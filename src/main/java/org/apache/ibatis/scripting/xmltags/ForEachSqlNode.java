@@ -15,9 +15,9 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.session.Configuration;
@@ -64,24 +64,31 @@ public class ForEachSqlNode implements SqlNode {
     this.configuration = configuration;
   }
 
+  public Iterable<?> getIterable(DynamicContext context) {
+    boolean nullable = this.nullable == null ? configuration.isNullableOnForEach() : this.nullable;
+    return evaluator.evaluateIterable(collectionExpression, context.getBindings(), nullable);
+  }
+
   @Override
   public boolean apply(DynamicContext context) {
-    Map<String, Object> bindings = context.getBindings();
-    final Iterable<?> iterable = evaluator.evaluateIterable(collectionExpression, bindings,
-        Optional.ofNullable(nullable).orElseGet(configuration::isNullableOnForEach));
-    if (iterable == null || !iterable.iterator().hasNext()) {
+    final Iterable<?> iterable = getIterable(context);
+    if (iterable == null) {
+      return true;
+    }
+    final Iterator<?> iterator = iterable.iterator();
+    boolean hasNext = iterator.hasNext();
+    if (!hasNext) {
       return true;
     }
     boolean first = true;
     applyOpen(context);
     int i = 0;
-    for (Object o : iterable) {
-      DynamicContext scopedContext;
-      if (first || separator == null) {
-        scopedContext = new PrefixedContext(context, "");
-      } else {
-        scopedContext = new PrefixedContext(context, separator);
-      }
+
+    final PrefixedContext scopedContext = new PrefixedContext(context, "");
+    while (hasNext) {
+      Object o = iterator.next();
+      scopedContext.resetPrefix(first || separator == null ? "" : separator);
+
       // Issue #709
       if (o instanceof Map.Entry) {
         @SuppressWarnings("unchecked")
@@ -94,9 +101,11 @@ public class ForEachSqlNode implements SqlNode {
       }
       contents.apply(scopedContext);
       if (first) {
-        first = !((PrefixedContext) scopedContext).isPrefixApplied();
+        first = !scopedContext.isPrefixApplied();
       }
       i++;
+
+      hasNext = iterator.hasNext();
     }
     applyClose(context);
     return true;
@@ -128,25 +137,29 @@ public class ForEachSqlNode implements SqlNode {
 
   private class PrefixedContext extends DynamicContext {
     private final DynamicContext delegate;
-    private final String prefix;
+    private String prefix;
     private boolean prefixApplied;
 
     public PrefixedContext(DynamicContext delegate, String prefix) {
       super(configuration, delegate.getParameterObject(), delegate.getParameterType(), delegate.getParamNameResolver(),
           delegate.isParamExists());
       this.delegate = delegate;
-      this.prefix = prefix;
-      this.prefixApplied = false;
       this.bindings.putAll(delegate.getBindings());
+      resetPrefix(prefix);
     }
 
     public boolean isPrefixApplied() {
       return prefixApplied;
     }
 
+    public void resetPrefix(String prefix) {
+      this.prefix = prefix;
+      this.prefixApplied = false;
+    }
+
     @Override
     public void appendSql(String sql) {
-      if (!prefixApplied && sql != null && sql.trim().length() > 0) {
+      if (!prefixApplied && sql != null && !sql.trim().isEmpty()) {
         delegate.appendSql(prefix);
         prefixApplied = true;
       }
