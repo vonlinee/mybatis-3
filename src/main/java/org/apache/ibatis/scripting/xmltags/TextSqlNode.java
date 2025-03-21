@@ -30,21 +30,14 @@ public class TextSqlNode implements SqlNode {
   }
 
   public boolean isDynamic() {
-    DynamicCheckerTokenParser checker = new DynamicCheckerTokenParser();
-    GenericTokenParser parser = createParser(checker);
-    parser.parse(text);
-    return checker.isDynamic();
+    return DynamicCheckerTokenParser.isDynamic(text);
   }
 
   @Override
   public boolean apply(DynamicContext context) {
-    GenericTokenParser parser = createParser(new BindingTokenParser(context));
+    GenericTokenParser parser = new GenericTokenParser("${", "}", new BindingTokenParser(context));
     context.appendSql(context.parseParam(parser.parse(text)));
     return true;
-  }
-
-  private GenericTokenParser createParser(TokenHandler handler) {
-    return new GenericTokenParser("${", "}", handler);
   }
 
   private static class BindingTokenParser implements TokenHandler {
@@ -68,24 +61,4 @@ public class TextSqlNode implements SqlNode {
       return value == null ? "" : String.valueOf(value);
     }
   }
-
-  private static class DynamicCheckerTokenParser implements TokenHandler {
-
-    private boolean isDynamic;
-
-    public DynamicCheckerTokenParser() {
-      // Prevent Synthetic Access
-    }
-
-    public boolean isDynamic() {
-      return isDynamic;
-    }
-
-    @Override
-    public String handleToken(String content) {
-      this.isDynamic = true;
-      return null;
-    }
-  }
-
 }

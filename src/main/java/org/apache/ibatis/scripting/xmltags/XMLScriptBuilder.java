@@ -94,8 +94,8 @@ public class XMLScriptBuilder extends BaseBuilder {
           contents.add(emptyNodeCache.computeIfAbsent(data, EmptySqlNode::new));
           continue;
         }
-        TextSqlNode textSqlNode = new TextSqlNode(data);
-        if (textSqlNode.isDynamic()) {
+        if (DynamicCheckerTokenParser.isDynamic(data)) {
+          TextSqlNode textSqlNode = new TextSqlNode(data);
           contents.add(textSqlNode);
           isDynamic = true;
         } else {

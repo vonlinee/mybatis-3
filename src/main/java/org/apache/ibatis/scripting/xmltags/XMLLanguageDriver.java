@@ -67,8 +67,8 @@ public class XMLLanguageDriver implements LanguageDriver {
     }
     // issue #127
     script = PropertyParser.parse(script, configuration.getVariables());
-    TextSqlNode textSqlNode = new TextSqlNode(script);
-    if (textSqlNode.isDynamic()) {
+    if (DynamicCheckerTokenParser.isDynamic(script)) {
+      TextSqlNode textSqlNode = new TextSqlNode(script);
       return new DynamicSqlSource(configuration, textSqlNode);
     } else {
       return new RawSqlSource(configuration, script, parameterType, paramNameResolver);
