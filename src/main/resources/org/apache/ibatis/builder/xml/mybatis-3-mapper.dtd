@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
 
-       Copyright 2009-2022 the original author or authors.
+       Copyright 2009-2025 the original author or authors.
 
        Licensed under the Apache License, Version 2.0 (the "License");
        you may not use this file except in compliance with the License.
@@ -167,7 +167,36 @@ alias CDATA #REQUIRED
 type CDATA #REQUIRED
 >
 
-<!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!-- <and></and> -->
+<!ELEMENT and (#PCDATA | and | or)*>
+<!ATTLIST and
+test CDATA #IMPLIED
+>
+
+<!-- <or></or> -->
+<!ELEMENT or (#PCDATA | and | or)*>
+<!ATTLIST or
+test CDATA #IMPLIED
+>
+
+<!ELEMENT limit (#PCDATA)*>
+<!ATTLIST limit
+test CDATA #IMPLIED
+limit CDATA #IMPLIED
+offset CDATA #IMPLIED
+>
+
+<!-- <in></in> -->
+<!ELEMENT in EMPTY>
+<!ATTLIST in
+collection CDATA #REQUIRED
+item CDATA #IMPLIED
+column CDATA #IMPLIED
+nullable CDATA #IMPLIED
+test CDATA #IMPLIED
+>
+
+<!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind | and | or | in | limit )*>
 <!ATTLIST select
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -187,7 +216,7 @@ resultSets CDATA #IMPLIED
 affectData (true|false) #IMPLIED
 >
 
-<!ELEMENT insert (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT insert (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind | and | or )*>
 <!ATTLIST insert
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -202,7 +231,7 @@ databaseId CDATA #IMPLIED
 lang CDATA #IMPLIED
 >
 
-<!ELEMENT selectKey (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT selectKey (#PCDATA | include | trim | where | set | foreach | choose | if | bind  | and | or )*>
 <!ATTLIST selectKey
 resultType CDATA #IMPLIED
 statementType (STATEMENT|PREPARED|CALLABLE) #IMPLIED
@@ -212,7 +241,7 @@ order (BEFORE|AFTER) #IMPLIED
 databaseId CDATA #IMPLIED
 >
 
-<!ELEMENT update (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT update (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind | and | or | in | limit )*>
 <!ATTLIST update
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -227,7 +256,7 @@ databaseId CDATA #IMPLIED
 lang CDATA #IMPLIED
 >
 
-<!ELEMENT delete (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT delete (#PCDATA | include | trim | where | set | foreach | choose | if | bind | and | or | in | limit )*>
 <!ATTLIST delete
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -252,7 +281,7 @@ refid CDATA #REQUIRED
  value CDATA #REQUIRED
 >
 
-<!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if | bind | and | or )*>
 <!ATTLIST sql
 id CDATA #REQUIRED
 lang CDATA #IMPLIED
@@ -266,10 +295,10 @@ prefixOverrides CDATA #IMPLIED
 suffix CDATA #IMPLIED
 suffixOverrides CDATA #IMPLIED
 >
-<!ELEMENT where (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT where (#PCDATA | include | trim | where | set | foreach | choose | if | bind | and | or | in)*>
 <!ELEMENT set (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
 
-<!ELEMENT foreach (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT foreach (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
 <!ATTLIST foreach
 collection CDATA #REQUIRED
 nullable (true|false) #IMPLIED

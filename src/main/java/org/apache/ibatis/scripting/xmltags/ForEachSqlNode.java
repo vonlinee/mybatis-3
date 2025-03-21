@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.session.Configuration;
 
 /**
@@ -64,13 +65,13 @@ public class ForEachSqlNode implements SqlNode {
     this.configuration = configuration;
   }
 
-  public Iterable<?> getIterable(DynamicContext context) {
+  public Iterable<?> getIterable(SqlBuildContext context) {
     boolean nullable = this.nullable == null ? configuration.isNullableOnForEach() : this.nullable;
     return evaluator.evaluateIterable(collectionExpression, context.getBindings(), nullable);
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(SqlBuildContext context) {
     final Iterable<?> iterable = getIterable(context);
     if (iterable == null) {
       return true;
@@ -123,24 +124,24 @@ public class ForEachSqlNode implements SqlNode {
     }
   }
 
-  private void applyOpen(DynamicContext context) {
+  private void applyOpen(SqlBuildContext context) {
     if (open != null) {
       context.appendSql(open);
     }
   }
 
-  private void applyClose(DynamicContext context) {
+  private void applyClose(SqlBuildContext context) {
     if (close != null) {
       context.appendSql(close);
     }
   }
 
   private class PrefixedContext extends DynamicContext {
-    private final DynamicContext delegate;
+    private final SqlBuildContext delegate;
     private String prefix;
     private boolean prefixApplied;
 
-    public PrefixedContext(DynamicContext delegate, String prefix) {
+    public PrefixedContext(SqlBuildContext delegate, String prefix) {
       super(configuration, delegate.getParameterObject(), delegate.getParameterType(), delegate.getParamNameResolver(),
           delegate.isParamExists());
       this.delegate = delegate;

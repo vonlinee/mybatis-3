@@ -13,30 +13,13 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.submitted.condition;
 
-import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.annotations.Param;
 
-/**
- * @author Clinton Begin
- */
-public class IfSqlNode implements SqlNode {
-  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
-  private final String test;
-  private final SqlNode contents;
+public interface TestMapper {
 
-  public IfSqlNode(SqlNode contents, String test) {
-    this.test = test;
-    this.contents = contents;
-  }
+  int countUserWithNullableIsFalse(@Param("param") User user);
 
-  @Override
-  public boolean apply(SqlBuildContext context) {
-    if (evaluator.evaluateBoolean(test, context.getBindings())) {
-      contents.apply(context);
-      return true;
-    }
-    return false;
-  }
-
+  int countUserWithTestAnd(@Param("param") User user);
 }

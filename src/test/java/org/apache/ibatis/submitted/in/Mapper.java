@@ -13,30 +13,21 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.submitted.in;
 
-import org.apache.ibatis.scripting.SqlBuildContext;
+import java.util.Map;
 
-/**
- * @author Clinton Begin
- */
-public class IfSqlNode implements SqlNode {
-  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
-  private final String test;
-  private final SqlNode contents;
+import org.apache.ibatis.annotations.Param;
 
-  public IfSqlNode(SqlNode contents, String test) {
-    this.test = test;
-    this.contents = contents;
-  }
+public interface Mapper {
 
-  @Override
-  public boolean apply(SqlBuildContext context) {
-    if (evaluator.evaluateBoolean(test, context.getBindings())) {
-      contents.apply(context);
-      return true;
-    }
-    return false;
-  }
+  int countUserWithNullableIsTrue(User user);
 
+  int countUserWithNullableIsFalse(User user);
+
+  int countUserWithConditionalIn(User user);
+
+  int countUserWithImplicitItem(Map<String, Object> map);
+
+  int countUserWithImplicitItem1(@Param("param") Map<String, Object> map);
 }

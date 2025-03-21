@@ -13,30 +13,31 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.internal.util;
 
-import org.apache.ibatis.scripting.SqlBuildContext;
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
- * @author Clinton Begin
+ * Utility class for common I/O operations.
  */
-public class IfSqlNode implements SqlNode {
-  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
-  private final String test;
-  private final SqlNode contents;
+public final class IOUtils {
 
-  public IfSqlNode(SqlNode contents, String test) {
-    this.test = test;
-    this.contents = contents;
+  private IOUtils() {
   }
 
-  @Override
-  public boolean apply(SqlBuildContext context) {
-    if (evaluator.evaluateBoolean(test, context.getBindings())) {
-      contents.apply(context);
-      return true;
+  /**
+   * Closes a Closeable resource quietly, ignoring any IOException that may occur.
+   *
+   * @param closeable
+   *          the Closeable resource to be closed
+   */
+  public static void closeQuietly(Closeable closeable) {
+    if (closeable != null) {
+      try {
+        closeable.close();
+      } catch (IOException ignore) {
+      }
     }
-    return false;
   }
-
 }

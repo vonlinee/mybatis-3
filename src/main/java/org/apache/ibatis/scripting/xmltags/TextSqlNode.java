@@ -17,6 +17,7 @@ package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.TokenHandler;
+import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**
@@ -34,7 +35,7 @@ public class TextSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(SqlBuildContext context) {
     GenericTokenParser parser = new GenericTokenParser("${", "}", new BindingTokenParser(context));
     context.appendSql(context.parseParam(parser.parse(text)));
     return true;
@@ -42,9 +43,9 @@ public class TextSqlNode implements SqlNode {
 
   private static class BindingTokenParser implements TokenHandler {
 
-    private final DynamicContext context;
+    private final SqlBuildContext context;
 
-    public BindingTokenParser(DynamicContext context) {
+    public BindingTokenParser(SqlBuildContext context) {
       this.context = context;
     }
 

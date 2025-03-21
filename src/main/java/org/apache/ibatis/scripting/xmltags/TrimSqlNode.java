@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.session.Configuration;
 
 /**
@@ -53,7 +54,7 @@ public class TrimSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(SqlBuildContext context) {
     FilteredDynamicContext filteredDynamicContext = new FilteredDynamicContext(context);
     boolean result = contents.apply(filteredDynamicContext);
     filteredDynamicContext.applyAll();
@@ -73,12 +74,12 @@ public class TrimSqlNode implements SqlNode {
   }
 
   private class FilteredDynamicContext extends DynamicContext {
-    private final DynamicContext delegate;
+    private final SqlBuildContext delegate;
     private boolean prefixApplied;
     private boolean suffixApplied;
     private StringBuilder sqlBuffer;
 
-    public FilteredDynamicContext(DynamicContext delegate) {
+    public FilteredDynamicContext(SqlBuildContext delegate) {
       super(configuration, delegate.getParameterObject(), delegate.getParameterType(), delegate.getParamNameResolver(),
           delegate.isParamExists());
       this.delegate = delegate;
@@ -91,7 +92,7 @@ public class TrimSqlNode implements SqlNode {
     public void applyAll() {
       sqlBuffer = new StringBuilder(sqlBuffer.toString().trim());
       String trimmedUppercaseSql = sqlBuffer.toString().toUpperCase(Locale.ENGLISH);
-      if (trimmedUppercaseSql.length() > 0) {
+      if (!trimmedUppercaseSql.isEmpty()) {
         applyPrefix(sqlBuffer, trimmedUppercaseSql);
         applySuffix(sqlBuffer, trimmedUppercaseSql);
       }

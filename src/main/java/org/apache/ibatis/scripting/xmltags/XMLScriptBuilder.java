@@ -23,9 +23,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.ParamNameResolver;
+import org.apache.ibatis.reflection.property.PropertyTokenizer;
+import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.defaults.RawSqlSource;
 import org.apache.ibatis.session.Configuration;
 import org.w3c.dom.Node;
@@ -57,19 +60,25 @@ public class XMLScriptBuilder extends BaseBuilder {
     this.context = context;
     this.parameterType = parameterType;
     this.paramNameResolver = paramNameResolver;
-    initNodeHandlerMap();
+    this.nodeHandlerMap.putAll(initNodeHandlerMap());
   }
 
-  private void initNodeHandlerMap() {
+  private Map<String, NodeHandler> initNodeHandlerMap() {
+    HashMap<String, NodeHandler> nodeHandlerMap = new HashMap<>();
     nodeHandlerMap.put("trim", new TrimHandler());
     nodeHandlerMap.put("where", new WhereHandler());
     nodeHandlerMap.put("set", new SetHandler());
     nodeHandlerMap.put("foreach", new ForEachHandler());
     nodeHandlerMap.put("if", new IfHandler());
     nodeHandlerMap.put("choose", new ChooseHandler());
+    ConditionSqlNodeHandler handler = new ConditionSqlNodeHandler();
+    nodeHandlerMap.put("and", handler);
+    nodeHandlerMap.put("or", handler);
     nodeHandlerMap.put("when", new IfHandler());
     nodeHandlerMap.put("otherwise", new OtherwiseHandler());
     nodeHandlerMap.put("bind", new BindHandler());
+    nodeHandlerMap.put("in", new InHandler());
+    return nodeHandlerMap;
   }
 
   public SqlSource parseScriptNode() {
@@ -271,9 +280,88 @@ public class XMLScriptBuilder extends BaseBuilder {
     }
 
     @Override
-    public boolean apply(DynamicContext context) {
+    public boolean apply(SqlBuildContext context) {
       context.appendSql(whitespaces);
       return true;
+    }
+  }
+
+  /**
+   * handle <and></and>, <or></or> in xml mapping file
+   *
+   * @see AndSqlNode
+   * @see OrSqlNode
+   * @see ConditionSqlNode
+   */
+  private class ConditionSqlNodeHandler implements NodeHandler {
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      final String nodeName = nodeToHandle.getName();
+      final MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+      final List<SqlNode> contents = mixedSqlNode.getContents();
+
+      final String test = nodeToHandle.getStringAttribute("test");
+
+      if (contents.size() == 1) {
+        if (nodeName.equalsIgnoreCase("and")) {
+          targetContents.add(new AndSqlNode(configuration, test, contents));
+        } else if (nodeName.equalsIgnoreCase("or")) {
+          targetContents.add(new OrSqlNode(configuration, test, contents));
+        }
+      } else if (contents.isEmpty()) {
+        throw new BuilderException("syntax error about <" + nodeName + ">, empty <" + nodeName + "> is meaningless.");
+      } else {
+        if (nodeName.equalsIgnoreCase("and")) {
+          targetContents.add(new AndSqlNode(configuration, test, contents));
+        } else if (nodeName.equalsIgnoreCase("or")) {
+          targetContents.add(new OrSqlNode(configuration, test, contents));
+        }
+      }
+    }
+  }
+
+  /**
+   * @see ForEachHandler
+   */
+  private class InHandler implements NodeHandler {
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      String collection = nodeToHandle.getStringAttribute("collection");
+      String item = nodeToHandle.getStringAttribute("item");
+      String test = nodeToHandle.getStringAttribute("test");
+      Boolean nullable = nodeToHandle.getBooleanAttribute("nullable");
+      if (nullable == null) {
+        nullable = configuration.isNullableOnForEach();
+      }
+
+      if (StringUtils.isEmpty(item)) {
+        item = "item";
+      }
+
+      StaticTextSqlNode contents = new StaticTextSqlNode("#{" + item + "}");
+      item = parseItemExpression(item);
+      targetContents.add(new InSqlNode(configuration, contents, collection, test, item, nullable));
+    }
+
+    /**
+     * item.id -> item
+     *
+     * @param itemExpression
+     *          item expression
+     *
+     * @return item expression value
+     */
+    private String parseItemExpression(String itemExpression) {
+      if (itemExpression == null) {
+        return null;
+      }
+      PropertyTokenizer tokenizer = new PropertyTokenizer(itemExpression);
+      if (tokenizer.hasNext()) {
+        return tokenizer.getName();
+      }
+      return itemExpression;
     }
   }
 }

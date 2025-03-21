@@ -13,30 +13,23 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.internal.util;
 
-import org.apache.ibatis.scripting.SqlBuildContext;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-/**
- * @author Clinton Begin
- */
-public class IfSqlNode implements SqlNode {
-  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
-  private final String test;
-  private final SqlNode contents;
+public final class CollectionUtils {
 
-  public IfSqlNode(SqlNode contents, String test) {
-    this.test = test;
-    this.contents = contents;
+  public static boolean isEmpty(Collection<?> collection) {
+    return collection == null || collection.isEmpty();
   }
 
-  @Override
-  public boolean apply(SqlBuildContext context) {
-    if (evaluator.evaluateBoolean(test, context.getBindings())) {
-      contents.apply(context);
-      return true;
-    }
-    return false;
+  public static boolean isEmpty(Map<?, ?> map) {
+    return map == null || map.isEmpty();
   }
 
+  public static <T> T getFirst(List<T> list) {
+    return isEmpty(list) ? null : list.get(0);
+  }
 }

@@ -15,28 +15,18 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import org.apache.ibatis.scripting.SqlBuildContext;
+import java.util.List;
 
-/**
- * @author Clinton Begin
- */
-public class IfSqlNode implements SqlNode {
-  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
-  private final String test;
-  private final SqlNode contents;
+import org.apache.ibatis.session.Configuration;
 
-  public IfSqlNode(SqlNode contents, String test) {
-    this.test = test;
-    this.contents = contents;
+public class OrSqlNode extends ConditionSqlNode {
+  public OrSqlNode(Configuration configuration, String test, List<SqlNode> contents) {
+    super(configuration, contents);
+    this.testExpression = test;
   }
 
   @Override
-  public boolean apply(SqlBuildContext context) {
-    if (evaluator.evaluateBoolean(test, context.getBindings())) {
-      contents.apply(context);
-      return true;
-    }
-    return false;
+  public final String getConditionConnector() {
+    return "or";
   }
-
 }

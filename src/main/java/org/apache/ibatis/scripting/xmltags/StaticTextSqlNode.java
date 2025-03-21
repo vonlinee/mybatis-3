@@ -15,6 +15,8 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import org.apache.ibatis.scripting.SqlBuildContext;
+
 /**
  * @author Clinton Begin
  */
@@ -26,7 +28,7 @@ public class StaticTextSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(SqlBuildContext context) {
     context.appendSql(context.parseParam(text));
     return true;
   }

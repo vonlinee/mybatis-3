@@ -13,28 +13,46 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.submitted.in;
 
-import org.apache.ibatis.scripting.SqlBuildContext;
+import java.util.List;
 
-/**
- * @author Frank D. Martinez [mnesarco]
- */
-public class VarDeclSqlNode implements SqlNode {
+public class User {
 
-  private final String name;
-  private final String expression;
+  private Integer id;
+  private String name;
+  private User bestFriend;
+  private List<User> friendList;
 
-  public VarDeclSqlNode(String name, String exp) {
+  public Integer getId() {
+    return id;
+  }
+
+  public void setId(Integer id) {
+    this.id = id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
     this.name = name;
-    this.expression = exp;
   }
 
-  @Override
-  public boolean apply(SqlBuildContext context) {
-    final Object value = OgnlCache.getValue(expression, context.getBindings());
-    context.bind(name, value);
-    return true;
+  public User getBestFriend() {
+    return bestFriend;
   }
 
+  public void setBestFriend(User bestFriend) {
+    this.bestFriend = bestFriend;
+  }
+
+  public List<User> getFriendList() {
+    return friendList;
+  }
+
+  public void setFriendList(List<User> friendList) {
+    this.friendList = friendList;
+  }
 }

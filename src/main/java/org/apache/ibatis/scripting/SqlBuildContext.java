@@ -13,30 +13,36 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.reflection.ParamNameResolver;
 
-/**
- * @author Clinton Begin
- */
-public class MixedSqlNode implements SqlNode {
-  private final List<SqlNode> contents;
+public interface SqlBuildContext {
 
-  public MixedSqlNode(List<SqlNode> contents) {
-    this.contents = contents;
-  }
+  String PARAMETER_OBJECT_KEY = "_parameter";
+  String DATABASE_ID_KEY = "_databaseId";
 
-  @Override
-  public boolean apply(SqlBuildContext context) {
-    contents.forEach(node -> node.apply(context));
-    return true;
-  }
+  Map<String, Object> getBindings();
 
-  public final List<SqlNode> getContents() {
-    return Collections.unmodifiableList(this.contents);
-  }
+  void bind(String name, Object value);
+
+  void appendSql(String sql);
+
+  String getSql();
+
+  List<ParameterMapping> getParameterMappings();
+
+  String parseParam(String sql);
+
+  Object getParameterObject();
+
+  Class<?> getParameterType();
+
+  ParamNameResolver getParamNameResolver();
+
+  boolean isParamExists();
 }

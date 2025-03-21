@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+       Copyright 2009-2025 the original author or authors.
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+          https://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.apache.ibatis.submitted.condition.TestMapper">
+
+    <select id="countUserWithNullableIsFalse" resultType="_int">
+        select count(*) from users
+        <where>
+            <and>
+                <and>id = #{param.id}</and>
+                <or>id = #{param.id} + 4</or>
+                <and>name like concat('%', #{param.name}, '%')</and>
+                <and>age between #{param.age} - 3 and #{param.age} + 3</and>
+            </and>
+        </where>
+    </select>
+
+    <select id="countUserWithTestAnd" resultType="_int">
+        select count(*) from users
+        <where>
+            <and>
+                <and test="param.id = null">
+                    id = #{param.id}
+                </and>
+                <and test="param.name == null and param.name != ''">name like concat('%', #{param.name}, '%')</and>
+                <and>age between #{param.age} - 3 and #{param.age} + 3</and>
+            </and>
+        </where>
+    </select>
+</mapper>
