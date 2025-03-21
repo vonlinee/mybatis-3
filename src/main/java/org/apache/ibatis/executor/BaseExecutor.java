@@ -75,9 +75,7 @@ public abstract class BaseExecutor implements Executor {
 
   @Override
   public Transaction getTransaction() {
-    if (closed) {
-      throw new ExecutorException("Executor was closed.");
-    }
+    checkIfClosed();
     return transaction;
   }
 
@@ -111,9 +109,7 @@ public abstract class BaseExecutor implements Executor {
   @Override
   public int update(MappedStatement ms, Object parameter) throws SQLException {
     ErrorContext.instance().resource(ms.getResource()).activity("executing an update").object(ms.getId());
-    if (closed) {
-      throw new ExecutorException("Executor was closed.");
-    }
+    checkIfClosed();
     clearLocalCache();
     return doUpdate(ms, parameter);
   }
@@ -124,9 +120,7 @@ public abstract class BaseExecutor implements Executor {
   }
 
   public List<BatchResult> flushStatements(boolean isRollBack) throws SQLException {
-    if (closed) {
-      throw new ExecutorException("Executor was closed.");
-    }
+    checkIfClosed();
     return doFlushStatements(isRollBack);
   }
 
@@ -184,9 +178,7 @@ public abstract class BaseExecutor implements Executor {
   @Override
   public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key,
       Class<?> targetType) {
-    if (closed) {
-      throw new ExecutorException("Executor was closed.");
-    }
+    checkIfClosed();
     DeferredLoad deferredLoad = new DeferredLoad(resultObject, property, key, localCache, configuration, targetType);
     if (deferredLoad.canLoad()) {
       deferredLoad.load();
@@ -195,11 +187,15 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
-  @Override
-  public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
+  private void checkIfClosed() {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
+  }
+
+  @Override
+  public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
+    checkIfClosed();
     CacheKey cacheKey = new CacheKey();
     cacheKey.update(ms.getId());
     cacheKey.update(rowBounds.getOffset());
