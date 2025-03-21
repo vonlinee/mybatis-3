@@ -33,7 +33,6 @@ import java.util.Set;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -66,7 +65,7 @@ class MapWrapperUnitTest extends ObjectWrapperBase {
   void shouldGet() {
     when(map.get("key")).thenReturn("value");
 
-    Object value = wrapper.get(new PropertyTokenizer("key"));
+    Object value = wrapper.get("key");
 
     assertEquals("value", value);
     verify(map).get("key");
@@ -77,7 +76,7 @@ class MapWrapperUnitTest extends ObjectWrapperBase {
     Author author = new Author(1);
     when(map.get("author")).thenReturn(author);
 
-    Object value = wrapper.get(new PropertyTokenizer("author.id"));
+    Object value = wrapper.get("author.id");
 
     assertEquals(1, value);
   }
@@ -87,7 +86,7 @@ class MapWrapperUnitTest extends ObjectWrapperBase {
     when(list.get(0)).thenReturn(1);
     when(map.get("key")).thenReturn(list);
 
-    Object value = wrapper.get(new PropertyTokenizer("key[0]"));
+    Object value = wrapper.get("key[0]");
 
     assertEquals(1, value);
   }
@@ -95,14 +94,14 @@ class MapWrapperUnitTest extends ObjectWrapperBase {
   @Test
   @Override
   void shouldSet() {
-    wrapper.set(new PropertyTokenizer("key"), "value");
+    wrapper.set("key", "value");
 
     verify(map).put("key", "value");
   }
 
   @Test
   void shouldSetWhichContainsDelim() {
-    wrapper.set(new PropertyTokenizer("author.id"), 1);
+    wrapper.set("author.id", 1);
 
     verify(map).put("author", new HashMap<>() {
       private static final long serialVersionUID = 1L;
@@ -117,7 +116,7 @@ class MapWrapperUnitTest extends ObjectWrapperBase {
   void shouldSetWhichContainsIndex() {
     when(map.get("key")).thenReturn(list);
 
-    wrapper.set(new PropertyTokenizer("key[0]"), 1);
+    wrapper.set("key[0]", 1);
 
     verify(list).set(0, 1);
   }
@@ -236,7 +235,7 @@ class MapWrapperUnitTest extends ObjectWrapperBase {
   @Test
   @Override
   void shouldInstantiatePropertyValue() {
-    MetaObject result = wrapper.instantiatePropertyValue("abc", new PropertyTokenizer("key"),
+    MetaObject result = wrapper.instantiatePropertyValue("abc", "key",
         SystemMetaObject.DEFAULT_OBJECT_FACTORY);
 
     assertFalse(result.hasGetter("key"));

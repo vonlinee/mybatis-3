@@ -29,7 +29,7 @@ public class CollectionWrapper implements ObjectWrapper {
 
   private final Collection<Object> object;
 
-  public CollectionWrapper(MetaObject metaObject, Collection<Object> object) {
+  public CollectionWrapper(Collection<Object> object) {
     this.object = object;
   }
 
@@ -39,7 +39,17 @@ public class CollectionWrapper implements ObjectWrapper {
   }
 
   @Override
+  public Object get(String property) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public void set(PropertyTokenizer prop, Object value) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void set(String property, Object value) {
     throw new UnsupportedOperationException();
   }
 
@@ -80,6 +90,11 @@ public class CollectionWrapper implements ObjectWrapper {
 
   @Override
   public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public MetaObject instantiatePropertyValue(String name, String property, ObjectFactory objectFactory) {
     throw new UnsupportedOperationException();
   }
 

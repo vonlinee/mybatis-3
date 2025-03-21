@@ -50,20 +50,19 @@ class CollectionWrapperUnitTest extends ObjectWrapperBase {
 
   @BeforeEach
   void setup() {
-    MetaObject metaObject = SystemMetaObject.forObject(collection);
-    this.wrapper = new CollectionWrapper(metaObject, collection);
+    this.wrapper = new CollectionWrapper(collection);
   }
 
   @Test
   @Override
   void shouldGet() {
-    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> wrapper.get(tokenizer));
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> wrapper.get(""));
   }
 
   @Test
   @Override
   void shouldSet() {
-    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> wrapper.set(tokenizer, null));
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> wrapper.set("", null));
   }
 
   @Test
@@ -118,7 +117,7 @@ class CollectionWrapperUnitTest extends ObjectWrapperBase {
   @Override
   void shouldInstantiatePropertyValue() {
     assertThatExceptionOfType(UnsupportedOperationException.class)
-        .isThrownBy(() -> wrapper.instantiatePropertyValue("abc", tokenizer, null));
+        .isThrownBy(() -> wrapper.instantiatePropertyValue("abc", "tokenizer", null));
   }
 
   @Test

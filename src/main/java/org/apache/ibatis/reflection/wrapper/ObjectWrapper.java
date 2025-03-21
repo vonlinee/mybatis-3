@@ -15,22 +15,32 @@
  */
 package org.apache.ibatis.reflection.wrapper;
 
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map.Entry;
-
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
+
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * @author Clinton Begin
  */
 public interface ObjectWrapper {
 
+  @Deprecated
   Object get(PropertyTokenizer prop);
 
+  /**
+   * @param property like richType.richProperty, richMap[key2], richList[1]
+   * @return value
+   */
+  Object get(String property);
+
+  @Deprecated
   void set(PropertyTokenizer prop, Object value);
+
+  void set(String property, Object value);
 
   String findProperty(String name, boolean useCamelCaseMapping);
 
@@ -44,19 +54,22 @@ public interface ObjectWrapper {
 
   default Entry<Type, Class<?>> getGenericSetterType(String name) {
     throw new UnsupportedOperationException(
-        "'" + this.getClass() + "' must override the default method 'getGenericSetterType()'.");
+      "'" + this.getClass() + "' must override the default method 'getGenericSetterType()'.");
   }
 
   default Entry<Type, Class<?>> getGenericGetterType(String name) {
     throw new UnsupportedOperationException(
-        "'" + this.getClass() + "' must override the default method 'getGenericGetterType()'.");
+      "'" + this.getClass() + "' must override the default method 'getGenericGetterType()'.");
   }
 
   boolean hasSetter(String name);
 
   boolean hasGetter(String name);
 
+  @Deprecated
   MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory);
+
+  MetaObject instantiatePropertyValue(String name, String property, ObjectFactory objectFactory);
 
   boolean isCollection();
 

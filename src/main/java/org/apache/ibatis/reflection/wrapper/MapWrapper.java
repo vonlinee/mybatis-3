@@ -15,16 +15,16 @@
  */
 package org.apache.ibatis.reflection.wrapper;
 
+import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.SystemMetaObject;
+import org.apache.ibatis.reflection.factory.ObjectFactory;
+import org.apache.ibatis.reflection.property.PropertyTokenizer;
+
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.SystemMetaObject;
-import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
@@ -50,6 +50,11 @@ public class MapWrapper extends BaseWrapper {
   }
 
   @Override
+  public Object get(String property) {
+    return get(new PropertyTokenizer(property));
+  }
+
+  @Override
   public void set(PropertyTokenizer prop, Object value) {
     if (prop.hasNext()) {
       setChildValue(prop, value);
@@ -58,6 +63,11 @@ public class MapWrapper extends BaseWrapper {
     } else {
       map.put(prop.getName(), value);
     }
+  }
+
+  @Override
+  public void set(String property, Object value) {
+    set(new PropertyTokenizer(property), value);
   }
 
   @Override
@@ -151,7 +161,12 @@ public class MapWrapper extends BaseWrapper {
     HashMap<String, Object> map = new HashMap<>();
     set(prop, map);
     return MetaObject.forObject(map, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory(),
-        metaObject.getReflectorFactory());
+      metaObject.getReflectorFactory());
+  }
+
+  @Override
+  public MetaObject instantiatePropertyValue(String name, String property, ObjectFactory objectFactory) {
+    return instantiatePropertyValue(name, new PropertyTokenizer(property), objectFactory);
   }
 
   @Override

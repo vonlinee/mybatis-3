@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.apache.ibatis.reflection.wrapper.BeanWrapper;
 import org.apache.ibatis.reflection.wrapper.CollectionWrapper;
 import org.apache.ibatis.reflection.wrapper.MapWrapper;
@@ -54,7 +53,7 @@ public class MetaObject {
     } else if (object instanceof Map) {
       this.objectWrapper = new MapWrapper(this, (Map) object);
     } else if (object instanceof Collection) {
-      this.objectWrapper = new CollectionWrapper(this, (Collection) object);
+      this.objectWrapper = new CollectionWrapper((Collection) object);
     } else {
       this.objectWrapper = new BeanWrapper(this, object);
     }
@@ -121,12 +120,11 @@ public class MetaObject {
   }
 
   public Object getValue(String name) {
-    PropertyTokenizer prop = new PropertyTokenizer(name);
-    return objectWrapper.get(prop);
+    return objectWrapper.get(name);
   }
 
   public void setValue(String name, Object value) {
-    objectWrapper.set(new PropertyTokenizer(name), value);
+    objectWrapper.set(name, value);
   }
 
   public MetaObject metaObjectForProperty(String name) {

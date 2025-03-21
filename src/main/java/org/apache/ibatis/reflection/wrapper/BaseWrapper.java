@@ -128,7 +128,7 @@ public abstract class BaseWrapper implements ObjectWrapper {
         // don't instantiate child path if value is null
         return;
       }
-      metaValue = instantiatePropertyValue(null, new PropertyTokenizer(prop.getName()), metaObject.getObjectFactory());
+      metaValue = instantiatePropertyValue(null, prop.getName(), metaObject.getObjectFactory());
     }
     metaValue.setValue(prop.getChildren(), value);
   }

@@ -54,6 +54,11 @@ public class BeanWrapper extends BaseWrapper {
   }
 
   @Override
+  public Object get(String property) {
+    return get(new PropertyTokenizer(property));
+  }
+
+  @Override
   public void set(PropertyTokenizer prop, Object value) {
     if (prop.hasNext()) {
       setChildValue(prop, value);
@@ -62,6 +67,11 @@ public class BeanWrapper extends BaseWrapper {
     } else {
       setBeanProperty(prop, object, value);
     }
+  }
+
+  @Override
+  public void set(String property, Object value) {
+    set(new PropertyTokenizer(property), value);
   }
 
   @Override
@@ -178,9 +188,14 @@ public class BeanWrapper extends BaseWrapper {
       set(prop, newObject);
     } catch (Exception e) {
       throw new ReflectionException("Cannot set value of property '" + name + "' because '" + name
-          + "' is null and cannot be instantiated on instance of " + type.getName() + ". Cause:" + e.toString(), e);
+          + "' is null and cannot be instantiated on instance of " + type.getName() + ". Cause:" + e, e);
     }
     return metaValue;
+  }
+
+  @Override
+  public MetaObject instantiatePropertyValue(String name, String property, ObjectFactory objectFactory) {
+    return instantiatePropertyValue(name, new PropertyTokenizer(property), objectFactory);
   }
 
   private Object getBeanProperty(PropertyTokenizer prop, Object object) {

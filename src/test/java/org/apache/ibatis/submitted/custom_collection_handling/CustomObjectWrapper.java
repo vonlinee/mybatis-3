@@ -37,7 +37,18 @@ public class CustomObjectWrapper implements ObjectWrapper {
   }
 
   @Override
+  public Object get(String property) {
+    // Not Implemented
+    return null;
+  }
+
+  @Override
   public void set(PropertyTokenizer prop, Object value) {
+    // Not Implemented
+  }
+
+  @Override
+  public void set(String property, Object value) {
     // Not Implemented
   }
 
@@ -85,6 +96,12 @@ public class CustomObjectWrapper implements ObjectWrapper {
 
   @Override
   public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
+    // Not Implemented
+    return null;
+  }
+
+  @Override
+  public MetaObject instantiatePropertyValue(String name, String property, ObjectFactory objectFactory) {
     // Not Implemented
     return null;
   }
