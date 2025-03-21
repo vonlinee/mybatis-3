@@ -15,16 +15,16 @@
  */
 package org.apache.ibatis.reflection.wrapper;
 
-import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.SystemMetaObject;
-import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
-
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.SystemMetaObject;
+import org.apache.ibatis.reflection.factory.ObjectFactory;
+import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
@@ -170,7 +170,7 @@ public class MapWrapper extends BaseWrapper {
     HashMap<String, Object> map = new HashMap<>();
     set(prop, map);
     return MetaObject.forObject(map, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory(),
-      metaObject.getReflectorFactory());
+        metaObject.getReflectorFactory());
   }
 
   @Override

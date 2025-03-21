@@ -15,13 +15,13 @@
  */
 package org.apache.ibatis.reflection.wrapper;
 
-import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
-
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map.Entry;
+
+import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.factory.ObjectFactory;
+import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
@@ -32,7 +32,9 @@ public interface ObjectWrapper {
   Object get(PropertyTokenizer prop);
 
   /**
-   * @param property like richType.richProperty, richMap[key2], richList[1]
+   * @param property
+   *          like richType.richProperty, richMap[key2], richList[1]
+   *
    * @return value
    */
   Object get(String property);
@@ -54,12 +56,12 @@ public interface ObjectWrapper {
 
   default Entry<Type, Class<?>> getGenericSetterType(String name) {
     throw new UnsupportedOperationException(
-      "'" + this.getClass() + "' must override the default method 'getGenericSetterType()'.");
+        "'" + this.getClass() + "' must override the default method 'getGenericSetterType()'.");
   }
 
   default Entry<Type, Class<?>> getGenericGetterType(String name) {
     throw new UnsupportedOperationException(
-      "'" + this.getClass() + "' must override the default method 'getGenericGetterType()'.");
+        "'" + this.getClass() + "' must override the default method 'getGenericGetterType()'.");
   }
 
   boolean hasSetter(String name);

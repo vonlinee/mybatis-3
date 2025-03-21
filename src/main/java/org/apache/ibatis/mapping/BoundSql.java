@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.reflection.wrapper.MapWrapper;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * An actual SQL String got from an {@link SqlSource} after having processed any dynamic content. The SQL may have SQL
@@ -39,8 +38,7 @@ public class BoundSql {
   private final Map<String, Object> additionalParameters;
   private final MapWrapper metaParameters;
 
-  public BoundSql(String sql, List<ParameterMapping> parameterMappings,
-      Object parameterObject) {
+  public BoundSql(String sql, List<ParameterMapping> parameterMappings, Object parameterObject) {
     this.sql = sql;
     this.parameterMappings = parameterMappings;
     this.parameterObject = parameterObject;
