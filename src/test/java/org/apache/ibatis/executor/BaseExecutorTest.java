@@ -489,7 +489,7 @@ class BaseExecutorTest extends BaseDataTest {
 
     Object parameterObject = 1;
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
       private static final long serialVersionUID = 1L;
 
       {
@@ -523,7 +523,7 @@ class BaseExecutorTest extends BaseDataTest {
 
     Object parameterObject = null;
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
       private static final long serialVersionUID = 1L;
 
       {
@@ -553,7 +553,7 @@ class BaseExecutorTest extends BaseDataTest {
 
     Object parameterObject = 1;
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
       private static final long serialVersionUID = 1L;
 
       {
@@ -583,7 +583,7 @@ class BaseExecutorTest extends BaseDataTest {
 
     Author parameterObject = new Author(-1, "cbegin", "******", "cbegin@nowhere.com", "N/A", Section.NEWS);
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
       private static final long serialVersionUID = 1L;
 
       {

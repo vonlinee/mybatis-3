@@ -38,6 +38,15 @@ public class MapWrapper extends BaseWrapper {
     this.map = map;
   }
 
+  public MapWrapper() {
+    this(new HashMap<>());
+  }
+
+  public MapWrapper(Map<String, Object> map) {
+    super(SystemMetaObject.forObject(map));
+    this.map = map;
+  }
+
   @Override
   public Object get(PropertyTokenizer prop) {
     if (prop.hasNext()) {
@@ -184,4 +193,8 @@ public class MapWrapper extends BaseWrapper {
     throw new UnsupportedOperationException();
   }
 
+  public boolean containsKey(String key) {
+    String paramName = new PropertyTokenizer(key).getName();
+    return this.map.containsKey(paramName);
+  }
 }

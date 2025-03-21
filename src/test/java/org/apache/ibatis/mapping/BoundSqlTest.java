@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Test;
 
 class BoundSqlTest {
@@ -31,7 +30,7 @@ class BoundSqlTest {
   @Test
   void hasAdditionalParameter() {
     List<ParameterMapping> params = Collections.emptyList();
-    BoundSql boundSql = new BoundSql(new Configuration(), "some sql", params, new Object());
+    BoundSql boundSql = new BoundSql("some sql", params, new Object());
 
     Map<String, String> map = new HashMap<>();
     map.put("key1", "value1");

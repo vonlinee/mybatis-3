@@ -121,7 +121,7 @@ class DefaultParameterHandlerTest {
 
     Object parameterObject = 1;
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
       private static final long serialVersionUID = 1L;
 
       {
@@ -156,7 +156,7 @@ class DefaultParameterHandlerTest {
 
     Object parameterObject = null;
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
       private static final long serialVersionUID = 1L;
 
       {
@@ -187,7 +187,7 @@ class DefaultParameterHandlerTest {
 
     Object parameterObject = 1;
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
       private static final long serialVersionUID = 1L;
 
       {
@@ -218,7 +218,7 @@ class DefaultParameterHandlerTest {
 
     Author parameterObject = new Author(-1, "cbegin", "******", "cbegin@nowhere.com", "N/A", Section.NEWS);
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
       private static final long serialVersionUID = 1L;
 
       {
@@ -271,7 +271,7 @@ class DefaultParameterHandlerTest {
     MappedStatement mappedStatement = new MappedStatement.Builder(mockConfig, "testSelect",
         new StaticSqlSource(mockConfig, "some select statement"), SqlCommandType.SELECT).build();
 
-    BoundSql boundSql = new BoundSql(mockConfig, "some select statement", new ArrayList<ParameterMapping>() {
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
       private static final long serialVersionUID = 1L;
 
       {

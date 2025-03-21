@@ -43,7 +43,7 @@ public class StaticSqlSource implements SqlSource {
 
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
-    return new BoundSql(configuration, sql, parameterMappings, parameterObject);
+    return new BoundSql(sql, parameterMappings, parameterObject);
   }
 
 }
