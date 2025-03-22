@@ -35,7 +35,7 @@ import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.SelectProvider;
 import org.apache.ibatis.annotations.UpdateProvider;
-import org.apache.ibatis.binding.MapperMethod;
+import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.annotation.ProviderContext;
 import org.apache.ibatis.builder.annotation.ProviderSqlSource;
@@ -909,7 +909,7 @@ class SqlProviderTest {
         return "SELECT '" + map.get("value") + "' FROM INFORMATION_SCHEMA.SYSTEM_USERS";
       }
 
-      public static String providerContextAndParamMap(ProviderContext context, MapperMethod.ParamMap<Object> map) {
+      public static String providerContextAndParamMap(ProviderContext context, ParamMap<Object> map) {
         return "SELECT '" + map.get("value") + "' FROM INFORMATION_SCHEMA.SYSTEM_USERS";
       }
 

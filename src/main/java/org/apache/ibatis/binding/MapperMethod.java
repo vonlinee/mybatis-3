@@ -19,7 +19,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -198,20 +197,6 @@ public class MapperMethod {
       result = sqlSession.selectMap(command.getName(), param, method.getMapKey());
     }
     return result;
-  }
-
-  public static class ParamMap<V> extends HashMap<String, V> {
-
-    private static final long serialVersionUID = -2212268410512043556L;
-
-    @Override
-    public V get(Object key) {
-      if (!super.containsKey(key)) {
-        throw new BindingException("Parameter '" + key + "' not found. Available parameters are " + keySet());
-      }
-      return super.get(key);
-    }
-
   }
 
   public static class SqlCommand {
