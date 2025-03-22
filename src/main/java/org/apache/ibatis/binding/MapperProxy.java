@@ -57,28 +57,14 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   private MapperMethodInvoker cachedInvoker(Method method) throws Throwable {
     try {
       return methodCache.computeIfAbsent(method, m -> {
-        if (!m.isDefault()) {
-          return new PlainMethodInvoker(new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
+        if (m.isDefault()) {
+          return new DefaultMethodInvoker(method);
         }
-        return new DefaultMethodInvoker(method);
+        return new PlainMethodInvoker(new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
       });
     } catch (RuntimeException re) {
       Throwable cause = re.getCause();
       throw cause == null ? re : cause;
     }
   }
-
-  private static class PlainMethodInvoker implements MapperMethodInvoker {
-    private final MapperMethod mapperMethod;
-
-    public PlainMethodInvoker(MapperMethod mapperMethod) {
-      this.mapperMethod = mapperMethod;
-    }
-
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args, SqlSession sqlSession) throws Throwable {
-      return mapperMethod.execute(sqlSession, args);
-    }
-  }
-
 }
