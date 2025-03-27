@@ -137,7 +137,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
   public ParameterMap addParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
     id = applyCurrentNamespace(id, false);
-    ParameterMap parameterMap = new ParameterMap.Builder(configuration, id, parameterClass, parameterMappings).build();
+    ParameterMap parameterMap = new ParameterMap.Builder(id, parameterClass, parameterMappings).build();
     configuration.addParameterMap(parameterMap);
     return parameterMap;
   }
@@ -309,8 +309,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
       }
     } else if (parameterTypeClass != null) {
       List<ParameterMapping> parameterMappings = new ArrayList<>();
-      parameterMap = new ParameterMap.Builder(configuration, statementId + "-Inline", parameterTypeClass,
-          parameterMappings).build();
+      parameterMap = new ParameterMap.Builder(statementId + "-Inline", parameterTypeClass, parameterMappings).build();
     }
     return parameterMap;
   }
