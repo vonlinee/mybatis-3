@@ -18,19 +18,13 @@ package org.apache.ibatis.executor.loader;
 import java.sql.SQLException;
 import java.util.List;
 
-import javax.sql.DataSource;
-
 import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.ResultExtractor;
 import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.RowBounds;
-import org.apache.ibatis.transaction.Transaction;
-import org.apache.ibatis.transaction.TransactionFactory;
 
 /**
  * @author Clinton Begin
@@ -48,7 +42,6 @@ public class ResultLoader {
   protected final long creatorThreadId;
 
   protected boolean loaded;
-  protected Object resultObject;
 
   public ResultLoader(Configuration config, Executor executor, MappedStatement mappedStatement, Object parameterObject,
       Class<?> targetType, Object cacheKey, BoundSql boundSql) {
@@ -65,14 +58,13 @@ public class ResultLoader {
 
   public Object loadResult() throws SQLException {
     List<Object> list = selectList();
-    resultObject = resultExtractor.extractObjectFromList(list, targetType);
-    return resultObject;
+    return resultExtractor.extractObjectFromList(list, targetType);
   }
 
   private <E> List<E> selectList() throws SQLException {
     Executor localExecutor = executor;
     if (Thread.currentThread().getId() != this.creatorThreadId || localExecutor.isClosed()) {
-      localExecutor = newExecutor();
+      localExecutor = configuration.newExecutor(ExecutorType.SIMPLE);
     }
     try {
       return localExecutor.query(mappedStatement, parameterObject, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER,
@@ -83,23 +75,4 @@ public class ResultLoader {
       }
     }
   }
-
-  private Executor newExecutor() {
-    final Environment environment = configuration.getEnvironment();
-    if (environment == null) {
-      throw new ExecutorException("ResultLoader could not load lazily.  Environment was not configured.");
-    }
-    final DataSource ds = environment.getDataSource();
-    if (ds == null) {
-      throw new ExecutorException("ResultLoader could not load lazily.  DataSource was not configured.");
-    }
-    final TransactionFactory transactionFactory = environment.getTransactionFactory();
-    final Transaction tx = transactionFactory.newTransaction(ds, null, false);
-    return configuration.newExecutor(tx, ExecutorType.SIMPLE);
-  }
-
-  public boolean wasNull() {
-    return resultObject == null;
-  }
-
 }

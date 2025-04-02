@@ -29,6 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 
+import javax.sql.DataSource;
+
 import org.apache.ibatis.binding.MapperRegistry;
 import org.apache.ibatis.builder.CacheRefResolver;
 import org.apache.ibatis.builder.IncompleteElementException;
@@ -48,6 +50,7 @@ import org.apache.ibatis.executor.BatchExecutor;
 import org.apache.ibatis.executor.CachingExecutor;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.ReuseExecutor;
 import org.apache.ibatis.executor.SimpleExecutor;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -91,6 +94,7 @@ import org.apache.ibatis.scripting.LanguageDriverRegistry;
 import org.apache.ibatis.scripting.defaults.RawLanguageDriver;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 import org.apache.ibatis.transaction.Transaction;
+import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
 import org.apache.ibatis.type.JdbcType;
@@ -740,6 +744,20 @@ public class Configuration {
 
   public Executor newExecutor(Transaction transaction) {
     return newExecutor(transaction, defaultExecutorType);
+  }
+
+  public Executor newExecutor(ExecutorType executorType) {
+    final Environment environment = getEnvironment();
+    if (environment == null) {
+      throw new ExecutorException("ResultLoader could not load lazily.  Environment was not configured.");
+    }
+    final DataSource ds = environment.getDataSource();
+    if (ds == null) {
+      throw new ExecutorException("ResultLoader could not load lazily.  DataSource was not configured.");
+    }
+    final TransactionFactory transactionFactory = environment.getTransactionFactory();
+    final Transaction tx = transactionFactory.newTransaction(ds, null, false);
+    return newExecutor(tx, executorType);
   }
 
   public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
