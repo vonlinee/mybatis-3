@@ -20,7 +20,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.ResultExtractor;
@@ -45,7 +44,7 @@ public class ResultLoader {
   protected final Object parameterObject;
   protected final Class<?> targetType;
   protected final ObjectFactory objectFactory;
-  protected final CacheKey cacheKey;
+  protected final Object cacheKey;
   protected final BoundSql boundSql;
   protected final ResultExtractor resultExtractor;
   protected final long creatorThreadId;
@@ -54,7 +53,7 @@ public class ResultLoader {
   protected Object resultObject;
 
   public ResultLoader(Configuration config, Executor executor, MappedStatement mappedStatement, Object parameterObject,
-      Class<?> targetType, CacheKey cacheKey, BoundSql boundSql) {
+      Class<?> targetType, Object cacheKey, BoundSql boundSql) {
     this.configuration = config;
     this.executor = executor;
     this.mappedStatement = mappedStatement;

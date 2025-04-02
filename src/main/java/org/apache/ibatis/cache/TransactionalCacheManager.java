@@ -31,11 +31,11 @@ public class TransactionalCacheManager {
     getTransactionalCache(cache).clear();
   }
 
-  public Object getObject(Cache cache, CacheKey key) {
+  public Object getObject(Cache cache, Object key) {
     return getTransactionalCache(cache).getObject(key);
   }
 
-  public void putObject(Cache cache, CacheKey key, Object value) {
+  public void putObject(Cache cache, Object key, Object value) {
     getTransactionalCache(cache).putObject(key, value);
   }
 

@@ -18,7 +18,6 @@ package org.apache.ibatis.executor;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -37,7 +36,7 @@ public interface Executor {
   int update(MappedStatement ms, Object parameter) throws SQLException;
 
   <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler,
-      CacheKey cacheKey, BoundSql boundSql) throws SQLException;
+      Object cacheKey, BoundSql boundSql) throws SQLException;
 
   <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler)
       throws SQLException;
@@ -50,13 +49,13 @@ public interface Executor {
 
   void rollback(boolean required) throws SQLException;
 
-  CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql);
+  Object createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql);
 
-  boolean isCached(MappedStatement ms, CacheKey key);
+  boolean isCached(MappedStatement ms, Object key);
 
   void clearLocalCache();
 
-  void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key, Class<?> targetType);
+  void deferLoad(MappedStatement ms, MetaObject resultObject, String property, Object key, Class<?> targetType);
 
   Transaction getTransaction();
 

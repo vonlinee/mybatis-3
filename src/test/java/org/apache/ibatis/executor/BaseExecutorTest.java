@@ -15,11 +15,7 @@
  */
 package org.apache.ibatis.executor;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,7 +66,6 @@ class BaseExecutorTest extends BaseDataTest {
 
   @Test
   void shouldInsertNewAuthorWithBeforeAutoKey() throws Exception {
-
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       Author author = new Author(-1, "someone", "******", "someone@apache.org", null, Section.NEWS);
@@ -98,7 +93,6 @@ class BaseExecutorTest extends BaseDataTest {
 
   @Test
   void shouldInsertNewAuthor() throws Exception {
-
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       Author author = new Author(99, "someone", "******", "someone@apache.org", null, Section.NEWS);
@@ -119,7 +113,6 @@ class BaseExecutorTest extends BaseDataTest {
 
   @Test
   void shouldSelectAllAuthorsAutoMapped() throws Exception {
-
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       MappedStatement selectStatement = ExecutorTestHelper.prepareSelectAllAuthorsAutoMappedStatement(config);
@@ -141,7 +134,6 @@ class BaseExecutorTest extends BaseDataTest {
 
   @Test
   void shouldInsertNewAuthorWithAutoKey() throws Exception {
-
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       Author author = new Author(-1, "someone", "******", "someone@apache.org", null, Section.NEWS);
@@ -169,7 +161,6 @@ class BaseExecutorTest extends BaseDataTest {
 
   @Test
   void shouldInsertNewAuthorByProc() throws Exception {
-
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       Author author = new Author(97, "someone", "******", "someone@apache.org", null, null);
@@ -189,7 +180,6 @@ class BaseExecutorTest extends BaseDataTest {
 
   @Test
   void shouldInsertNewAuthorUsingSimpleNonPreparedStatements() throws Exception {
-
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       Author author = new Author(99, "someone", "******", "someone@apache.org", null, null);
@@ -210,7 +200,6 @@ class BaseExecutorTest extends BaseDataTest {
 
   @Test
   void shouldUpdateAuthor() throws Exception {
-
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       Author author = new Author(101, "someone", "******", "someone@apache.org", null, Section.NEWS);
@@ -231,7 +220,6 @@ class BaseExecutorTest extends BaseDataTest {
 
   @Test
   void shouldDeleteAuthor() throws Exception {
-
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       Author author = new Author(101, null, null, null, null, null);
@@ -251,7 +239,6 @@ class BaseExecutorTest extends BaseDataTest {
 
   @Test
   void shouldSelectDiscriminatedPost() throws Exception {
-
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       MappedStatement selectStatement = ExecutorTestHelper.prepareSelectDiscriminatedPost(config);
@@ -274,7 +261,6 @@ class BaseExecutorTest extends BaseDataTest {
 
   @Test
   void shouldSelect2DiscriminatedPosts() throws Exception {
-
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       MappedStatement selectStatement = ExecutorTestHelper.prepareSelectDiscriminatedPost(config);
@@ -302,7 +288,6 @@ class BaseExecutorTest extends BaseDataTest {
     try {
       MappedStatement selectStatement = ExecutorTestHelper.prepareSelectTwoSetsOfAuthorsProc(config);
       List<List<Author>> authorSets = executor.query(selectStatement, new HashMap<String, Object>() {
-        private static final long serialVersionUID = 1L;
         {
           put("id1", 101);
           put("id2", 102);
@@ -312,7 +297,7 @@ class BaseExecutorTest extends BaseDataTest {
       for (List<Author> authors : authorSets) {
         assertEquals(2, authors.size());
         for (Object author : authors) {
-          assertTrue(author instanceof Author);
+          assertInstanceOf(Author.class, author);
         }
       }
     } finally {
@@ -357,7 +342,7 @@ class BaseExecutorTest extends BaseDataTest {
       List<Post> posts = executor.query(selectPosts, 1, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
       executor.flushStatements();
       assertEquals(2, posts.size());
-      assertTrue(posts.get(1) instanceof Proxy);
+      assertInstanceOf(Proxy.class, posts.get(1));
       assertNotNull(posts.get(1).getBlog());
       assertEquals(1, posts.get(1).getBlog().getId());
       executor.rollback(true);
@@ -369,7 +354,6 @@ class BaseExecutorTest extends BaseDataTest {
 
   @Test
   void shouldFetchOneOrphanedPostWithNoBlog() throws Exception {
-
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       MappedStatement selectBlog = ExecutorTestHelper.prepareComplexSelectBlogMappedStatement(config);
@@ -412,7 +396,6 @@ class BaseExecutorTest extends BaseDataTest {
 
   @Test
   void shouldFetchComplexBlogs() throws Exception {
-
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       MappedStatement selectBlog = ExecutorTestHelper.prepareComplexSelectBlogMappedStatement(config);
@@ -489,9 +472,7 @@ class BaseExecutorTest extends BaseDataTest {
 
     Object parameterObject = 1;
 
-    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
-      private static final long serialVersionUID = 1L;
-
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
         add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
       }
@@ -502,7 +483,7 @@ class BaseExecutorTest extends BaseDataTest {
     };
 
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
-    CacheKey cacheKey = executor.createCacheKey(mappedStatement, parameterObject, RowBounds.DEFAULT, boundSql);
+    Object cacheKey = executor.createCacheKey(mappedStatement, parameterObject, RowBounds.DEFAULT, boundSql);
 
     CacheKey expected = new CacheKey();
     expected.update(mappedStatement.getId());
@@ -523,16 +504,14 @@ class BaseExecutorTest extends BaseDataTest {
 
     Object parameterObject = null;
 
-    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
-      private static final long serialVersionUID = 1L;
-
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
         add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
       }
     }, parameterObject);
 
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
-    CacheKey cacheKey = executor.createCacheKey(mappedStatement, parameterObject, RowBounds.DEFAULT, boundSql);
+    Object cacheKey = executor.createCacheKey(mappedStatement, parameterObject, RowBounds.DEFAULT, boundSql);
 
     CacheKey expected = new CacheKey();
     expected.update(mappedStatement.getId());
@@ -553,16 +532,14 @@ class BaseExecutorTest extends BaseDataTest {
 
     Object parameterObject = 1;
 
-    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
-      private static final long serialVersionUID = 1L;
-
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
         add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
       }
     }, parameterObject);
 
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
-    CacheKey cacheKey = executor.createCacheKey(mappedStatement, parameterObject, RowBounds.DEFAULT, boundSql);
+    Object cacheKey = executor.createCacheKey(mappedStatement, parameterObject, RowBounds.DEFAULT, boundSql);
 
     CacheKey expected = new CacheKey();
     expected.update(mappedStatement.getId());
@@ -583,9 +560,7 @@ class BaseExecutorTest extends BaseDataTest {
 
     Author parameterObject = new Author(-1, "cbegin", "******", "cbegin@nowhere.com", "N/A", Section.NEWS);
 
-    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
-      private static final long serialVersionUID = 1L;
-
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
         add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
         add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
@@ -599,7 +574,7 @@ class BaseExecutorTest extends BaseDataTest {
     }, parameterObject);
 
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
-    CacheKey cacheKey = executor.createCacheKey(mappedStatement, parameterObject, RowBounds.DEFAULT, boundSql);
+    Object cacheKey = executor.createCacheKey(mappedStatement, parameterObject, RowBounds.DEFAULT, boundSql);
 
     CacheKey expected = new CacheKey();
     expected.update(mappedStatement.getId());

@@ -135,7 +135,7 @@ public abstract class BaseExecutor implements Executor {
   @SuppressWarnings("unchecked")
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler,
-      CacheKey key, BoundSql boundSql) throws SQLException {
+      Object key, BoundSql boundSql) throws SQLException {
     ErrorContext.instance().resource(ms.getResource()).activity("executing a query").object(ms.getId());
     if (closed) {
       throw new ExecutorException("Executor was closed.");
@@ -176,8 +176,7 @@ public abstract class BaseExecutor implements Executor {
   }
 
   @Override
-  public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key,
-      Class<?> targetType) {
+  public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, Object key, Class<?> targetType) {
     checkIfClosed();
     DeferredLoad deferredLoad = new DeferredLoad(resultObject, property, key, localCache, configuration, targetType);
     if (deferredLoad.canLoad()) {
@@ -239,7 +238,7 @@ public abstract class BaseExecutor implements Executor {
   }
 
   @Override
-  public boolean isCached(MappedStatement ms, CacheKey key) {
+  public boolean isCached(MappedStatement ms, Object key) {
     return localCache.getObject(key) != null;
   }
 
@@ -314,7 +313,7 @@ public abstract class BaseExecutor implements Executor {
     StatementUtil.applyTransactionTimeout(statement, statement.getQueryTimeout(), transaction.getTimeout());
   }
 
-  private void handleLocallyCachedOutputParameters(MappedStatement ms, CacheKey key, Object parameter,
+  private void handleLocallyCachedOutputParameters(MappedStatement ms, Object key, Object parameter,
       BoundSql boundSql) {
     if (ms.getStatementType() == StatementType.CALLABLE) {
       final Object cachedParameter = localOutputParameterCache.getObject(key);
@@ -333,7 +332,7 @@ public abstract class BaseExecutor implements Executor {
   }
 
   private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds,
-      ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
+      ResultHandler resultHandler, Object key, BoundSql boundSql) throws SQLException {
     List<E> list;
     localCache.putObject(key, EXECUTION_PLACEHOLDER);
     try {
@@ -366,13 +365,13 @@ public abstract class BaseExecutor implements Executor {
     private final MetaObject resultObject;
     private final String property;
     private final Class<?> targetType;
-    private final CacheKey key;
+    private final Object key;
     private final PerpetualCache localCache;
     private final ObjectFactory objectFactory;
     private final ResultExtractor resultExtractor;
 
     // issue #781
-    public DeferredLoad(MetaObject resultObject, String property, CacheKey key, PerpetualCache localCache,
+    public DeferredLoad(MetaObject resultObject, String property, Object key, PerpetualCache localCache,
         Configuration configuration, Class<?> targetType) {
       this.resultObject = resultObject;
       this.property = property;
