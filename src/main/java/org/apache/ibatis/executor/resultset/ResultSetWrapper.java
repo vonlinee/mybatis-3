@@ -107,7 +107,10 @@ public class ResultSetWrapper {
         return handler;
       }
 
-      Class<?> javaType = resolveClass(classNames.get(index));
+      Class<?> javaType = Resources.resolveClass(classNames.get(index));
+      if (javaType == null) {
+        return null;
+      }
       if (!(k instanceof Class && ((Class<?>) k).isAssignableFrom(javaType))) {
         // Clearly incompatible
         return null;
@@ -121,18 +124,6 @@ public class ResultSetWrapper {
     });
   }
 
-  static Class<?> resolveClass(String className) {
-    try {
-      // #699 className could be null
-      if (className != null) {
-        return Resources.classForName(className);
-      }
-    } catch (ClassNotFoundException e) {
-      // ignore
-    }
-    return null;
-  }
-
   private int getColumnIndex(String columnName) {
     for (int i = 0; i < columnNames.size(); i++) {
       if (columnNames.get(i).equalsIgnoreCase(columnName)) {
@@ -142,7 +133,7 @@ public class ResultSetWrapper {
     return -1;
   }
 
-  private void loadMappedAndUnmappedColumnNames(ResultMap resultMap, String columnPrefix) throws SQLException {
+  private void loadMappedAndUnmappedColumnNames(ResultMap resultMap, String columnPrefix) {
     Set<String> mappedColumnNames = new HashSet<>();
     List<String> unmappedColumnNames = new ArrayList<>();
     final String upperColumnPrefix = columnPrefix == null ? null : columnPrefix.toUpperCase(Locale.ENGLISH);
@@ -159,7 +150,7 @@ public class ResultSetWrapper {
     unMappedColumnNamesMap.put(getMapKey(resultMap, columnPrefix), unmappedColumnNames);
   }
 
-  public Set<String> getMappedColumnNames(ResultMap resultMap, String columnPrefix) throws SQLException {
+  public Set<String> getMappedColumnNames(ResultMap resultMap, String columnPrefix) {
     Set<String> mappedColumnNames = mappedColumnNamesMap.get(getMapKey(resultMap, columnPrefix));
     if (mappedColumnNames == null) {
       loadMappedAndUnmappedColumnNames(resultMap, columnPrefix);
@@ -168,7 +159,7 @@ public class ResultSetWrapper {
     return mappedColumnNames;
   }
 
-  public List<String> getUnmappedColumnNames(ResultMap resultMap, String columnPrefix) throws SQLException {
+  public List<String> getUnmappedColumnNames(ResultMap resultMap, String columnPrefix) {
     List<String> unMappedColumnNames = unMappedColumnNamesMap.get(getMapKey(resultMap, columnPrefix));
     if (unMappedColumnNames == null) {
       loadMappedAndUnmappedColumnNames(resultMap, columnPrefix);
@@ -182,7 +173,7 @@ public class ResultSetWrapper {
   }
 
   private Set<String> prependPrefixes(Set<String> columnNames, String prefix) {
-    if (columnNames == null || columnNames.isEmpty() || prefix == null || prefix.length() == 0) {
+    if (columnNames == null || columnNames.isEmpty() || prefix == null || prefix.isEmpty()) {
       return columnNames;
     }
     final Set<String> prefixed = new HashSet<>();

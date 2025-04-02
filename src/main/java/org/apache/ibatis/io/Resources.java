@@ -330,4 +330,16 @@ public class Resources {
     Resources.charset = charset;
   }
 
+  public static Class<?> resolveClass(String className) {
+    try {
+      // #699 className could be null
+      if (className != null) {
+        return Resources.classForName(className);
+      }
+    } catch (ClassNotFoundException e) {
+      // ignore
+    }
+    return null;
+  }
+
 }
