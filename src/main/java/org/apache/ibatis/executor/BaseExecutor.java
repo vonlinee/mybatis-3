@@ -37,7 +37,6 @@ import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
-import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.session.ResultHandler;
@@ -156,17 +155,21 @@ public abstract class BaseExecutor implements Executor {
       queryStack--;
     }
     if (queryStack == 0) {
-      for (DeferredLoad deferredLoad : deferredLoads) {
-        deferredLoad.load();
-      }
-      // issue #601
-      deferredLoads.clear();
+      handleDeferred();
       if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
         // issue #482
         clearLocalCache();
       }
     }
     return list;
+  }
+
+  private void handleDeferred() {
+    for (DeferredLoad deferredLoad : deferredLoads) {
+      loadDeferred(deferredLoad);
+    }
+    // issue #601
+    deferredLoads.clear();
   }
 
   @Override
@@ -176,14 +179,30 @@ public abstract class BaseExecutor implements Executor {
   }
 
   @Override
-  public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, Object key, Class<?> targetType) {
+  public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, Object cacheKey,
+      Class<?> targetType) {
     checkIfClosed();
-    DeferredLoad deferredLoad = new DeferredLoad(resultObject, property, key, localCache, configuration, targetType);
-    if (deferredLoad.canLoad()) {
-      deferredLoad.load();
+
+    DeferredLoad deferredLoad = new DeferredLoad(resultObject, property, cacheKey, targetType);
+    if (hasLocalCache(cacheKey)) {
+      loadDeferred(deferredLoad);
     } else {
-      deferredLoads.add(new DeferredLoad(resultObject, property, key, localCache, configuration, targetType));
+      deferredLoads.add(deferredLoad);
     }
+  }
+
+  private boolean hasLocalCache(Object cacheKey) {
+    return localCache.getObject(cacheKey) != null
+        && localCache.getObject(cacheKey) != ExecutionPlaceholder.EXECUTION_PLACEHOLDER;
+  }
+
+  private void loadDeferred(DeferredLoad deferredLoad) {
+    @SuppressWarnings("unchecked")
+    // we suppose we get back a List
+    List<Object> list = (List<Object>) localCache.getObject(deferredLoad.getCacheKey());
+    ResultExtractor extractor = new ResultExtractor(configuration);
+    Object value = extractor.extractObjectFromList(list, deferredLoad.getTargetType());
+    deferredLoad.setValue(value);
   }
 
   private void checkIfClosed() {
@@ -358,42 +377,6 @@ public abstract class BaseExecutor implements Executor {
   @Override
   public void setExecutorWrapper(Executor wrapper) {
     this.wrapper = wrapper;
-  }
-
-  private static class DeferredLoad {
-
-    private final MetaObject resultObject;
-    private final String property;
-    private final Class<?> targetType;
-    private final Object key;
-    private final PerpetualCache localCache;
-    private final ObjectFactory objectFactory;
-    private final ResultExtractor resultExtractor;
-
-    // issue #781
-    public DeferredLoad(MetaObject resultObject, String property, Object key, PerpetualCache localCache,
-        Configuration configuration, Class<?> targetType) {
-      this.resultObject = resultObject;
-      this.property = property;
-      this.key = key;
-      this.localCache = localCache;
-      this.objectFactory = configuration.getObjectFactory();
-      this.resultExtractor = new ResultExtractor(configuration, objectFactory);
-      this.targetType = targetType;
-    }
-
-    public boolean canLoad() {
-      return localCache.getObject(key) != null && localCache.getObject(key) != EXECUTION_PLACEHOLDER;
-    }
-
-    public void load() {
-      @SuppressWarnings("unchecked")
-      // we suppose we get back a List
-      List<Object> list = (List<Object>) localCache.getObject(key);
-      Object value = resultExtractor.extractObjectFromList(list, targetType);
-      resultObject.setValue(property, value);
-    }
-
   }
 
 }

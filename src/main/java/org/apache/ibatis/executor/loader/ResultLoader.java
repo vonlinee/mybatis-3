@@ -26,7 +26,6 @@ import org.apache.ibatis.executor.ResultExtractor;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.RowBounds;
@@ -43,7 +42,6 @@ public class ResultLoader {
   protected final MappedStatement mappedStatement;
   protected final Object parameterObject;
   protected final Class<?> targetType;
-  protected final ObjectFactory objectFactory;
   protected final Object cacheKey;
   protected final BoundSql boundSql;
   protected final ResultExtractor resultExtractor;
@@ -59,10 +57,9 @@ public class ResultLoader {
     this.mappedStatement = mappedStatement;
     this.parameterObject = parameterObject;
     this.targetType = targetType;
-    this.objectFactory = configuration.getObjectFactory();
     this.cacheKey = cacheKey;
     this.boundSql = boundSql;
-    this.resultExtractor = new ResultExtractor(configuration, objectFactory);
+    this.resultExtractor = new ResultExtractor(configuration);
     this.creatorThreadId = Thread.currentThread().getId();
   }
 

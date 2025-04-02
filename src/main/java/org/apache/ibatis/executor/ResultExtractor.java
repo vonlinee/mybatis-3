@@ -21,6 +21,8 @@ import java.util.List;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Andrew Gustafson
@@ -29,13 +31,21 @@ public class ResultExtractor {
   private final Configuration configuration;
   private final ObjectFactory objectFactory;
 
-  public ResultExtractor(Configuration configuration, ObjectFactory objectFactory) {
+  public ResultExtractor(Configuration configuration) {
+    this(configuration, configuration.getObjectFactory());
+  }
+
+  public ResultExtractor(@NotNull Configuration configuration, @NotNull ObjectFactory objectFactory) {
     this.configuration = configuration;
     this.objectFactory = objectFactory;
   }
 
-  public Object extractObjectFromList(List<Object> list, Class<?> targetType) {
+  public Object extractObjectFromList(@Nullable List<Object> list, @Nullable Class<?> targetType) {
     Object value = null;
+    if (list == null) {
+      return value;
+    }
+
     if (targetType != null && targetType.isAssignableFrom(list.getClass())) {
       value = list;
     } else if (targetType != null && objectFactory.isCollection(targetType)) {
@@ -53,9 +63,9 @@ public class ResultExtractor {
       } else {
         value = list.toArray((Object[]) array);
       }
-    } else if (list != null && list.size() > 1) {
+    } else if (list.size() > 1) {
       throw new ExecutorException("Statement returned more than one row, where no more than one was expected.");
-    } else if (list != null && list.size() == 1) {
+    } else if (list.size() == 1) {
       value = list.get(0);
     }
     return value;
