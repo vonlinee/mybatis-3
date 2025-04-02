@@ -34,8 +34,6 @@ import java.util.List;
 import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
-import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
@@ -76,12 +74,9 @@ class DefaultResultSetHandlerTest {
     final MappedStatement ms = getMappedStatement();
 
     final Executor executor = null;
-    final ParameterHandler parameterHandler = null;
     final ResultHandler resultHandler = null;
-    final BoundSql boundSql = null;
     final RowBounds rowBounds = new RowBounds(0, 100);
-    final DefaultResultSetHandler fastResultSetHandler = new DefaultResultSetHandler(executor, ms, parameterHandler,
-        resultHandler, boundSql, rowBounds);
+    final DefaultResultSetHandler fastResultSetHandler = new DefaultResultSetHandler(null, ms, null, rowBounds);
 
     when(stmt.getResultSet()).thenReturn(rs);
     when(rs.getMetaData()).thenReturn(rsmd);
@@ -104,7 +99,7 @@ class DefaultResultSetHandlerTest {
     final RowBounds rowBounds = new RowBounds(0, 100);
 
     final DefaultResultSetHandler defaultResultSetHandler = new DefaultResultSetHandler(null/* executor */, ms,
-        null/* parameterHandler */, null/* resultHandler */, null/* boundSql */, rowBounds);
+        null/* resultHandler */, rowBounds);
 
     final ResultSetWrapper rsw = mock(ResultSetWrapper.class);
     when(rsw.getResultSet()).thenReturn(mock(ResultSet.class));

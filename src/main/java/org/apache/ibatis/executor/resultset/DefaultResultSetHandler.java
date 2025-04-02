@@ -45,7 +45,6 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.loader.ResultLoader;
 import org.apache.ibatis.executor.loader.ResultLoaderMap;
-import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.result.DefaultResultContext;
 import org.apache.ibatis.executor.result.DefaultResultHandler;
 import org.apache.ibatis.executor.result.ResultMapException;
@@ -83,9 +82,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   private final Configuration configuration;
   private final MappedStatement mappedStatement;
   private final RowBounds rowBounds;
-  private final ParameterHandler parameterHandler;
   private final ResultHandler<?> resultHandler;
-  private final BoundSql boundSql;
   private final TypeHandlerRegistry typeHandlerRegistry;
   private final ObjectFactory objectFactory;
   private final ReflectorFactory reflectorFactory;
@@ -128,14 +125,12 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
   }
 
-  public DefaultResultSetHandler(Executor executor, MappedStatement mappedStatement, ParameterHandler parameterHandler,
-      ResultHandler<?> resultHandler, BoundSql boundSql, RowBounds rowBounds) {
+  public DefaultResultSetHandler(Executor executor, MappedStatement mappedStatement, ResultHandler<?> resultHandler,
+      RowBounds rowBounds) {
     this.executor = executor;
     this.configuration = mappedStatement.getConfiguration();
     this.mappedStatement = mappedStatement;
     this.rowBounds = rowBounds;
-    this.parameterHandler = parameterHandler;
-    this.boundSql = boundSql;
     this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
     this.objectFactory = configuration.getObjectFactory();
     this.reflectorFactory = configuration.getReflectorFactory();

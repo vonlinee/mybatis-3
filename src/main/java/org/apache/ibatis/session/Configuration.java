@@ -716,14 +716,14 @@ public class Configuration {
   }
 
   public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds,
-      ParameterHandler parameterHandler, ResultHandler resultHandler, BoundSql boundSql) {
-    ResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, mappedStatement, parameterHandler,
-        resultHandler, boundSql, rowBounds);
+      ResultHandler<?> resultHandler) {
+    ResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, mappedStatement, resultHandler,
+        rowBounds);
     return (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
   }
 
   public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement,
-      Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+      Object parameterObject, RowBounds rowBounds, ResultHandler<?> resultHandler, BoundSql boundSql) {
 
     if (boundSql == null) { // issue #435, get the key before calculating the statement
       KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
