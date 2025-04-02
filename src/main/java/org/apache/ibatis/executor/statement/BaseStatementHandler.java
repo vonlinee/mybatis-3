@@ -22,7 +22,6 @@ import java.sql.Statement;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
-import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -59,11 +58,6 @@ public abstract class BaseStatementHandler implements StatementHandler {
 
     this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
     this.objectFactory = configuration.getObjectFactory();
-
-    if (boundSql == null) { // issue #435, get the key before calculating the statement
-      generateKeys(parameterObject);
-      boundSql = mappedStatement.getBoundSql(parameterObject);
-    }
 
     this.boundSql = boundSql;
 
@@ -136,12 +130,4 @@ public abstract class BaseStatementHandler implements StatementHandler {
       // ignore
     }
   }
-
-  protected void generateKeys(Object parameter) {
-    KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
-    ErrorContext.instance().store();
-    keyGenerator.processBefore(executor, mappedStatement, null, parameter);
-    ErrorContext.instance().recall();
-  }
-
 }

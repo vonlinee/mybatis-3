@@ -46,6 +46,7 @@ import org.apache.ibatis.datasource.pooled.PooledDataSourceFactory;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSourceFactory;
 import org.apache.ibatis.executor.BatchExecutor;
 import org.apache.ibatis.executor.CachingExecutor;
+import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ReuseExecutor;
 import org.apache.ibatis.executor.SimpleExecutor;
@@ -723,6 +724,15 @@ public class Configuration {
 
   public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement,
       Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+
+    if (boundSql == null) { // issue #435, get the key before calculating the statement
+      KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
+      ErrorContext.instance().store();
+      keyGenerator.processBefore(executor, mappedStatement, null, parameterObject);
+      ErrorContext.instance().recall();
+      boundSql = mappedStatement.getBoundSql(parameterObject);
+    }
+
     StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject,
         rowBounds, resultHandler, boundSql);
     return (StatementHandler) interceptorChain.pluginAll(statementHandler);
