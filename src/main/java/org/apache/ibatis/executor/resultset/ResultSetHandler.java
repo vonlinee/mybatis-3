@@ -15,7 +15,7 @@
  */
 package org.apache.ibatis.executor.resultset;
 
-import java.sql.CallableStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -35,8 +35,8 @@ public interface ResultSetHandler {
 
   <E> Cursor<E> handleCursorResultSets(Statement stmt) throws SQLException;
 
-  void handleOutputParameters(CallableStatement cs) throws SQLException;
-
   void handleRowValues(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler, RowBounds rowBounds,
       ResultMapping parentMapping) throws SQLException;
+
+  void closeResultSet(ResultSet rs);
 }
