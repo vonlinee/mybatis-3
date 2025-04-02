@@ -21,6 +21,10 @@ import java.sql.Statement;
 import java.util.List;
 
 import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.mapping.ResultMap;
+import org.apache.ibatis.mapping.ResultMapping;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
 
 /**
  * @author Clinton Begin
@@ -33,4 +37,6 @@ public interface ResultSetHandler {
 
   void handleOutputParameters(CallableStatement cs) throws SQLException;
 
+  void handleRowValues(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler, RowBounds rowBounds,
+      ResultMapping parentMapping) throws SQLException;
 }
