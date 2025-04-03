@@ -23,6 +23,7 @@ import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.reflection.ParamNameResolver;
@@ -154,12 +155,12 @@ public final class MappedStatement {
     }
 
     public Builder keyProperty(String keyProperty) {
-      mappedStatement.keyProperties = delimitedStringToArray(keyProperty);
+      mappedStatement.keyProperties = StringUtils.delimitedStringToArray(keyProperty);
       return this;
     }
 
     public Builder keyColumn(String keyColumn) {
-      mappedStatement.keyColumns = delimitedStringToArray(keyColumn);
+      mappedStatement.keyColumns = StringUtils.delimitedStringToArray(keyColumn);
       return this;
     }
 
@@ -173,8 +174,16 @@ public final class MappedStatement {
       return this;
     }
 
+    /**
+     * Resul sets.
+     *
+     * @param resultSet
+     *          the result set
+     *
+     * @return the builder
+     */
     public Builder resultSets(String resultSet) {
-      mappedStatement.resultSets = delimitedStringToArray(resultSet);
+      mappedStatement.resultSets = StringUtils.delimitedStringToArray(resultSet);
       return this;
     }
 
@@ -185,22 +194,6 @@ public final class MappedStatement {
 
     public Builder paramNameResolver(ParamNameResolver paramNameResolver) {
       mappedStatement.paramNameResolver = paramNameResolver;
-      return this;
-    }
-
-    /**
-     * Resul sets.
-     *
-     * @param resultSet
-     *          the result set
-     *
-     * @return the builder
-     *
-     * @deprecated Use {@link #resultSets}
-     */
-    @Deprecated
-    public Builder resulSets(String resultSet) {
-      mappedStatement.resultSets = delimitedStringToArray(resultSet);
       return this;
     }
 
@@ -302,6 +295,11 @@ public final class MappedStatement {
     return lang;
   }
 
+  /**
+   * Gets the resul sets.
+   *
+   * @return the resul sets
+   */
   public String[] getResultSets() {
     return resultSets;
   }
@@ -312,18 +310,6 @@ public final class MappedStatement {
 
   public ParamNameResolver getParamNameResolver() {
     return paramNameResolver;
-  }
-
-  /**
-   * Gets the resul sets.
-   *
-   * @return the resul sets
-   *
-   * @deprecated Use {@link #getResultSets()}
-   */
-  @Deprecated
-  public String[] getResulSets() {
-    return resultSets;
   }
 
   public BoundSql getBoundSql(Object parameterObject) {
@@ -346,12 +332,4 @@ public final class MappedStatement {
 
     return boundSql;
   }
-
-  private static String[] delimitedStringToArray(String in) {
-    if (in == null || in.trim().length() == 0) {
-      return null;
-    }
-    return in.split(",");
-  }
-
 }

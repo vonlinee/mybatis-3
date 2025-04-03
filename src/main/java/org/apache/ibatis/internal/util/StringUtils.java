@@ -15,6 +15,8 @@
  */
 package org.apache.ibatis.internal.util;
 
+import org.jetbrains.annotations.Nullable;
+
 public final class StringUtils {
 
   public static final String EMPTY = "";
@@ -185,5 +187,13 @@ public final class StringUtils {
           String.format("invalid range [%s, %s] to delete given string (%s)", start, end, start));
     }
     return str.substring(0, start) + str.substring(end, str.length() - 1);
+  }
+
+  @Nullable
+  public static String[] delimitedStringToArray(@Nullable String in) {
+    if (in == null || in.trim().isEmpty()) {
+      return null;
+    }
+    return in.split(",");
   }
 }
