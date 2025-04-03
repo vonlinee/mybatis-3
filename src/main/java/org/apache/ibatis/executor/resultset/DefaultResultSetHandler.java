@@ -126,7 +126,7 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
     int resultSetCount = 0;
     while (rsw != null && resultMapCount > resultSetCount) {
       ResultMap resultMap = resultMaps.get(resultSetCount);
-      handleResultSet(rsw, resultMap, multipleResults, null);
+      handleResultSet(rsw, resultMap, multipleResults);
       rsw = getNextResultSet(stmt);
       cleanUpAfterHandlingResultSet();
       resultSetCount++;
@@ -139,7 +139,11 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
         if (parentMapping != null) {
           String nestedResultMapId = parentMapping.getNestedResultMapId();
           ResultMap resultMap = configuration.getResultMap(nestedResultMapId);
-          handleResultSet(rsw, resultMap, null, parentMapping);
+          try {
+            handleRowValues(rsw, resultMap, null, RowBounds.DEFAULT, parentMapping);
+          } finally {
+            closeResultSet(rsw.getResultSet());
+          }
         }
         rsw = getNextResultSet(stmt);
         cleanUpAfterHandlingResultSet();
@@ -180,12 +184,10 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
     }
   }
 
-  private void handleResultSet(ResultSetWrapper rsw, ResultMap resultMap, List<Object> multipleResults,
-      ResultMapping parentMapping) throws SQLException {
+  private void handleResultSet(ResultSetWrapper rsw, ResultMap resultMap, List<Object> multipleResults)
+      throws SQLException {
     try {
-      if (parentMapping != null) {
-        handleRowValues(rsw, resultMap, null, RowBounds.DEFAULT, parentMapping);
-      } else if (resultHandler == null) {
+      if (resultHandler == null) {
         DefaultResultHandler defaultResultHandler = new DefaultResultHandler(objectFactory);
         handleRowValues(rsw, resultMap, defaultResultHandler, rowBounds, null);
         multipleResults.add(defaultResultHandler.getResultList());
@@ -447,7 +449,7 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
     ResultSetWrapper nestedRsw = new ResultSetWrapper(rsw.getResultSet().getObject(column, ResultSet.class),
         configuration);
     List<Object> results = new ArrayList<>();
-    handleResultSet(nestedRsw, nestedResultMap, results, null);
+    handleResultSet(nestedRsw, nestedResultMap, results);
     return results;
   }
 
@@ -972,16 +974,16 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
   private void handleRowValuesForNestedResultMap(ResultSetWrapper rsw, ResultMap resultMap,
       ResultHandler<?> resultHandler, RowBounds rowBounds, ResultMapping parentMapping) throws SQLException {
     final boolean useCollectionConstructorInjection = resultMap.hasResultMapsUsingConstructorCollection();
-    PendingConstructorCreation lastHandledCreation = null;
     if (useCollectionConstructorInjection) {
       verifyPendingCreationPreconditions(parentMapping);
     }
 
-    final DefaultResultContext<Object> resultContext = new DefaultResultContext<>();
     ResultSet resultSet = rsw.getResultSet();
     skipRows(resultSet, rowBounds);
     Object rowValue = previousRowValue;
 
+    PendingConstructorCreation lastHandledCreation = null;
+    final DefaultResultContext<Object> resultContext = new DefaultResultContext<>();
     while (shouldProcessMoreRows(resultContext, rowBounds) && !resultSet.isClosed() && resultSet.next()) {
       final ResultMap discriminatedResultMap = resolveDiscriminatedResultMap(rsw, resultMap, null);
       final CacheKey rowKey = createRowKey(discriminatedResultMap, rsw, null);
