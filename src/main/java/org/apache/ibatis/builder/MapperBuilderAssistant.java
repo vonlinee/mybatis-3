@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.function.BiConsumer;
 
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.decorators.LruCache;
@@ -58,6 +59,7 @@ import org.apache.ibatis.type.TypeHandler;
  */
 public class MapperBuilderAssistant extends BaseBuilder {
 
+  protected final Configuration configuration;
   private String currentNamespace;
   private final String resource;
   private Cache currentCache;
@@ -65,6 +67,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
   public MapperBuilderAssistant(Configuration configuration, String resource) {
     super(configuration);
+    this.configuration = configuration;
     ErrorContext.instance().resource(resource);
     this.resource = resource;
   }
@@ -84,6 +87,10 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
 
     this.currentNamespace = currentNamespace;
+  }
+
+  public Configuration getConfiguration() {
+    return configuration;
   }
 
   public String applyCurrentNamespace(String base, boolean isReference) {
@@ -468,5 +475,32 @@ public class MapperBuilderAssistant extends BaseBuilder {
       javaType = Object.class;
     }
     return javaType;
+  }
+
+  public void loadResource(String resource, BiConsumer<Configuration, String> callback) {
+    if (!configuration.isResourceLoaded(resource)) {
+      callback.accept(this.configuration, resource);
+      configuration.addLoadedResource(resource);
+    }
+  }
+
+  public void parsePending(boolean reportUnresolved) {
+    configuration.parsePendingResultMaps(reportUnresolved);
+    configuration.parsePendingCacheRefs(reportUnresolved);
+    configuration.parsePendingStatements(reportUnresolved);
+  }
+
+  public void addIncompleteResultMap(ResultMapResolver resultMapResolver) {
+    configuration.addIncompleteResultMap(resultMapResolver);
+  }
+
+  public Class<?> getSetterType(Class<?> type, String property) {
+    MetaClass metaResultType = MetaClass.forClass(type, configuration.getReflectorFactory());
+    return metaResultType.getSetterType(property);
+  }
+
+  public boolean hasSetter(Class<?> enclosingType, String property) {
+    MetaClass metaResultType = MetaClass.forClass(enclosingType, configuration.getReflectorFactory());
+    return metaResultType.hasSetter(property);
   }
 }

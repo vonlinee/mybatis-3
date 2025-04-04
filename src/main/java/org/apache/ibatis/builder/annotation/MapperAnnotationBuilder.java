@@ -72,6 +72,7 @@ import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
+import org.apache.ibatis.internal.util.ObjectUtils;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.FetchType;
@@ -455,12 +456,22 @@ public class MapperAnnotationBuilder {
       Class<? extends TypeHandler<?>> typeHandler = (Class<? extends TypeHandler<?>>) (result
           .typeHandler() == UnknownTypeHandler.class ? null : result.typeHandler());
       boolean hasNestedResultMap = hasNestedResultMap(result);
-      ResultMapping resultMapping = assistant.buildResultMapping(resultType, nullOrEmpty(result.property()),
-          nullOrEmpty(result.column()), result.javaType() == void.class ? null : result.javaType(),
-          result.jdbcType() == JdbcType.UNDEFINED ? null : result.jdbcType(),
-          hasNestedSelect(result) ? nestedSelectId(result) : null,
-          hasNestedResultMap ? nestedResultMapId(result) : null, null,
-          hasNestedResultMap ? findColumnPrefix(result) : null, typeHandler, flags, null, null, isLazy(result));
+      // @formatter:off
+      ResultMapping resultMapping = assistant.buildResultMapping(resultType,
+        ObjectUtils.nullIfBlank(result.property()),
+        ObjectUtils.nullIfBlank(result.column()),
+        result.javaType() == void.class ? null : result.javaType(),
+        result.jdbcType() == JdbcType.UNDEFINED ? null : result.jdbcType(),
+        hasNestedSelect(result) ? nestedSelectId(result) : null,
+        hasNestedResultMap ? nestedResultMapId(result) : null,
+        null,
+        hasNestedResultMap ? findColumnPrefix(result) : null,
+        typeHandler,
+        flags,
+        null,
+        null,
+        isLazy(result));
+      // @formatter:on
       resultMappings.add(resultMapping);
     }
   }
@@ -531,10 +542,19 @@ public class MapperAnnotationBuilder {
       @SuppressWarnings("unchecked")
       Class<? extends TypeHandler<?>> typeHandler = (Class<? extends TypeHandler<?>>) (arg
           .typeHandler() == UnknownTypeHandler.class ? null : arg.typeHandler());
-      ResultMapping resultMapping = assistant.buildResultMapping(resultType, nullOrEmpty(arg.name()),
-          nullOrEmpty(arg.column()), arg.javaType() == void.class ? null : arg.javaType(),
-          arg.jdbcType() == JdbcType.UNDEFINED ? null : arg.jdbcType(), nullOrEmpty(arg.select()),
-          nullOrEmpty(arg.resultMap()), null, nullOrEmpty(arg.columnPrefix()), typeHandler, flags, null, null, false);
+
+      // @formatter:off
+      ResultMapping resultMapping = assistant.buildResultMapping(resultType,
+        ObjectUtils.nullIfBlank(arg.name()),
+        ObjectUtils.nullIfBlank(arg.column()),
+        arg.javaType() == void.class ? null : arg.javaType(),
+        arg.jdbcType() == JdbcType.UNDEFINED ? null : arg.jdbcType(),
+        ObjectUtils.nullIfBlank(arg.select()),
+        ObjectUtils.nullIfBlank(arg.resultMap()),
+        null,
+        ObjectUtils.nullIfBlank(arg.columnPrefix()),
+        typeHandler, flags, null, null, false);
+      // @formatter:on
       mappings.add(resultMapping);
     }
 
@@ -565,7 +585,8 @@ public class MapperAnnotationBuilder {
     String parameterMap = null;
     String resultMap = null;
     ResultSetType resultSetTypeEnum = null;
-    String databaseId = selectKeyAnnotation.databaseId().isEmpty() ? null : selectKeyAnnotation.databaseId();
+
+    String databaseId = ObjectUtils.nullIfEmpty(selectKeyAnnotation.databaseId());
 
     SqlSource sqlSource = buildSqlSourceFromStrings(selectKeyAnnotation.statement(), parameterTypeClass,
         paramNameResolver, languageDriver);
@@ -607,7 +628,7 @@ public class MapperAnnotationBuilder {
   }
 
   @SafeVarargs
-  private final Optional<AnnotationWrapper> getAnnotationWrapper(Method method, boolean errorIfNoMatch,
+  private Optional<AnnotationWrapper> getAnnotationWrapper(Method method, boolean errorIfNoMatch,
       Class<? extends Annotation>... targetTypes) {
     return getAnnotationWrapper(method, errorIfNoMatch, Arrays.asList(targetTypes));
   }

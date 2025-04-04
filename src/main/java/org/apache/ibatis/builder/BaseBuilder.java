@@ -64,7 +64,7 @@ public abstract class BaseBuilder {
     return new HashSet<>(Arrays.asList(value.split(",")));
   }
 
-  protected JdbcType resolveJdbcType(String alias) {
+  public JdbcType resolveJdbcType(String alias) {
     try {
       return alias == null ? null : JdbcType.valueOf(alias);
     } catch (IllegalArgumentException e) {
@@ -72,7 +72,7 @@ public abstract class BaseBuilder {
     }
   }
 
-  protected ResultSetType resolveResultSetType(String alias) {
+  public ResultSetType resolveResultSetType(String alias) {
     try {
       return alias == null ? null : ResultSetType.valueOf(alias);
     } catch (IllegalArgumentException e) {
@@ -80,7 +80,7 @@ public abstract class BaseBuilder {
     }
   }
 
-  protected ParameterMode resolveParameterMode(String alias) {
+  public ParameterMode resolveParameterMode(String alias) {
     try {
       return alias == null ? null : ParameterMode.valueOf(alias);
     } catch (IllegalArgumentException e) {
@@ -88,7 +88,7 @@ public abstract class BaseBuilder {
     }
   }
 
-  protected Object createInstance(String alias) {
+  public Object createInstance(String alias) {
     Class<?> clazz = resolveClass(alias);
     try {
       return clazz == null ? null : clazz.getDeclaredConstructor().newInstance();
@@ -97,7 +97,7 @@ public abstract class BaseBuilder {
     }
   }
 
-  protected <T> Class<? extends T> resolveClass(String alias) {
+  public <T> Class<? extends T> resolveClass(String alias) {
     try {
       return alias == null ? null : resolveAlias(alias);
     } catch (Exception e) {
@@ -106,16 +106,16 @@ public abstract class BaseBuilder {
   }
 
   @Deprecated(since = "3.6.0", forRemoval = true)
-  protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, String typeHandlerAlias) {
+  public TypeHandler<?> resolveTypeHandler(Class<?> javaType, String typeHandlerAlias) {
     return resolveTypeHandler(null, javaType, null, typeHandlerAlias);
   }
 
   @Deprecated(since = "3.6.0", forRemoval = true)
-  protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, Class<? extends TypeHandler<?>> typeHandlerType) {
+  public TypeHandler<?> resolveTypeHandler(Class<?> javaType, Class<? extends TypeHandler<?>> typeHandlerType) {
     return resolveTypeHandler(javaType, null, typeHandlerType);
   }
 
-  protected TypeHandler<?> resolveTypeHandler(Class<?> parameterType, Type propertyType, JdbcType jdbcType,
+  public TypeHandler<?> resolveTypeHandler(Class<?> parameterType, Type propertyType, JdbcType jdbcType,
       String typeHandlerAlias) {
     Class<? extends TypeHandler<?>> typeHandlerType = null;
     typeHandlerType = resolveClass(typeHandlerAlias);
@@ -126,7 +126,7 @@ public abstract class BaseBuilder {
     return resolveTypeHandler(propertyType, jdbcType, typeHandlerType);
   }
 
-  protected TypeHandler<?> resolveTypeHandler(Type javaType, JdbcType jdbcType,
+  public TypeHandler<?> resolveTypeHandler(Type javaType, JdbcType jdbcType,
       Class<? extends TypeHandler<?>> typeHandlerType) {
     if (typeHandlerType == null && jdbcType == null) {
       return null;
@@ -134,7 +134,7 @@ public abstract class BaseBuilder {
     return configuration.getTypeHandlerRegistry().getTypeHandler(javaType, jdbcType, typeHandlerType);
   }
 
-  protected <T> Class<? extends T> resolveAlias(String alias) {
+  public <T> Class<? extends T> resolveAlias(String alias) {
     return typeAliasRegistry.resolveAlias(alias);
   }
 }

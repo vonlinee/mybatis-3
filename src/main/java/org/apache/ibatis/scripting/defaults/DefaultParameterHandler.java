@@ -56,7 +56,7 @@ public class DefaultParameterHandler implements ParameterHandler {
 
   private ParameterMetaData paramMetaData;
   private MetaObject paramMetaObject;
-  private HashMap<Class<?>, MetaClass> metaClassCache = new HashMap<>();
+  private final HashMap<Class<?>, MetaClass> metaClassCache = new HashMap<>();
   private static final ParameterMetaData NULL_PARAM_METADATA = new ParameterMetaData() {
     // @formatter:off
     public <T> T unwrap(Class<T> iface) throws SQLException { return null; }
@@ -109,7 +109,7 @@ public class DefaultParameterHandler implements ParameterHandler {
           } else if (parameterObject == null) {
             value = null;
           } else {
-            Class<? extends Object> parameterClass = parameterObject.getClass();
+            Class<?> parameterClass = parameterObject.getClass();
             TypeHandler paramTypeHandler = typeHandlerRegistry.getTypeHandler(parameterClass, actualJdbcType);
             if (paramTypeHandler != null) {
               value = parameterObject;
