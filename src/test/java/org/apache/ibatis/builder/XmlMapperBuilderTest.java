@@ -137,7 +137,7 @@ class XmlMapperBuilderTest {
   @Test
   void resolveTypeHandlerTypeHandlerAliasIsNull() {
     Configuration configuration = new Configuration();
-    TypeHandler<?> typeHandler = configuration.resolveTypeHandler(String.class, null, null, (String) null);
+    TypeHandler<?> typeHandler = configuration.resolveTypeHandler(String.class, null, null, null);
     assertThat(typeHandler).isNull();
   }
 
@@ -188,24 +188,25 @@ class XmlMapperBuilderTest {
   @Test
   void parseMultipleColumnNames() {
     Set<String> columns = MapperBuilderAssistant.parseMultipleColumnNames("{prop1=col1,prop2=col2}");
-
-    System.out.println(columns);
-
+    Assertions.assertEquals(2, columns.size());
   }
 
-  // @Test
-  // public void shouldNotLoadTheSameNamespaceFromTwoResourcesWithDifferentNames() throws Exception {
-  // Configuration configuration = new Configuration();
-  // String resource = "org/apache/ibatis/builder/AuthorMapper.xml";
-  // InputStream inputStream = Resources.getResourceAsStream(resource);
-  // XMLMapperBuilder builder = new XMLMapperBuilder(inputStream, configuration, "name1",
-  // configuration.getSqlFragments());
-  // builder.parse();
-  // InputStream inputStream2 = Resources.getResourceAsStream(resource);
-  // XMLMapperBuilder builder2 = new XMLMapperBuilder(inputStream2, configuration, "name2",
-  // configuration.getSqlFragments());
-  // builder2.parse();
-  // }
+  @Test
+  public void shouldNotLoadTheSameNamespaceFromTwoResourcesWithDifferentNames() throws Exception {
+    Configuration configuration = new Configuration();
+    String resource = "org/apache/ibatis/builder/AuthorMapper.xml";
+    InputStream inputStream = Resources.getResourceAsStream(resource);
+    XMLMapperBuilder builder = new XMLMapperBuilder(inputStream, configuration, "name1",
+        configuration.getSqlFragments());
+    builder.parse();
+    InputStream inputStream2 = Resources.getResourceAsStream(resource);
+    XMLMapperBuilder builder2 = new XMLMapperBuilder(inputStream2, configuration, "name2",
+        configuration.getSqlFragments());
+
+    when(builder2::parse);
+    then(caughtException()).hasMessageContaining(
+        "Error parsing Mapper XML. The XML location is 'name2'. Cause: java.lang.IllegalArgumentException: Parameter Maps collection already contains key ");
+  }
 
   @Test
   void errorResultMapLocation() throws Exception {
