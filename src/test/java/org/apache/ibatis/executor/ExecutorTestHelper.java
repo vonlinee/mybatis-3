@@ -60,7 +60,6 @@ final class ExecutorTestHelper {
   static {
     authorCache = new SynchronizedCache(
         new SerializedCache(new LoggingCache(new ScheduledCache(new PerpetualCache("author_cache")))));
-
   }
 
   static MappedStatement prepareInsertAuthorMappedStatement(final Configuration config) {
@@ -71,13 +70,13 @@ final class ExecutorTestHelper {
         SqlCommandType.INSERT)
             .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
               {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-                add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
+                add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
+                add(new ParameterMapping.Builder("username", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("password", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("email", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("bio", registry.getTypeHandler(String.class))
                     .jdbcType(JdbcType.VARCHAR).build());
-                add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
+                add(new ParameterMapping.Builder("favouriteSection", registry.getTypeHandler(Section.class))
                     .jdbcType(JdbcType.VARCHAR).build());
               }
             }).build()).cache(authorCache).build();
@@ -91,12 +90,12 @@ final class ExecutorTestHelper {
         SqlCommandType.INSERT)
             .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
               {
-                add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
+                add(new ParameterMapping.Builder("username", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("password", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("email", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("bio", registry.getTypeHandler(String.class))
                     .jdbcType(JdbcType.VARCHAR).build());
-                add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
+                add(new ParameterMapping.Builder("favouriteSection", registry.getTypeHandler(Section.class))
                     .jdbcType(JdbcType.VARCHAR).build());
               }
             }).build()).cache(authorCache).keyGenerator(Jdbc3KeyGenerator.INSTANCE).keyProperty("id").build();
@@ -108,10 +107,10 @@ final class ExecutorTestHelper {
         new StaticSqlSource(config, "{call insertAuthor(?,?,?,?)}"), SqlCommandType.INSERT)
             .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
               {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-                add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
+                add(new ParameterMapping.Builder("username", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("password", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("email", registry.getTypeHandler(String.class)).build());
               }
             }).build()).cache(authorCache).build();
   }
@@ -123,12 +122,12 @@ final class ExecutorTestHelper {
         SqlCommandType.UPDATE)
             .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
               {
-                add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
+                add(new ParameterMapping.Builder("username", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("password", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("email", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("bio", registry.getTypeHandler(String.class))
                     .jdbcType(JdbcType.VARCHAR).build());
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+                add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
               }
             }).build()).cache(authorCache).build();
   }
@@ -139,7 +138,7 @@ final class ExecutorTestHelper {
         new StaticSqlSource(config, "DELETE FROM author WHERE id = ?"), SqlCommandType.DELETE)
             .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
               {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+                add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
               }
             }).build()).cache(authorCache).build();
   }
@@ -163,7 +162,7 @@ final class ExecutorTestHelper {
         new StaticSqlSource(config, "SELECT * FROM author WHERE id = ?"), SqlCommandType.SELECT)
             .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
               {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+                add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
               }
             }).build()).resultMaps(new ArrayList<>() {
               {
@@ -195,7 +194,7 @@ final class ExecutorTestHelper {
         new StaticSqlSource(config, "SELECT * FROM author WHERE id = ?"), SqlCommandType.SELECT)
             .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
               {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+                add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
               }
             }).build()).resultMaps(new ArrayList<>() {
               {
@@ -229,8 +228,8 @@ final class ExecutorTestHelper {
             .statementType(StatementType.CALLABLE)
             .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
               {
-                add(new ParameterMapping.Builder(config, "id1", registry.getTypeHandler(int.class)).build());
-                add(new ParameterMapping.Builder(config, "id2", registry.getTypeHandler(int.class)).build());
+                add(new ParameterMapping.Builder("id1", registry.getTypeHandler(int.class)).build());
+                add(new ParameterMapping.Builder("id2", registry.getTypeHandler(int.class)).build());
               }
             }).build()).resultMaps(new ArrayList<>() {
               {
@@ -259,14 +258,14 @@ final class ExecutorTestHelper {
             .statementType(StatementType.CALLABLE)
             .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
               {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-                add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class))
+                add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
+                add(new ParameterMapping.Builder("username", registry.getTypeHandler(String.class))
                     .jdbcType(JdbcType.VARCHAR).mode(ParameterMode.OUT).build());
-                add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class))
+                add(new ParameterMapping.Builder("password", registry.getTypeHandler(String.class))
                     .jdbcType(JdbcType.VARCHAR).mode(ParameterMode.OUT).build());
-                add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class))
+                add(new ParameterMapping.Builder("email", registry.getTypeHandler(String.class))
                     .jdbcType(JdbcType.VARCHAR).mode(ParameterMode.OUT).build());
-                add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
+                add(new ParameterMapping.Builder("bio", registry.getTypeHandler(String.class))
                     .jdbcType(JdbcType.VARCHAR).mode(ParameterMode.OUT).build());
               }
             }).build()).resultMaps(new ArrayList<>()).cache(authorCache).build();
@@ -354,7 +353,7 @@ final class ExecutorTestHelper {
         """);
     final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", int.class, new ArrayList<>() {
       {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
     }).build();
     final ResultMap resultMap = new ResultMap.Builder(config, "defaultResultMap", Blog.class, new ArrayList<>() {
@@ -401,8 +400,8 @@ final class ExecutorTestHelper {
          """);
     final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", Map.class, new ArrayList<>() {
       {
-        add(new ParameterMapping.Builder(config, "blogId", registry.getTypeHandler(int.class)).build());
-        add(new ParameterMapping.Builder(config, "authorId", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("blogId", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("authorId", registry.getTypeHandler(int.class)).build());
       }
     }).build();
     final ResultMap resultMap = new ResultMap.Builder(config, "defaultResultMap", Blog.class, new ArrayList<>() {
@@ -456,7 +455,7 @@ final class ExecutorTestHelper {
         """);
     final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
       {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
     }).build();
     final ResultMap tagResultMap = new ResultMap.Builder(config, "tagResultMap", Tag.class, new ArrayList<>() {
@@ -533,7 +532,7 @@ final class ExecutorTestHelper {
          """);
     final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
       {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
     }).build();
     final ResultMap tagResultMap = new ResultMap.Builder(config, "tagResultMap", Tag.class, new ArrayList<>() {
@@ -612,7 +611,7 @@ final class ExecutorTestHelper {
          """);
     final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
       {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
     }).build();
     final ResultMap tagResultMap = new ResultMap.Builder(config, "tagResultMap", Tag.class, new ArrayList<>() {
@@ -692,13 +691,13 @@ final class ExecutorTestHelper {
         SqlCommandType.INSERT)
             .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
               {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(Integer.class)).build());
-                add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
+                add(new ParameterMapping.Builder("id", registry.getTypeHandler(Integer.class)).build());
+                add(new ParameterMapping.Builder("username", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("password", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("email", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder("bio", registry.getTypeHandler(String.class))
                     .jdbcType(JdbcType.VARCHAR).build());
-                add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
+                add(new ParameterMapping.Builder("favouriteSection", registry.getTypeHandler(Section.class))
                     .jdbcType(JdbcType.VARCHAR).build());
               }
             }).build()).cache(authorCache).keyGenerator(new SelectKeyGenerator(kms, true)).keyProperty("id").build();

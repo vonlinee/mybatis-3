@@ -87,7 +87,7 @@ public class ParameterMappingTokenHandler implements TokenHandler {
     final JdbcType jdbcType = configuration.resolveJdbcType(propertiesMap.remove("jdbcType"));
     final String typeHandlerAlias = propertiesMap.remove("typeHandler");
 
-    ParameterMapping.Builder builder = new ParameterMapping.Builder(configuration, property, (Class<?>) null);
+    ParameterMapping.Builder builder = new ParameterMapping.Builder(property, (Class<?>) null);
     PropertyTokenizer propertyTokenizer = new PropertyTokenizer(property);
     builder.jdbcType(jdbcType);
     final Class<?> javaType = figureOutJavaType(propertiesMap, property, propertyTokenizer, jdbcType);

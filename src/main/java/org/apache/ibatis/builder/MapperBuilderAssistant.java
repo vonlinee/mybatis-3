@@ -166,7 +166,7 @@ public class MapperBuilderAssistant {
     Class<?> javaTypeClass = resolveParameterJavaType(parameterType, property, javaType, jdbcType);
     TypeHandler<?> typeHandlerInstance = configuration.resolveTypeHandler(javaTypeClass, jdbcType, typeHandler);
     // @formatter:off
-    return new ParameterMapping.Builder(configuration, property, javaTypeClass)
+    return new ParameterMapping.Builder(property, javaTypeClass)
       .jdbcType(jdbcType)
       .resultMapId(resultMap)
       .mode(parameterMode)
@@ -310,7 +310,7 @@ public class MapperBuilderAssistant {
     Entry<Type, Class<?>> setterType = resolveSetterType(resultType, property, javaType);
     TypeHandler<?> typeHandlerInstance = configuration.resolveTypeHandler(setterType.getKey(), jdbcType, typeHandler);
     List<ResultMapping> composites;
-    if ((nestedSelect == null || nestedSelect.isEmpty()) && (foreignColumn == null || foreignColumn.isEmpty())) {
+    if (StringUtils.isEmpty(nestedSelect) && StringUtils.isEmpty(foreignColumn)) {
       composites = Collections.emptyList();
     } else {
       composites = parseCompositeColumnName(column);

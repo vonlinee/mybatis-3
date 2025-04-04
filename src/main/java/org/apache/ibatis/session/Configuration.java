@@ -1098,12 +1098,16 @@ public class Configuration {
   protected void checkGloballyForDiscriminatedNestedResultMaps(ResultMap rm) {
     if (rm.hasNestedResultMaps()) {
       final String resultMapId = rm.getId();
-      for (ResultMap entryResultMap : resultMaps.values()) {
-        if (!entryResultMap.hasNestedResultMaps() && entryResultMap.getDiscriminator() != null) {
-          Collection<String> discriminatedResultMapNames = entryResultMap.getDiscriminator().getDiscriminatorMap()
-              .values();
-          if (discriminatedResultMapNames.contains(resultMapId)) {
-            entryResultMap.forceNestedResultMaps();
+      for (Object resultMapObject : resultMaps.values()) {
+        // TODO looks weired
+        if (resultMapObject instanceof ResultMap) {
+          ResultMap entryResultMap = (ResultMap) resultMapObject;
+          if (!entryResultMap.hasNestedResultMaps() && entryResultMap.getDiscriminator() != null) {
+            Collection<String> discriminatedResultMapNames = entryResultMap.getDiscriminator().getDiscriminatorMap()
+                .values();
+            if (discriminatedResultMapNames.contains(resultMapId)) {
+              entryResultMap.forceNestedResultMaps();
+            }
           }
         }
       }
