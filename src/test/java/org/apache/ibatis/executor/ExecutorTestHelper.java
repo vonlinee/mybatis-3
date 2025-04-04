@@ -291,7 +291,7 @@ final class ExecutorTestHelper {
                 add(new ResultMapping.Builder(config, "blog_id", "blog_id", registry.getTypeHandler(int.class))
                     .build());
               }
-            }).discriminator(new Discriminator.Builder(config,
+            }).discriminator(new Discriminator.Builder(
                 new ResultMapping.Builder(config, "section", "section", registry.getTypeHandler(String.class)).build(),
                 new HashMap<>() {
                   {
