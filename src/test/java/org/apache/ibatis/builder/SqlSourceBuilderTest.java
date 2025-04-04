@@ -20,10 +20,9 @@ import org.junit.jupiter.api.Test;
 
 class SqlSourceBuilderTest {
 
-  private final String sqlFromXml = "\t\n\n  SELECT * \n        FROM user\n \t        WHERE user_id = 1\n\t  ";
-
   @Test
   void shrinkWhitespacesInSqlIsTrue() {
+    String sqlFromXml = "\t\n\n  SELECT * \n        FROM user\n \t        WHERE user_id = 1\n\t  ";
     String actual = SqlSourceBuilder.removeExtraWhitespaces(sqlFromXml);
     String shrankWhitespacesInSql = "SELECT * FROM user WHERE user_id = 1";
     Assertions.assertEquals(shrankWhitespacesInSql, actual);
