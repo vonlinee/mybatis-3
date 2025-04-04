@@ -167,9 +167,9 @@ class XmlConfigBuilderTest {
         """;
 
     XMLConfigBuilder builder = new XMLConfigBuilder(new StringReader(mapperConfig));
-    builder.parse();
+    Configuration configuration = builder.parse();
 
-    TypeHandlerRegistry typeHandlerRegistry = builder.getConfiguration().getTypeHandlerRegistry();
+    TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
     TypeHandler<?> typeHandler = typeHandlerRegistry.getTypeHandler(MyEnum.class);
 
     assertTrue(typeHandler instanceof EnumOrderTypeHandler);

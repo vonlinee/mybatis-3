@@ -33,7 +33,7 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
-public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHandler {
+public class ParameterMappingTokenHandler implements TokenHandler {
 
   private static final String PARAMETER_PROPERTIES = "javaType,jdbcType,mode,numericScale,resultMap,typeHandler,jdbcTypeName";
   private final List<ParameterMapping> parameterMappings;
@@ -42,14 +42,14 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
   private final Object parameterObject;
   private final boolean paramExists;
   private final ParamNameResolver paramNameResolver;
-
+  private final Configuration configuration;
   private Type genericType = null;
   private TypeHandler<?> typeHandler = null;
 
   public ParameterMappingTokenHandler(List<ParameterMapping> parameterMappings, Configuration configuration,
       Object parameterObject, Class<?> parameterType, Map<String, Object> additionalParameters,
       ParamNameResolver paramNameResolver, boolean paramExists) {
-    super(configuration);
+    this.configuration = configuration;
     this.parameterType = parameterObject == null ? (parameterType == null ? Object.class : parameterType)
         : parameterObject.getClass();
     this.metaParameters = configuration.newMetaObject(additionalParameters);
@@ -61,7 +61,7 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
 
   public ParameterMappingTokenHandler(List<ParameterMapping> parameterMappings, Configuration configuration,
       Class<?> parameterType, Map<String, Object> additionalParameters, ParamNameResolver paramNameResolver) {
-    super(configuration);
+    this.configuration = configuration;
     this.parameterType = parameterType;
     this.metaParameters = configuration.newMetaObject(additionalParameters);
     this.parameterObject = null;
@@ -84,7 +84,7 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
     Map<String, String> propertiesMap = parseParameterMapping(content);
 
     final String property = propertiesMap.remove("property");
-    final JdbcType jdbcType = resolveJdbcType(propertiesMap.remove("jdbcType"));
+    final JdbcType jdbcType = configuration.resolveJdbcType(propertiesMap.remove("jdbcType"));
     final String typeHandlerAlias = propertiesMap.remove("typeHandler");
 
     ParameterMapping.Builder builder = new ParameterMapping.Builder(configuration, property, (Class<?>) null);
@@ -96,7 +96,7 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
       genericType = javaType;
     }
     if ((typeHandler == null || typeHandlerAlias != null) && genericType != null && genericType != Object.class) {
-      typeHandler = resolveTypeHandler(parameterType, genericType, jdbcType, typeHandlerAlias);
+      typeHandler = configuration.resolveTypeHandler(parameterType, genericType, jdbcType, typeHandlerAlias);
     }
     builder.typeHandler(typeHandler);
 
@@ -105,7 +105,7 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
       String name = entry.getKey();
       String value = entry.getValue();
       if ("mode".equals(name)) {
-        mode = resolveParameterMode(value);
+        mode = configuration.resolveParameterMode(value);
         builder.mode(mode);
       } else if ("numericScale".equals(name)) {
         builder.numericScale(Integer.valueOf(value));
@@ -125,7 +125,7 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
         builder.value(metaParameters.getValue(property));
       } else if (parameterObject == null) {
         builder.value(null);
-      } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
+      } else if (configuration.getTypeHandlerRegistry().hasTypeHandler(parameterObject.getClass())) {
         builder.value(parameterObject);
       } else {
         MetaObject metaObject = configuration.newMetaObject(parameterObject);
@@ -137,14 +137,14 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
 
   private Class<?> figureOutJavaType(Map<String, String> propertiesMap, String property,
       PropertyTokenizer propertyTokenizer, JdbcType jdbcType) {
-    Class<?> javaType = resolveClass(propertiesMap.remove("javaType"));
+    Class<?> javaType = configuration.resolveClass(propertiesMap.remove("javaType"));
     if (javaType != null) {
       return javaType;
     }
     if (metaParameters.hasGetter(propertyTokenizer.getName())) { // issue #448 get type from additional params
       return metaParameters.getGetterType(property);
     }
-    typeHandler = resolveTypeHandler(parameterType, jdbcType, (Class<? extends TypeHandler<?>>) null);
+    typeHandler = configuration.resolveTypeHandler(parameterType, jdbcType, (Class<? extends TypeHandler<?>>) null);
     if (typeHandler != null) {
       return parameterType;
     }

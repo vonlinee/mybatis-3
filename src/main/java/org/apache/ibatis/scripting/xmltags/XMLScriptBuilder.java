@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.SqlSource;
@@ -37,7 +36,7 @@ import org.w3c.dom.NodeList;
 /**
  * @author Clinton Begin
  */
-public class XMLScriptBuilder extends BaseBuilder {
+public class XMLScriptBuilder {
 
   private final XNode context;
   private boolean isDynamic;
@@ -45,6 +44,7 @@ public class XMLScriptBuilder extends BaseBuilder {
   private final ParamNameResolver paramNameResolver;
   private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
   private static final Map<String, SqlNode> emptyNodeCache = new ConcurrentHashMap<>();
+  private final Configuration configuration;
 
   public XMLScriptBuilder(Configuration configuration, XNode context) {
     this(configuration, context, null);
@@ -56,7 +56,7 @@ public class XMLScriptBuilder extends BaseBuilder {
 
   public XMLScriptBuilder(Configuration configuration, XNode context, Class<?> parameterType,
       ParamNameResolver paramNameResolver) {
-    super(configuration);
+    this.configuration = configuration;
     this.context = context;
     this.parameterType = parameterType;
     this.paramNameResolver = paramNameResolver;

@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.session;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import java.util.function.BiFunction;
 import javax.sql.DataSource;
 
 import org.apache.ibatis.binding.MapperRegistry;
+import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.CacheRefResolver;
 import org.apache.ibatis.builder.IncompleteElementException;
 import org.apache.ibatis.builder.ResultMapResolver;
@@ -72,13 +74,7 @@ import org.apache.ibatis.logging.log4j2.Log4j2Impl;
 import org.apache.ibatis.logging.nologging.NoLoggingImpl;
 import org.apache.ibatis.logging.slf4j.Slf4jImpl;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.Environment;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ParameterMap;
-import org.apache.ibatis.mapping.ResultMap;
-import org.apache.ibatis.mapping.ResultSetType;
-import org.apache.ibatis.mapping.VendorDatabaseIdProvider;
+import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.InterceptorChain;
@@ -1225,4 +1221,77 @@ public class Configuration {
     }
   }
 
+  public JdbcType resolveJdbcType(String alias) {
+    try {
+      return alias == null ? null : JdbcType.valueOf(alias);
+    } catch (IllegalArgumentException e) {
+      throw new BuilderException("Error resolving JdbcType. Cause: " + e, e);
+    }
+  }
+
+  public ResultSetType resolveResultSetType(String alias) {
+    try {
+      return alias == null ? null : ResultSetType.valueOf(alias);
+    } catch (IllegalArgumentException e) {
+      throw new BuilderException("Error resolving ResultSetType. Cause: " + e, e);
+    }
+  }
+
+  public ParameterMode resolveParameterMode(String alias) {
+    try {
+      return alias == null ? null : ParameterMode.valueOf(alias);
+    } catch (IllegalArgumentException e) {
+      throw new BuilderException("Error resolving ParameterMode. Cause: " + e, e);
+    }
+  }
+
+  public Object createInstance(String alias) {
+    Class<?> clazz = resolveClass(alias);
+    try {
+      return clazz == null ? null : clazz.getDeclaredConstructor().newInstance();
+    } catch (Exception e) {
+      throw new BuilderException("Error creating instance. Cause: " + e, e);
+    }
+  }
+
+  public <T> Class<? extends T> resolveClass(String alias) {
+    try {
+      return alias == null ? null : resolveAlias(alias);
+    } catch (Exception e) {
+      throw new BuilderException("Error resolving class. Cause: " + e, e);
+    }
+  }
+
+  @Deprecated(since = "3.6.0", forRemoval = true)
+  public TypeHandler<?> resolveTypeHandler(Class<?> javaType, String typeHandlerAlias) {
+    return resolveTypeHandler(null, javaType, null, typeHandlerAlias);
+  }
+
+  @Deprecated(since = "3.6.0", forRemoval = true)
+  public TypeHandler<?> resolveTypeHandler(Class<?> javaType, Class<? extends TypeHandler<?>> typeHandlerType) {
+    return resolveTypeHandler(javaType, null, typeHandlerType);
+  }
+
+  public TypeHandler<?> resolveTypeHandler(Class<?> parameterType, Type propertyType, JdbcType jdbcType,
+      String typeHandlerAlias) {
+    Class<? extends TypeHandler<?>> typeHandlerType = null;
+    typeHandlerType = resolveClass(typeHandlerAlias);
+    if (typeHandlerType != null && !TypeHandler.class.isAssignableFrom(typeHandlerType)) {
+      throw new BuilderException("Type " + typeHandlerType.getName()
+          + " is not a valid TypeHandler because it does not implement TypeHandler interface");
+    }
+    return resolveTypeHandler(propertyType, jdbcType, typeHandlerType);
+  }
+
+  public TypeHandler<?> resolveTypeHandler(Type javaType, JdbcType jdbcType,
+      Class<? extends TypeHandler<?>> typeHandlerType) {
+    if (typeHandlerType == null && jdbcType == null) {
+      return null;
+    }
+    return typeHandlerRegistry.getTypeHandler(javaType, jdbcType, typeHandlerType);
+  }
+
+  public <T> Class<? extends T> resolveAlias(String alias) {
+    return typeAliasRegistry.resolveAlias(alias);
+  }
 }

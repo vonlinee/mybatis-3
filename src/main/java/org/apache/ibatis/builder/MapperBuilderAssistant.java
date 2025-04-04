@@ -57,7 +57,7 @@ import org.apache.ibatis.type.TypeHandler;
 /**
  * @author Clinton Begin
  */
-public class MapperBuilderAssistant extends BaseBuilder {
+public class MapperBuilderAssistant {
 
   protected final Configuration configuration;
   private String currentNamespace;
@@ -66,7 +66,6 @@ public class MapperBuilderAssistant extends BaseBuilder {
   private boolean unresolvedCacheRef; // issue #676
 
   public MapperBuilderAssistant(Configuration configuration, String resource) {
-    super(configuration);
     this.configuration = configuration;
     ErrorContext.instance().resource(resource);
     this.resource = resource;
@@ -156,7 +155,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
     // Class parameterType = parameterMapBuilder.type();
     Class<?> javaTypeClass = resolveParameterJavaType(parameterType, property, javaType, jdbcType);
-    TypeHandler<?> typeHandlerInstance = resolveTypeHandler(javaTypeClass, jdbcType, typeHandler);
+    TypeHandler<?> typeHandlerInstance = configuration.resolveTypeHandler(javaTypeClass, jdbcType, typeHandler);
 
     return new ParameterMapping.Builder(configuration, property, javaTypeClass).jdbcType(jdbcType)
         .resultMapId(resultMap).mode(parameterMode).numericScale(numericScale).typeHandler(typeHandlerInstance).build();
@@ -348,7 +347,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
       Class<? extends TypeHandler<?>> typeHandler, List<ResultFlag> flags, String resultSet, String foreignColumn,
       boolean lazy) {
     Entry<Type, Class<?>> setterType = resolveSetterType(resultType, property, javaType);
-    TypeHandler<?> typeHandlerInstance = resolveTypeHandler(setterType.getKey(), jdbcType, typeHandler);
+    TypeHandler<?> typeHandlerInstance = configuration.resolveTypeHandler(setterType.getKey(), jdbcType, typeHandler);
     List<ResultMapping> composites;
     if ((nestedSelect == null || nestedSelect.isEmpty()) && (foreignColumn == null || foreignColumn.isEmpty())) {
       composites = Collections.emptyList();

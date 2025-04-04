@@ -57,6 +57,7 @@ public class XMLMapperBuilder {
   private final Map<String, XNode> sqlFragments;
   private final String resource;
   private Class<?> mapperClass;
+  private final Configuration configuration;
 
   public XMLMapperBuilder(InputStream inputStream, Configuration configuration, String resource,
       Map<String, XNode> sqlFragments, Class<?> mapperClass) {
@@ -78,6 +79,7 @@ public class XMLMapperBuilder {
 
   private XMLMapperBuilder(XPathParser parser, Configuration configuration, String resource,
       Map<String, XNode> sqlFragments) {
+    this.configuration = configuration;
     this.builderAssistant = new MapperBuilderAssistant(configuration, resource);
     this.parser = parser;
     this.sqlFragments = sqlFragments;
@@ -132,7 +134,6 @@ public class XMLMapperBuilder {
   }
 
   private void buildStatementFromContext(List<XNode> list) {
-    Configuration configuration = builderAssistant.getConfiguration();
     if (configuration.getDatabaseId() != null) {
       buildStatementFromContext(list, configuration.getDatabaseId());
     }
@@ -140,7 +141,6 @@ public class XMLMapperBuilder {
   }
 
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
-    Configuration configuration = builderAssistant.getConfiguration();
     for (XNode context : list) {
       final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context,
           requiredDatabaseId, mapperClass);
@@ -154,7 +154,6 @@ public class XMLMapperBuilder {
 
   private void cacheRefElement(XNode context) {
     if (context != null) {
-      Configuration configuration = builderAssistant.getConfiguration();
       configuration.addCacheRef(builderAssistant.getCurrentNamespace(), context.getStringAttribute("namespace"));
       CacheRefResolver cacheRefResolver = new CacheRefResolver(builderAssistant,
           context.getStringAttribute("namespace"));
@@ -169,9 +168,9 @@ public class XMLMapperBuilder {
   private void cacheElement(XNode context) {
     if (context != null) {
       String type = context.getStringAttribute("type", "PERPETUAL");
-      Class<? extends Cache> typeClass = builderAssistant.resolveAlias(type);
+      Class<? extends Cache> typeClass = configuration.resolveAlias(type);
       String eviction = context.getStringAttribute("eviction", "LRU");
-      Class<? extends Cache> evictionClass = builderAssistant.resolveAlias(eviction);
+      Class<? extends Cache> evictionClass = configuration.resolveAlias(eviction);
       Long flushInterval = context.getLongAttribute("flushInterval");
       Integer size = context.getIntAttribute("size");
       boolean readWrite = !context.getBooleanAttribute("readOnly", false);
@@ -185,7 +184,7 @@ public class XMLMapperBuilder {
     for (XNode parameterMapNode : list) {
       String id = parameterMapNode.getStringAttribute("id");
       String type = parameterMapNode.getStringAttribute("type");
-      Class<?> parameterClass = builderAssistant.resolveClass(type);
+      Class<?> parameterClass = configuration.resolveClass(type);
       List<XNode> parameterNodes = parameterMapNode.evalNodes("parameter");
       List<ParameterMapping> parameterMappings = new ArrayList<>();
       for (XNode parameterNode : parameterNodes) {
@@ -196,10 +195,10 @@ public class XMLMapperBuilder {
         String mode = parameterNode.getStringAttribute("mode");
         String typeHandler = parameterNode.getStringAttribute("typeHandler");
         Integer numericScale = parameterNode.getIntAttribute("numericScale");
-        ParameterMode modeEnum = builderAssistant.resolveParameterMode(mode);
-        Class<?> javaTypeClass = builderAssistant.resolveClass(javaType);
-        JdbcType jdbcTypeEnum = builderAssistant.resolveJdbcType(jdbcType);
-        Class<? extends TypeHandler<?>> typeHandlerClass = builderAssistant.resolveClass(typeHandler);
+        ParameterMode modeEnum = configuration.resolveParameterMode(mode);
+        Class<?> javaTypeClass = configuration.resolveClass(javaType);
+        JdbcType jdbcTypeEnum = configuration.resolveJdbcType(jdbcType);
+        Class<? extends TypeHandler<?>> typeHandlerClass = configuration.resolveClass(typeHandler);
         ParameterMapping parameterMapping = builderAssistant.buildParameterMapping(parameterClass, property,
             javaTypeClass, jdbcTypeEnum, resultMap, modeEnum, typeHandlerClass, numericScale);
         parameterMappings.add(parameterMapping);
@@ -232,7 +231,7 @@ public class XMLMapperBuilder {
     if (StringUtils.isBlank(type)) {
       return null;
     }
-    return builderAssistant.resolveClass(type);
+    return configuration.resolveClass(type);
   }
 
   private ResultMap resultMapElement(XNode resultMapNode, List<ResultMapping> additionalResultMappings,
@@ -301,7 +300,6 @@ public class XMLMapperBuilder {
       mappings.add(buildResultMappingFromContext(argChild, resultType, flags));
     }
 
-    Configuration configuration = builderAssistant.getConfiguration();
     final ResultMappingConstructorResolver resolver = new ResultMappingConstructorResolver(configuration, mappings,
         resultType, id);
     resultMappings.addAll(resolver.resolveWithConstructor());
@@ -313,9 +311,9 @@ public class XMLMapperBuilder {
     String javaType = context.getStringAttribute("javaType");
     String jdbcType = context.getStringAttribute("jdbcType");
     String typeHandler = context.getStringAttribute("typeHandler");
-    Class<?> javaTypeClass = builderAssistant.resolveClass(javaType);
-    Class<? extends TypeHandler<?>> typeHandlerClass = builderAssistant.resolveClass(typeHandler);
-    JdbcType jdbcTypeEnum = builderAssistant.resolveJdbcType(jdbcType);
+    Class<?> javaTypeClass = configuration.resolveClass(javaType);
+    Class<? extends TypeHandler<?>> typeHandlerClass = configuration.resolveClass(typeHandler);
+    JdbcType jdbcTypeEnum = configuration.resolveJdbcType(jdbcType);
     Map<String, String> discriminatorMap = new HashMap<>();
     for (XNode caseChild : context.getChildren()) {
       String value = caseChild.getStringAttribute("value");
@@ -328,7 +326,6 @@ public class XMLMapperBuilder {
   }
 
   private void sqlElement(List<XNode> list) {
-    Configuration configuration = builderAssistant.getConfiguration();
     if (configuration.getDatabaseId() != null) {
       sqlElement(list, configuration.getDatabaseId());
     }
@@ -380,12 +377,11 @@ public class XMLMapperBuilder {
     String resultSet = context.getStringAttribute("resultSet");
     String foreignColumn = context.getStringAttribute("foreignColumn");
 
-    Configuration configuration = builderAssistant.getConfiguration();
     boolean lazy = "lazy"
         .equals(context.getStringAttribute("fetchType", configuration.isLazyLoadingEnabled() ? "lazy" : "eager"));
-    Class<?> javaTypeClass = builderAssistant.resolveClass(javaType);
-    Class<? extends TypeHandler<?>> typeHandlerClass = builderAssistant.resolveClass(typeHandler);
-    JdbcType jdbcTypeEnum = builderAssistant.resolveJdbcType(jdbcType);
+    Class<?> javaTypeClass = configuration.resolveClass(javaType);
+    Class<? extends TypeHandler<?>> typeHandlerClass = configuration.resolveClass(typeHandler);
+    JdbcType jdbcTypeEnum = configuration.resolveJdbcType(jdbcType);
     return builderAssistant.buildResultMapping(resultType, property, column, javaTypeClass, jdbcTypeEnum, nestedSelect,
         nestedResultMap, notNullColumn, columnPrefix, typeHandlerClass, flags, resultSet, foreignColumn, lazy);
   }

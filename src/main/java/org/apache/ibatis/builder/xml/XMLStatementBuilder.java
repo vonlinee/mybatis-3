@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.apache.ibatis.binding.ParamMap;
-import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.builder.annotation.MapperAnnotationBuilder;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
@@ -43,8 +42,9 @@ import org.apache.ibatis.session.Configuration;
 /**
  * @author Clinton Begin
  */
-public class XMLStatementBuilder extends BaseBuilder {
+public class XMLStatementBuilder {
 
+  private final Configuration configuration;
   private final MapperBuilderAssistant builderAssistant;
   private final XNode context;
   private final String requiredDatabaseId;
@@ -61,7 +61,7 @@ public class XMLStatementBuilder extends BaseBuilder {
 
   public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context,
       String databaseId, Class<?> mapperClass) {
-    super(configuration);
+    this.configuration = configuration;
     this.builderAssistant = builderAssistant;
     this.context = context;
     this.requiredDatabaseId = databaseId;
@@ -88,7 +88,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     includeParser.applyIncludes(context.getNode());
 
     String parameterType = context.getStringAttribute("parameterType");
-    Class<?> parameterTypeClass = resolveClass(parameterType);
+    Class<?> parameterTypeClass = configuration.resolveClass(parameterType);
     ParamNameResolver paramNameResolver = null;
     if (parameterTypeClass == null && mapperClass != null) {
       List<Method> mapperMethods = Arrays.stream(mapperClass.getMethods())
@@ -134,13 +134,13 @@ public class XMLStatementBuilder extends BaseBuilder {
     Integer timeout = context.getIntAttribute("timeout");
     String parameterMap = context.getStringAttribute("parameterMap");
     String resultType = context.getStringAttribute("resultType");
-    Class<?> resultTypeClass = resolveClass(resultType);
+    Class<?> resultTypeClass = configuration.resolveClass(resultType);
     String resultMap = context.getStringAttribute("resultMap");
     if (resultTypeClass == null && resultMap == null) {
       resultTypeClass = MapperAnnotationBuilder.getMethodReturnType(builderAssistant.getCurrentNamespace(), id);
     }
     String resultSetType = context.getStringAttribute("resultSetType");
-    ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);
+    ResultSetType resultSetTypeEnum = configuration.resolveResultSetType(resultSetType);
     if (resultSetTypeEnum == null) {
       resultSetTypeEnum = configuration.getDefaultResultSetType();
     }
@@ -177,7 +177,7 @@ public class XMLStatementBuilder extends BaseBuilder {
   private void parseSelectKeyNode(String id, XNode nodeToHandle, Class<?> parameterTypeClass, LanguageDriver langDriver,
       String databaseId) {
     String resultType = nodeToHandle.getStringAttribute("resultType");
-    Class<?> resultTypeClass = resolveClass(resultType);
+    Class<?> resultTypeClass = configuration.resolveClass(resultType);
     StatementType statementType = StatementType
         .valueOf(nodeToHandle.getStringAttribute("statementType", StatementType.PREPARED.toString()));
     String keyProperty = nodeToHandle.getStringAttribute("keyProperty");
@@ -233,7 +233,7 @@ public class XMLStatementBuilder extends BaseBuilder {
   private LanguageDriver getLanguageDriver(String lang) {
     Class<? extends LanguageDriver> langClass = null;
     if (lang != null) {
-      langClass = resolveClass(lang);
+      langClass = configuration.resolveClass(lang);
     }
     return configuration.getLanguageDriver(langClass);
   }

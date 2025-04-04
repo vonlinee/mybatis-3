@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.datasource.DataSourceFactory;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.loader.ProxyFactory;
+import org.apache.ibatis.internal.util.ObjectUtils;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.io.VFS;
 import org.apache.ibatis.logging.Log;
@@ -51,8 +51,9 @@ import org.apache.ibatis.type.JdbcType;
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
-public class XMLConfigBuilder extends BaseBuilder {
+public class XMLConfigBuilder {
 
+  private final Configuration configuration;
   private boolean parsed;
   private final XPathParser parser;
   private String environment;
@@ -94,7 +95,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private XMLConfigBuilder(Class<? extends Configuration> configClass, XPathParser parser, String environment,
       Properties props) {
-    super(newConfig(configClass));
+    this.configuration = newConfig(configClass);
     ErrorContext.instance().resource("SQL Mapper Configuration");
     this.configuration.setVariables(props);
     this.parsed = false;
@@ -166,7 +167,7 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   private void loadCustomLogImpl(Properties props) {
-    Class<? extends Log> logImpl = resolveClass(props.getProperty("logImpl"));
+    Class<? extends Log> logImpl = configuration.resolveClass(props.getProperty("logImpl"));
     configuration.setLogImpl(logImpl);
   }
 
@@ -184,9 +185,9 @@ public class XMLConfigBuilder extends BaseBuilder {
         try {
           Class<?> clazz = Resources.classForName(type);
           if (alias == null) {
-            typeAliasRegistry.registerAlias(clazz);
+            this.configuration.getTypeAliasRegistry().registerAlias(clazz);
           } else {
-            typeAliasRegistry.registerAlias(alias, clazz);
+            this.configuration.getTypeAliasRegistry().registerAlias(alias, clazz);
           }
         } catch (ClassNotFoundException e) {
           throw new BuilderException("Error registering typeAlias for '" + alias + "'. Cause: " + e, e);
@@ -200,7 +201,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       for (XNode child : context.getChildren()) {
         String interceptor = child.getStringAttribute("interceptor");
         Properties properties = child.getChildrenAsProperties();
-        Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).getDeclaredConstructor()
+        Interceptor interceptorInstance = (Interceptor) configuration.resolveClass(interceptor).getDeclaredConstructor()
             .newInstance();
         interceptorInstance.setProperties(properties);
         configuration.addInterceptor(interceptorInstance);
@@ -212,7 +213,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context != null) {
       String type = context.getStringAttribute("type");
       Properties properties = context.getChildrenAsProperties();
-      ObjectFactory factory = (ObjectFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+      ObjectFactory factory = (ObjectFactory) configuration.resolveClass(type).getDeclaredConstructor().newInstance();
       factory.setProperties(properties);
       configuration.setObjectFactory(factory);
     }
@@ -221,7 +222,8 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void objectWrapperFactoryElement(XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
-      ObjectWrapperFactory factory = (ObjectWrapperFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+      ObjectWrapperFactory factory = (ObjectWrapperFactory) configuration.resolveClass(type).getDeclaredConstructor()
+          .newInstance();
       configuration.setObjectWrapperFactory(factory);
     }
   }
@@ -229,7 +231,8 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void reflectorFactoryElement(XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
-      ReflectorFactory factory = (ReflectorFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+      ReflectorFactory factory = (ReflectorFactory) configuration.resolveClass(type).getDeclaredConstructor()
+          .newInstance();
       configuration.setReflectorFactory(factory);
     }
   }
@@ -263,35 +266,43 @@ public class XMLConfigBuilder extends BaseBuilder {
         .setAutoMappingBehavior(AutoMappingBehavior.valueOf(props.getProperty("autoMappingBehavior", "PARTIAL")));
     configuration.setAutoMappingUnknownColumnBehavior(
         AutoMappingUnknownColumnBehavior.valueOf(props.getProperty("autoMappingUnknownColumnBehavior", "NONE")));
-    configuration.setCacheEnabled(booleanValueOf(props.getProperty("cacheEnabled"), true));
-    configuration.setProxyFactory((ProxyFactory) createInstance(props.getProperty("proxyFactory")));
-    configuration.setLazyLoadingEnabled(booleanValueOf(props.getProperty("lazyLoadingEnabled"), false));
-    configuration.setAggressiveLazyLoading(booleanValueOf(props.getProperty("aggressiveLazyLoading"), false));
-    configuration.setUseColumnLabel(booleanValueOf(props.getProperty("useColumnLabel"), true));
-    configuration.setUseGeneratedKeys(booleanValueOf(props.getProperty("useGeneratedKeys"), false));
+    configuration.setCacheEnabled(ObjectUtils.booleanValueOf(props.getProperty("cacheEnabled"), true));
+    configuration.setProxyFactory((ProxyFactory) configuration.createInstance(props.getProperty("proxyFactory")));
+    configuration.setLazyLoadingEnabled(ObjectUtils.booleanValueOf(props.getProperty("lazyLoadingEnabled"), false));
+    configuration
+        .setAggressiveLazyLoading(ObjectUtils.booleanValueOf(props.getProperty("aggressiveLazyLoading"), false));
+    configuration.setUseColumnLabel(ObjectUtils.booleanValueOf(props.getProperty("useColumnLabel"), true));
+    configuration.setUseGeneratedKeys(ObjectUtils.booleanValueOf(props.getProperty("useGeneratedKeys"), false));
     configuration.setDefaultExecutorType(ExecutorType.valueOf(props.getProperty("defaultExecutorType", "SIMPLE")));
-    configuration.setDefaultStatementTimeout(integerValueOf(props.getProperty("defaultStatementTimeout"), null));
-    configuration.setDefaultFetchSize(integerValueOf(props.getProperty("defaultFetchSize"), null));
-    configuration.setDefaultResultSetType(resolveResultSetType(props.getProperty("defaultResultSetType")));
-    configuration.setMapUnderscoreToCamelCase(booleanValueOf(props.getProperty("mapUnderscoreToCamelCase"), false));
-    configuration.setSafeRowBoundsEnabled(booleanValueOf(props.getProperty("safeRowBoundsEnabled"), false));
+    configuration
+        .setDefaultStatementTimeout(ObjectUtils.integerValueOf(props.getProperty("defaultStatementTimeout"), null));
+    configuration.setDefaultFetchSize(ObjectUtils.integerValueOf(props.getProperty("defaultFetchSize"), null));
+    configuration
+        .setDefaultResultSetType(configuration.resolveResultSetType(props.getProperty("defaultResultSetType")));
+    configuration
+        .setMapUnderscoreToCamelCase(ObjectUtils.booleanValueOf(props.getProperty("mapUnderscoreToCamelCase"), false));
+    configuration.setSafeRowBoundsEnabled(ObjectUtils.booleanValueOf(props.getProperty("safeRowBoundsEnabled"), false));
     configuration.setLocalCacheScope(LocalCacheScope.valueOf(props.getProperty("localCacheScope", "SESSION")));
     configuration.setJdbcTypeForNull(JdbcType.valueOf(props.getProperty("jdbcTypeForNull", "OTHER")));
     configuration.setLazyLoadTriggerMethods(
-        stringSetValueOf(props.getProperty("lazyLoadTriggerMethods"), "equals,clone,hashCode,toString"));
-    configuration.setSafeResultHandlerEnabled(booleanValueOf(props.getProperty("safeResultHandlerEnabled"), true));
-    configuration.setDefaultScriptingLanguage(resolveClass(props.getProperty("defaultScriptingLanguage")));
-    configuration.setDefaultEnumTypeHandler(resolveClass(props.getProperty("defaultEnumTypeHandler")));
-    configuration.setCallSettersOnNulls(booleanValueOf(props.getProperty("callSettersOnNulls"), false));
-    configuration.setUseActualParamName(booleanValueOf(props.getProperty("useActualParamName"), true));
-    configuration.setReturnInstanceForEmptyRow(booleanValueOf(props.getProperty("returnInstanceForEmptyRow"), false));
+        ObjectUtils.stringSetValueOf(props.getProperty("lazyLoadTriggerMethods"), "equals,clone,hashCode,toString"));
+    configuration
+        .setSafeResultHandlerEnabled(ObjectUtils.booleanValueOf(props.getProperty("safeResultHandlerEnabled"), true));
+    configuration
+        .setDefaultScriptingLanguage(configuration.resolveClass(props.getProperty("defaultScriptingLanguage")));
+    configuration.setDefaultEnumTypeHandler(configuration.resolveClass(props.getProperty("defaultEnumTypeHandler")));
+    configuration.setCallSettersOnNulls(ObjectUtils.booleanValueOf(props.getProperty("callSettersOnNulls"), false));
+    configuration.setUseActualParamName(ObjectUtils.booleanValueOf(props.getProperty("useActualParamName"), true));
+    configuration.setReturnInstanceForEmptyRow(
+        ObjectUtils.booleanValueOf(props.getProperty("returnInstanceForEmptyRow"), false));
     configuration.setLogPrefix(props.getProperty("logPrefix"));
-    configuration.setConfigurationFactory(resolveClass(props.getProperty("configurationFactory")));
-    configuration.setShrinkWhitespacesInSql(booleanValueOf(props.getProperty("shrinkWhitespacesInSql"), false));
+    configuration.setConfigurationFactory(configuration.resolveClass(props.getProperty("configurationFactory")));
+    configuration
+        .setShrinkWhitespacesInSql(ObjectUtils.booleanValueOf(props.getProperty("shrinkWhitespacesInSql"), false));
     configuration.setArgNameBasedConstructorAutoMapping(
-        booleanValueOf(props.getProperty("argNameBasedConstructorAutoMapping"), false));
-    configuration.setDefaultSqlProviderType(resolveClass(props.getProperty("defaultSqlProviderType")));
-    configuration.setNullableOnForEach(booleanValueOf(props.getProperty("nullableOnForEach"), false));
+        ObjectUtils.booleanValueOf(props.getProperty("argNameBasedConstructorAutoMapping"), false));
+    configuration.setDefaultSqlProviderType(configuration.resolveClass(props.getProperty("defaultSqlProviderType")));
+    configuration.setNullableOnForEach(ObjectUtils.booleanValueOf(props.getProperty("nullableOnForEach"), false));
   }
 
   private void environmentsElement(XNode context) throws Exception {
@@ -325,8 +336,8 @@ public class XMLConfigBuilder extends BaseBuilder {
       type = "DB_VENDOR";
     }
     Properties properties = context.getChildrenAsProperties();
-    DatabaseIdProvider databaseIdProvider = (DatabaseIdProvider) resolveClass(type).getDeclaredConstructor()
-        .newInstance();
+    DatabaseIdProvider databaseIdProvider = (DatabaseIdProvider) configuration.resolveClass(type)
+        .getDeclaredConstructor().newInstance();
     databaseIdProvider.setProperties(properties);
     Environment environment = configuration.getEnvironment();
     if (environment != null) {
@@ -339,7 +350,8 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context != null) {
       String type = context.getStringAttribute("type");
       Properties props = context.getChildrenAsProperties();
-      TransactionFactory factory = (TransactionFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+      TransactionFactory factory = (TransactionFactory) configuration.resolveClass(type).getDeclaredConstructor()
+          .newInstance();
       factory.setProperties(props);
       return factory;
     }
@@ -350,7 +362,8 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context != null) {
       String type = context.getStringAttribute("type");
       Properties props = context.getChildrenAsProperties();
-      DataSourceFactory factory = (DataSourceFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+      DataSourceFactory factory = (DataSourceFactory) configuration.resolveClass(type).getDeclaredConstructor()
+          .newInstance();
       factory.setProperties(props);
       return factory;
     }
@@ -364,22 +377,22 @@ public class XMLConfigBuilder extends BaseBuilder {
     for (XNode child : context.getChildren()) {
       if ("package".equals(child.getName())) {
         String typeHandlerPackage = child.getStringAttribute("name");
-        typeHandlerRegistry.register(typeHandlerPackage);
+        this.configuration.getTypeHandlerRegistry().register(typeHandlerPackage);
       } else {
         String javaTypeName = child.getStringAttribute("javaType");
         String jdbcTypeName = child.getStringAttribute("jdbcType");
         String handlerTypeName = child.getStringAttribute("handler");
-        Class<?> javaTypeClass = resolveClass(javaTypeName);
-        JdbcType jdbcType = resolveJdbcType(jdbcTypeName);
-        Class<?> typeHandlerClass = resolveClass(handlerTypeName);
+        Class<?> javaTypeClass = configuration.resolveClass(javaTypeName);
+        JdbcType jdbcType = configuration.resolveJdbcType(jdbcTypeName);
+        Class<?> typeHandlerClass = configuration.resolveClass(handlerTypeName);
         if (javaTypeClass != null) {
           if (jdbcType == null) {
-            typeHandlerRegistry.register(javaTypeClass, typeHandlerClass);
+            this.configuration.getTypeHandlerRegistry().register(javaTypeClass, typeHandlerClass);
           } else {
-            typeHandlerRegistry.register(javaTypeClass, jdbcType, typeHandlerClass);
+            this.configuration.getTypeHandlerRegistry().register(javaTypeClass, jdbcType, typeHandlerClass);
           }
         } else {
-          typeHandlerRegistry.register(typeHandlerClass);
+          this.configuration.getTypeHandlerRegistry().register(typeHandlerClass);
         }
       }
     }

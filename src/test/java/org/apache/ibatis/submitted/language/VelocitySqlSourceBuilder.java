@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.ParameterExpression;
 import org.apache.ibatis.builder.StaticSqlSource;
@@ -35,12 +34,13 @@ import org.apache.ibatis.type.JdbcType;
 /**
  * Just a test case. Not a real Velocity implementation.
  */
-public class VelocitySqlSourceBuilder extends BaseBuilder {
+public class VelocitySqlSourceBuilder {
 
+  private final Configuration configuration;
   private static final String parameterProperties = "javaType,jdbcType,mode,numericScale,resultMap,typeHandler,jdbcTypeName";
 
   public VelocitySqlSourceBuilder(Configuration configuration) {
-    super(configuration);
+    this.configuration = configuration;
   }
 
   public SqlSource parse(String originalSql, Class<?> parameterType) {
@@ -50,13 +50,14 @@ public class VelocitySqlSourceBuilder extends BaseBuilder {
     return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
   }
 
-  private static class ParameterMappingTokenHandler extends BaseBuilder implements TokenHandler {
+  private static class ParameterMappingTokenHandler implements TokenHandler {
 
     private final List<ParameterMapping> parameterMappings = new ArrayList<>();
     private final Class<?> parameterType;
+    private final Configuration configuration;
 
     public ParameterMappingTokenHandler(Configuration configuration, Class<?> parameterType) {
-      super(configuration);
+      this.configuration = configuration;
       this.parameterType = parameterType;
     }
 
@@ -73,9 +74,9 @@ public class VelocitySqlSourceBuilder extends BaseBuilder {
     private ParameterMapping buildParameterMapping(String content) {
       Map<String, String> propertiesMap = parseParameterMapping(content);
       String property = propertiesMap.get("property");
-      JdbcType jdbcType = resolveJdbcType(propertiesMap.get("jdbcType"));
+      JdbcType jdbcType = configuration.resolveJdbcType(propertiesMap.get("jdbcType"));
       Class<?> propertyType;
-      if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
+      if (configuration.getTypeHandlerRegistry().hasTypeHandler(parameterType)) {
         propertyType = parameterType;
       } else if (JdbcType.CURSOR.equals(jdbcType)) {
         propertyType = ResultSet.class;
@@ -101,11 +102,11 @@ public class VelocitySqlSourceBuilder extends BaseBuilder {
         if (name != null) {
           switch (name) {
             case "javaType":
-              javaType = resolveClass(value);
+              javaType = configuration.resolveClass(value);
               builder.javaType(javaType);
               break;
             case "mode":
-              builder.mode(resolveParameterMode(value));
+              builder.mode(configuration.resolveParameterMode(value));
               break;
             case "numericScale":
               builder.numericScale(Integer.valueOf(value));
@@ -134,7 +135,7 @@ public class VelocitySqlSourceBuilder extends BaseBuilder {
         }
       }
       if (typeHandlerAlias != null) {
-        builder.typeHandler(resolveTypeHandler(javaType, propertyType, jdbcType, typeHandlerAlias));
+        builder.typeHandler(configuration.resolveTypeHandler(javaType, propertyType, jdbcType, typeHandlerAlias));
       }
       return builder.build();
     }

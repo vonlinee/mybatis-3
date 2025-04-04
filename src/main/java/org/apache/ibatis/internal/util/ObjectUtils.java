@@ -15,6 +15,11 @@
  */
 package org.apache.ibatis.internal.util;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 public final class ObjectUtils {
 
   public static String nullIfEmpty(String value) {
@@ -23,5 +28,22 @@ public final class ObjectUtils {
 
   public static String nullIfBlank(String value) {
     return value == null || value.trim().isEmpty() ? null : value;
+  }
+
+  public static Pattern parseExpression(String regex, String defaultValue) {
+    return Pattern.compile(regex == null ? defaultValue : regex);
+  }
+
+  public static Boolean booleanValueOf(String value, Boolean defaultValue) {
+    return value == null ? defaultValue : Boolean.valueOf(value);
+  }
+
+  public static Integer integerValueOf(String value, Integer defaultValue) {
+    return value == null ? defaultValue : Integer.valueOf(value);
+  }
+
+  public static Set<String> stringSetValueOf(String value, String defaultValue) {
+    value = value == null ? defaultValue : value;
+    return new HashSet<>(Arrays.asList(value.split(",")));
   }
 }
