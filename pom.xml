@@ -101,6 +101,8 @@
 
     <!-- Reproducible Builds -->
     <project.build.outputTimestamp>1735704225</project.build.outputTimestamp>
+    <!-- Maven minimum version -->
+    <maven.min-version>3.9.6</maven.min-version>
   </properties>
 
   <dependencies>
@@ -458,6 +460,9 @@
               <maxJdkVersion>${java.version}</maxJdkVersion>
               <ignoredScopes>provided,test</ignoredScopes>
             </enforceBytecodeVersion>
+            <requireMavenVersion>
+              <version>[${maven.min-version},)</version>
+            </requireMavenVersion>
           </rules>
         </configuration>
       </plugin>
