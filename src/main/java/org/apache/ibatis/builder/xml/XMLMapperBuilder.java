@@ -34,12 +34,7 @@ import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.mapping.Discriminator;
-import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.mapping.ParameterMode;
-import org.apache.ibatis.mapping.ResultFlag;
-import org.apache.ibatis.mapping.ResultMap;
-import org.apache.ibatis.mapping.ResultMapping;
+import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.session.Configuration;
@@ -176,7 +171,10 @@ public class XMLMapperBuilder {
       boolean readWrite = !context.getBooleanAttribute("readOnly", false);
       boolean blocking = context.getBooleanAttribute("blocking", false);
       Properties props = context.getChildrenAsProperties();
-      builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
+      Cache cache = builderAssistant.buildCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking,
+          props);
+      builderAssistant.setCurrentCache(cache);
+      configuration.addCache(cache);
     }
   }
 
@@ -203,14 +201,17 @@ public class XMLMapperBuilder {
             javaTypeClass, jdbcTypeEnum, resultMap, modeEnum, typeHandlerClass, numericScale);
         parameterMappings.add(parameterMapping);
       }
-      builderAssistant.addParameterMap(id, parameterClass, parameterMappings);
+      ParameterMap parameterMap = builderAssistant.buildParameterMap(id, parameterClass, parameterMappings);
+      configuration.addParameterMap(parameterMap);
     }
   }
 
   private void resultMapElements(List<XNode> list) {
     for (XNode resultMapNode : list) {
       try {
-        resultMapElement(resultMapNode, Collections.emptyList(), null);
+        ResultMap resultMap = parseResultMap(resultMapNode, Collections.emptyList(), null);
+
+        configuration.addResultMap(resultMap);
       } catch (IncompleteElementException e) {
         // ignore, it will be retried
       }
@@ -234,7 +235,7 @@ public class XMLMapperBuilder {
     return configuration.resolveClass(type);
   }
 
-  private ResultMap resultMapElement(XNode resultMapNode, List<ResultMapping> additionalResultMappings,
+  private ResultMap parseResultMap(XNode resultMapNode, List<ResultMapping> additionalResultMappings,
       Class<?> enclosingType) {
     ErrorContext.instance().activity("processing " + resultMapNode.getValueBasedIdentifier());
 
@@ -391,7 +392,8 @@ public class XMLMapperBuilder {
     if (Arrays.asList("association", "collection", "case").contains(context.getName())
         && context.getStringAttribute("select") == null) {
       validateCollection(context, enclosingType);
-      ResultMap resultMap = resultMapElement(context, resultMappings, enclosingType);
+      ResultMap resultMap = parseResultMap(context, resultMappings, enclosingType);
+      configuration.addResultMap(resultMap);
       return resultMap.getId();
     }
     return null;

@@ -1068,7 +1068,8 @@ public class Configuration {
         Iterator<ResultMapResolver> iterator = incompleteResultMaps.iterator();
         while (iterator.hasNext()) {
           try {
-            iterator.next().resolve();
+            ResultMap resultMap = iterator.next().resolve();
+            addResultMap(resultMap);
             iterator.remove();
             resolved = true;
           } catch (IncompleteElementException e) {

@@ -22,6 +22,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.InputStream;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
@@ -182,6 +183,14 @@ class XmlMapperBuilderTest {
       Assertions.assertTrue(exception.getMessage()
           .contains("Error parsing Mapper XML. The XML location is 'org/apache/ibatis/builder/ProblemMapper.xml'"));
     }
+  }
+
+  @Test
+  void parseMultipleColumnNames() {
+    Set<String> columns = MapperBuilderAssistant.parseMultipleColumnNames("{prop1=col1,prop2=col2}");
+
+    System.out.println(columns);
+
   }
 
   // @Test

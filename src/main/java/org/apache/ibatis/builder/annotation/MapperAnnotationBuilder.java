@@ -67,6 +67,7 @@ import org.apache.ibatis.builder.IncompleteElementException;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.builder.ResultMappingConstructorResolver;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
+import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -177,8 +178,17 @@ public class MapperAnnotationBuilder {
       Integer size = cacheDomain.size() == 0 ? null : cacheDomain.size();
       Long flushInterval = cacheDomain.flushInterval() == 0 ? null : cacheDomain.flushInterval();
       Properties props = convertToProperties(cacheDomain.properties());
-      assistant.useNewCache(cacheDomain.implementation(), cacheDomain.eviction(), flushInterval, size,
-          cacheDomain.readWrite(), cacheDomain.blocking(), props);
+      // @formatter:off
+      Cache cache = assistant.buildCache(cacheDomain.implementation(),
+        cacheDomain.eviction(),
+        flushInterval,
+        size,
+        cacheDomain.readWrite(),
+        cacheDomain.blocking(),
+        props);
+      assistant.setCurrentCache(cache);
+      configuration.addCache(cache);
+      // @formatter:on
     }
   }
 
@@ -246,7 +256,7 @@ public class MapperAnnotationBuilder {
     applyResults(results, returnType, resultMappings);
     Discriminator disc = applyDiscriminator(resultMapId, returnType, discriminator);
     // TODO add AutoMappingBehaviour
-    assistant.addResultMap(resultMapId, returnType, null, disc, resultMappings, null);
+    configuration.addResultMap(assistant.buildResultMap(resultMapId, returnType, null, disc, resultMappings, null));
     createDiscriminatorResultMaps(resultMapId, returnType, discriminator);
   }
 
@@ -259,7 +269,8 @@ public class MapperAnnotationBuilder {
         applyConstructorArgs(c.constructArgs(), resultType, resultMappings, resultMapId);
         applyResults(c.results(), resultType, resultMappings);
         // TODO add AutoMappingBehaviour
-        assistant.addResultMap(caseResultMapId, c.type(), resultMapId, null, resultMappings, null);
+        configuration
+            .addResultMap(assistant.buildResultMap(caseResultMapId, c.type(), resultMapId, null, resultMappings, null));
       }
     }
   }

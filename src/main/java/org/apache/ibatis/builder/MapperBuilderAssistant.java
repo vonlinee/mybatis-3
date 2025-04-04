@@ -17,16 +17,8 @@ package org.apache.ibatis.builder;
 
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.function.BiConsumer;
 
 import org.apache.ibatis.cache.Cache;
@@ -34,6 +26,7 @@ import org.apache.ibatis.cache.decorators.LruCache;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.CacheBuilder;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -53,6 +46,7 @@ import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
@@ -88,10 +82,6 @@ public class MapperBuilderAssistant {
     this.currentNamespace = currentNamespace;
   }
 
-  public Configuration getConfiguration() {
-    return configuration;
-  }
-
   public String applyCurrentNamespace(String base, boolean isReference) {
     if (base == null) {
       return null;
@@ -113,30 +103,46 @@ public class MapperBuilderAssistant {
     return currentNamespace + "." + base;
   }
 
+  public final void setCurrentCache(Cache cache) {
+    this.currentCache = cache;
+  }
+
+  public boolean hasUnsolvedCacheRef() {
+    return unresolvedCacheRef;
+  }
+
+  public void markCachedRefUnsolved() {
+    unresolvedCacheRef = true;
+  }
+
+  public void markCacheRefResolved() {
+    unresolvedCacheRef = false;
+  }
+
   public Cache useCacheRef(String namespace) {
     if (namespace == null) {
       throw new BuilderException("cache-ref element requires a namespace attribute.");
     }
     try {
-      unresolvedCacheRef = true;
+      markCachedRefUnsolved();
       Cache cache = configuration.getCache(namespace);
       if (cache == null) {
         throw new IncompleteElementException("No cache for namespace '" + namespace + "' could be found.");
       }
-      currentCache = cache;
-      unresolvedCacheRef = false;
+      setCurrentCache(cache);
+      markCacheRefResolved();
       return cache;
     } catch (IllegalArgumentException e) {
       throw new IncompleteElementException("No cache for namespace '" + namespace + "' could be found.", e);
     }
   }
 
-  public Cache useNewCache(Class<? extends Cache> typeClass, Class<? extends Cache> evictionClass, Long flushInterval,
+  public Cache buildCache(Class<? extends Cache> typeClass, Class<? extends Cache> evictionClass, Long flushInterval,
       Integer size, boolean readWrite, boolean blocking, Properties props) {
     // @formatter:off
-    Cache cache = new CacheBuilder(currentNamespace)
-      .implementation(valueOrDefault(typeClass, PerpetualCache.class))
-      .addDecorator(valueOrDefault(evictionClass, LruCache.class))
+    return new CacheBuilder(currentNamespace)
+      .implementation(typeClass == null ? PerpetualCache.class : typeClass)
+      .addDecorator(evictionClass == null ? LruCache.class : evictionClass)
       .clearInterval(flushInterval)
       .size(size)
       .readWrite(readWrite)
@@ -144,16 +150,11 @@ public class MapperBuilderAssistant {
       .properties(props)
       .build();
     // @formatter:on
-    configuration.addCache(cache);
-    currentCache = cache;
-    return cache;
   }
 
-  public ParameterMap addParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
+  public ParameterMap buildParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
     id = applyCurrentNamespace(id, false);
-    ParameterMap parameterMap = new ParameterMap.Builder(id, parameterClass, parameterMappings).build();
-    configuration.addParameterMap(parameterMap);
-    return parameterMap;
+    return new ParameterMap.Builder(id, parameterClass, parameterMappings).build();
   }
 
   public ParameterMapping buildParameterMapping(Class<?> parameterType, String property, Class<?> javaType,
@@ -175,14 +176,14 @@ public class MapperBuilderAssistant {
     // @formatter:on
   }
 
-  public ResultMap addResultMap(String id, Class<?> type, String extend, Discriminator discriminator,
+  public ResultMap buildResultMap(String id, Class<?> type, String extend, Discriminator discriminator,
       List<ResultMapping> resultMappings, Boolean autoMapping) {
     id = applyCurrentNamespace(id, false);
     extend = applyCurrentNamespace(extend, true);
 
     if (extend != null) {
       if (!configuration.hasResultMap(extend)) {
-        throw new IncompleteElementException("Could not find a parent resultmap with id '" + extend + "'");
+        throw new IncompleteElementException("Could not find a parent resultMap with id '" + extend + "'");
       }
       ResultMap resultMap = configuration.getResultMap(extend);
       List<ResultMapping> extendedResultMappings = new ArrayList<>(resultMap.getResultMappings());
@@ -200,10 +201,11 @@ public class MapperBuilderAssistant {
       }
       resultMappings.addAll(extendedResultMappings);
     }
-    ResultMap resultMap = new ResultMap.Builder(configuration, id, type, resultMappings, autoMapping)
-        .discriminator(discriminator).build();
-    configuration.addResultMap(resultMap);
-    return resultMap;
+    // @formatter:off
+    return new ResultMap.Builder(configuration, id, type, resultMappings, autoMapping)
+      .discriminator(discriminator)
+      .build();
+    // @formatter:on
   }
 
   public Discriminator buildDiscriminator(Class<?> resultType, String column, Class<?> javaType, JdbcType jdbcType,
@@ -260,10 +262,6 @@ public class MapperBuilderAssistant {
     MappedStatement statement = statementBuilder.build();
     configuration.addMappedStatement(statement);
     return statement;
-  }
-
-  private <T> T valueOrDefault(T value, T defaultValue) {
-    return value == null ? defaultValue : value;
   }
 
   private ParameterMap getStatementParameterMap(String parameterMapName, Class<?> parameterTypeClass,
@@ -333,18 +331,28 @@ public class MapperBuilderAssistant {
     // @formatter:on
   }
 
-  private Set<String> parseMultipleColumnNames(String columnName) {
+  /**
+   * multiple column names
+   *
+   * @param columnName
+   *          multiple columns like (column="{prop1=col1,prop2=col2}")
+   *
+   * @return column names
+   */
+  @NotNull
+  public static Set<String> parseMultipleColumnNames(String columnName) {
+    if (StringUtils.isBlank(columnName)) {
+      return Collections.emptySet();
+    }
     Set<String> columns = new HashSet<>();
-    if (columnName != null) {
-      if (columnName.indexOf(',') > -1) {
-        StringTokenizer parser = new StringTokenizer(columnName, "{}, ", false);
-        while (parser.hasMoreTokens()) {
-          String column = parser.nextToken();
-          columns.add(column);
-        }
-      } else {
-        columns.add(columnName);
+    if (columnName.indexOf(',') > -1) {
+      StringTokenizer parser = new StringTokenizer(columnName, "{}, ", false);
+      while (parser.hasMoreTokens()) {
+        String column = parser.nextToken();
+        columns.add(column.trim());
       }
+    } else {
+      columns.add(columnName.trim());
     }
     return columns;
   }
