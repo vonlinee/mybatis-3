@@ -27,13 +27,12 @@
     <relativePath />
   </parent>
 
-  <groupId>org.mybatis</groupId>
   <artifactId>mybatis</artifactId>
   <version>3.6.0-SNAPSHOT</version>
 
   <name>mybatis</name>
   <description>The MyBatis SQL mapper framework makes it easier to use a relational database with object-oriented
-    applications. MyBatis couples objects with stored procedures or SQL statements using a XML descriptor or
+    applications. MyBatis couples objects with stored procedures or SQL statements using an XML descriptor or
     annotations. Simplicity is the biggest advantage of the MyBatis data mapper over object relational mapping
     tools.</description>
   <url>https://www.mybatis.org/mybatis-3/</url>
@@ -67,7 +66,7 @@
 <!--    <java.version>11</java.version>-->
 <!--    <java.release.version>11</java.release.version>-->
 
-    <!-- Override impsort comliance to 17 (remove after parent 49 release) -->
+    <!-- Override impsort compliance to 17 (remove after parent 49 release) -->
     <impsort.compliance>17</impsort.compliance>
 
     <clirr.comparisonVersion>3.4.6</clirr.comparisonVersion>
@@ -81,7 +80,7 @@
     <git-build-hook.version>3.5.0</git-build-hook.version>
 
     <!-- Add slow test groups here and annotate classes similar to @Tag('groupName'). -->
-    <!-- Excluded groups are ran on github ci, to force here, pass -d"excludedGroups=" -->
+    <!-- Excluded groups are ran on GitHub ci, to force here, pass -d"excludedGroups=" -->
     <!-- Note: RequireIllegalAccess tests are now no longer valid as they only worked prior to java 16 -->
     <excludedGroups>TestcontainersTests,RequireIllegalAccess</excludedGroups>
 
@@ -201,7 +200,7 @@
       <version>2.4.1</version>
       <scope>test</scope>
     </dependency>
-    <!-- postgresql driver is required to run the refcursor tests -->
+    <!-- postgresql driver is required to run the ref cursor tests -->
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
@@ -249,7 +248,7 @@
       <artifactId>junit-jupiter</artifactId>
       <version>${testcontainers.version}</version>
       <scope>test</scope>
-      <!--Only Mysqlcontainer is allowed to use junit 4 due to testContainers coupling: Uncomment to test no other leakage
+      <!--Only Mysql container is allowed to use junit 4 due to testContainers coupling: Uncomment to test no other leakage
       <exclusions>
         <exclusion>
           <groupId>junit</groupId>
@@ -534,6 +533,7 @@
                 <phase>prepare-package</phase>
                 <configuration>
                   <attach>false</attach>
+                  <defaultManifestFile/>
                 </configuration>
               </execution>
             </executions>
