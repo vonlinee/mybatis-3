@@ -97,6 +97,7 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
@@ -188,6 +189,7 @@ public class Configuration {
     this.environment = environment;
   }
 
+  @SuppressWarnings("deprecation")
   public Configuration() {
     typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
     typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
@@ -670,6 +672,11 @@ public class Configuration {
     getLanguageRegistry().setDefaultDriverClass(driver);
   }
 
+  /**
+   * Gets the default scripting language instance.
+   *
+   * @return the default scripting language instance
+   */
   public LanguageDriver getDefaultScriptingLanguageInstance() {
     return languageRegistry.getDefaultDriver();
   }
@@ -690,18 +697,6 @@ public class Configuration {
     }
     languageRegistry.register(langClass);
     return languageRegistry.getDriver(langClass);
-  }
-
-  /**
-   * Gets the default scripting language instance.
-   *
-   * @return the default scripting language instance
-   *
-   * @deprecated Use {@link #getDefaultScriptingLanguageInstance()}
-   */
-  @Deprecated
-  public LanguageDriver getDefaultScriptingLanuageInstance() {
-    return getDefaultScriptingLanguageInstance();
   }
 
   public MetaObject newMetaObject(Object object) {
@@ -1103,15 +1098,12 @@ public class Configuration {
   protected void checkGloballyForDiscriminatedNestedResultMaps(ResultMap rm) {
     if (rm.hasNestedResultMaps()) {
       final String resultMapId = rm.getId();
-      for (Object resultMapObject : resultMaps.values()) {
-        if (resultMapObject instanceof ResultMap) {
-          ResultMap entryResultMap = (ResultMap) resultMapObject;
-          if (!entryResultMap.hasNestedResultMaps() && entryResultMap.getDiscriminator() != null) {
-            Collection<String> discriminatedResultMapNames = entryResultMap.getDiscriminator().getDiscriminatorMap()
-                .values();
-            if (discriminatedResultMapNames.contains(resultMapId)) {
-              entryResultMap.forceNestedResultMaps();
-            }
+      for (ResultMap entryResultMap : resultMaps.values()) {
+        if (!entryResultMap.hasNestedResultMaps() && entryResultMap.getDiscriminator() != null) {
+          Collection<String> discriminatedResultMapNames = entryResultMap.getDiscriminator().getDiscriminatorMap()
+              .values();
+          if (discriminatedResultMapNames.contains(resultMapId)) {
+            entryResultMap.forceNestedResultMaps();
           }
         }
       }
@@ -1178,7 +1170,7 @@ public class Configuration {
 
     @Override
     @SuppressWarnings("unchecked")
-    public V put(String key, V value) {
+    public V put(@NotNull String key, @NotNull V value) {
       if (containsKey(key)) {
         throw new IllegalArgumentException(name + " already contains key " + key
             + (conflictMessageProducer == null ? "" : conflictMessageProducer.apply(super.get(key), value)));
