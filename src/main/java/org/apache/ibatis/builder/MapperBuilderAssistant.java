@@ -164,9 +164,15 @@ public class MapperBuilderAssistant {
     // Class parameterType = parameterMapBuilder.type();
     Class<?> javaTypeClass = resolveParameterJavaType(parameterType, property, javaType, jdbcType);
     TypeHandler<?> typeHandlerInstance = configuration.resolveTypeHandler(javaTypeClass, jdbcType, typeHandler);
-
-    return new ParameterMapping.Builder(configuration, property, javaTypeClass).jdbcType(jdbcType)
-        .resultMapId(resultMap).mode(parameterMode).numericScale(numericScale).typeHandler(typeHandlerInstance).build();
+    // @formatter:off
+    return new ParameterMapping.Builder(configuration, property, javaTypeClass)
+      .jdbcType(jdbcType)
+      .resultMapId(resultMap)
+      .mode(parameterMode)
+      .numericScale(numericScale)
+      .typeHandler(typeHandlerInstance)
+      .build();
+    // @formatter:on
   }
 
   public ResultMap addResultMap(String id, Class<?> type, String extend, Discriminator discriminator,
@@ -311,12 +317,20 @@ public class MapperBuilderAssistant {
     } else {
       composites = parseCompositeColumnName(column);
     }
-    return new ResultMapping.Builder(configuration, property, column, setterType.getValue()).jdbcType(jdbcType)
-        .nestedQueryId(applyCurrentNamespace(nestedSelect, true))
-        .nestedResultMapId(applyCurrentNamespace(nestedResultMap, true)).resultSet(resultSet)
-        .typeHandler(typeHandlerInstance).flags(flags == null ? new ArrayList<>() : flags).composites(composites)
-        .notNullColumns(parseMultipleColumnNames(notNullColumn)).columnPrefix(columnPrefix).foreignColumn(foreignColumn)
-        .lazy(lazy).build();
+    // @formatter:off
+    return new ResultMapping.Builder(configuration, property, column, setterType.getValue())
+      .jdbcType(jdbcType)
+      .nestedQueryId(applyCurrentNamespace(nestedSelect, true))
+      .nestedResultMapId(applyCurrentNamespace(nestedResultMap, true))
+      .resultSet(resultSet)
+      .typeHandler(typeHandlerInstance)
+      .flags(flags == null ? new ArrayList<>() : flags)
+      .composites(composites)
+      .notNullColumns(parseMultipleColumnNames(notNullColumn))
+      .columnPrefix(columnPrefix)
+      .foreignColumn(foreignColumn)
+      .lazy(lazy).build();
+    // @formatter:on
   }
 
   private Set<String> parseMultipleColumnNames(String columnName) {
