@@ -15,7 +15,8 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import org.apache.ibatis.builder.SqlSourceBuilder;
+import org.apache.ibatis.builder.StaticSqlSource;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.reflection.ParamNameResolver;
@@ -45,8 +46,10 @@ public class DynamicSqlSource implements SqlSource {
     DynamicContext context = new DynamicContext(configuration, parameterObject, null, paramNameResolver, true);
     rootSqlNode.apply(context);
     String sql = context.getSql();
-    SqlSource sqlSource = SqlSourceBuilder.buildSqlSource(configuration, sql, context.getParameterMappings());
-    BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
+    StaticSqlSource staticSqlSource = new StaticSqlSource(
+        configuration.isShrinkWhitespacesInSql() ? StringUtils.removeExtraWhitespaces(sql) : sql,
+        context.getParameterMappings());
+    BoundSql boundSql = staticSqlSource.getBoundSql(parameterObject);
     context.getBindings().forEach(boundSql::setAdditionalParameter);
     return boundSql;
   }

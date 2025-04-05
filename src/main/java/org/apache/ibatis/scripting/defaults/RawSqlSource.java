@@ -20,7 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.ibatis.builder.ParameterMappingTokenHandler;
-import org.apache.ibatis.builder.SqlSourceBuilder;
+import org.apache.ibatis.builder.StaticSqlSource;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
@@ -34,9 +35,9 @@ import org.apache.ibatis.session.Configuration;
 /**
  * Static SqlSource. It is faster than {@link DynamicSqlSource} because mappings are calculated during startup.
  *
- * @since 3.2.0
- *
  * @author Eduardo Macarron
+ *
+ * @since 3.2.0
  */
 public class RawSqlSource implements SqlSource {
 
@@ -51,7 +52,9 @@ public class RawSqlSource implements SqlSource {
     DynamicContext context = new DynamicContext(configuration, parameterType, paramNameResolver);
     rootSqlNode.apply(context);
     String sql = context.getSql();
-    sqlSource = SqlSourceBuilder.buildSqlSource(configuration, sql, context.getParameterMappings());
+    sqlSource = new StaticSqlSource(
+        configuration.isShrinkWhitespacesInSql() ? StringUtils.removeExtraWhitespaces(sql) : sql,
+        context.getParameterMappings());
   }
 
   public RawSqlSource(Configuration configuration, String sql, Class<?> parameterType) {
@@ -65,7 +68,11 @@ public class RawSqlSource implements SqlSource {
     ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration,
         clazz, new HashMap<>(), paramNameResolver);
     GenericTokenParser parser = new GenericTokenParser("#{", "}", tokenHandler);
-    sqlSource = SqlSourceBuilder.buildSqlSource(configuration, parser.parse(sql), parameterMappings);
+
+    String parsedSql = parser.parse(sql);
+    sqlSource = new StaticSqlSource(
+        configuration.isShrinkWhitespacesInSql() ? StringUtils.removeExtraWhitespaces(parsedSql) : parsedSql,
+        parameterMappings);
   }
 
   @Override
