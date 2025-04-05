@@ -17,6 +17,7 @@ package org.apache.ibatis.builder;
 
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,13 +30,13 @@ import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
+import org.apache.ibatis.scripting.SqlUtils;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
 public class ParameterMappingTokenHandler implements TokenHandler {
 
-  private static final String PARAMETER_PROPERTIES = "javaType,jdbcType,mode,numericScale,resultMap,typeHandler,jdbcTypeName";
   private final List<ParameterMapping> parameterMappings;
   private final Class<?> parameterType;
   private final MetaObject metaParameters;
@@ -50,12 +51,11 @@ public class ParameterMappingTokenHandler implements TokenHandler {
       Object parameterObject, Class<?> parameterType, Map<String, Object> additionalParameters,
       ParamNameResolver paramNameResolver, boolean paramExists) {
     this.configuration = configuration;
-    this.parameterType = parameterObject == null ? (parameterType == null ? Object.class : parameterType)
-        : parameterObject.getClass();
+    this.parameterType = SqlUtils.getParameterType(parameterObject, parameterType);
     this.metaParameters = configuration.newMetaObject(additionalParameters);
     this.parameterObject = parameterObject;
     this.paramExists = paramExists;
-    this.parameterMappings = parameterMappings;
+    this.parameterMappings = parameterMappings != null ? parameterMappings : new ArrayList<>();
     this.paramNameResolver = paramNameResolver;
   }
 
@@ -77,7 +77,7 @@ public class ParameterMappingTokenHandler implements TokenHandler {
   @Override
   public String handleToken(String content) {
     parameterMappings.add(buildParameterMapping(content));
-    return "?";
+    return SqlUtils.PLACEHOLDER;
   }
 
   private ParameterMapping buildParameterMapping(String content) {
@@ -117,7 +117,7 @@ public class ParameterMappingTokenHandler implements TokenHandler {
         throw new BuilderException("Expression based parameters are not supported yet");
       } else {
         throw new BuilderException("An invalid property '" + name + "' was found in mapping #{" + content
-            + "}.  Valid properties are " + PARAMETER_PROPERTIES);
+            + "}.  Valid properties are javaType,jdbcType,mode,numericScale,resultMap,typeHandler,jdbcTypeName");
       }
     }
     if (!ParameterMode.OUT.equals(mode) && paramExists) {

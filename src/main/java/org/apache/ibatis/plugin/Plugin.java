@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.ibatis.internal.util.ReflectionUtils;
 import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
@@ -41,9 +42,9 @@ public class Plugin implements InvocationHandler {
   }
 
   public static Object wrap(Object target, Interceptor interceptor) {
-    Map<Class<?>, Set<Method>> signatureMap = getSignatureMap(interceptor);
+    final Map<Class<?>, Set<Method>> signatureMap = getSignatureMap(interceptor);
     Class<?> type = target.getClass();
-    Class<?>[] interfaces = getAllInterfaces(type, signatureMap);
+    Class<?>[] interfaces = ReflectionUtils.getAllInterfaces(type, signatureMap);
     if (interfaces.length > 0) {
       return Proxy.newProxyInstance(type.getClassLoader(), interfaces, new Plugin(target, interceptor, signatureMap));
     }
@@ -83,19 +84,6 @@ public class Plugin implements InvocationHandler {
       }
     }
     return signatureMap;
-  }
-
-  private static Class<?>[] getAllInterfaces(Class<?> type, Map<Class<?>, Set<Method>> signatureMap) {
-    Set<Class<?>> interfaces = new HashSet<>();
-    while (type != null) {
-      for (Class<?> c : type.getInterfaces()) {
-        if (signatureMap.containsKey(c)) {
-          interfaces.add(c);
-        }
-      }
-      type = type.getSuperclass();
-    }
-    return interfaces.toArray(new Class<?>[0]);
   }
 
 }

@@ -15,7 +15,15 @@
  */
 package org.apache.ibatis.internal.util;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Simple utility class for working with the reflection API and handling reflection exceptions.
@@ -48,5 +56,29 @@ public final class ReflectionUtils {
   public static <T> T createInstance(Class<?> clazz) throws ReflectiveOperationException {
     Objects.requireNonNull(clazz, "class must not be null");
     return (T) clazz.getDeclaredConstructor().newInstance();
+  }
+
+  public static Class<?>[] getAllInterfaces(Class<?> type, Map<Class<?>, Set<Method>> signatureMap) {
+    Set<Class<?>> interfaces = new HashSet<>();
+    while (type != null) {
+      for (Class<?> c : type.getInterfaces()) {
+        if (signatureMap.containsKey(c)) {
+          interfaces.add(c);
+        }
+      }
+      type = type.getSuperclass();
+    }
+    return interfaces.toArray(new Class<?>[0]);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> T createJdkProxy(@NotNull Class<T> interfaceType, @NotNull InvocationHandler ih) {
+    Objects.requireNonNull(interfaceType, "interface type must not be null");
+    Objects.requireNonNull(ih, "invocation handler must not be null");
+    if (!interfaceType.isInterface()) {
+      throw new UnsupportedOperationException(
+          "not supported type " + interfaceType + " when create proxy based on jdk");
+    }
+    return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[] { interfaceType }, ih);
   }
 }

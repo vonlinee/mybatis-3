@@ -15,7 +15,6 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -32,6 +31,7 @@ import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.ContextMap;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
@@ -101,10 +101,10 @@ public class DynamicContext implements SqlBuildContext {
     return sqlBuilder.toString().trim();
   }
 
-  private void initTokenParser(List<ParameterMapping> parameterMappings) {
+  private void initTokenParser(@Nullable List<ParameterMapping> parameterMappings) {
     if (tokenHandler == null) {
-      tokenHandler = new ParameterMappingTokenHandler(parameterMappings != null ? parameterMappings : new ArrayList<>(),
-          configuration, parameterObject, parameterType, bindings, paramNameResolver, paramExists);
+      tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration, parameterObject, parameterType,
+          bindings, paramNameResolver, paramExists);
     }
   }
 
