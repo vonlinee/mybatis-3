@@ -25,8 +25,8 @@ import org.apache.ibatis.builder.ParameterExpression;
 import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
-import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.TokenHandler;
+import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
@@ -45,8 +45,7 @@ public class VelocitySqlSourceBuilder {
 
   public SqlSource parse(String originalSql, Class<?> parameterType) {
     ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType);
-    GenericTokenParser parser = new GenericTokenParser("@{", "}", handler);
-    String sql = parser.parse(originalSql);
+    String sql = TokenParser.parse(originalSql, "@{", "}", handler);
     return new StaticSqlSource(sql, handler.getParameterMappings());
   }
 

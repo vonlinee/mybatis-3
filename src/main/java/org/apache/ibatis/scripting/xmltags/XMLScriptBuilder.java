@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.SqlSource;
+import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
@@ -103,7 +104,7 @@ public class XMLScriptBuilder {
           contents.add(emptyNodeCache.computeIfAbsent(data, EmptySqlNode::new));
           continue;
         }
-        if (DynamicCheckerTokenParser.isDynamic(data)) {
+        if (TokenParser.containsToken(data, "${", "}")) {
           TextSqlNode textSqlNode = new TextSqlNode(data);
           contents.add(textSqlNode);
           isDynamic = true;

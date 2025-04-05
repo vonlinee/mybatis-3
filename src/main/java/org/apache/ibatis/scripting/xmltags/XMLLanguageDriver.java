@@ -21,6 +21,7 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.PropertyParser;
+import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.reflection.ParamNameResolver;
@@ -67,7 +68,7 @@ public class XMLLanguageDriver implements LanguageDriver {
     }
     // issue #127
     script = PropertyParser.parse(script, configuration.getVariables());
-    if (DynamicCheckerTokenParser.isDynamic(script)) {
+    if (TokenParser.containsToken(script, "${", "}")) {
       TextSqlNode textSqlNode = new TextSqlNode(script);
       return new DynamicSqlSource(configuration, textSqlNode);
     } else {

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,22 +15,17 @@
  */
 package org.apache.ibatis.parsing;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
+ * support ${xxx} or #{xxx}
+ *
  * @author Clinton Begin
  */
-public class GenericTokenParser {
+public class TokenParser {
 
-  private final String openToken;
-  private final String closeToken;
-  private final TokenHandler handler;
-
-  public GenericTokenParser(String openToken, String closeToken, TokenHandler handler) {
-    this.openToken = openToken;
-    this.closeToken = closeToken;
-    this.handler = handler;
-  }
-
-  public String parse(String text) {
+  public static String parse(String text, @NotNull String openToken, @NotNull String closeToken,
+      @NotNull TokenHandler handler) {
     if (text == null || text.isEmpty()) {
       return "";
     }
@@ -83,5 +78,52 @@ public class GenericTokenParser {
       builder.append(src, offset, src.length - offset);
     }
     return builder.toString();
+  }
+
+  public static boolean containsToken(String text, @NotNull String openToken, @NotNull String closeToken) {
+    if (text == null || text.isEmpty()) {
+      return false;
+    }
+    // search open token
+    int start = text.indexOf(openToken);
+    if (start == -1) {
+      return false;
+    }
+    char[] src = text.toCharArray();
+    int offset;
+    StringBuilder expression = null;
+    do {
+      if (start > 0 && src[start - 1] == '\\') {
+        // this open token is escaped. remove the backslash and continue.
+        offset = start + openToken.length();
+      } else {
+        // found open token. let's search close token.
+        if (expression == null) {
+          expression = new StringBuilder();
+        } else {
+          expression.setLength(0);
+        }
+        offset = start + openToken.length();
+        int end = text.indexOf(closeToken, offset);
+        while (end > -1) {
+          if ((end <= offset) || (src[end - 1] != '\\')) {
+            expression.append(src, offset, end - offset);
+            break;
+          }
+          // this close token is escaped. remove the backslash and continue.
+          expression.append(src, offset, end - offset - 1).append(closeToken);
+          offset = end + closeToken.length();
+          end = text.indexOf(closeToken, offset);
+        }
+        if (end == -1) {
+          // close token was not found.
+          offset = src.length;
+        } else {
+          return true;
+        }
+      }
+      start = text.indexOf(openToken, offset);
+    } while (start > -1);
+    return false;
   }
 }

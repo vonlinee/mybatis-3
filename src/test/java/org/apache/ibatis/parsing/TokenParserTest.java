@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,10 +30,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class GenericTokenParserTest {
+class TokenParserTest {
 
   public static class VariableTokenHandler implements TokenHandler {
-    private Map<String, String> variables = new HashMap<>();
+    private final Map<String, String> variables;
 
     VariableTokenHandler(Map<String, String> variables) {
       this.variables = variables;
@@ -48,19 +48,15 @@ class GenericTokenParserTest {
   @ParameterizedTest
   @MethodSource("shouldDemonstrateGenericTokenReplacementProvider")
   void shouldDemonstrateGenericTokenReplacement(String expected, String text) {
-    GenericTokenParser parser = new GenericTokenParser("${", "}",
-        new VariableTokenHandler(new HashMap<String, String>() {
-          private static final long serialVersionUID = 1L;
-
-          {
-            put("first_name", "James");
-            put("initial", "T");
-            put("last_name", "Kirk");
-            put("var{with}brace", "Hiya");
-            put("", "");
-          }
-        }));
-    assertEquals(expected, parser.parse(text));
+    assertEquals(expected, TokenParser.parse(text, "${", "}", new VariableTokenHandler(new HashMap<>() {
+      {
+        put("first_name", "James");
+        put("initial", "T");
+        put("last_name", "Kirk");
+        put("var{with}brace", "Hiya");
+        put("", "");
+      }
+    })));
   }
 
   static Stream<Arguments> shouldDemonstrateGenericTokenReplacementProvider() {
@@ -87,8 +83,7 @@ class GenericTokenParserTest {
   @ParameterizedTest
   @MethodSource("shallNotInterpolateSkippedVariablesProvider")
   void shallNotInterpolateSkippedVariables(String expected, String text) {
-    GenericTokenParser parser = new GenericTokenParser("${", "}", new VariableTokenHandler(new HashMap<>()));
-    assertEquals(expected, parser.parse(text));
+    assertEquals(expected, TokenParser.parse(text, "${", "}", new VariableTokenHandler(new HashMap<>())));
   }
 
   static Stream<Arguments> shallNotInterpolateSkippedVariablesProvider() {
@@ -103,18 +98,6 @@ class GenericTokenParserTest {
   void shouldParseFastOnJdk7u6() {
     Assertions.assertTimeout(Duration.ofMillis(1000), () -> {
       // issue #760
-      GenericTokenParser parser = new GenericTokenParser("${", "}",
-          new VariableTokenHandler(new HashMap<String, String>() {
-            private static final long serialVersionUID = 1L;
-
-            {
-              put("first_name", "James");
-              put("initial", "T");
-              put("last_name", "Kirk");
-              put("", "");
-            }
-          }));
-
       StringBuilder input = new StringBuilder();
       for (int i = 0; i < 10000; i++) {
         input.append("${first_name} ${initial} ${last_name} reporting. ");
@@ -123,7 +106,15 @@ class GenericTokenParserTest {
       for (int i = 0; i < 10000; i++) {
         expected.append("James T Kirk reporting. ");
       }
-      assertEquals(expected.toString(), parser.parse(input.toString()));
+      assertEquals(expected.toString(),
+          TokenParser.parse(input.toString(), "${", "}", new VariableTokenHandler(new HashMap<>() {
+            {
+              put("first_name", "James");
+              put("initial", "T");
+              put("last_name", "Kirk");
+              put("", "");
+            }
+          })));
     });
   }
 

@@ -25,7 +25,7 @@ import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
-import org.apache.ibatis.parsing.GenericTokenParser;
+import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
@@ -52,13 +52,10 @@ public class RawSqlSource implements SqlSource {
     DynamicContext context = new DynamicContext(configuration, parameterType, paramNameResolver);
     rootSqlNode.apply(context);
     String sql = context.getSql();
-    sqlSource = new StaticSqlSource(
-        configuration.isShrinkWhitespacesInSql() ? StringUtils.removeExtraWhitespaces(sql) : sql,
-        context.getParameterMappings());
-  }
 
-  public RawSqlSource(Configuration configuration, String sql, Class<?> parameterType) {
-    this(configuration, sql, parameterType, null);
+    sql = configuration.isShrinkWhitespacesInSql() ? StringUtils.removeExtraWhitespaces(sql) : sql;
+
+    sqlSource = new StaticSqlSource(sql, context.getParameterMappings());
   }
 
   public RawSqlSource(Configuration configuration, String sql, Class<?> parameterType,
@@ -67,17 +64,14 @@ public class RawSqlSource implements SqlSource {
     List<ParameterMapping> parameterMappings = new ArrayList<>();
     ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration,
         clazz, new HashMap<>(), paramNameResolver);
-    GenericTokenParser parser = new GenericTokenParser("#{", "}", tokenHandler);
+    String parsedSql = TokenParser.parse(sql, "#{", "}", tokenHandler);
 
-    String parsedSql = parser.parse(sql);
-    sqlSource = new StaticSqlSource(
-        configuration.isShrinkWhitespacesInSql() ? StringUtils.removeExtraWhitespaces(parsedSql) : parsedSql,
-        parameterMappings);
+    parsedSql = configuration.isShrinkWhitespacesInSql() ? StringUtils.removeExtraWhitespaces(parsedSql) : parsedSql;
+    sqlSource = new StaticSqlSource(parsedSql, parameterMappings);
   }
 
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
     return sqlSource.getBoundSql(parameterObject);
   }
-
 }

@@ -86,7 +86,7 @@ class RawSqlSourceTest {
   void testShrinkWhitespacesInSql(String input, boolean shrinkWhitespaces, String expected) {
     Configuration config = new Configuration();
     config.setShrinkWhitespacesInSql(shrinkWhitespaces);
-    String actual = new RawSqlSource(config, input, null).getBoundSql(null).getSql();
+    String actual = new RawSqlSource(config, input, null, null).getBoundSql(null).getSql();
     assertEquals(expected, actual);
   }
 
