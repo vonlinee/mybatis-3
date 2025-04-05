@@ -13,21 +13,22 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.executor.statement;
+package org.apache.ibatis.internal.util;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
  * Utility for {@link java.sql.Statement}.
  *
- * @since 3.4.0
- *
  * @author Kazuki Shimizu
+ *
+ * @since 3.4.0
  */
-public class StatementUtil {
+public final class JdbcUtils {
 
-  private StatementUtil() {
+  private JdbcUtils() {
     // NOP
   }
 
@@ -53,6 +54,30 @@ public class StatementUtil {
     }
     if (queryTimeout == null || queryTimeout == 0 || transactionTimeout < queryTimeout) {
       statement.setQueryTimeout(transactionTimeout);
+    }
+  }
+
+  public static boolean closeSilently(Statement statement) {
+    if (statement == null) {
+      return false;
+    }
+    try {
+      statement.close();
+      return true;
+    } catch (SQLException ignored) {
+      return false;
+    }
+  }
+
+  public static boolean closeSilently(ResultSet resultSet) {
+    if (resultSet == null) {
+      return false;
+    }
+    try {
+      resultSet.close();
+      return true;
+    } catch (SQLException ignored) {
+      return false;
     }
   }
 

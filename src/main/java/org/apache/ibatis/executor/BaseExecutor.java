@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.cursor.Cursor;
-import org.apache.ibatis.executor.statement.StatementUtil;
+import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.logging.jdbc.ConnectionLogger;
@@ -306,13 +306,7 @@ public abstract class BaseExecutor implements Executor {
       BoundSql boundSql) throws SQLException;
 
   protected void closeStatement(Statement statement) {
-    if (statement != null) {
-      try {
-        statement.close();
-      } catch (SQLException e) {
-        // ignore
-      }
-    }
+    JdbcUtils.closeSilently(statement);
   }
 
   /**
@@ -326,10 +320,10 @@ public abstract class BaseExecutor implements Executor {
    *
    * @since 3.4.0
    *
-   * @see StatementUtil#applyTransactionTimeout(Statement, Integer, Integer)
+   * @see JdbcUtils#applyTransactionTimeout(Statement, Integer, Integer)
    */
   protected void applyTransactionTimeout(Statement statement) throws SQLException {
-    StatementUtil.applyTransactionTimeout(statement, statement.getQueryTimeout(), transaction.getTimeout());
+    JdbcUtils.applyTransactionTimeout(statement, statement.getQueryTimeout(), transaction.getTimeout());
   }
 
   private void handleLocallyCachedOutputParameters(MappedStatement ms, Object key, Object parameter,

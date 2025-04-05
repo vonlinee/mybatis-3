@@ -48,6 +48,7 @@ import org.apache.ibatis.executor.loader.ResultLoaderMap;
 import org.apache.ibatis.executor.result.DefaultResultContext;
 import org.apache.ibatis.executor.result.DefaultResultHandler;
 import org.apache.ibatis.executor.result.ResultMapException;
+import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -629,7 +630,7 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
     for (ResultMapping constructorMapping : constructorMappings) {
       final Class<?> parameterType = constructorMapping.getJavaType();
       final String column = constructorMapping.getColumn();
-      final Object value;
+      Object value = null;
       try {
         if (constructorMapping.getNestedQueryId() != null) {
           value = getNestedQueryConstructorValue(rsw, constructorMapping, columnPrefix);
@@ -640,7 +641,7 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
             collection.addAll((List<?>) result);
             value = collection.getOriginalObject();
           } else {
-            value = toSingleObj(result);
+            value = CollectionUtils.getFirst(result);
           }
         } else if (constructorMapping.getNestedResultMapId() != null) {
           final String constructorColumnPrefix = getColumnPrefix(columnPrefix, constructorMapping);
@@ -653,7 +654,9 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
           if (typeHandler == null) {
             typeHandler = typeHandlerRegistry.getTypeHandler(constructorMapping.getJavaType(), rsw.getJdbcType(column));
           }
-          value = typeHandler.getResult(rsw.getResultSet(), prependPrefix(column, columnPrefix));
+          if (typeHandler != null) {
+            value = typeHandler.getResult(rsw.getResultSet(), prependPrefix(column, columnPrefix));
+          }
         }
       } catch (ResultMapException | SQLException e) {
         throw new ExecutorException("Could not process result for mapping: " + constructorMapping, e);
@@ -1437,13 +1440,9 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
         pendingPccRelations.put(originalObject, new PendingRelation(metaObject, resultMapping));
       }
     } else {
+      // Even if there are multiple elements, silently returns the first one.
       metaObject.setValue(resultMapping.getProperty(),
-          isNestedCursorResult ? toSingleObj((List<?>) rowValue) : rowValue);
+          isNestedCursorResult ? CollectionUtils.getFirst((List<?>) rowValue) : rowValue);
     }
-  }
-
-  private Object toSingleObj(List<?> list) {
-    // Even if there are multiple elements, silently returns the first one.
-    return list.isEmpty() ? null : list.get(0);
   }
 }

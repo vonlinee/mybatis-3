@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.ibatis.executor.ExecutorException;
+import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ReflectorFactory;
@@ -144,12 +145,6 @@ public abstract class BaseResultSetHandler implements ResultSetHandler {
 
   @Override
   public void closeResultSet(ResultSet rs) {
-    try {
-      if (rs != null) {
-        rs.close();
-      }
-    } catch (SQLException e) {
-      // ignore
-    }
+    JdbcUtils.closeSilently(rs);
   }
 }

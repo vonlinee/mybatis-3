@@ -24,6 +24,7 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
+import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
@@ -105,7 +106,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
     if (queryTimeout != null) {
       stmt.setQueryTimeout(queryTimeout);
     }
-    StatementUtil.applyTransactionTimeout(stmt, queryTimeout, transactionTimeout);
+    JdbcUtils.applyTransactionTimeout(stmt, queryTimeout, transactionTimeout);
   }
 
   protected void setFetchSize(Statement stmt) throws SQLException {
