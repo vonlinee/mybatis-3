@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.session.Configuration;
 
 /**

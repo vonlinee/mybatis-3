@@ -16,6 +16,7 @@
 package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.expression.OgnlCache;
 
 /**
  * @author Frank D. Martinez [mnesarco]

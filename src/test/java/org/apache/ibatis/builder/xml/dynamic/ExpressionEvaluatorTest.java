@@ -23,7 +23,7 @@ import java.util.HashMap;
 
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.domain.blog.Section;
-import org.apache.ibatis.scripting.xmltags.ExpressionEvaluator;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.junit.jupiter.api.Test;
 
 class ExpressionEvaluatorTest {
@@ -76,7 +76,7 @@ class ExpressionEvaluatorTest {
   void shouldReturnFalseIfZeroWithScale() {
     class Bean {
       @SuppressWarnings("unused")
-      public double d = 0.0D;
+      public final double d = 0.0D;
     }
     assertFalse(evaluator.evaluateBoolean("d", new Bean()));
   }
@@ -84,7 +84,6 @@ class ExpressionEvaluatorTest {
   @Test
   void shouldIterateOverIterable() {
     final HashMap<String, String[]> parameterObject = new HashMap<>() {
-      private static final long serialVersionUID = 1L;
       {
         put("array", new String[] { "1", "2", "3" });
       }

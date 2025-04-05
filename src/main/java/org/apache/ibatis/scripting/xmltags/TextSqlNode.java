@@ -18,6 +18,7 @@ package org.apache.ibatis.scripting.xmltags;
 import org.apache.ibatis.parsing.TokenHandler;
 import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.expression.OgnlCache;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**

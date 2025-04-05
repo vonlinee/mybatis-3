@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting.expression;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -41,10 +41,6 @@ public class ExpressionEvaluator {
     return value != null;
   }
 
-  /**
-   * @deprecated Since 3.5.9, use the {@link #evaluateIterable(String, Object, boolean)}.
-   */
-  @Deprecated
   public Iterable<?> evaluateIterable(String expression, Object parameterObject) {
     return evaluateIterable(expression, parameterObject, false);
   }
