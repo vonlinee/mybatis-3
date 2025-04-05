@@ -435,4 +435,12 @@ public class MapperBuilderAssistant {
     MetaClass metaResultType = MetaClass.forClass(enclosingType, configuration.getReflectorFactory());
     return metaResultType.hasSetter(property);
   }
+
+  public <T> Class<? extends T> resolveClass(String alias) {
+    try {
+      return alias == null ? null : configuration.resolveAlias(alias);
+    } catch (Exception e) {
+      throw new BuilderException("Error resolving class. Cause: " + e, e);
+    }
+  }
 }

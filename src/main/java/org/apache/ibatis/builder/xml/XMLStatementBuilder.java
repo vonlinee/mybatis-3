@@ -50,15 +50,6 @@ public class XMLStatementBuilder {
   private final String requiredDatabaseId;
   private final Class<?> mapperClass;
 
-  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context) {
-    this(configuration, builderAssistant, context, null);
-  }
-
-  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context,
-      String databaseId) {
-    this(configuration, builderAssistant, context, null, null);
-  }
-
   public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context,
       String databaseId, Class<?> mapperClass) {
     this.configuration = configuration;
@@ -88,11 +79,14 @@ public class XMLStatementBuilder {
     includeParser.applyIncludes(context.getNode());
 
     String parameterType = context.getStringAttribute("parameterType");
-    Class<?> parameterTypeClass = configuration.resolveClass(parameterType);
+    Class<?> parameterTypeClass = builderAssistant.resolveClass(parameterType);
     ParamNameResolver paramNameResolver = null;
     if (parameterTypeClass == null && mapperClass != null) {
+      // @formatter:off
       List<Method> mapperMethods = Arrays.stream(mapperClass.getMethods())
-          .filter(m -> m.getName().equals(id) && !m.isDefault() && !m.isBridge()).collect(Collectors.toList());
+        .filter(m -> m.getName().equals(id) && !m.isDefault() && !m.isBridge())
+        .collect(Collectors.toList());
+      // @formatter:on
       if (mapperMethods.size() == 1) {
         paramNameResolver = new ParamNameResolver(configuration, mapperMethods.get(0), mapperClass);
         if (paramNameResolver.isUseParamMap()) {
