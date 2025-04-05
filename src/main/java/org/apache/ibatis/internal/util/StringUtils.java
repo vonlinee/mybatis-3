@@ -15,6 +15,8 @@
  */
 package org.apache.ibatis.internal.util;
 
+import java.util.Objects;
+
 import org.jetbrains.annotations.Nullable;
 
 public final class StringUtils {
@@ -195,5 +197,9 @@ public final class StringUtils {
       return null;
     }
     return in.split(",");
+  }
+
+  public static boolean equalsAny(String str, String str1, String str2, String str3) {
+    return Objects.equals(str, str1) || Objects.equals(str, str2) || Objects.equals(str, str3);
   }
 }

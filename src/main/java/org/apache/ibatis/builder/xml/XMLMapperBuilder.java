@@ -17,7 +17,6 @@ package org.apache.ibatis.builder.xml;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -389,7 +388,7 @@ public class XMLMapperBuilder {
 
   private String processNestedResultMappings(XNode context, List<ResultMapping> resultMappings,
       Class<?> enclosingType) {
-    if (Arrays.asList("association", "collection", "case").contains(context.getName())
+    if (StringUtils.equalsAny(context.getName(), "association", "collection", "case")
         && context.getStringAttribute("select") == null) {
       validateCollection(context, enclosingType);
       ResultMap resultMap = parseResultMap(context, resultMappings, enclosingType);
