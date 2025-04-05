@@ -15,7 +15,10 @@
  */
 package org.apache.ibatis.internal.util;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -201,5 +204,10 @@ public final class StringUtils {
 
   public static boolean equalsAny(String str, String str1, String str2, String str3) {
     return Objects.equals(str, str1) || Objects.equals(str, str2) || Objects.equals(str, str3);
+  }
+
+  public static Set<String> splitToSet(String value, String defaultValue) {
+    value = value == null ? defaultValue : value;
+    return new HashSet<>(Arrays.asList(value.split(",")));
   }
 }

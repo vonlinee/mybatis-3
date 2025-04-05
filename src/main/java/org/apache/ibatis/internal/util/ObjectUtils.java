@@ -15,9 +15,6 @@
  */
 package org.apache.ibatis.internal.util;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 public final class ObjectUtils {
@@ -34,16 +31,14 @@ public final class ObjectUtils {
     return Pattern.compile(regex == null ? defaultValue : regex);
   }
 
-  public static Boolean booleanValueOf(String value, Boolean defaultValue) {
-    return value == null ? defaultValue : Boolean.valueOf(value);
+  public static Boolean parseBoolean(String value, Boolean defaultValue) {
+    if (value == null) {
+      return defaultValue;
+    }
+    return "true".equalsIgnoreCase(value) ? Boolean.TRUE : Boolean.FALSE;
   }
 
-  public static Integer integerValueOf(String value, Integer defaultValue) {
+  public static Integer parseInteger(String value, Integer defaultValue) {
     return value == null ? defaultValue : Integer.valueOf(value);
-  }
-
-  public static Set<String> stringSetValueOf(String value, String defaultValue) {
-    value = value == null ? defaultValue : value;
-    return new HashSet<>(Arrays.asList(value.split(",")));
   }
 }

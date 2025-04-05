@@ -26,6 +26,7 @@ import org.apache.ibatis.datasource.DataSourceFactory;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.loader.ProxyFactory;
 import org.apache.ibatis.internal.util.ObjectUtils;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.io.VFS;
 import org.apache.ibatis.logging.Log;
@@ -266,43 +267,42 @@ public class XMLConfigBuilder {
         .setAutoMappingBehavior(AutoMappingBehavior.valueOf(props.getProperty("autoMappingBehavior", "PARTIAL")));
     configuration.setAutoMappingUnknownColumnBehavior(
         AutoMappingUnknownColumnBehavior.valueOf(props.getProperty("autoMappingUnknownColumnBehavior", "NONE")));
-    configuration.setCacheEnabled(ObjectUtils.booleanValueOf(props.getProperty("cacheEnabled"), true));
+    configuration.setCacheEnabled(ObjectUtils.parseBoolean(props.getProperty("cacheEnabled"), true));
     configuration.setProxyFactory((ProxyFactory) configuration.createInstance(props.getProperty("proxyFactory")));
-    configuration.setLazyLoadingEnabled(ObjectUtils.booleanValueOf(props.getProperty("lazyLoadingEnabled"), false));
-    configuration
-        .setAggressiveLazyLoading(ObjectUtils.booleanValueOf(props.getProperty("aggressiveLazyLoading"), false));
-    configuration.setUseColumnLabel(ObjectUtils.booleanValueOf(props.getProperty("useColumnLabel"), true));
-    configuration.setUseGeneratedKeys(ObjectUtils.booleanValueOf(props.getProperty("useGeneratedKeys"), false));
+    configuration.setLazyLoadingEnabled(ObjectUtils.parseBoolean(props.getProperty("lazyLoadingEnabled"), false));
+    configuration.setAggressiveLazyLoading(ObjectUtils.parseBoolean(props.getProperty("aggressiveLazyLoading"), false));
+    configuration.setUseColumnLabel(ObjectUtils.parseBoolean(props.getProperty("useColumnLabel"), true));
+    configuration.setUseGeneratedKeys(ObjectUtils.parseBoolean(props.getProperty("useGeneratedKeys"), false));
     configuration.setDefaultExecutorType(ExecutorType.valueOf(props.getProperty("defaultExecutorType", "SIMPLE")));
     configuration
-        .setDefaultStatementTimeout(ObjectUtils.integerValueOf(props.getProperty("defaultStatementTimeout"), null));
-    configuration.setDefaultFetchSize(ObjectUtils.integerValueOf(props.getProperty("defaultFetchSize"), null));
+        .setDefaultStatementTimeout(ObjectUtils.parseInteger(props.getProperty("defaultStatementTimeout"), null));
+    configuration.setDefaultFetchSize(ObjectUtils.parseInteger(props.getProperty("defaultFetchSize"), null));
     configuration
         .setDefaultResultSetType(configuration.resolveResultSetType(props.getProperty("defaultResultSetType")));
     configuration
-        .setMapUnderscoreToCamelCase(ObjectUtils.booleanValueOf(props.getProperty("mapUnderscoreToCamelCase"), false));
-    configuration.setSafeRowBoundsEnabled(ObjectUtils.booleanValueOf(props.getProperty("safeRowBoundsEnabled"), false));
+        .setMapUnderscoreToCamelCase(ObjectUtils.parseBoolean(props.getProperty("mapUnderscoreToCamelCase"), false));
+    configuration.setSafeRowBoundsEnabled(ObjectUtils.parseBoolean(props.getProperty("safeRowBoundsEnabled"), false));
     configuration.setLocalCacheScope(LocalCacheScope.valueOf(props.getProperty("localCacheScope", "SESSION")));
     configuration.setJdbcTypeForNull(JdbcType.valueOf(props.getProperty("jdbcTypeForNull", "OTHER")));
     configuration.setLazyLoadTriggerMethods(
-        ObjectUtils.stringSetValueOf(props.getProperty("lazyLoadTriggerMethods"), "equals,clone,hashCode,toString"));
+        StringUtils.splitToSet(props.getProperty("lazyLoadTriggerMethods"), "equals,clone,hashCode,toString"));
     configuration
-        .setSafeResultHandlerEnabled(ObjectUtils.booleanValueOf(props.getProperty("safeResultHandlerEnabled"), true));
+        .setSafeResultHandlerEnabled(ObjectUtils.parseBoolean(props.getProperty("safeResultHandlerEnabled"), true));
     configuration
         .setDefaultScriptingLanguage(configuration.resolveClass(props.getProperty("defaultScriptingLanguage")));
     configuration.setDefaultEnumTypeHandler(configuration.resolveClass(props.getProperty("defaultEnumTypeHandler")));
-    configuration.setCallSettersOnNulls(ObjectUtils.booleanValueOf(props.getProperty("callSettersOnNulls"), false));
-    configuration.setUseActualParamName(ObjectUtils.booleanValueOf(props.getProperty("useActualParamName"), true));
-    configuration.setReturnInstanceForEmptyRow(
-        ObjectUtils.booleanValueOf(props.getProperty("returnInstanceForEmptyRow"), false));
+    configuration.setCallSettersOnNulls(ObjectUtils.parseBoolean(props.getProperty("callSettersOnNulls"), false));
+    configuration.setUseActualParamName(ObjectUtils.parseBoolean(props.getProperty("useActualParamName"), true));
+    configuration
+        .setReturnInstanceForEmptyRow(ObjectUtils.parseBoolean(props.getProperty("returnInstanceForEmptyRow"), false));
     configuration.setLogPrefix(props.getProperty("logPrefix"));
     configuration.setConfigurationFactory(configuration.resolveClass(props.getProperty("configurationFactory")));
     configuration
-        .setShrinkWhitespacesInSql(ObjectUtils.booleanValueOf(props.getProperty("shrinkWhitespacesInSql"), false));
+        .setShrinkWhitespacesInSql(ObjectUtils.parseBoolean(props.getProperty("shrinkWhitespacesInSql"), false));
     configuration.setArgNameBasedConstructorAutoMapping(
-        ObjectUtils.booleanValueOf(props.getProperty("argNameBasedConstructorAutoMapping"), false));
+        ObjectUtils.parseBoolean(props.getProperty("argNameBasedConstructorAutoMapping"), false));
     configuration.setDefaultSqlProviderType(configuration.resolveClass(props.getProperty("defaultSqlProviderType")));
-    configuration.setNullableOnForEach(ObjectUtils.booleanValueOf(props.getProperty("nullableOnForEach"), false));
+    configuration.setNullableOnForEach(ObjectUtils.parseBoolean(props.getProperty("nullableOnForEach"), false));
   }
 
   private void environmentsElement(XNode context) throws Exception {
