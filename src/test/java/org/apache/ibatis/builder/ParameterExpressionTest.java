@@ -15,8 +15,6 @@
  */
 package org.apache.ibatis.builder;
 
-import java.util.Map;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -24,106 +22,95 @@ class ParameterExpressionTest {
 
   @Test
   void simpleProperty() {
-    Map<String, String> result = new ParameterExpression("id");
-    Assertions.assertEquals(1, result.size());
-    Assertions.assertEquals("id", result.get("property"));
+    ParameterExpression result = new ParameterExpression("id");
+    Assertions.assertEquals("id", result.getProperty());
   }
 
   @Test
   void propertyWithSpacesInside() {
-    Map<String, String> result = new ParameterExpression(" with spaces ");
+    ParameterExpression result = new ParameterExpression(" with spaces ");
     Assertions.assertEquals(1, result.size());
-    Assertions.assertEquals("with spaces", result.get("property"));
+    Assertions.assertEquals("with spaces", result.getProperty());
   }
 
   @Test
   void simplePropertyWithOldStyleJdbcType() {
-    Map<String, String> result = new ParameterExpression("id:VARCHAR");
-    Assertions.assertEquals(2, result.size());
-    Assertions.assertEquals("id", result.get("property"));
-    Assertions.assertEquals("VARCHAR", result.get("jdbcType"));
+    ParameterExpression result = new ParameterExpression("id:VARCHAR");
+    Assertions.assertEquals("id", result.getProperty());
+    Assertions.assertEquals("VARCHAR", result.getJdbcType());
   }
 
   @Test
   void oldStyleJdbcTypeWithExtraWhitespaces() {
-    Map<String, String> result = new ParameterExpression(" id :  VARCHAR ");
-    Assertions.assertEquals(2, result.size());
-    Assertions.assertEquals("id", result.get("property"));
-    Assertions.assertEquals("VARCHAR", result.get("jdbcType"));
+    ParameterExpression result = new ParameterExpression(" id :  VARCHAR ");
+    Assertions.assertEquals("id", result.getProperty());
+    Assertions.assertEquals("VARCHAR", result.getJdbcType());
   }
 
   @Test
   void expressionWithOldStyleJdbcType() {
-    Map<String, String> result = new ParameterExpression("(id.toString()):VARCHAR");
-    Assertions.assertEquals(2, result.size());
-    Assertions.assertEquals("id.toString()", result.get("expression"));
-    Assertions.assertEquals("VARCHAR", result.get("jdbcType"));
+    ParameterExpression result = new ParameterExpression("(id.toString()):VARCHAR");
+    Assertions.assertEquals("id.toString()", result.getExpression());
+    Assertions.assertEquals("VARCHAR", result.getJdbcType());
   }
 
   @Test
   void simplePropertyWithOneAttribute() {
-    Map<String, String> result = new ParameterExpression("id,name=value");
-    Assertions.assertEquals(2, result.size());
-    Assertions.assertEquals("id", result.get("property"));
-    Assertions.assertEquals("value", result.get("name"));
+    ParameterExpression result = new ParameterExpression("id,name=value");
+    Assertions.assertEquals("id", result.getProperty());
+    Assertions.assertEquals("value", result.getAttribute("name"));
   }
 
   @Test
   void expressionWithOneAttribute() {
-    Map<String, String> result = new ParameterExpression("(id.toString()),name=value");
-    Assertions.assertEquals(2, result.size());
-    Assertions.assertEquals("id.toString()", result.get("expression"));
-    Assertions.assertEquals("value", result.get("name"));
+    ParameterExpression result = new ParameterExpression("(id.toString()),name=value");
+    Assertions.assertEquals("id.toString()", result.getExpression());
+    Assertions.assertEquals("value", result.getAttribute("name"));
   }
 
   @Test
   void simplePropertyWithManyAttributes() {
-    Map<String, String> result = new ParameterExpression("id, attr1=val1, attr2=val2, attr3=val3");
-    Assertions.assertEquals(4, result.size());
-    Assertions.assertEquals("id", result.get("property"));
-    Assertions.assertEquals("val1", result.get("attr1"));
-    Assertions.assertEquals("val2", result.get("attr2"));
-    Assertions.assertEquals("val3", result.get("attr3"));
+    ParameterExpression result = new ParameterExpression("id, attr1=val1, attr2=val2, attr3=val3");
+    Assertions.assertEquals("id", result.getProperty());
+    Assertions.assertEquals("val1", result.getAttribute("attr1"));
+    Assertions.assertEquals("val2", result.getAttribute("attr2"));
+    Assertions.assertEquals("val3", result.getAttribute("attr3"));
   }
 
   @Test
   void expressionWithManyAttributes() {
-    Map<String, String> result = new ParameterExpression("(id.toString()), attr1=val1, attr2=val2, attr3=val3");
-    Assertions.assertEquals(4, result.size());
-    Assertions.assertEquals("id.toString()", result.get("expression"));
-    Assertions.assertEquals("val1", result.get("attr1"));
-    Assertions.assertEquals("val2", result.get("attr2"));
-    Assertions.assertEquals("val3", result.get("attr3"));
+    ParameterExpression result = new ParameterExpression("(id.toString()), attr1=val1, attr2=val2, attr3=val3");
+    Assertions.assertEquals("id.toString()", result.getExpression());
+    Assertions.assertEquals("val1", result.getAttribute("attr1"));
+    Assertions.assertEquals("val2", result.getAttribute("attr2"));
+    Assertions.assertEquals("val3", result.getAttribute("attr3"));
   }
 
   @Test
   void simplePropertyWithOldStyleJdbcTypeAndAttributes() {
-    Map<String, String> result = new ParameterExpression("id:VARCHAR, attr1=val1, attr2=val2");
-    Assertions.assertEquals(4, result.size());
-    Assertions.assertEquals("id", result.get("property"));
-    Assertions.assertEquals("VARCHAR", result.get("jdbcType"));
-    Assertions.assertEquals("val1", result.get("attr1"));
-    Assertions.assertEquals("val2", result.get("attr2"));
+    ParameterExpression result = new ParameterExpression("id:VARCHAR, attr1=val1, attr2=val2");
+    Assertions.assertEquals("id", result.getProperty());
+    Assertions.assertEquals("VARCHAR", result.getJdbcType());
+    Assertions.assertEquals("val1", result.getAttribute("attr1"));
+    Assertions.assertEquals("val2", result.getAttribute("attr2"));
   }
 
   @Test
   void simplePropertyWithSpaceAndManyAttributes() {
-    Map<String, String> result = new ParameterExpression("user name, attr1=val1, attr2=val2, attr3=val3");
-    Assertions.assertEquals(4, result.size());
-    Assertions.assertEquals("user name", result.get("property"));
-    Assertions.assertEquals("val1", result.get("attr1"));
-    Assertions.assertEquals("val2", result.get("attr2"));
-    Assertions.assertEquals("val3", result.get("attr3"));
+    ParameterExpression result = new ParameterExpression("user name, attr1=val1, attr2=val2, attr3=val3");
+    Assertions.assertEquals("user name", result.getProperty());
+    Assertions.assertEquals("val1", result.getAttribute("attr1"));
+    Assertions.assertEquals("val2", result.getAttribute("attr2"));
+    Assertions.assertEquals("val3", result.getAttribute("attr3"));
   }
 
   @Test
   void shouldIgnoreLeadingAndTrailingSpaces() {
-    Map<String, String> result = new ParameterExpression(" id , jdbcType =  VARCHAR,  attr1 = val1 ,  attr2 = val2 ");
-    Assertions.assertEquals(4, result.size());
-    Assertions.assertEquals("id", result.get("property"));
-    Assertions.assertEquals("VARCHAR", result.get("jdbcType"));
-    Assertions.assertEquals("val1", result.get("attr1"));
-    Assertions.assertEquals("val2", result.get("attr2"));
+    ParameterExpression result = new ParameterExpression(" id , jdbcType =  VARCHAR,  attr1 = val1 ,  attr2 = val2 ");
+    Assertions.assertEquals("id", result.getProperty());
+    Assertions.assertEquals("VARCHAR", result.getJdbcType());
+    Assertions.assertEquals("val1", result.getAttribute("attr1"));
+    Assertions.assertEquals("val2", result.getAttribute("attr2"));
   }
 
   @Test

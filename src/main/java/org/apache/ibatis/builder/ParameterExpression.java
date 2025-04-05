@@ -17,6 +17,8 @@ package org.apache.ibatis.builder;
 
 import java.util.HashMap;
 
+import org.apache.ibatis.internal.util.StringUtils;
+
 /**
  * Inline parameter expression parser. Supported grammar (simplified):
  *
@@ -35,12 +37,15 @@ public class ParameterExpression extends HashMap<String, String> {
 
   private static final long serialVersionUID = -2417552199605158680L;
 
+  private String property;
+  private String expression;
+
   public ParameterExpression(String expression) {
     parse(expression);
   }
 
   private void parse(String expression) {
-    int p = skipWS(expression, 0);
+    int p = StringUtils.skipWS(expression, 0);
     if (expression.charAt(p) == '(') {
       expression(expression, p + 1);
     } else {
@@ -65,33 +70,14 @@ public class ParameterExpression extends HashMap<String, String> {
 
   private void property(String expression, int left) {
     if (left < expression.length()) {
-      int right = skipUntil(expression, left, ",:");
-      put("property", trimmedStr(expression, left, right));
+      int right = StringUtils.skipUntil(expression, left, ",:");
+      put("property", StringUtils.trimmedStr(expression, left, right));
       jdbcTypeOpt(expression, right);
     }
   }
 
-  private int skipWS(String expression, int p) {
-    for (int i = p; i < expression.length(); i++) {
-      if (expression.charAt(i) > 0x20) {
-        return i;
-      }
-    }
-    return expression.length();
-  }
-
-  private int skipUntil(String expression, int p, final String endChars) {
-    for (int i = p; i < expression.length(); i++) {
-      char c = expression.charAt(i);
-      if (endChars.indexOf(c) > -1) {
-        return i;
-      }
-    }
-    return expression.length();
-  }
-
   private void jdbcTypeOpt(String expression, int p) {
-    p = skipWS(expression, p);
+    p = StringUtils.skipWS(expression, p);
     if (p < expression.length()) {
       if (expression.charAt(p) == ':') {
         jdbcType(expression, p + 1);
@@ -104,36 +90,41 @@ public class ParameterExpression extends HashMap<String, String> {
   }
 
   private void jdbcType(String expression, int p) {
-    int left = skipWS(expression, p);
-    int right = skipUntil(expression, left, ",");
+    int left = StringUtils.skipWS(expression, p);
+    int right = StringUtils.skipUntil(expression, left, ",");
     if (right <= left) {
       throw new BuilderException("Parsing error in {" + expression + "} in position " + p);
     }
-    put("jdbcType", trimmedStr(expression, left, right));
+    put("jdbcType", StringUtils.trimmedStr(expression, left, right));
     option(expression, right + 1);
   }
 
   private void option(String expression, int p) {
-    int left = skipWS(expression, p);
+    int left = StringUtils.skipWS(expression, p);
     if (left < expression.length()) {
-      int right = skipUntil(expression, left, "=");
-      String name = trimmedStr(expression, left, right);
+      int right = StringUtils.skipUntil(expression, left, "=");
+      String name = StringUtils.trimmedStr(expression, left, right);
       left = right + 1;
-      right = skipUntil(expression, left, ",");
-      String value = trimmedStr(expression, left, right);
+      right = StringUtils.skipUntil(expression, left, ",");
+      String value = StringUtils.trimmedStr(expression, left, right);
       put(name, value);
       option(expression, right + 1);
     }
   }
 
-  private String trimmedStr(String str, int start, int end) {
-    while (str.charAt(start) <= 0x20) {
-      start++;
-    }
-    while (str.charAt(end - 1) <= 0x20) {
-      end--;
-    }
-    return start >= end ? "" : str.substring(start, end);
+  public String getProperty() {
+    return this.get("property");
   }
 
+  public String getAttribute(String attrName) {
+    return this.get(attrName);
+  }
+
+  public String getJdbcType() {
+    return this.get("jdbcType");
+  }
+
+  public String getExpression() {
+    return this.get("expression");
+  }
 }

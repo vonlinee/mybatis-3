@@ -210,4 +210,33 @@ public final class StringUtils {
     value = value == null ? defaultValue : value;
     return new HashSet<>(Arrays.asList(value.split(",")));
   }
+
+  public static int skipUntil(String str, int p, final String endChars) {
+    for (int i = p; i < str.length(); i++) {
+      char c = str.charAt(i);
+      if (endChars.indexOf(c) > -1) {
+        return i;
+      }
+    }
+    return str.length();
+  }
+
+  public static String trimmedStr(String str, int start, int end) {
+    while (str.charAt(start) <= 0x20) {
+      start++;
+    }
+    while (str.charAt(end - 1) <= 0x20) {
+      end--;
+    }
+    return start >= end ? "" : str.substring(start, end);
+  }
+
+  public static int skipWS(String expression, int p) {
+    for (int i = p; i < expression.length(); i++) {
+      if (expression.charAt(i) > 0x20) {
+        return i;
+      }
+    }
+    return expression.length();
+  }
 }
