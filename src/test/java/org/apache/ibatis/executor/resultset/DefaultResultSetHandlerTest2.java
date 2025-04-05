@@ -63,7 +63,7 @@ class DefaultResultSetHandlerTest2 {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     final MappedStatement ms = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
+        new StaticSqlSource("some select statement"), SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
           {
             add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<>() {
               {
@@ -97,7 +97,7 @@ class DefaultResultSetHandlerTest2 {
     }).build();
     config.addResultMap(nestedResultMap);
     final MappedStatement ms = new MappedStatement.Builder(config, "selectPerson",
-        new StaticSqlSource(config, "select person..."), SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
+        new StaticSqlSource("select person..."), SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
           {
             add(new ResultMap.Builder(config, "personMap", HashMap.class, new ArrayList<>() {
               {

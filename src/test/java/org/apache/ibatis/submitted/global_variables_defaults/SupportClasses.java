@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
 public class SupportClasses {
 
   public static class CustomObjectFactory extends DefaultObjectFactory {
-    private static final long serialVersionUID = 4576592418878031661L;
     private Properties properties;
 
     @Override

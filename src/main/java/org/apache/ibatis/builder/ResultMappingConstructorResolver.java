@@ -259,7 +259,7 @@ public class ResultMappingConstructorResolver {
           || originalTypeHandler.getClass().isAssignableFrom(UnknownTypeHandler.class) ? null : originalTypeHandler;
 
       // given that we selected a new java type, overwrite the currently
-      // selected type handler so it can get retrieved again from the registry
+      // selected type handler, so it can get retrieved again from the registry
       adjustedAutoTypeResultMappings.add(
           new ResultMapping.Builder(originalMapping).javaType(matchingArg.getType()).typeHandler(typeHandler).build());
     }

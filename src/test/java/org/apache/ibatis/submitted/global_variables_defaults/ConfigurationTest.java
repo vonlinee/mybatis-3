@@ -88,13 +88,13 @@ class ConfigurationTest {
 
     configuration.addMappedStatement(
         new MappedStatement.Builder(configuration, "org.apache.ibatis.submitted.DemoMapper1.selectById",
-            new StaticSqlSource(configuration, "select * from test where id = 1"), SqlCommandType.SELECT).build());
+            new StaticSqlSource("select * from test where id = 1"), SqlCommandType.SELECT).build());
     configuration
         .addMappedStatement(new MappedStatement.Builder(configuration, "org.apache.ibatis.submitted.DemoMapper1.test",
-            new StaticSqlSource(configuration, "select * from test"), SqlCommandType.SELECT).build());
+            new StaticSqlSource("select * from test"), SqlCommandType.SELECT).build());
     configuration
         .addMappedStatement(new MappedStatement.Builder(configuration, "org.apache.ibatis.submitted.DemoMapper2.test",
-            new StaticSqlSource(configuration, "select * from test"), SqlCommandType.SELECT).build());
+            new StaticSqlSource("select * from test"), SqlCommandType.SELECT).build());
 
     Assertions.assertThat(configuration.getMappedStatement("selectById")).isNotNull();
     Assertions.assertThat(configuration.getMappedStatement("org.apache.ibatis.submitted.DemoMapper1.test")).isNotNull();

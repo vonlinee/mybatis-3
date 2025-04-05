@@ -468,7 +468,7 @@ class BaseExecutorTest extends BaseDataTest {
     TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
     MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
+        new StaticSqlSource("some select statement"), SqlCommandType.SELECT).build();
 
     Object parameterObject = 1;
 
@@ -500,7 +500,7 @@ class BaseExecutorTest extends BaseDataTest {
     TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
     MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
+        new StaticSqlSource("some select statement"), SqlCommandType.SELECT).build();
 
     Object parameterObject = null;
 
@@ -528,7 +528,7 @@ class BaseExecutorTest extends BaseDataTest {
     TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
     MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
+        new StaticSqlSource("some select statement"), SqlCommandType.SELECT).build();
 
     Object parameterObject = 1;
 
@@ -556,7 +556,7 @@ class BaseExecutorTest extends BaseDataTest {
     TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
     MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
+        new StaticSqlSource("some select statement"), SqlCommandType.SELECT).build();
 
     Author parameterObject = new Author(-1, "cbegin", "******", "cbegin@nowhere.com", "N/A", Section.NEWS);
 

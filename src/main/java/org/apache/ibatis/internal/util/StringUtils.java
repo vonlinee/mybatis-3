@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -254,5 +255,19 @@ public final class StringUtils {
       }
     }
     return expression.length();
+  }
+
+  public static String removeExtraWhitespaces(String original) {
+    StringTokenizer tokenizer = new StringTokenizer(original);
+    StringBuilder builder = new StringBuilder();
+    boolean hasMoreTokens = tokenizer.hasMoreTokens();
+    while (hasMoreTokens) {
+      builder.append(tokenizer.nextToken());
+      hasMoreTokens = tokenizer.hasMoreTokens();
+      if (hasMoreTokens) {
+        builder.append(' ');
+      }
+    }
+    return builder.toString();
   }
 }

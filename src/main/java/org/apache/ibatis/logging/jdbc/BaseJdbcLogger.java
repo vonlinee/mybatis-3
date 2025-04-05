@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.ibatis.builder.SqlSourceBuilder;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.reflection.ArrayUtil;
 
@@ -119,7 +119,7 @@ public abstract class BaseJdbcLogger {
   }
 
   protected String removeExtraWhitespace(String original) {
-    return SqlSourceBuilder.removeExtraWhitespaces(original);
+    return StringUtils.removeExtraWhitespaces(original);
   }
 
   protected boolean isDebugEnabled() {

@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.builder;
 
+import org.apache.ibatis.internal.util.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +24,7 @@ class SqlSourceBuilderTest {
   @Test
   void shrinkWhitespacesInSqlIsTrue() {
     String sqlFromXml = "\t\n\n  SELECT * \n        FROM user\n \t        WHERE user_id = 1\n\t  ";
-    String actual = SqlSourceBuilder.removeExtraWhitespaces(sqlFromXml);
+    String actual = StringUtils.removeExtraWhitespaces(sqlFromXml);
     String shrankWhitespacesInSql = "SELECT * FROM user WHERE user_id = 1";
     Assertions.assertEquals(shrankWhitespacesInSql, actual);
   }

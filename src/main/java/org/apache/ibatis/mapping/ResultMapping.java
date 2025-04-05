@@ -69,6 +69,7 @@ public class ResultMapping {
     }
 
     public Builder(Configuration configuration, String property) {
+      resultMapping.configuration = configuration;
       resultMapping.property = property;
       resultMapping.flags = new ArrayList<>();
       resultMapping.composites = new ArrayList<>();

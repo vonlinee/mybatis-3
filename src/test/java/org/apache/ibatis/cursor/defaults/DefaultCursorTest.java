@@ -32,17 +32,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.builder.StaticSqlSource;
-import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
 import org.apache.ibatis.executor.resultset.ResultSetWrapper;
-import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.junit.jupiter.api.Test;
@@ -64,14 +60,9 @@ class DefaultCursorTest {
     final MappedStatement ms = getNestedAndOrderedMappedStatement();
     final ResultMap rm = ms.getResultMaps().get(0);
 
-    final Executor executor = null;
-    final ParameterHandler parameterHandler = null;
-    final ResultHandler<?> resultHandler = null;
-    final BoundSql boundSql = null;
     final RowBounds rowBounds = RowBounds.DEFAULT;
 
-    final DefaultResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, ms, resultHandler,
-        rowBounds);
+    final DefaultResultSetHandler resultSetHandler = new DefaultResultSetHandler(null, ms, null, rowBounds);
 
     when(rsmd.getColumnCount()).thenReturn(2);
     doReturn("id").when(rsmd).getColumnLabel(1);
@@ -103,20 +94,17 @@ class DefaultCursorTest {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
-    ResultMap nestedResultMap = new ResultMap.Builder(config, "roleMap", HashMap.class, new ArrayList<ResultMapping>() {
-      private static final long serialVersionUID = 1L;
+    ResultMap nestedResultMap = new ResultMap.Builder(config, "roleMap", HashMap.class, new ArrayList<>() {
       {
         add(new ResultMapping.Builder(config, "role", "role", registry.getTypeHandler(String.class)).build());
       }
     }).build();
     config.addResultMap(nestedResultMap);
 
-    return new MappedStatement.Builder(config, "selectPerson", new StaticSqlSource(config, "select person..."),
-        SqlCommandType.SELECT).resultMaps(new ArrayList<ResultMap>() {
-          private static final long serialVersionUID = 1L;
+    return new MappedStatement.Builder(config, "selectPerson", new StaticSqlSource("select person..."),
+        SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
           {
-            add(new ResultMap.Builder(config, "personMap", HashMap.class, new ArrayList<ResultMapping>() {
-              private static final long serialVersionUID = 1L;
+            add(new ResultMap.Builder(config, "personMap", HashMap.class, new ArrayList<>() {
               {
                 add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(Integer.class)).build());
                 add(new ResultMapping.Builder(config, "roles").nestedResultMapId("roleMap").build());
@@ -131,7 +119,7 @@ class DefaultCursorTest {
    */
   protected abstract class ImpatientResultSet implements ResultSet {
     private int rowIndex = -1;
-    private List<Map<String, Object>> rows = new ArrayList<>();
+    private final List<Map<String, Object>> rows = new ArrayList<>();
 
     protected ImpatientResultSet() {
       Map<String, Object> row = new HashMap<>();

@@ -32,14 +32,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.ibatis.builder.StaticSqlSource;
-import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
@@ -73,8 +71,6 @@ class DefaultResultSetHandlerTest {
 
     final MappedStatement ms = getMappedStatement();
 
-    final Executor executor = null;
-    final ResultHandler resultHandler = null;
     final RowBounds rowBounds = new RowBounds(0, 100);
     final DefaultResultSetHandler fastResultSetHandler = new DefaultResultSetHandler(null, ms, null, rowBounds);
 
@@ -117,7 +113,7 @@ class DefaultResultSetHandlerTest {
           /* useCollectionConstructorInjection */ null/* parentRowKey */);
       Assertions.fail("Should have thrown ExecutorException");
     } catch (Exception e) {
-      Assertions.assertTrue(e instanceof ExecutorException, "Expected ExecutorException");
+      Assertions.assertInstanceOf(ExecutorException.class, e, "Expected ExecutorException");
       Assertions.assertTrue(e.getMessage().contains("mapping: " + resultMapping.toString()));
     }
   }
@@ -125,12 +121,10 @@ class DefaultResultSetHandlerTest {
   MappedStatement getMappedStatement() {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
-    return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource(config, "some select statement"),
-        SqlCommandType.SELECT).resultMaps(new ArrayList<ResultMap>() {
-          private static final long serialVersionUID = 1L;
+    return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource("some select statement"),
+        SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
           {
-            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<ResultMapping>() {
-              private static final long serialVersionUID = 1L;
+            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<>() {
               {
                 add(new ResultMapping.Builder(config, "cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class))
                     .build());
