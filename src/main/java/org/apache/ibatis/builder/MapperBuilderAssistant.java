@@ -157,7 +157,7 @@ public class MapperBuilderAssistant {
 
   public ParameterMap buildParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
     id = applyCurrentNamespace(id, false);
-    return new ParameterMap.Builder(id, parameterClass, parameterMappings).build();
+    return new ParameterMap(id, parameterClass, parameterMappings);
   }
 
   public ParameterMapping buildParameterMapping(Class<?> parameterType, String property, Class<?> javaType,
@@ -279,7 +279,7 @@ public class MapperBuilderAssistant {
       }
     } else if (parameterTypeClass != null) {
       List<ParameterMapping> parameterMappings = new ArrayList<>();
-      parameterMap = new ParameterMap.Builder(statementId + "-Inline", parameterTypeClass, parameterMappings).build();
+      parameterMap = new ParameterMap(statementId + "-Inline", parameterTypeClass, parameterMappings);
     }
     return parameterMap;
   }

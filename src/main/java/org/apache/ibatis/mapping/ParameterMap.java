@@ -23,31 +23,20 @@ import java.util.List;
  */
 public class ParameterMap {
 
-  private String id;
-  private Class<?> type;
-  private List<ParameterMapping> parameterMappings;
+  private final String id;
+  private final Class<?> type;
+  private final List<ParameterMapping> parameterMappings;
 
-  private ParameterMap() {
+  public ParameterMap(String id, Class<?> type, List<ParameterMapping> parameterMappings) {
+    this.id = id;
+    this.type = type;
+    this.parameterMappings = parameterMappings == null ? Collections.emptyList() : parameterMappings;
   }
 
-  public static class Builder {
-    private final ParameterMap parameterMap = new ParameterMap();
-
-    public Builder(String id, Class<?> type, List<ParameterMapping> parameterMappings) {
-      parameterMap.id = id;
-      parameterMap.type = type;
-      parameterMap.parameterMappings = parameterMappings;
-    }
-
-    public Class<?> type() {
-      return parameterMap.type;
-    }
-
-    public ParameterMap build() {
-      // lock down collections
-      parameterMap.parameterMappings = Collections.unmodifiableList(parameterMap.parameterMappings);
-      return parameterMap;
-    }
+  public ParameterMap(String id, Class<?> type) {
+    this.id = id;
+    this.type = type;
+    this.parameterMappings = Collections.emptyList();
   }
 
   public String getId() {
