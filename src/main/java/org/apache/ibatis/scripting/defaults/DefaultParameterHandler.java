@@ -62,12 +62,12 @@ public class DefaultParameterHandler implements ParameterHandler {
     public <T> T unwrap(Class<T> iface) throws SQLException { return null; }
     public boolean isWrapperFor(Class<?> iface) throws SQLException { return false; }
     public boolean isSigned(int param) throws SQLException { return false; }
-    public int isNullable(int param) throws SQLException { return 0; }
+    public int isNullable(int param) throws SQLException { return ParameterMetaData.parameterNoNulls; }
     public int getScale(int param) throws SQLException { return 0; }
     public int getPrecision(int param) throws SQLException { return 0; }
     public String getParameterTypeName(int param) throws SQLException { return null; }
     public int getParameterType(int param) throws SQLException { return 0; }
-    public int getParameterMode(int param) throws SQLException { return 0; }
+    public int getParameterMode(int param) throws SQLException { return ParameterMetaData.parameterModeUnknown; }
     public int getParameterCount() throws SQLException { return 0; }
     public String getParameterClassName(int param) throws SQLException { return null; }
     // @formatter:on

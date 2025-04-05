@@ -37,9 +37,6 @@ public class ParameterExpression extends HashMap<String, String> {
 
   private static final long serialVersionUID = -2417552199605158680L;
 
-  private String property;
-  private String expression;
-
   public ParameterExpression(String expression) {
     parse(expression);
   }
