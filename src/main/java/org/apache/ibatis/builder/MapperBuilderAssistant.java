@@ -55,14 +55,17 @@ public class MapperBuilderAssistant {
 
   protected final Configuration configuration;
   private String currentNamespace;
-  private final String resource;
+  private String currentResource;
   private Cache currentCache;
   private boolean unresolvedCacheRef; // issue #676
 
-  public MapperBuilderAssistant(Configuration configuration, String resource) {
+  public MapperBuilderAssistant(Configuration configuration) {
     this.configuration = configuration;
+  }
+
+  public void setCurrentLoadedResource(String resource) {
+    this.currentResource = resource;
     ErrorContext.instance().resource(resource);
-    this.resource = resource;
   }
 
   public String getCurrentNamespace() {
@@ -235,7 +238,7 @@ public class MapperBuilderAssistant {
 
     // @formatter:off
     MappedStatement.Builder statementBuilder = new MappedStatement.Builder(configuration, id, sqlSource, sqlCommandType)
-      .resource(resource)
+      .resource(currentResource)
       .fetchSize(fetchSize)
       .timeout(timeout)
       .statementType(statementType)

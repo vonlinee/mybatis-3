@@ -68,8 +68,8 @@ public class MapperRegistry {
         // It's important that the type is added before the parser is run
         // otherwise the binding may automatically be attempted by the
         // mapper parser. If the type is already known, it won't try.
-        MapperAnnotationBuilder parser = new MapperAnnotationBuilder(config, type);
-        parser.parse();
+        MapperAnnotationBuilder parser = new MapperAnnotationBuilder(config);
+        parser.parse(type);
         loadCompleted = true;
       } finally {
         if (!loadCompleted) {

@@ -74,7 +74,8 @@ public class XMLMapperBuilder {
   private XMLMapperBuilder(XPathParser parser, Configuration configuration, String resource,
       Map<String, XNode> sqlFragments) {
     this.configuration = configuration;
-    this.builderAssistant = new MapperBuilderAssistant(configuration, resource);
+    this.builderAssistant = new MapperBuilderAssistant(configuration);
+    this.builderAssistant.setCurrentLoadedResource(resource);
     this.parser = parser;
     this.sqlFragments = sqlFragments;
     this.resource = resource;
@@ -83,16 +84,11 @@ public class XMLMapperBuilder {
   public void parse() {
     this.builderAssistant.loadResource(resource, (configuration, resource) -> {
       configurationElement(parser.evalNode("/mapper"));
-
       // bind Mapper For Namespace
       String namespace = builderAssistant.getCurrentNamespace();
       if (namespace != null) {
-        Class<?> boundType = null;
-        try {
-          boundType = Resources.classForName(namespace);
-        } catch (ClassNotFoundException e) {
-          // ignore, bound type is not required
-        }
+        // ignore, bound type is not required
+        Class<?> boundType = Resources.classForNameOrNull(namespace);
         if (boundType != null && !configuration.hasMapper(boundType)) {
           // Spring may not know the real resource name, so we set a flag
           // to prevent loading again this resource from the mapper interface

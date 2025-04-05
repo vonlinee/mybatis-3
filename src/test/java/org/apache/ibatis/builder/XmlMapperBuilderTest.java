@@ -151,7 +151,8 @@ class XmlMapperBuilderTest {
 
   @Test
   void setCurrentNamespaceValueIsNull() {
-    MapperBuilderAssistant builder = new MapperBuilderAssistant(new Configuration(), "resource");
+    MapperBuilderAssistant builder = new MapperBuilderAssistant(new Configuration());
+    builder.setCurrentLoadedResource("resource");
     when(() -> builder.setCurrentNamespace(null));
     then(caughtException()).isInstanceOf(BuilderException.class)
         .hasMessage("The mapper element requires a namespace attribute to be specified.");
@@ -159,7 +160,8 @@ class XmlMapperBuilderTest {
 
   @Test
   void useCacheRefNamespaceIsNull() {
-    MapperBuilderAssistant builder = new MapperBuilderAssistant(new Configuration(), "resource");
+    MapperBuilderAssistant builder = new MapperBuilderAssistant(new Configuration());
+    builder.setCurrentLoadedResource("resource");
     when(() -> builder.useCacheRef(null));
     then(caughtException()).isInstanceOf(BuilderException.class)
         .hasMessage("cache-ref element requires a namespace attribute.");
@@ -167,7 +169,8 @@ class XmlMapperBuilderTest {
 
   @Test
   void useCacheRefNamespaceIsUndefined() {
-    MapperBuilderAssistant builder = new MapperBuilderAssistant(new Configuration(), "resource");
+    MapperBuilderAssistant builder = new MapperBuilderAssistant(new Configuration());
+    builder.setCurrentLoadedResource("resource");
     when(() -> builder.useCacheRef("eee"));
     then(caughtException()).hasMessage("No cache for namespace 'eee' could be found.");
   }

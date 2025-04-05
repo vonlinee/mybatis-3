@@ -33,8 +33,8 @@ class AnnotationMapperBuilderTest {
   @Test
   void withOptions() {
     Configuration configuration = new Configuration();
-    MapperAnnotationBuilder builder = new MapperAnnotationBuilder(configuration, Mapper.class);
-    builder.parse();
+    MapperAnnotationBuilder builder = new MapperAnnotationBuilder(configuration);
+    builder.parse(Mapper.class);
 
     MappedStatement mappedStatement = configuration.getMappedStatement("selectWithOptions");
     assertThat(mappedStatement.getFetchSize()).isEqualTo(200);
@@ -55,8 +55,8 @@ class AnnotationMapperBuilderTest {
   void withOptionsAndWithoutOptionsAttributesWhenSpecifyDefaultValue() {
     Configuration configuration = new Configuration();
     configuration.setDefaultResultSetType(ResultSetType.SCROLL_INSENSITIVE);
-    MapperAnnotationBuilder builder = new MapperAnnotationBuilder(configuration, Mapper.class);
-    builder.parse();
+    MapperAnnotationBuilder builder = new MapperAnnotationBuilder(configuration);
+    builder.parse(Mapper.class);
 
     MappedStatement mappedStatement = configuration.getMappedStatement("selectWithOptionsAndWithoutOptionsAttributes");
     assertThat(mappedStatement.getResultSetType()).isEqualTo(ResultSetType.SCROLL_INSENSITIVE);
@@ -65,8 +65,8 @@ class AnnotationMapperBuilderTest {
   @Test
   void withOptionsAndWithoutOptionsAttributesWhenNotSpecifyDefaultValue() {
     Configuration configuration = new Configuration();
-    MapperAnnotationBuilder builder = new MapperAnnotationBuilder(configuration, Mapper.class);
-    builder.parse();
+    MapperAnnotationBuilder builder = new MapperAnnotationBuilder(configuration);
+    builder.parse(Mapper.class);
 
     MappedStatement mappedStatement = configuration.getMappedStatement("selectWithOptionsAndWithoutOptionsAttributes");
     assertThat(mappedStatement.getResultSetType()).isEqualTo(ResultSetType.DEFAULT);
@@ -76,8 +76,8 @@ class AnnotationMapperBuilderTest {
   void withoutOptionsWhenSpecifyDefaultValue() {
     Configuration configuration = new Configuration();
     configuration.setDefaultResultSetType(ResultSetType.SCROLL_INSENSITIVE);
-    MapperAnnotationBuilder builder = new MapperAnnotationBuilder(configuration, Mapper.class);
-    builder.parse();
+    MapperAnnotationBuilder builder = new MapperAnnotationBuilder(configuration);
+    builder.parse(Mapper.class);
 
     MappedStatement mappedStatement = configuration.getMappedStatement("selectWithoutOptions");
     assertThat(mappedStatement.getResultSetType()).isEqualTo(ResultSetType.SCROLL_INSENSITIVE);
@@ -86,8 +86,8 @@ class AnnotationMapperBuilderTest {
   @Test
   void withoutOptionsWhenNotSpecifyDefaultValue() {
     Configuration configuration = new Configuration();
-    MapperAnnotationBuilder builder = new MapperAnnotationBuilder(configuration, Mapper.class);
-    builder.parse();
+    MapperAnnotationBuilder builder = new MapperAnnotationBuilder(configuration);
+    builder.parse(Mapper.class);
 
     MappedStatement mappedStatement = configuration.getMappedStatement("selectWithoutOptions");
     assertThat(mappedStatement.getResultSetType()).isEqualTo(ResultSetType.DEFAULT);
