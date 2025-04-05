@@ -96,7 +96,8 @@ class DefaultCursorTest {
 
     ResultMap nestedResultMap = new ResultMap.Builder(config, "roleMap", HashMap.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "role", "role", registry.getTypeHandler(String.class)).build());
+        add(new ResultMapping.Builder("role", "role", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
       }
     }).build();
     config.addResultMap(nestedResultMap);
@@ -106,8 +107,10 @@ class DefaultCursorTest {
           {
             add(new ResultMap.Builder(config, "personMap", HashMap.class, new ArrayList<>() {
               {
-                add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(Integer.class)).build());
-                add(new ResultMapping.Builder(config, "roles").nestedResultMapId("roleMap").build());
+                add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(Integer.class),
+                    config.isLazyLoadingEnabled()).build());
+                add(new ResultMapping.Builder("roles", config.isLazyLoadingEnabled()).nestedResultMapId("roleMap")
+                    .build());
               }
             }).build());
           }

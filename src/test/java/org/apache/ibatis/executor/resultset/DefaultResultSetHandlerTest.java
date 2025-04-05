@@ -126,8 +126,8 @@ class DefaultResultSetHandlerTest {
           {
             add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<>() {
               {
-                add(new ResultMapping.Builder(config, "cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class))
-                    .build());
+                add(new ResultMapping.Builder("cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class),
+                    config.isLazyLoadingEnabled()).build());
               }
             }).build());
           }

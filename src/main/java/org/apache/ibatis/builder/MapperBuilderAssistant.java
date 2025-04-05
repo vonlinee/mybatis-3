@@ -319,7 +319,7 @@ public class MapperBuilderAssistant {
       composites = parseCompositeColumnName(column);
     }
     // @formatter:off
-    return new ResultMapping.Builder(configuration, property, column, setterType.getValue())
+    return new ResultMapping.Builder(property, column, setterType.getValue(), configuration.isLazyLoadingEnabled())
       .jdbcType(jdbcType)
       .nestedQueryId(applyCurrentNamespace(nestedSelect, true))
       .nestedResultMapId(applyCurrentNamespace(nestedResultMap, true))
@@ -368,7 +368,8 @@ public class MapperBuilderAssistant {
       while (parser.hasMoreTokens()) {
         String property = parser.nextToken();
         String column = parser.nextToken();
-        ResultMapping complexResultMapping = new ResultMapping.Builder(configuration, property, column).build();
+        ResultMapping complexResultMapping = new ResultMapping.Builder(property, column,
+            configuration.isLazyLoadingEnabled()).build();
         compositeMappings.add(complexResultMapping);
       }
     }

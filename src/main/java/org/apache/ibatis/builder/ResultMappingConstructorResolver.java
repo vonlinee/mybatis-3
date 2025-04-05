@@ -260,8 +260,14 @@ public class ResultMappingConstructorResolver {
 
       // given that we selected a new java type, overwrite the currently
       // selected type handler, so it can get retrieved again from the registry
+      // @formatter:off
       adjustedAutoTypeResultMappings.add(
-          new ResultMapping.Builder(originalMapping).javaType(matchingArg.getType()).typeHandler(typeHandler).build());
+          new ResultMapping.Builder(originalMapping)
+            .javaType(matchingArg.getType())
+            .lazy(configuration.isLazyLoadingEnabled())
+            .typeHandler(typeHandler)
+            .build());
+      // @formatter:on
     }
 
     return adjustedAutoTypeResultMappings;

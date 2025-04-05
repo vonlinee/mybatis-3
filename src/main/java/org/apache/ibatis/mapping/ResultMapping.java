@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
@@ -29,7 +28,6 @@ import org.apache.ibatis.type.TypeHandler;
  */
 public class ResultMapping {
 
-  private Configuration configuration;
   private String property;
   private String column;
   private Class<?> javaType;
@@ -51,33 +49,32 @@ public class ResultMapping {
   public static class Builder {
     private final ResultMapping resultMapping = new ResultMapping();
 
-    public Builder(Configuration configuration, String property, String column, TypeHandler<?> typeHandler) {
-      this(configuration, property);
+    public Builder(String property, String column, TypeHandler<?> typeHandler, boolean lazy) {
+      this(property, lazy);
       resultMapping.column = column;
       resultMapping.typeHandler = typeHandler;
     }
 
-    public Builder(Configuration configuration, String property, String column) {
-      this(configuration, property);
+    public Builder(String property, String column, boolean lazy) {
+      this(property, lazy);
       resultMapping.column = column;
     }
 
-    public Builder(Configuration configuration, String property, String column, Class<?> javaType) {
-      this(configuration, property);
+    public Builder(String property, String column, Class<?> javaType, boolean lazy) {
+      this(property, lazy);
       resultMapping.column = column;
       resultMapping.javaType = javaType;
     }
 
-    public Builder(Configuration configuration, String property) {
-      resultMapping.configuration = configuration;
+    public Builder(String property, boolean lazy) {
       resultMapping.property = property;
       resultMapping.flags = new ArrayList<>();
       resultMapping.composites = new ArrayList<>();
-      resultMapping.lazy = configuration.isLazyLoadingEnabled();
+      resultMapping.lazy = lazy;
     }
 
     public Builder(ResultMapping otherMapping) {
-      this(otherMapping.configuration, otherMapping.property);
+      this(otherMapping.property, otherMapping.lazy);
 
       resultMapping.flags.addAll(otherMapping.flags);
       resultMapping.composites.addAll(otherMapping.composites);

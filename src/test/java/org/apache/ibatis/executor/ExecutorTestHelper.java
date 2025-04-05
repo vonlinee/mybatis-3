@@ -142,13 +142,18 @@ final class ExecutorTestHelper {
 
     final ResultMap rm = new ResultMap.Builder(config, "defaultResultMap", Author.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).build());
-        add(new ResultMapping.Builder(config, "username", "username", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "password", "password", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "email", "email", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "bio", "bio", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "favouriteSection", "favourite_section",
-            registry.getTypeHandler(Section.class)).build());
+        add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class), config.isLazyLoadingEnabled())
+            .build());
+        add(new ResultMapping.Builder("username", "username", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("password", "password", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("email", "email", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("bio", "bio", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("favouriteSection", "favourite_section", registry.getTypeHandler(Section.class),
+            config.isLazyLoadingEnabled()).build());
       }
     }).build();
 
@@ -171,9 +176,9 @@ final class ExecutorTestHelper {
           {
             add(new ResultMap.Builder(config, "defaultResultMap", Author.class, new ArrayList<>() {
               {
-                add(new ResultMapping.Builder(config, "favouriteSection", "favourite_section",
-                    registry.getTypeHandler(Section.class)).build());
-                add(new ResultMapping.Builder(config, null, "not_exists", Object.class).build());
+                add(new ResultMapping.Builder("favouriteSection", "favourite_section",
+                    registry.getTypeHandler(Section.class), config.isLazyLoadingEnabled()).build());
+                add(new ResultMapping.Builder(null, "not_exists", Object.class, config.isLazyLoadingEnabled()).build());
               }
             }).build());
           }
@@ -191,20 +196,22 @@ final class ExecutorTestHelper {
           {
             add(new ResultMap.Builder(config, "defaultResultMap", Author.class, new ArrayList<>() {
               {
-                add(new ResultMapping.Builder(config, null, "id", registry.getTypeHandler(Integer.class))
-                    .javaType(int.class).flags(new ArrayList<>() {
+                add(new ResultMapping.Builder(null, "id", registry.getTypeHandler(Integer.class),
+                    config.isLazyLoadingEnabled()).javaType(int.class).flags(new ArrayList<>() {
                       {
                         add(ResultFlag.CONSTRUCTOR);
                       }
                     }).build());
-                add(new ResultMapping.Builder(config, "username", "username", registry.getTypeHandler(String.class))
-                    .build());
-                add(new ResultMapping.Builder(config, "password", "password", registry.getTypeHandler(String.class))
-                    .build());
-                add(new ResultMapping.Builder(config, "email", "email", registry.getTypeHandler(String.class)).build());
-                add(new ResultMapping.Builder(config, "bio", "bio", registry.getTypeHandler(String.class)).build());
-                add(new ResultMapping.Builder(config, "favouriteSection", "favourite_section",
-                    registry.getTypeHandler(Section.class)).build());
+                add(new ResultMapping.Builder("username", "username", registry.getTypeHandler(String.class),
+                    config.isLazyLoadingEnabled()).build());
+                add(new ResultMapping.Builder("password", "password", registry.getTypeHandler(String.class),
+                    config.isLazyLoadingEnabled()).build());
+                add(new ResultMapping.Builder("email", "email", registry.getTypeHandler(String.class),
+                    config.isLazyLoadingEnabled()).build());
+                add(new ResultMapping.Builder("bio", "bio", registry.getTypeHandler(String.class),
+                    config.isLazyLoadingEnabled()).build());
+                add(new ResultMapping.Builder("favouriteSection", "favourite_section",
+                    registry.getTypeHandler(Section.class), config.isLazyLoadingEnabled()).build());
               }
             }).build());
           }
@@ -225,14 +232,16 @@ final class ExecutorTestHelper {
               {
                 ResultMap map = new ResultMap.Builder(config, "defaultResultMap", Author.class, new ArrayList<>() {
                   {
-                    add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).build());
-                    add(new ResultMapping.Builder(config, "username", "username", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "password", "password", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "email", "email", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "bio", "bio", registry.getTypeHandler(String.class)).build());
+                    add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class),
+                        config.isLazyLoadingEnabled()).build());
+                    add(new ResultMapping.Builder("username", "username", registry.getTypeHandler(String.class),
+                        config.isLazyLoadingEnabled()).build());
+                    add(new ResultMapping.Builder("password", "password", registry.getTypeHandler(String.class),
+                        config.isLazyLoadingEnabled()).build());
+                    add(new ResultMapping.Builder("email", "email", registry.getTypeHandler(String.class),
+                        config.isLazyLoadingEnabled()).build());
+                    add(new ResultMapping.Builder("bio", "bio", registry.getTypeHandler(String.class),
+                        config.isLazyLoadingEnabled()).build());
                   }
                 }).build();
                 add(map);
@@ -266,8 +275,10 @@ final class ExecutorTestHelper {
     final ResultMap discriminatorResultMap = new ResultMap.Builder(config, "postResultMap", HashMap.class,
         new ArrayList<>() {
           {
-            add(new ResultMapping.Builder(config, "subject", "subject", registry.getTypeHandler(String.class)).build());
-            add(new ResultMapping.Builder(config, "body", "body", registry.getTypeHandler(String.class)).build());
+            add(new ResultMapping.Builder("subject", "subject", registry.getTypeHandler(String.class),
+                config.isLazyLoadingEnabled()).build());
+            add(new ResultMapping.Builder("body", "body", registry.getTypeHandler(String.class),
+                config.isLazyLoadingEnabled()).build());
           }
         }).build();
     config.addResultMap(discriminatorResultMap);
@@ -276,13 +287,13 @@ final class ExecutorTestHelper {
           {
             add(new ResultMap.Builder(config, "defaultResultMap", HashMap.class, new ArrayList<>() {
               {
-                add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).build());
-                add(new ResultMapping.Builder(config, "blog_id", "blog_id", registry.getTypeHandler(int.class))
-                    .build());
+                add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class),
+                    config.isLazyLoadingEnabled()).build());
+                add(new ResultMapping.Builder("blog_id", "blog_id", registry.getTypeHandler(int.class),
+                    config.isLazyLoadingEnabled()).build());
               }
-            }).discriminator(new Discriminator.Builder(
-                new ResultMapping.Builder(config, "section", "section", registry.getTypeHandler(String.class)).build(),
-                new HashMap<>() {
+            }).discriminator(new Discriminator.Builder(new ResultMapping.Builder("section", "section",
+                registry.getTypeHandler(String.class), config.isLazyLoadingEnabled()).build(), new HashMap<>() {
                   {
                     put("NEWS", discriminatorResultMap.getId());
                     put("VIDEOS", discriminatorResultMap.getId());
@@ -311,14 +322,16 @@ final class ExecutorTestHelper {
               {
                 add(new ResultMap.Builder(config, "defaultResultMap", Author.class, new ArrayList<>() {
                   {
-                    add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).build());
-                    add(new ResultMapping.Builder(config, "username", "username", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "password", "password", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "email", "email", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "bio", "bio", registry.getTypeHandler(String.class)).build());
+                    add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class),
+                        config.isLazyLoadingEnabled()).build());
+                    add(new ResultMapping.Builder("username", "username", registry.getTypeHandler(String.class),
+                        config.isLazyLoadingEnabled()).build());
+                    add(new ResultMapping.Builder("password", "password", registry.getTypeHandler(String.class),
+                        config.isLazyLoadingEnabled()).build());
+                    add(new ResultMapping.Builder("email", "email", registry.getTypeHandler(String.class),
+                        config.isLazyLoadingEnabled()).build());
+                    add(new ResultMapping.Builder("bio", "bio", registry.getTypeHandler(String.class),
+                        config.isLazyLoadingEnabled()).build());
                   }
                 }).build());
               }
@@ -346,21 +359,26 @@ final class ExecutorTestHelper {
     });
     final ResultMap resultMap = new ResultMap.Builder(config, "defaultResultMap", Blog.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
-          {
-            add(ResultFlag.ID);
-          }
-        }).build());
-        add(new ResultMapping.Builder(config, "title", "title", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "author.id", "author_id", registry.getTypeHandler(int.class)).build());
-        add(new ResultMapping.Builder(config, "author.username", "username", registry.getTypeHandler(String.class))
-            .build());
-        add(new ResultMapping.Builder(config, "author.password", "password", registry.getTypeHandler(String.class))
-            .build());
-        add(new ResultMapping.Builder(config, "author.email", "email", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "author.bio", "bio", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "posts", "id", registry.getTypeHandler(int.class)).javaType(List.class)
-            .nestedQueryId("selectPostsForBlog").build());
+        add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class), config.isLazyLoadingEnabled())
+            .flags(new ArrayList<>() {
+              {
+                add(ResultFlag.ID);
+              }
+            }).build());
+        add(new ResultMapping.Builder("title", "title", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("author.id", "author_id", registry.getTypeHandler(int.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("author.username", "username", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("author.password", "password", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("author.email", "email", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("author.bio", "bio", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("posts", "id", registry.getTypeHandler(int.class), config.isLazyLoadingEnabled())
+            .javaType(List.class).nestedQueryId("selectPostsForBlog").build());
       }
     }).build();
 
@@ -394,21 +412,26 @@ final class ExecutorTestHelper {
     });
     final ResultMap resultMap = new ResultMap.Builder(config, "defaultResultMap", Blog.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
-          {
-            add(ResultFlag.ID);
-          }
-        }).build());
-        add(new ResultMapping.Builder(config, "title", "title", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "author.id", "author_id", registry.getTypeHandler(int.class)).build());
-        add(new ResultMapping.Builder(config, "author.username", "username", registry.getTypeHandler(String.class))
-            .build());
-        add(new ResultMapping.Builder(config, "author.password", "password", registry.getTypeHandler(String.class))
-            .build());
-        add(new ResultMapping.Builder(config, "author.email", "email", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "author.bio", "bio", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "posts", "id", registry.getTypeHandler(int.class)).javaType(List.class)
-            .nestedQueryId("selectPostsForBlog").build());
+        add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class), config.isLazyLoadingEnabled())
+            .flags(new ArrayList<>() {
+              {
+                add(ResultFlag.ID);
+              }
+            }).build());
+        add(new ResultMapping.Builder("title", "title", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("author.id", "author_id", registry.getTypeHandler(int.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("author.username", "username", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("author.password", "password", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("author.email", "email", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("author.bio", "bio", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("posts", "id", registry.getTypeHandler(int.class), config.isLazyLoadingEnabled())
+            .javaType(List.class).nestedQueryId("selectPostsForBlog").build());
       }
     }).build();
 
@@ -448,46 +471,55 @@ final class ExecutorTestHelper {
     });
     final ResultMap tagResultMap = new ResultMap.Builder(config, "tagResultMap", Tag.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "tag_id", registry.getTypeHandler(int.class))
+        add(new ResultMapping.Builder("id", "tag_id", registry.getTypeHandler(int.class), config.isLazyLoadingEnabled())
             .flags(new ArrayList<>() {
               {
                 add(ResultFlag.ID);
               }
             }).build());
-        add(new ResultMapping.Builder(config, "name", "tag_name", registry.getTypeHandler(String.class)).build());
+        add(new ResultMapping.Builder("name", "tag_name", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
       }
     }).build();
     final ResultMap commentResultMap = new ResultMap.Builder(config, "commentResultMap", Comment.class,
         new ArrayList<>() {
           {
-            add(new ResultMapping.Builder(config, "id", "comment_id", registry.getTypeHandler(int.class))
-                .flags(new ArrayList<>() {
+            add(new ResultMapping.Builder("id", "comment_id", registry.getTypeHandler(int.class),
+                config.isLazyLoadingEnabled()).flags(new ArrayList<>() {
                   {
                     add(ResultFlag.ID);
                   }
                 }).build());
-            add(new ResultMapping.Builder(config, "name", "comment_name", registry.getTypeHandler(String.class))
-                .build());
-            add(new ResultMapping.Builder(config, "comment", "comment", registry.getTypeHandler(String.class)).build());
+            add(new ResultMapping.Builder("name", "comment_name", registry.getTypeHandler(String.class),
+                config.isLazyLoadingEnabled()).build());
+            add(new ResultMapping.Builder("comment", "comment", registry.getTypeHandler(String.class),
+                config.isLazyLoadingEnabled()).build());
           }
         }).build();
     config.addResultMap(tagResultMap);
     config.addResultMap(commentResultMap);
     final ResultMap postResultMap = new ResultMap.Builder(config, "defaultResultMap", Post.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
-          {
-            add(ResultFlag.ID);
-          }
-        }).build());
-        add(new ResultMapping.Builder(config, "blog", "blog_id", registry.getTypeHandler(int.class))
-            .javaType(Blog.class).nestedQueryId("selectBlogById").build());
-        add(new ResultMapping.Builder(config, "createdOn", "created_on", registry.getTypeHandler(Date.class)).build());
-        add(new ResultMapping.Builder(config, "section", "section", registry.getTypeHandler(Section.class)).build());
-        add(new ResultMapping.Builder(config, "subject", "subject", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "body", "body", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "tags").nestedResultMapId(tagResultMap.getId()).build());
-        add(new ResultMapping.Builder(config, "comments").nestedResultMapId(commentResultMap.getId()).build());
+        add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class), config.isLazyLoadingEnabled())
+            .flags(new ArrayList<>() {
+              {
+                add(ResultFlag.ID);
+              }
+            }).build());
+        add(new ResultMapping.Builder("blog", "blog_id", registry.getTypeHandler(int.class),
+            config.isLazyLoadingEnabled()).javaType(Blog.class).nestedQueryId("selectBlogById").build());
+        add(new ResultMapping.Builder("createdOn", "created_on", registry.getTypeHandler(Date.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("section", "section", registry.getTypeHandler(Section.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("subject", "subject", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("body", "body", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("tags", config.isLazyLoadingEnabled()).nestedResultMapId(tagResultMap.getId())
+            .build());
+        add(new ResultMapping.Builder("comments", config.isLazyLoadingEnabled())
+            .nestedResultMapId(commentResultMap.getId()).build());
       }
     }).build();
     return new MappedStatement.Builder(config, "selectPostsForBlog", sqlSource, SqlCommandType.SELECT)
@@ -525,46 +557,55 @@ final class ExecutorTestHelper {
     });
     final ResultMap tagResultMap = new ResultMap.Builder(config, "tagResultMap", Tag.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "tag_id", registry.getTypeHandler(int.class))
+        add(new ResultMapping.Builder("id", "tag_id", registry.getTypeHandler(int.class), config.isLazyLoadingEnabled())
             .flags(new ArrayList<>() {
               {
                 add(ResultFlag.ID);
               }
             }).build());
-        add(new ResultMapping.Builder(config, "name", "tag_name", registry.getTypeHandler(String.class)).build());
+        add(new ResultMapping.Builder("name", "tag_name", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
       }
     }).build();
     final ResultMap commentResultMap = new ResultMap.Builder(config, "commentResultMap", Comment.class,
         new ArrayList<>() {
           {
-            add(new ResultMapping.Builder(config, "id", "comment_id", registry.getTypeHandler(int.class))
-                .flags(new ArrayList<>() {
+            add(new ResultMapping.Builder("id", "comment_id", registry.getTypeHandler(int.class),
+                config.isLazyLoadingEnabled()).flags(new ArrayList<>() {
                   {
                     add(ResultFlag.ID);
                   }
                 }).build());
-            add(new ResultMapping.Builder(config, "name", "comment_name", registry.getTypeHandler(String.class))
-                .build());
-            add(new ResultMapping.Builder(config, "comment", "comment", registry.getTypeHandler(String.class)).build());
+            add(new ResultMapping.Builder("name", "comment_name", registry.getTypeHandler(String.class),
+                config.isLazyLoadingEnabled()).build());
+            add(new ResultMapping.Builder("comment", "comment", registry.getTypeHandler(String.class),
+                config.isLazyLoadingEnabled()).build());
           }
         }).build();
     config.addResultMap(tagResultMap);
     config.addResultMap(commentResultMap);
     final ResultMap postResultMap = new ResultMap.Builder(config, "", Post.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
-          {
-            add(ResultFlag.ID);
-          }
-        }).build());
-        add(new ResultMapping.Builder(config, "blog", "blog_id", registry.getTypeHandler(int.class))
-            .javaType(Blog.class).nestedQueryId("selectBlogById").build());
-        add(new ResultMapping.Builder(config, "createdOn", "created_on", registry.getTypeHandler(Date.class)).build());
-        add(new ResultMapping.Builder(config, "section", "section", registry.getTypeHandler(Section.class)).build());
-        add(new ResultMapping.Builder(config, "subject", "subject", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "body", "body", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "tags").nestedResultMapId(tagResultMap.getId()).build());
-        add(new ResultMapping.Builder(config, "comments").nestedResultMapId(commentResultMap.getId()).build());
+        add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class), config.isLazyLoadingEnabled())
+            .flags(new ArrayList<>() {
+              {
+                add(ResultFlag.ID);
+              }
+            }).build());
+        add(new ResultMapping.Builder("blog", "blog_id", registry.getTypeHandler(int.class),
+            config.isLazyLoadingEnabled()).javaType(Blog.class).nestedQueryId("selectBlogById").build());
+        add(new ResultMapping.Builder("createdOn", "created_on", registry.getTypeHandler(Date.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("section", "section", registry.getTypeHandler(Section.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("subject", "subject", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("body", "body", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("tags", config.isLazyLoadingEnabled()).nestedResultMapId(tagResultMap.getId())
+            .build());
+        add(new ResultMapping.Builder("comments", config.isLazyLoadingEnabled())
+            .nestedResultMapId(commentResultMap.getId()).build());
       }
     }).build();
 
@@ -604,53 +645,63 @@ final class ExecutorTestHelper {
     });
     final ResultMap tagResultMap = new ResultMap.Builder(config, "tagResultMap", Tag.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "tag_id", registry.getTypeHandler(int.class))
+        add(new ResultMapping.Builder("id", "tag_id", registry.getTypeHandler(int.class), config.isLazyLoadingEnabled())
             .flags(new ArrayList<>() {
               {
                 add(ResultFlag.ID);
               }
             }).build());
-        add(new ResultMapping.Builder(config, "name", "tag_name", registry.getTypeHandler(String.class)).build());
+        add(new ResultMapping.Builder("name", "tag_name", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
       }
     }).build();
     final ResultMap commentResultMap = new ResultMap.Builder(config, "commentResultMap", Comment.class,
         new ArrayList<>() {
           {
-            add(new ResultMapping.Builder(config, "id", "comment_id", registry.getTypeHandler(int.class))
-                .flags(new ArrayList<>() {
+            add(new ResultMapping.Builder("id", "comment_id", registry.getTypeHandler(int.class),
+                config.isLazyLoadingEnabled()).flags(new ArrayList<>() {
                   {
                     add(ResultFlag.ID);
                   }
                 }).build());
-            add(new ResultMapping.Builder(config, "name", "comment_name", registry.getTypeHandler(String.class))
-                .build());
-            add(new ResultMapping.Builder(config, "comment", "comment", registry.getTypeHandler(String.class)).build());
+            add(new ResultMapping.Builder("name", "comment_name", registry.getTypeHandler(String.class),
+                config.isLazyLoadingEnabled()).build());
+            add(new ResultMapping.Builder("comment", "comment", registry.getTypeHandler(String.class),
+                config.isLazyLoadingEnabled()).build());
           }
         }).build();
     config.addResultMap(tagResultMap);
     config.addResultMap(commentResultMap);
     final ResultMap postResultMap = new ResultMap.Builder(config, "postResultMap", Post.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
-          {
-            add(ResultFlag.ID);
-          }
-        }).build());
-
-        add(new ResultMapping.Builder(config, "blog").nestedQueryId("selectBlogByIdAndAuthor")
-            .composites(new ArrayList<>() {
+        add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class), config.isLazyLoadingEnabled())
+            .flags(new ArrayList<>() {
               {
-                add(new ResultMapping.Builder(config, "authorId", "author_id", registry.getTypeHandler(int.class))
-                    .build());
-                add(new ResultMapping.Builder(config, "blogId", "blog_id", registry.getTypeHandler(int.class)).build());
+                add(ResultFlag.ID);
               }
             }).build());
-        add(new ResultMapping.Builder(config, "createdOn", "created_on", registry.getTypeHandler(Date.class)).build());
-        add(new ResultMapping.Builder(config, "section", "section", registry.getTypeHandler(Section.class)).build());
-        add(new ResultMapping.Builder(config, "subject", "subject", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "body", "body", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "tags").nestedResultMapId(tagResultMap.getId()).build());
-        add(new ResultMapping.Builder(config, "comments").nestedResultMapId(commentResultMap.getId()).build());
+
+        add(new ResultMapping.Builder("blog", config.isLazyLoadingEnabled()).nestedQueryId("selectBlogByIdAndAuthor")
+            .composites(new ArrayList<>() {
+              {
+                add(new ResultMapping.Builder("authorId", "author_id", registry.getTypeHandler(int.class),
+                    config.isLazyLoadingEnabled()).build());
+                add(new ResultMapping.Builder("blogId", "blog_id", registry.getTypeHandler(int.class),
+                    config.isLazyLoadingEnabled()).build());
+              }
+            }).build());
+        add(new ResultMapping.Builder("createdOn", "created_on", registry.getTypeHandler(Date.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("section", "section", registry.getTypeHandler(Section.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("subject", "subject", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("body", "body", registry.getTypeHandler(String.class),
+            config.isLazyLoadingEnabled()).build());
+        add(new ResultMapping.Builder("tags", config.isLazyLoadingEnabled()).nestedResultMapId(tagResultMap.getId())
+            .build());
+        add(new ResultMapping.Builder("comments", config.isLazyLoadingEnabled())
+            .nestedResultMapId(commentResultMap.getId()).build());
       }
     }).build();
 
