@@ -57,6 +57,11 @@ public class ResultMapping {
       resultMapping.typeHandler = typeHandler;
     }
 
+    public Builder(Configuration configuration, String property, String column) {
+      this(configuration, property);
+      resultMapping.column = column;
+    }
+
     public Builder(Configuration configuration, String property, String column, Class<?> javaType) {
       this(configuration, property);
       resultMapping.column = column;
@@ -64,7 +69,6 @@ public class ResultMapping {
     }
 
     public Builder(Configuration configuration, String property) {
-      resultMapping.configuration = configuration;
       resultMapping.property = property;
       resultMapping.flags = new ArrayList<>();
       resultMapping.composites = new ArrayList<>();
@@ -164,7 +168,7 @@ public class ResultMapping {
         throw new IllegalStateException(
             "Cannot define both nestedQueryId and nestedResultMapId in property " + resultMapping.property);
       }
-      // Issue #4 and GH #39: column is optional only in nested resultmaps but not in the rest
+      // Issue #4 and GH #39: column is optional only in nested resultMaps but not in the rest
       if (resultMapping.nestedResultMapId == null && resultMapping.column == null
           && resultMapping.composites.isEmpty()) {
         throw new IllegalStateException("Mapping is missing column attribute for property " + resultMapping.property);

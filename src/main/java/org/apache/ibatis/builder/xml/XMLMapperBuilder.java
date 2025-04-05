@@ -365,8 +365,10 @@ public class XMLMapperBuilder {
     String javaType = context.getStringAttribute("javaType");
     String jdbcType = context.getStringAttribute("jdbcType");
     String nestedSelect = context.getStringAttribute("select");
-    String nestedResultMap = context.getStringAttribute("resultMap",
-        () -> processNestedResultMappings(context, Collections.emptyList(), resultType));
+    String nestedResultMap = context.getStringAttribute("resultMap");
+    if (StringUtils.isBlank(nestedResultMap)) {
+      nestedResultMap = processNestedResultMappings(context, Collections.emptyList(), resultType);
+    }
     String notNullColumn = context.getStringAttribute("notNullColumn");
     String columnPrefix = context.getStringAttribute("columnPrefix");
     String typeHandler = context.getStringAttribute("typeHandler");

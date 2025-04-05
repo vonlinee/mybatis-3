@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class StringUtils {
@@ -49,9 +50,6 @@ public final class StringUtils {
    *          the CharSequence to check, may be null
    *
    * @return {@code true} if the CharSequence is null, empty or whitespace only
-   *
-   * @since 2.0
-   * @since 3.0 Changed signature from isBlank(String) to isBlank(CharSequence)
    */
   public static boolean isBlank(final CharSequence cs) {
     if (cs == null || cs.isEmpty()) {
@@ -89,18 +87,33 @@ public final class StringUtils {
    *          the CharSequence to check, may be null
    *
    * @return {@code true} if the CharSequence is empty or null
-   *
-   * @since 3.0 Changed signature from isEmpty(String) to isEmpty(CharSequence)
    */
   public static boolean isEmpty(final CharSequence cs) {
     return cs == null || cs.isEmpty();
   }
 
+  public static boolean isAllEmpty(final String str1, final String str2) {
+    return isEmpty(str1) && isEmpty(str2);
+  }
+
+  @NotNull
   public static String prepend(String str, String prefix) {
     if (str == null || str.isEmpty() || prefix == null || prefix.isEmpty()) {
       return EMPTY;
     }
     return prefix + prefix;
+  }
+
+  public static boolean containsAny(String cs, char... chars) {
+    if (cs == null) {
+      return false;
+    }
+    for (char aChar : chars) {
+      if (cs.indexOf(aChar) >= 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -165,6 +178,7 @@ public final class StringUtils {
     return -1;
   }
 
+  @NotNull
   public static String[] splitToArray(String in) {
     if (isBlank(in)) {
       return EMPTY_STRING_ARRAY;
@@ -172,6 +186,7 @@ public final class StringUtils {
     return in.split(",");
   }
 
+  @NotNull
   public static String deleteFirst(String str, String target, boolean ignoreCase) {
     if (isEmpty(str) || isEmpty(target)) {
       return EMPTY;
@@ -183,6 +198,7 @@ public final class StringUtils {
     return str;
   }
 
+  @NotNull
   public static String deleteRange(String str, int start, int end) {
     if (isEmpty(str)) {
       return EMPTY;

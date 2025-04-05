@@ -313,7 +313,7 @@ public class MapperBuilderAssistant {
     Entry<Type, Class<?>> setterType = resolveSetterType(resultType, property, javaType);
     TypeHandler<?> typeHandlerInstance = configuration.resolveTypeHandler(setterType.getKey(), jdbcType, typeHandler);
     List<ResultMapping> composites;
-    if (StringUtils.isEmpty(nestedSelect) && StringUtils.isEmpty(foreignColumn)) {
+    if (StringUtils.isAllEmpty(nestedSelect, foreignColumn)) {
       composites = Collections.emptyList();
     } else {
       composites = parseCompositeColumnName(column);
@@ -360,19 +360,19 @@ public class MapperBuilderAssistant {
     return columns;
   }
 
-  private List<ResultMapping> parseCompositeColumnName(String columnName) {
-    List<ResultMapping> composites = new ArrayList<>();
-    if (columnName != null && (columnName.indexOf('=') > -1 || columnName.indexOf(',') > -1)) {
+  public List<ResultMapping> parseCompositeColumnName(String columnName) {
+    List<ResultMapping> compositeMappings = Collections.emptyList();
+    if (StringUtils.containsAny(columnName, '=', ',')) {
+      compositeMappings = new ArrayList<>();
       StringTokenizer parser = new StringTokenizer(columnName, "{}=, ", false);
       while (parser.hasMoreTokens()) {
         String property = parser.nextToken();
         String column = parser.nextToken();
-        ResultMapping complexResultMapping = new ResultMapping.Builder(configuration, property, column,
-            (TypeHandler<?>) null).build();
-        composites.add(complexResultMapping);
+        ResultMapping complexResultMapping = new ResultMapping.Builder(configuration, property, column).build();
+        compositeMappings.add(complexResultMapping);
       }
     }
-    return composites;
+    return compositeMappings;
   }
 
   private Entry<Type, Class<?>> resolveSetterType(Class<?> resultType, String property, Class<?> javaType) {
