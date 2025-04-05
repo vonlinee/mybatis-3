@@ -458,22 +458,6 @@ public class Configuration {
     this.aggressiveLazyLoading = aggressiveLazyLoading;
   }
 
-  /**
-   * @deprecated You can safely remove the call to this method as this option had no effect.
-   */
-  @Deprecated
-  public boolean isMultipleResultSetsEnabled() {
-    return true;
-  }
-
-  /**
-   * @deprecated You can safely remove the call to this method as this option had no effect.
-   */
-  @Deprecated
-  public void setMultipleResultSetsEnabled(boolean multipleResultSetsEnabled) {
-    // nop
-  }
-
   public Set<String> getLazyLoadTriggerMethods() {
     return lazyLoadTriggerMethods;
   }
@@ -863,14 +847,6 @@ public class Configuration {
     return mappedStatements.values();
   }
 
-  /**
-   * @deprecated call {@link #parsePendingStatements(boolean)}
-   */
-  @Deprecated
-  public Collection<XMLStatementBuilder> getIncompleteStatements() {
-    return incompleteStatements;
-  }
-
   public void addIncompleteStatement(XMLStatementBuilder incompleteStatement) {
     incompleteStatementsLock.lock();
     try {
@@ -880,14 +856,6 @@ public class Configuration {
     }
   }
 
-  /**
-   * @deprecated call {@link #parsePendingCacheRefs(boolean)}
-   */
-  @Deprecated
-  public Collection<CacheRefResolver> getIncompleteCacheRefs() {
-    return incompleteCacheRefs;
-  }
-
   public void addIncompleteCacheRef(CacheRefResolver incompleteCacheRef) {
     incompleteCacheRefsLock.lock();
     try {
@@ -895,14 +863,6 @@ public class Configuration {
     } finally {
       incompleteCacheRefsLock.unlock();
     }
-  }
-
-  /**
-   * @deprecated call {@link #parsePendingResultMaps(boolean)}
-   */
-  @Deprecated
-  public Collection<ResultMapResolver> getIncompleteResultMaps() {
-    return incompleteResultMaps;
   }
 
   public void addIncompleteResultMap(ResultMapResolver resultMapResolver) {
