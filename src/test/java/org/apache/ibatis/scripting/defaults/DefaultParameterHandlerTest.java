@@ -248,7 +248,7 @@ class DefaultParameterHandlerTest {
     final ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
     final ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
 
-    when(mockConfig.getTypeHandlerRegistry()).thenReturn(new TypeHandlerRegistry(mockConfig));
+    when(mockConfig.getTypeHandlerRegistry()).thenReturn(new TypeHandlerRegistry());
     when(mockConfig.getDefaultScriptingLanguageInstance()).thenReturn(new XMLLanguageDriver());
     when(mockConfig.newMetaObject(parameterObject))
         .thenReturn(MetaObject.forObject(parameterObject, objectFactory, objectWrapperFactory, reflectorFactory));

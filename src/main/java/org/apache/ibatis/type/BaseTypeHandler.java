@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.ibatis.executor.result.ResultMapException;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * The base {@link TypeHandler} for references a generic type.
@@ -35,25 +34,6 @@ import org.apache.ibatis.session.Configuration;
  * @author Kzuki Shimizu
  */
 public abstract class BaseTypeHandler<T> implements TypeHandler<T> {
-
-  /**
-   * @deprecated Since 3.5.0 - See https://github.com/mybatis/mybatis-3/issues/1203. This field will remove future.
-   */
-  @Deprecated
-  protected Configuration configuration;
-
-  /**
-   * Sets the configuration.
-   *
-   * @param c
-   *          the new configuration
-   *
-   * @deprecated Since 3.5.0 - See https://github.com/mybatis/mybatis-3/issues/1203. This property will remove future.
-   */
-  @Deprecated
-  public void setConfiguration(Configuration c) {
-    this.configuration = c;
-  }
 
   @Override
   public void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException {

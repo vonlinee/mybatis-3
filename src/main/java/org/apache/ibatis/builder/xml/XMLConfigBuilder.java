@@ -318,9 +318,7 @@ public class XMLConfigBuilder {
         TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
         DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
         DataSource dataSource = dsFactory.getDataSource();
-        Environment.Builder environmentBuilder = new Environment.Builder(id).transactionFactory(txFactory)
-            .dataSource(dataSource);
-        configuration.setEnvironment(environmentBuilder.build());
+        configuration.setEnvironment(new Environment(id, txFactory, dataSource));
         break;
       }
     }
