@@ -23,10 +23,10 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Lang;
 import org.apache.ibatis.builder.BuilderException;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.reflection.ParamNameResolver;
+import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.LanguageDriver;
+import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.session.Configuration;
 
 /**

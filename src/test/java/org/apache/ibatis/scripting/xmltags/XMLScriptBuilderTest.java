@@ -18,8 +18,8 @@ package org.apache.ibatis.scripting.xmltags;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XPathParser;
+import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Test;
 

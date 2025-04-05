@@ -22,8 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.apache.ibatis.mapping.ResultSetType;
-import org.apache.ibatis.mapping.StatementType;
+import org.apache.ibatis.scripting.ResultSetType;
+import org.apache.ibatis.scripting.StatementType;
 
 /**
  * The annotation that specify options for customizing default behaviors.

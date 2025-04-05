@@ -22,7 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.apache.ibatis.mapping.StatementType;
+import org.apache.ibatis.scripting.StatementType;
 
 /**
  * The annotation that specify an SQL for retrieving a key value.

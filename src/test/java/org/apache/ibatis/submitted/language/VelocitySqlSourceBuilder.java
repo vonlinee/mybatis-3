@@ -24,10 +24,10 @@ import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.ParameterExpression;
 import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.TokenHandler;
 import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.reflection.MetaClass;
+import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 

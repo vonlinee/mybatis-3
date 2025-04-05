@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2022 the original author or authors.
+ *    Copyright 2009-2023 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,23 +13,16 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.mapping;
+package org.apache.ibatis.scripting;
 
 /**
+ * Represents the content of a mapped statement read from an XML file or an annotation. It creates the SQL that will be
+ * passed to the database out of the input parameter received from the user.
+ *
  * @author Clinton Begin
  */
-public enum SqlCommandType {
+public interface SqlSource {
 
-  UNKNOWN,
-
-  INSERT,
-
-  UPDATE,
-
-  DELETE,
-
-  SELECT,
-
-  FLUSH
+  BoundSql getBoundSql(Object parameterObject);
 
 }

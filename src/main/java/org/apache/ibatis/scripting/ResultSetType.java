@@ -13,16 +13,29 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.mapping;
+package org.apache.ibatis.scripting;
+
+import java.sql.ResultSet;
 
 /**
- * Represents the content of a mapped statement read from an XML file or an annotation. It creates the SQL that will be
- * passed to the database out of the input parameter received from the user.
- *
  * @author Clinton Begin
  */
-public interface SqlSource {
+public enum ResultSetType {
+  /**
+   * behavior with same as unset (driver dependent).
+   *
+   * @since 3.5.0
+   */
+  DEFAULT(-1), FORWARD_ONLY(ResultSet.TYPE_FORWARD_ONLY), SCROLL_INSENSITIVE(ResultSet.TYPE_SCROLL_INSENSITIVE),
+  SCROLL_SENSITIVE(ResultSet.TYPE_SCROLL_SENSITIVE);
 
-  BoundSql getBoundSql(Object parameterObject);
+  private final int value;
 
+  ResultSetType(int value) {
+    this.value = value;
+  }
+
+  public int getValue() {
+    return value;
+  }
 }

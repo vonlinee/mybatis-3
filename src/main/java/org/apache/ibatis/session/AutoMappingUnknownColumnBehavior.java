@@ -19,7 +19,7 @@ import java.lang.reflect.Type;
 
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
-import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.scripting.MappedStatement;
 
 /**
  * Specify the behavior when detects an unknown column (or unknown property type) of automatic mapping target.

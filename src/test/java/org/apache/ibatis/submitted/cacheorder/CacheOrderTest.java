@@ -22,7 +22,7 @@ import java.io.Reader;
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.junit.jupiter.api.BeforeAll;

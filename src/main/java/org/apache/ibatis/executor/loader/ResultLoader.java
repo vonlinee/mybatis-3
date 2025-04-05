@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ResultExtractor;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.scripting.BoundSql;
+import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.RowBounds;

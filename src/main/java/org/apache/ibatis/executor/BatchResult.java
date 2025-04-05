@@ -18,7 +18,7 @@ package org.apache.ibatis.executor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.scripting.MappedStatement;
 
 /**
  * @author Jeff Butler

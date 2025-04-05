@@ -20,7 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.apache.ibatis.mapping.FetchType;
+import org.apache.ibatis.scripting.FetchType;
 
 /**
  * The annotation that specify the nested statement for retrieving collections.

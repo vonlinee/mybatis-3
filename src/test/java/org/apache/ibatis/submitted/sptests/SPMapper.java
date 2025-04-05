@@ -25,7 +25,7 @@ import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
-import org.apache.ibatis.mapping.StatementType;
+import org.apache.ibatis.scripting.StatementType;
 
 public interface SPMapper {
   // XML based

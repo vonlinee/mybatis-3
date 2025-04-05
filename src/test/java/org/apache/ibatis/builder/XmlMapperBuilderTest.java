@@ -28,9 +28,9 @@ import java.util.regex.Pattern;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.internal.util.ObjectUtils;
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ResultSetType;
-import org.apache.ibatis.mapping.StatementType;
+import org.apache.ibatis.scripting.MappedStatement;
+import org.apache.ibatis.scripting.ResultSetType;
+import org.apache.ibatis.scripting.StatementType;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.TypeHandler;
 import org.junit.jupiter.api.Assertions;
@@ -114,7 +114,7 @@ class XmlMapperBuilderTest {
     when(() -> configuration.resolveResultSetType("bbb"));
     then(caughtException()).isInstanceOf(BuilderException.class)
         .hasMessageStartingWith("Error resolving ResultSetType. Cause: java.lang.IllegalArgumentException: No enum")
-        .hasMessageEndingWith("org.apache.ibatis.mapping.ResultSetType.bbb");
+        .hasMessageEndingWith("org.apache.ibatis.scripting.ResultSetType.bbb");
   }
 
   @Test

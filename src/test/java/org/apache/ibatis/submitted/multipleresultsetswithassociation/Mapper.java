@@ -20,7 +20,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.mapping.StatementType;
+import org.apache.ibatis.scripting.StatementType;
 
 public interface Mapper {
 

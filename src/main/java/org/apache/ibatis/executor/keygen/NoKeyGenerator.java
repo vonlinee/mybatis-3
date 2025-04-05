@@ -18,7 +18,7 @@ package org.apache.ibatis.executor.keygen;
 import java.sql.Statement;
 
 import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.scripting.MappedStatement;
 
 /**
  * @author Clinton Begin

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.scripting.BoundSql;
 import org.junit.jupiter.api.Test;
 
 class BoundSqlTest {

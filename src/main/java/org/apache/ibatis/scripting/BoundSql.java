@@ -13,12 +13,13 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.mapping;
+package org.apache.ibatis.scripting;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.reflection.wrapper.MapWrapper;
 
 /**

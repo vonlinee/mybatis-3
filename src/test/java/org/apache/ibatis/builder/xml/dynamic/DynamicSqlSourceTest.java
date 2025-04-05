@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.mapping.BoundSql;
+import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.xmltags.ChooseSqlNode;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
 import org.apache.ibatis.scripting.xmltags.ForEachSqlNode;

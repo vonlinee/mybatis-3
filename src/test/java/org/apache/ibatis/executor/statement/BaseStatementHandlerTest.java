@@ -25,7 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.ibatis.builder.StaticSqlSource;
-import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
