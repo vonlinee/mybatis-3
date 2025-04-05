@@ -32,7 +32,7 @@ public final class IOUtils {
    * @param closeable
    *          the Closeable resource to be closed
    */
-  public static void closeQuietly(Closeable closeable) {
+  public static void closeSilently(Closeable closeable) {
     if (closeable != null) {
       try {
         closeable.close();
