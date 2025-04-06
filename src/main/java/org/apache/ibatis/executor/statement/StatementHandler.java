@@ -38,7 +38,7 @@ public interface StatementHandler {
 
   int update(Statement statement) throws SQLException;
 
-  <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException;
+  <E> List<E> query(Statement statement, ResultHandler<E> resultHandler) throws SQLException;
 
   <E> Cursor<E> queryCursor(Statement statement) throws SQLException;
 

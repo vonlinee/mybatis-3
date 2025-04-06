@@ -146,11 +146,12 @@ public class DefaultSqlSession implements SqlSession {
     return selectList(statement, parameter, rowBounds, Executor.NO_RESULT_HANDLER);
   }
 
+  @SuppressWarnings("unchecked")
   private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler<?> handler) {
     try {
       MappedStatement ms = configuration.getMappedStatement(statement);
       dirty |= ms.isDirtySelect();
-      return executor.query(ms, wrapCollection(parameter), rowBounds, handler);
+      return (List<E>) executor.query(ms, wrapCollection(parameter), rowBounds, handler);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);
     } finally {

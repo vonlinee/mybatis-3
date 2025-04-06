@@ -122,12 +122,6 @@ public abstract class BaseStatementHandler implements StatementHandler {
   }
 
   protected void closeStatement(Statement statement) {
-    try {
-      if (statement != null) {
-        statement.close();
-      }
-    } catch (SQLException e) {
-      // ignore
-    }
+    JdbcUtils.closeSilently(statement);
   }
 }
