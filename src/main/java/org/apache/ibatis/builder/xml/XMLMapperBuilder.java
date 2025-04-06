@@ -23,10 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.ibatis.builder.BuilderAssistant;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.CacheRefResolver;
 import org.apache.ibatis.builder.IncompleteElementException;
-import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.builder.ResultMapResolver;
 import org.apache.ibatis.builder.ResultMappingConstructorResolver;
 import org.apache.ibatis.cache.Cache;
@@ -47,7 +47,7 @@ import org.apache.ibatis.type.TypeHandler;
 public class XMLMapperBuilder {
 
   private final XPathParser parser;
-  private final MapperBuilderAssistant builderAssistant;
+  private final BuilderAssistant builderAssistant;
   private final Map<String, XNode> sqlFragments;
   private final String resource;
   private Class<?> mapperClass;
@@ -74,7 +74,7 @@ public class XMLMapperBuilder {
   private XMLMapperBuilder(XPathParser parser, Configuration configuration, String resource,
       Map<String, XNode> sqlFragments) {
     this.configuration = configuration;
-    this.builderAssistant = new MapperBuilderAssistant(configuration);
+    this.builderAssistant = new BuilderAssistant(configuration);
     this.builderAssistant.setCurrentLoadedResource(resource);
     this.parser = parser;
     this.sqlFragments = sqlFragments;

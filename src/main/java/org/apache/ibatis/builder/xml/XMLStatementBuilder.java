@@ -23,7 +23,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.apache.ibatis.binding.ParamMap;
-import org.apache.ibatis.builder.MapperBuilderAssistant;
+import org.apache.ibatis.builder.BuilderAssistant;
 import org.apache.ibatis.builder.annotation.MapperAnnotationBuilder;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -45,12 +45,12 @@ import org.apache.ibatis.session.Configuration;
 public class XMLStatementBuilder {
 
   private final Configuration configuration;
-  private final MapperBuilderAssistant builderAssistant;
+  private final BuilderAssistant builderAssistant;
   private final XNode context;
   private final String requiredDatabaseId;
   private final Class<?> mapperClass;
 
-  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context,
+  public XMLStatementBuilder(Configuration configuration, BuilderAssistant builderAssistant, XNode context,
       String databaseId, Class<?> mapperClass) {
     this.configuration = configuration;
     this.builderAssistant = builderAssistant;

@@ -151,7 +151,7 @@ class XmlMapperBuilderTest {
 
   @Test
   void setCurrentNamespaceValueIsNull() {
-    MapperBuilderAssistant builder = new MapperBuilderAssistant(new Configuration());
+    BuilderAssistant builder = new BuilderAssistant(new Configuration());
     builder.setCurrentLoadedResource("resource");
     when(() -> builder.setCurrentNamespace(null));
     then(caughtException()).isInstanceOf(BuilderException.class)
@@ -160,7 +160,7 @@ class XmlMapperBuilderTest {
 
   @Test
   void useCacheRefNamespaceIsNull() {
-    MapperBuilderAssistant builder = new MapperBuilderAssistant(new Configuration());
+    BuilderAssistant builder = new BuilderAssistant(new Configuration());
     builder.setCurrentLoadedResource("resource");
     when(() -> builder.useCacheRef(null));
     then(caughtException()).isInstanceOf(BuilderException.class)
@@ -169,7 +169,7 @@ class XmlMapperBuilderTest {
 
   @Test
   void useCacheRefNamespaceIsUndefined() {
-    MapperBuilderAssistant builder = new MapperBuilderAssistant(new Configuration());
+    BuilderAssistant builder = new BuilderAssistant(new Configuration());
     builder.setCurrentLoadedResource("resource");
     when(() -> builder.useCacheRef("eee"));
     then(caughtException()).hasMessage("No cache for namespace 'eee' could be found.");
@@ -190,7 +190,7 @@ class XmlMapperBuilderTest {
 
   @Test
   void parseMultipleColumnNames() {
-    Set<String> columns = MapperBuilderAssistant.parseMultipleColumnNames("{prop1=col1,prop2=col2}");
+    Set<String> columns = BuilderAssistant.parseMultipleColumnNames("{prop1=col1,prop2=col2}");
     Assertions.assertEquals(2, columns.size());
   }
 

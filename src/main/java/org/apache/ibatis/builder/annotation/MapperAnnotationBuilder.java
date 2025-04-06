@@ -61,10 +61,10 @@ import org.apache.ibatis.annotations.TypeDiscriminator;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.binding.ParamMap;
+import org.apache.ibatis.builder.BuilderAssistant;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.CacheRefResolver;
 import org.apache.ibatis.builder.IncompleteElementException;
-import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.builder.ResultMappingConstructorResolver;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.cache.Cache;
@@ -107,10 +107,10 @@ public class MapperAnnotationBuilder {
       .collect(Collectors.toSet());
 
   private final Configuration configuration;
-  private final MapperBuilderAssistant assistant;
+  private final BuilderAssistant assistant;
 
   public MapperAnnotationBuilder(Configuration configuration) {
-    this.assistant = new MapperBuilderAssistant(configuration);
+    this.assistant = new BuilderAssistant(configuration);
     this.configuration = configuration;
   }
 

@@ -25,7 +25,7 @@ import org.apache.ibatis.mapping.ResultMapping;
  * @author Eduardo Macarron
  */
 public class ResultMapResolver {
-  private final MapperBuilderAssistant assistant;
+  private final BuilderAssistant assistant;
   private final String id;
   private final Class<?> type;
   private final String extend;
@@ -33,7 +33,7 @@ public class ResultMapResolver {
   private final List<ResultMapping> resultMappings;
   private final Boolean autoMapping;
 
-  public ResultMapResolver(MapperBuilderAssistant assistant, String id, Class<?> type, String extend,
+  public ResultMapResolver(BuilderAssistant assistant, String id, Class<?> type, String extend,
       Discriminator discriminator, List<ResultMapping> resultMappings, Boolean autoMapping) {
     this.assistant = assistant;
     this.id = id;

@@ -17,8 +17,16 @@ package org.apache.ibatis.builder;
 
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.function.BiConsumer;
 
 import org.apache.ibatis.cache.Cache;
@@ -51,7 +59,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Clinton Begin
  */
-public class MapperBuilderAssistant {
+public class BuilderAssistant {
 
   protected final Configuration configuration;
   private String currentNamespace;
@@ -59,7 +67,7 @@ public class MapperBuilderAssistant {
   private Cache currentCache;
   private boolean unresolvedCacheRef; // issue #676
 
-  public MapperBuilderAssistant(Configuration configuration) {
+  public BuilderAssistant(Configuration configuration) {
     this.configuration = configuration;
   }
 

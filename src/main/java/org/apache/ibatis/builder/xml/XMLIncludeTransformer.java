@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
+import org.apache.ibatis.builder.BuilderAssistant;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.IncompleteElementException;
-import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.PropertyParser;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.session.Configuration;
@@ -36,9 +36,9 @@ import org.w3c.dom.NodeList;
 public class XMLIncludeTransformer {
 
   private final Configuration configuration;
-  private final MapperBuilderAssistant builderAssistant;
+  private final BuilderAssistant builderAssistant;
 
-  public XMLIncludeTransformer(Configuration configuration, MapperBuilderAssistant builderAssistant) {
+  public XMLIncludeTransformer(Configuration configuration, BuilderAssistant builderAssistant) {
     this.configuration = configuration;
     this.builderAssistant = builderAssistant;
   }
