@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.executor.Sql;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.reflection.wrapper.MapWrapper;
 
@@ -31,7 +32,7 @@ import org.apache.ibatis.reflection.wrapper.MapWrapper;
  *
  * @author Clinton Begin
  */
-public class BoundSql {
+public class BoundSql implements Sql {
 
   private final String sql;
   private final List<ParameterMapping> parameterMappings;
