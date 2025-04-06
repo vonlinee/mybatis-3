@@ -41,14 +41,14 @@
 
   <select id="selectById" resultMap="personMap" parameterType="int">
     SELECT
-    <include refid="columns"/>
+    <include ref="columns"/>
     FROM Person
     WHERE id = #{id,jdbcType=INTEGER}
   </select>
 
   <select id="selectByStringId" resultMap="personMap" parameterType="String">
     SELECT
-    <include refid="columns"/>
+    <include ref="columns"/>
     FROM Person
     WHERE id = ${value}
   </select>

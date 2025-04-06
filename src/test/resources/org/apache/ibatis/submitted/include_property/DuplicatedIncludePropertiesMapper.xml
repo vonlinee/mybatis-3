@@ -28,7 +28,7 @@
 
   <select id="select" resultType="string">
     select
-    <include refid="colsSuffix">
+    <include ref="colsSuffix">
       <property name="suffix" value="a" />
       <property name="suffix" value="b" />
     </include>

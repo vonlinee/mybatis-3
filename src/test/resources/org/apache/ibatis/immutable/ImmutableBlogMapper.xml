@@ -159,10 +159,10 @@
 
     <sql id="allResultsJoined">
         select b.*
-          <include refid="authorColumns"/>
-          <include refid="postColumns"/>
-          <include refid="commentColumns"/>
-          <include refid="tagColumns"/>
+          <include ref="authorColumns"/>
+          <include ref="postColumns"/>
+          <include ref="commentColumns"/>
+          <include ref="tagColumns"/>
         from Blog b
           join Author a on b.author_id = a.id
           join Post p on b.id = p.blog_id
@@ -174,25 +174,25 @@
     </sql>
 
     <select id="retrieveFullImmutableBlog" parameterType="int" resultMap="immutableBlogResultMap" resultOrdered="true">
-        <include refid="allResultsJoined"/>
+        <include ref="allResultsJoined"/>
         where b.id = #{id}
     </select>
 
     <select id="retrieveAllBlogsAndPostsJoined" resultMap="immutableBlogResultMap" resultOrdered="true">
-        <include refid="allResultsJoined"/>
+        <include ref="allResultsJoined"/>
     </select>
 
     <select id="retrieveAllBlogsWithoutPosts" resultMap="immutableBlogWithoutPostsResultMap" resultOrdered="true">
         select b.*
-          <include refid="authorColumns"/>
+          <include ref="authorColumns"/>
         from blog b
           join Author a on b.author_id = a.id
     </select>
 
     <select id="retrieveAllBlogsWithPostsButNoCommentsOrTags" resultMap="immutableBlogWithPostsButNoCommentsOrTagsResultMap" resultOrdered="true">
         select b.*
-          <include refid="authorColumns"/>
-          <include refid="postColumns"/>
+          <include ref="authorColumns"/>
+          <include ref="postColumns"/>
         from blog b
           join Author a on b.author_id = a.id
           join Post p on b.id = p.blog_id
@@ -201,9 +201,9 @@
 
     <select id="retrieveAllBlogsWithMissingConstructor" resultMap="immutableBlogWithMissingConstructorResultMap" resultOrdered="true">
         select b.*
-          <include refid="authorColumns"/>
-          <include refid="postColumns"/>
-          <include refid="commentColumns"/>
+          <include ref="authorColumns"/>
+          <include ref="postColumns"/>
+          <include ref="commentColumns"/>
         from blog b
           join Author a on b.author_id = a.id
           join Post p on b.id = p.blog_id

@@ -88,11 +88,11 @@
     </sql>
 
     <select id="getAllHouses" resultMap="houseMap" resultOrdered="true">
-        <include refid="housesSelect"/>
+        <include ref="housesSelect"/>
     </select>
 
     <select id="getHouse" resultMap="houseMap" resultOrdered="true" parameterType="int">
-        <include refid="housesSelect"/>
+        <include ref="housesSelect"/>
         where h.id = #{id}
     </select>
 
@@ -102,6 +102,6 @@
     </resultMap>
 
     <select id="getHousePortfolio" resultMap="housePortfolioMap" resultOrdered="true">
-      <include refid="housesSelect"/>
+      <include ref="housesSelect"/>
     </select>
 </mapper>

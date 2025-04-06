@@ -25,8 +25,8 @@ import org.apache.ibatis.builder.BuilderException;
 /**
  * The interface that resolve an SQL provider method via an SQL provider class.
  * <p>
- * This interface need to implements at an SQL provider class and it need to define the default constructor for creating
- * a new instance.
+ * This interface need to implements at an SQL provider class, and it needs to define the default constructor for
+ * creating a new instance.
  *
  * @since 3.5.1
  *

@@ -24,7 +24,7 @@
     </sql>
     <select id="selectAll" resultType="java.util.Map">
         SELECT
-        <include refid="wrongId" />
+        <include ref="wrongId" />
         FROM person
     </select>
 

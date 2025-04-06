@@ -238,14 +238,14 @@ The SQL fragment can then be included in another statement, for example:
 ```xml
 <select id="selectUsers" resultType="map">
   select
-    <include refid="userColumns"><property name="alias" value="t1"/></include>,
-    <include refid="userColumns"><property name="alias" value="t2"/></include>
+    <include ref="userColumns"><property name="alias" value="t1"/></include>,
+    <include ref="userColumns"><property name="alias" value="t2"/></include>
   from some_table t1
     cross join some_table t2
 </select>
 ```
 
-Property value can be also used in include refid attribute or property values inside include clause, for example:
+Property value can be also used in include ref attribute or property values inside include clause, for example:
 
 ```xml
 <sql id="sometable">
@@ -254,13 +254,13 @@ Property value can be also used in include refid attribute or property values in
 
 <sql id="someinclude">
   from
-    <include refid="${include_target}"/>
+    <include ref="${include_target}"/>
 </sql>
 
 <select id="select" resultType="map">
   select
     field1, field2, field3
-  <include refid="someinclude">
+  <include ref="someinclude">
     <property name="prefix" value="Some"/>
     <property name="include_target" value="sometable"/>
   </include>

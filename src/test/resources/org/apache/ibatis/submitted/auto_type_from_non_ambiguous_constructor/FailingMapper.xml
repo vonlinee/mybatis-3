@@ -36,6 +36,6 @@
     </sql>
 
     <select id="getAccountAmbiguous" resultMap="account1RM">
-        <include refid="accountSelect"/>
+        <include ref="accountSelect"/>
     </select>
 </mapper>

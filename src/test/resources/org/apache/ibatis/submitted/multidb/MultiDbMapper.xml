@@ -64,7 +64,7 @@
 
     <select id="select4" resultType="string" parameterType="int">
         select name from
-        <include refid="sql1"/>
+        <include ref="sql1"/>
         where id=#{value}
     </select>
 

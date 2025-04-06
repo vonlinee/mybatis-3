@@ -35,23 +35,23 @@
   </sql>
 
   <sql id="nested">
-    <include refid="${sqlToInclude}" />
+    <include ref="${sqlToInclude}" />
   </sql>
 
   <sql id="nestedWithProperty">
-    <include refid="${sqlToInclude}">
+    <include ref="${sqlToInclude}">
       <property name="prefix" value="" />
     </include>
   </sql>
 
   <sql id="nestedDynamicValue">
-    <include refid="colsPrefix">
+    <include ref="colsPrefix">
       <property name="prefix" value="${var}" />
     </include>
   </sql>
 
   <sql id="nestedPropertyContext">
-    <include refid="colsSuffix">
+    <include ref="colsSuffix">
       <property name="suffix" value="a" />
     </include>
     , col_${suffix}
@@ -68,7 +68,7 @@
 
   <select id="selectSimpleA" resultType="string">
     select
-    <include refid="colsSuffix">
+    <include ref="colsSuffix">
       <property name="suffix" value="a" />
     </include>
     from table1
@@ -76,7 +76,7 @@
 
   <select id="selectSimpleB" resultType="string">
     select
-    <include refid="colsSuffix">
+    <include ref="colsSuffix">
       <property name="suffix" value="b" />
     </include>
     from table1
@@ -84,7 +84,7 @@
 
   <select id="selectNestedDynamicValue" resultType="string">
     select
-    <include refid="nestedDynamicValue">
+    <include ref="nestedDynamicValue">
       <property name="var" value="col_" />
     </include>
     from table1
@@ -92,7 +92,7 @@
 
   <select id="selectPropertyContext" resultType="map">
     select
-    <include refid="nestedPropertyContext">
+    <include ref="nestedPropertyContext">
       <property name="suffix" value="b" />
     </include>
     from table1
@@ -100,7 +100,7 @@
 
   <select id="selectEmptyProperty" resultType="string">
     select
-    <include refid="colsPrefix">
+    <include ref="colsPrefix">
       <property name="prefix" value="" />
     </include>
     from table1
@@ -108,13 +108,13 @@
 
   <select id="selectConfigVar" resultType="string">
     select
-    <include refid="nested" />
+    <include ref="nested" />
     from table1
   </select>
 
   <select id="selectPropertyInRefid" resultType="string">
     select
-    <include refid="nested">
+    <include ref="nested">
       <property name="sqlToInclude" value="colsPrefix" />
       <property name="prefix" value="col_" />
     </include>
@@ -123,7 +123,7 @@
 
   <select id="selectRuntimeVar" resultType="string">
     select
-    <include refid="nested">
+    <include ref="nested">
       <property name="sqlToInclude" value="colsSuffix" />
     </include>
     from table1
@@ -131,7 +131,7 @@
 
   <select id="selectNestedInclude" resultType="string">
     select
-    <include refid="nestedWithProperty">
+    <include ref="nestedWithProperty">
       <property name="sqlToInclude" value="colsPrefix" />
       <property name="prefix" value="col_" />
     </include>
@@ -140,10 +140,10 @@
 
   <select id="selectPropertyInAttribute" resultType="map">
     select
-    <include refid="colsIfAttribute">
+    <include ref="colsIfAttribute">
       <property name="value" value="x" />
     </include>,
-    <include refid="colsIfAttribute">
+    <include ref="colsIfAttribute">
       <property name="value" value="y" />
     </include>
     from table1

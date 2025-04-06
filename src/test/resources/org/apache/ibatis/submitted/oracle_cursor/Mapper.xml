@@ -49,19 +49,19 @@
   <select id="selectImplicitCursors_Statement"
     resultSets="topRS,bookRS" resultMap="authorRM"
     statementType="STATEMENT">
-    <include refid="implicitCursors" />
+    <include ref="implicitCursors" />
   </select>
 
   <select id="selectImplicitCursors_Prepared"
     resultSets="topRS,bookRS" resultMap="authorRM"
     statementType="PREPARED">
-    <include refid="implicitCursors" />
+    <include ref="implicitCursors" />
   </select>
 
   <select id="selectImplicitCursors_Callable"
     resultSets="topRS,bookRS" resultMap="authorRM"
     statementType="CALLABLE">
-    <include refid="implicitCursors" />
+    <include ref="implicitCursors" />
   </select>
 
   <!-- Referencing external result map to map nested curso to collectionr.
@@ -83,17 +83,17 @@
 
   <select id="selectNestedCursor_Statement"
     resultMap="authorRM_NestedCursor" statementType="STATEMENT">
-    <include refid="nestedCursor" />
+    <include ref="nestedCursor" />
   </select>
 
   <select id="selectNestedCursor_Prepared"
     resultMap="authorRM_NestedCursor" statementType="PREPARED">
-    <include refid="nestedCursor" />
+    <include ref="nestedCursor" />
   </select>
 
   <select id="selectNestedCursor_Callable"
     resultMap="authorRM_NestedCursor" statementType="CALLABLE">
-    <include refid="nestedCursor" />
+    <include ref="nestedCursor" />
   </select>
 
   <!-- As mapping Book does not require <association> nor <collection>, you
@@ -109,7 +109,7 @@
 
   <select id="selectNestedCursor_Automap"
     resultMap="authorRM_Automap">
-    <include refid="nestedCursor" />
+    <include ref="nestedCursor" />
   </select>
 
   <!-- Map nested cursor to constructor arg (collection). -->
@@ -125,7 +125,7 @@
 
   <select id="selectNestedCursorConstructorCollection"
     resultMap="authorRM_ConstructorCollection">
-    <include refid="nestedCursor" />
+    <include ref="nestedCursor" />
   </select>
 
   <!-- Map nested cursor to property using type handler. -->
@@ -139,7 +139,7 @@
 
   <select id="selectNestedCursorTypeHandler"
     resultMap="authorRM_TypeHandler">
-    <include refid="nestedCursor" />
+    <include ref="nestedCursor" />
   </select>
 
   <!-- Map nested cursor to constructor arg using type handler. -->
@@ -155,7 +155,7 @@
 
   <select id="selectNestedCursorTypeHandlerConstructor"
     resultMap="authorRM_TypeHandlerConstructor">
-    <include refid="nestedCursor" />
+    <include ref="nestedCursor" />
   </select>
 
   <!-- Use inline result map to map nested cursor to collection. -->
@@ -196,7 +196,7 @@
 
   <select id="selectNestedCursorAssociation"
     resultMap="book2RM_Association">
-    <include refid="bookNestedCursor" />
+    <include ref="bookNestedCursor" />
   </select>
 
   <resultMap id="authorRM_ConstructorIdName"
@@ -221,7 +221,7 @@
 
   <select id="selectNestedCursorConstructorAssociation"
     resultMap="book2RM_ConstructorAssociation">
-    <include refid="bookNestedCursor" />
+    <include ref="bookNestedCursor" />
   </select>
 
 </mapper>

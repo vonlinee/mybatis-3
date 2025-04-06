@@ -74,11 +74,11 @@
     </sql>
 
     <select id="getAllHouses" resultMap="houseMap">
-        <include refid="housesSelect"/>
+        <include ref="housesSelect"/>
     </select>
 
     <select id="getHouse" resultMap="houseMap" parameterType="int">
-        <include refid="housesSelect"/>
+        <include ref="housesSelect"/>
         where h.id = #{id}
     </select>
 </mapper>

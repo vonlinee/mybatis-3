@@ -31,13 +31,13 @@
     </select>
 
     <select id="selectOne" flushCache="true" resultType="string">
-        <include refid="select">
+        <include ref="select">
             <property name="select.columns" value="'1'"/>
         </include>
     </select>
 
     <select id="selectFromVariable" flushCache="true" resultType="string">
-        <include refid="select" />
+        <include ref="select" />
     </select>
 
     <sql id="select">

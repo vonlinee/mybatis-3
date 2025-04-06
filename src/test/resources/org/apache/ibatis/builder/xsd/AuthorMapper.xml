@@ -109,7 +109,7 @@
 
     <insert id="insertAuthor" parameterType="org.apache.ibatis.domain.blog.Author">
         <selectKey keyProperty="id" resultType="_int" order="BEFORE">
-            <include refid="selectNum">
+            <include ref="selectNum">
                 <property name="num" value="1"/>
             </include>
         </selectKey>

@@ -48,7 +48,7 @@
     </sql>
 
     <select id="getUserWithPets_Inline" resultMap="resultWithPets_Inline">
-        <include refid="selectUserPetBreeder" />
+        <include ref="selectUserPetBreeder" />
     </select>
 
     <resultMap type="org.apache.ibatis.submitted.automapping.User" id="resultWithPets_Inline" autoMapping="true">
@@ -60,7 +60,7 @@
     </resultMap>
 
     <select id="getUserWithPets_External" resultMap="resultWithPets_External">
-        <include refid="selectUserPetBreeder" />
+        <include ref="selectUserPetBreeder" />
     </select>
 
     <resultMap type="org.apache.ibatis.submitted.automapping.User" id="resultWithPets_External" autoMapping="true">

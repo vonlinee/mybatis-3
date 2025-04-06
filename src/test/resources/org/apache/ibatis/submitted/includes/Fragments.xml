@@ -32,6 +32,6 @@
   </sql>
   <sql id="selectId">
     select id from
-    <include refid="tableName" />
+    <include ref="tableName" />
   </sql>
 </mapper>

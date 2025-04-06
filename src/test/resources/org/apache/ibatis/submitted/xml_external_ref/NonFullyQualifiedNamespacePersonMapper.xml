@@ -36,9 +36,9 @@
     <!-- Referencing a sql fragment in another file -->
     <select id="select" parameterType="java.lang.Integer" resultMap="resultWithPets">
         SELECT
-        <include refid="personColumnList" />
+        <include ref="personColumnList" />
         ,
-        <include refid="pet namespace.petColumnList" />
+        <include ref="pet namespace.petColumnList" />
         FROM person, pet
         WHERE person_id = #{id}
         AND person_id = owner_id
@@ -49,7 +49,7 @@
     <select id="selectPet" parameterType="java.lang.Integer"
         resultMap="pet namespace.petResult">
         SELECT
-        <include refid="pet namespace.petColumnList" />
+        <include ref="pet namespace.petColumnList" />
         FROM pet
         WHERE pet_id = #{id}
     </select>

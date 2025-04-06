@@ -55,7 +55,7 @@
 
   <select id="selectRawWithInclude" resultType="Name" lang="raw">
     SELECT firstName, lastName
-    <include refid="include"/>
+    <include ref="include"/>
     WHERE lastName LIKE #{name}
   </select>
 
@@ -67,7 +67,7 @@
       <![CDATA[
     SELECT firstName, lastName
       ]]>
-    <include refid="includeWithCData"/>
+    <include ref="includeWithCData"/>
       <![CDATA[
     WHERE lastName LIKE #{name}
       ]]>

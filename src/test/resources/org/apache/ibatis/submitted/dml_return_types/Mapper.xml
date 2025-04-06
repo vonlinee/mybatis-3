@@ -31,31 +31,31 @@
     </sql>
 
     <update id="updateReturnsVoid" parameterType="org.apache.ibatis.submitted.dml_return_types.User">
-        <include refid="update"/>
+        <include ref="update"/>
     </update>
 
     <update id="updateReturnsPrimitiveInteger" parameterType="org.apache.ibatis.submitted.dml_return_types.User">
-        <include refid="update"/>
+        <include ref="update"/>
     </update>
 
     <update id="updateReturnsInteger" parameterType="org.apache.ibatis.submitted.dml_return_types.User">
-        <include refid="update"/>
+        <include ref="update"/>
     </update>
 
     <update id="updateReturnsPrimitiveLong" parameterType="org.apache.ibatis.submitted.dml_return_types.User">
-        <include refid="update"/>
+        <include ref="update"/>
     </update>
 
     <update id="updateReturnsLong" parameterType="org.apache.ibatis.submitted.dml_return_types.User">
-        <include refid="update"/>
+        <include ref="update"/>
     </update>
 
     <update id="updateReturnsPrimitiveBoolean" parameterType="org.apache.ibatis.submitted.dml_return_types.User">
-        <include refid="update"/>
+        <include ref="update"/>
     </update>
 
     <update id="updateReturnsBoolean" parameterType="org.apache.ibatis.submitted.dml_return_types.User">
-        <include refid="update"/>
+        <include ref="update"/>
     </update>
 
 </mapper>

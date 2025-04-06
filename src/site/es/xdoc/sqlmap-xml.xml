@@ -442,14 +442,14 @@ Por ejemplo, si la columna id de la tabla Author del ejemplo siguiente fuera aut
 
         <source><![CDATA[<select id="selectUsers" resultType="map">
   select
-    <include refid="userColumns"><property name="alias" value="t1"/></include>,
-    <include refid="userColumns"><property name="alias" value="t2"/></include>
+    <include ref="userColumns"><property name="alias" value="t1"/></include>,
+    <include ref="userColumns"><property name="alias" value="t2"/></include>
   from some_table t1
     cross join some_table t2
 </select>]]></source>
 
         <p>
-          Property value can be also used in include refid attribute or property values inside include clause, for example:
+          Property value can be also used in include ref attribute or property values inside include clause, for example:
         </p>
 
         <source><![CDATA[<sql id="sometable">
@@ -458,13 +458,13 @@ Por ejemplo, si la columna id de la tabla Author del ejemplo siguiente fuera aut
 
 <sql id="someinclude">
   from
-    <include refid="${include_target}"/>
+    <include ref="${include_target}"/>
 </sql>
 
 <select id="select" resultType="map">
   select
     field1, field2, field3
-  <include refid="someinclude">
+  <include ref="someinclude">
     <property name="prefix" value="Some"/>
     <property name="include_target" value="sometable"/>
   </include>
@@ -571,7 +571,7 @@ User findByEmail(@Param("email") String email);
 User findByColumn(@Param("column") String column, @Param("value") String value);
 ]]></source>
           in which the <code>${column}</code> will be substituted directly and the <code>#{value}</code> will be "prepared".
-          Thus you can just do the same work by:
+          Thus, you can just do the same work by:
           <source><![CDATA[
 User userOfId1 = userMapper.findByColumn("id", 1L);
 User userOfNameKid = userMapper.findByColumn("name", "kid");
@@ -1966,7 +1966,7 @@ SELECT * FROM POST WHERE BLOG_ID = #{id}]]></source>
 
         <p>
           Since 3.4.2, the MyBatis has been supported to call an initialization method after it's set all properties.
-          If you want to use this feature, please implements the <code>org.apache.ibatis.builder.InitializingObject</code>
+          If you want to use this feature, please implement the <code>org.apache.ibatis.builder.InitializingObject</code>
           interface on your custom cache class.
         </p>
 

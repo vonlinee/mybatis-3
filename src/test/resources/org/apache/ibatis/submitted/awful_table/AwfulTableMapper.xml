@@ -42,7 +42,7 @@
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select
-    <include refid="Base_Column_List" />
+    <include ref="Base_Column_List" />
     from "awful table" A
     where A."CuStOmEr iD" = #{customerId,jdbcType=INTEGER}
   </select>

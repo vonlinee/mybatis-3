@@ -27,7 +27,7 @@
     <!-- Referencing a sql fragment farther in same file -->
     <select id="select" parameterType="java.lang.Integer" resultMap="personResult">
         SELECT
-        <include refid="personColumnList" />
+        <include ref="personColumnList" />
         FROM person
         WHERE person_id = #{id}
     </select>

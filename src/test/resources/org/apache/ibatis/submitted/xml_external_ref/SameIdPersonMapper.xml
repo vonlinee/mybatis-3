@@ -37,10 +37,10 @@
     <!-- Referencing a sql fragment in another file -->
     <select id="select" parameterType="java.lang.Integer" resultMap="resultWithPets">
         SELECT
-        <include refid="columns" />
+        <include ref="columns" />
         ,
         <include
-            refid="org.apache.ibatis.submitted.xml_external_ref.SameIdPetMapper.columns" />
+            ref="org.apache.ibatis.submitted.xml_external_ref.SameIdPetMapper.columns" />
         FROM person, pet
         WHERE person_id = #{id}
         AND person_id = owner_id
@@ -51,7 +51,7 @@
         resultMap="org.apache.ibatis.submitted.xml_external_ref.SameIdPetMapper.petResult">
         SELECT
         <include
-            refid="org.apache.ibatis.submitted.xml_external_ref.SameIdPetMapper.columns" />
+            ref="org.apache.ibatis.submitted.xml_external_ref.SameIdPetMapper.columns" />
         FROM pet
         WHERE pet_id = #{id}
     </select>

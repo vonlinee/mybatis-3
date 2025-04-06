@@ -37,9 +37,9 @@
     </sql>
     <select id="select" parameterType="java.lang.Integer" resultMap="resultWithOwner">
         SELECT
-        <include refid="petColumnList" />
+        <include ref="petColumnList" />
         ,
-        <include refid="person namespace.personColumnList" />
+        <include ref="person namespace.personColumnList" />
         FROM pet, person where person_id = owner_id
         AND pet_id = #{id}
     </select>

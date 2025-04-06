@@ -60,19 +60,19 @@
     </sql>
 
     <select id="getAccountNonAmbiguous" resultMap="nonAmbiguousAccountRM">
-        <include refid="accountSelect"/>
+        <include ref="accountSelect"/>
     </select>
 
     <select id="getAccountJavaTypesMissing" resultMap="accountRM">
-        <include refid="accountSelect"/>
+        <include ref="accountSelect"/>
     </select>
 
     <select id="getAccountExtraParameter" resultMap="account2RM">
-        <include refid="accountSelect"/>
+        <include ref="accountSelect"/>
     </select>
 
     <select id="getAccountPartialTypesProvided" resultMap="account3RM">
-        <include refid="accountSelect"/>
+        <include ref="accountSelect"/>
     </select>
 
     <resultMap id="account4RM" type="org.apache.ibatis.submitted.auto_type_from_non_ambiguous_constructor.Account4">

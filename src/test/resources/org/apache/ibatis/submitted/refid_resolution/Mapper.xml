@@ -26,13 +26,13 @@
     </sql>
     <select id="selectValid" resultType="map">
         select
-        <include refid="columnList" />
+        <include ref="columnList" />
         from table1
     </select>
     <select id="selectInvalid" resultType="map">
         select
-        <!-- Non-existent refid with the same short name -->
-        <include refid="noSuchMapper.columnList" />
+        <!-- Non-existent ref with the same short name -->
+        <include ref="noSuchMapper.columnList" />
         from table1
     </select>
 </mapper>

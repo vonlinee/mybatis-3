@@ -60,7 +60,7 @@ public class XMLIncludeTransformer {
    */
   private void applyIncludes(Node source, final Properties variablesContext, boolean included) {
     if ("include".equals(source.getNodeName())) {
-      Node toInclude = findSqlFragment(getStringAttribute(source, "refid"), variablesContext);
+      Node toInclude = findSqlFragment(getStringAttribute(source, "ref"), variablesContext);
       Properties toIncludeContext = getVariablesContext(source, variablesContext);
       applyIncludes(toInclude, toIncludeContext, true);
       if (toInclude.getOwnerDocument() != source.getOwnerDocument()) {
@@ -91,14 +91,14 @@ public class XMLIncludeTransformer {
     }
   }
 
-  private Node findSqlFragment(String refid, Properties variables) {
-    refid = PropertyParser.parse(refid, variables);
-    refid = builderAssistant.applyCurrentNamespace(refid, true);
+  private Node findSqlFragment(String ref, Properties variables) {
+    ref = PropertyParser.parse(ref, variables);
+    ref = builderAssistant.applyCurrentNamespace(ref, true);
     try {
-      XNode nodeToInclude = configuration.getSqlFragments().get(refid);
+      XNode nodeToInclude = configuration.getSqlFragments().get(ref);
       return nodeToInclude.getNode().cloneNode(true);
     } catch (IllegalArgumentException e) {
-      throw new IncompleteElementException("Could not find SQL statement to include with refid '" + refid + "'", e);
+      throw new IncompleteElementException("Could not find SQL statement to include with ref '" + ref + "'", e);
     }
   }
 
