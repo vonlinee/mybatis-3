@@ -29,10 +29,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.internal.util.ReflectionUtils;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.mapping.ResultMapping;
-import org.apache.ibatis.reflection.ParamNameUtil;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.UnknownTypeHandler;
@@ -344,7 +344,7 @@ public class ResultMappingConstructorResolver {
 
         if (name == null && configuration.isUseActualParamName()) {
           if (actualParamNames == null) {
-            actualParamNames = ParamNameUtil.getParamNames(constructor);
+            actualParamNames = ReflectionUtils.getParamNames(constructor);
           }
           if (actualParamNames.size() > paramIndex) {
             name = actualParamNames.get(paramIndex);

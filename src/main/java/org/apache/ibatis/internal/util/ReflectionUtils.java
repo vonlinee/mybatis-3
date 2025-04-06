@@ -15,10 +15,15 @@
  */
 package org.apache.ibatis.internal.util;
 
+import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -80,5 +85,20 @@ public final class ReflectionUtils {
           "not supported type " + interfaceType + " when create proxy based on jdk");
     }
     return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[] { interfaceType }, ih);
+  }
+
+  public static List<String> getParamNames(Executable executable) {
+    if (executable == null) {
+      return Collections.emptyList();
+    }
+    Parameter[] parameters = executable.getParameters();
+    if (parameters == null || parameters.length == 0) {
+      return Collections.emptyList();
+    }
+    List<String> parameterNames = new ArrayList<>(parameters.length);
+    for (int i = 0; i < parameters.length; i++) {
+      parameterNames.add(parameters[i].getName());
+    }
+    return parameterNames;
   }
 }

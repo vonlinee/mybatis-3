@@ -31,6 +31,7 @@ import java.util.TreeMap;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.binding.ParamMap;
+import org.apache.ibatis.internal.util.ReflectionUtils;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
@@ -75,6 +76,7 @@ public class ParamNameResolver {
     Type[] actualParamTypes = TypeParameterResolver.resolveParamTypes(method, mapperClass);
     int paramCount = paramAnnotations.length;
     // get names from @Param annotations
+    final List<String> paramNames = ReflectionUtils.getParamNames(method);
     for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
       if (isSpecialParameter(paramTypes[paramIndex])) {
         // skip special parameters
@@ -92,7 +94,7 @@ public class ParamNameResolver {
       if (name == null) {
         // @Param was not specified.
         if (useActualParamName) {
-          name = getActualParamName(method, paramIndex);
+          name = paramNames.get(paramIndex);
         }
         if (name == null) {
           // use the parameter index as the name ("0", "1", ...)
@@ -118,7 +120,7 @@ public class ParamNameResolver {
         } else if (soleParamType instanceof Class) {
           soleParamClass = (Class<?>) soleParamType;
         }
-        if (Collection.class.isAssignableFrom(soleParamClass)) {
+        if (soleParamClass != null && Collection.class.isAssignableFrom(soleParamClass)) {
           typeMap.put("collection", soleParamType);
           if (List.class.isAssignableFrom(soleParamClass)) {
             typeMap.put("list", soleParamType);
@@ -126,10 +128,6 @@ public class ParamNameResolver {
         }
       }
     }
-  }
-
-  private String getActualParamName(Method method, int paramIndex) {
-    return ParamNameUtil.getParamNames(method).get(paramIndex);
   }
 
   private static boolean isSpecialParameter(Class<?> clazz) {
@@ -186,7 +184,7 @@ public class ParamNameResolver {
 
     if (type == null && unindexed.startsWith(GENERIC_NAME_PREFIX)) {
       try {
-        Integer paramIndex = Integer.valueOf(unindexed.substring(GENERIC_NAME_PREFIX.length())) - 1;
+        Integer paramIndex = Integer.parseInt(unindexed.substring(GENERIC_NAME_PREFIX.length())) - 1;
         unindexed = names.get(paramIndex);
         if (unindexed != null) {
           type = typeMap.get(unindexed);
