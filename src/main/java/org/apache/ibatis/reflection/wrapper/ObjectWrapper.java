@@ -21,15 +21,11 @@ import java.util.Map.Entry;
 
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
  */
 public interface ObjectWrapper {
-
-  @Deprecated
-  Object get(PropertyTokenizer prop);
 
   /**
    * @param property
@@ -38,9 +34,6 @@ public interface ObjectWrapper {
    * @return value
    */
   Object get(String property);
-
-  @Deprecated
-  void set(PropertyTokenizer prop, Object value);
 
   void set(String property, Object value);
 
@@ -67,9 +60,6 @@ public interface ObjectWrapper {
   boolean hasSetter(String name);
 
   boolean hasGetter(String name);
-
-  @Deprecated
-  MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory);
 
   MetaObject instantiatePropertyValue(String name, String property, ObjectFactory objectFactory);
 

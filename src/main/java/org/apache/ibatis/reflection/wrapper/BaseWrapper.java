@@ -48,11 +48,11 @@ public abstract class BaseWrapper implements ObjectWrapper {
           + prop.getName() + "' is null.");
     }
     if (collection instanceof Map) {
-      return ((Map) collection).get(prop.getIndex());
+      return ((Map<?, ?>) collection).get(prop.getIndex());
     }
     int i = Integer.parseInt(prop.getIndex());
     if (collection instanceof List) {
-      return ((List) collection).get(i);
+      return ((List<?>) collection).get(i);
     } else if (collection instanceof Object[]) {
       return ((Object[]) collection)[i];
     } else if (collection instanceof char[]) {

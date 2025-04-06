@@ -42,8 +42,7 @@ public class BeanWrapper extends BaseWrapper {
     this.metaClass = MetaClass.forClass(object.getClass(), metaObject.getReflectorFactory());
   }
 
-  @Override
-  public Object get(PropertyTokenizer prop) {
+  private Object get(PropertyTokenizer prop) {
     if (prop.hasNext()) {
       return getChildValue(prop);
     } else if (prop.getIndex() != null) {
@@ -58,8 +57,7 @@ public class BeanWrapper extends BaseWrapper {
     return get(new PropertyTokenizer(property));
   }
 
-  @Override
-  public void set(PropertyTokenizer prop, Object value) {
+  private void set(PropertyTokenizer prop, Object value) {
     if (prop.hasNext()) {
       setChildValue(prop, value);
     } else if (prop.getIndex() != null) {
@@ -177,8 +175,7 @@ public class BeanWrapper extends BaseWrapper {
     return false;
   }
 
-  @Override
-  public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
+  private MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
     MetaObject metaValue;
     Class<?> type = getSetterType(prop.getName());
     try {
