@@ -101,7 +101,7 @@ public interface SqlSession extends Closeable {
 
   /**
    * The selectMap is a special case in that it is designed to convert a list of results into a Map based on one of the
-   * properties in the resulting objects. Eg. Return a of Map[Integer,Author] for selectMap("selectAuthors","id")
+   * properties in the resulting objects. E.g. Return a Map[Integer,Author] for selectMap("selectAuthors","id")
    *
    * @param <K>
    *          the returned Map keys type
@@ -208,7 +208,7 @@ public interface SqlSession extends Closeable {
    * @param handler
    *          ResultHandler that will handle each retrieved row
    */
-  void select(String statement, Object parameter, ResultHandler handler);
+  <T> void select(String statement, Object parameter, ResultHandler<T> handler);
 
   /**
    * Retrieve a single row mapped from the statement using a {@code ResultHandler}.
@@ -218,7 +218,7 @@ public interface SqlSession extends Closeable {
    * @param handler
    *          ResultHandler that will handle each retrieved row
    */
-  void select(String statement, ResultHandler handler);
+  <T> void select(String statement, ResultHandler<T> handler);
 
   /**
    * Retrieve a single row mapped from the statement key and parameter using a {@code ResultHandler} and
@@ -233,7 +233,7 @@ public interface SqlSession extends Closeable {
    * @param handler
    *          ResultHandler that will handle each retrieved row
    */
-  void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler);
+  <T> void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler<T> handler);
 
   /**
    * Execute an insert statement.
@@ -286,7 +286,7 @@ public interface SqlSession extends Closeable {
    * @param statement
    *          Unique identifier matching the statement to execute.
    *
-   * @return int The number of rows affected by the delete.
+   * @return int The number of rows affected by the deletion.
    */
   int delete(String statement);
 
@@ -298,7 +298,7 @@ public interface SqlSession extends Closeable {
    * @param parameter
    *          A parameter object to pass to the statement.
    *
-   * @return int The number of rows affected by the delete.
+   * @return int The number of rows affected by the deletion.
    */
   int delete(String statement, Object parameter);
 
