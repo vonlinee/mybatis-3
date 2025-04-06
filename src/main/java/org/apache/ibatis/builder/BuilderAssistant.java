@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.BiConsumer;
 
+import org.apache.ibatis.builder.xml.XMLStatementBuilder;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.decorators.LruCache;
 import org.apache.ibatis.cache.impl.PerpetualCache;
@@ -45,6 +46,7 @@ import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.reflection.ParamNameResolver;
+import org.apache.ibatis.scripting.FetchType;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.ResultSetType;
@@ -55,9 +57,12 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
+ *
+ * @see BuilderException
  */
 public class BuilderAssistant {
 
@@ -148,9 +153,26 @@ public class BuilderAssistant {
     }
   }
 
-  public Cache buildCache(Class<? extends Cache> typeClass, Class<? extends Cache> evictionClass, Long flushInterval,
-      Integer size, boolean readWrite, boolean blocking, Properties props) {
-    // @formatter:off
+  // @formatter:off
+  public void addCache(Class<? extends Cache> typeClass,
+                       Class<? extends Cache> evictionClass,
+                       Long flushInterval,
+                       Integer size,
+                       boolean readWrite,
+                       boolean blocking,
+                       Properties props) {
+    Cache cache = buildCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
+    this.setCurrentCache(cache);
+    configuration.addCache(cache);
+  }
+  // @formatter:on
+
+  // @formatter:off
+  public Cache buildCache(Class<? extends Cache> typeClass,
+                          Class<? extends Cache> evictionClass,
+                          Long flushInterval,
+                          Integer size, boolean readWrite, boolean blocking,
+                          Properties props) {
     return new CacheBuilder(currentNamespace)
       .implementation(typeClass == null ? PerpetualCache.class : typeClass)
       .addDecorator(evictionClass == null ? LruCache.class : evictionClass)
@@ -160,7 +182,12 @@ public class BuilderAssistant {
       .blocking(blocking)
       .properties(props)
       .build();
-    // @formatter:on
+  }
+  // @formatter:on
+
+  public void addParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
+    ParameterMap parameterMap = this.buildParameterMap(id, parameterClass, parameterMappings);
+    configuration.addParameterMap(parameterMap);
   }
 
   public ParameterMap buildParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
@@ -168,15 +195,17 @@ public class BuilderAssistant {
     return new ParameterMap(id, parameterClass, parameterMappings);
   }
 
-  public ParameterMapping buildParameterMapping(Class<?> parameterType, String property, Class<?> javaType,
-      JdbcType jdbcType, String resultMap, ParameterMode parameterMode, Class<? extends TypeHandler<?>> typeHandler,
-      Integer numericScale) {
+  // @formatter:off
+  public ParameterMapping buildParameterMapping(Class<?> parameterType,
+                                                String property, Class<?> javaType,
+                                                JdbcType jdbcType, String resultMap,
+                                                ParameterMode parameterMode,
+                                                Class<? extends TypeHandler<?>> typeHandler,
+                                                Integer numericScale) {
     resultMap = applyCurrentNamespace(resultMap, true);
-
     // Class parameterType = parameterMapBuilder.type();
     Class<?> javaTypeClass = resolveParameterJavaType(parameterType, property, javaType, jdbcType);
     TypeHandler<?> typeHandlerInstance = configuration.resolveTypeHandler(javaTypeClass, jdbcType, typeHandler);
-    // @formatter:off
     return new ParameterMapping.Builder(property, javaTypeClass)
       .jdbcType(jdbcType)
       .resultMapId(resultMap)
@@ -184,8 +213,8 @@ public class BuilderAssistant {
       .numericScale(numericScale)
       .typeHandler(typeHandlerInstance)
       .build();
-    // @formatter:on
   }
+  // @formatter:on
 
   public ResultMap buildResultMap(String id, Class<?> type, String extend, Discriminator discriminator,
       List<ResultMapping> resultMappings, Boolean autoMapping) {
@@ -232,19 +261,26 @@ public class BuilderAssistant {
     return new Discriminator.Builder(resultMapping, namespaceDiscriminatorMap).build();
   }
 
-  public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType,
-      SqlCommandType sqlCommandType, Integer fetchSize, Integer timeout, String parameterMap, Class<?> parameterType,
-      String resultMap, Class<?> resultType, ResultSetType resultSetType, boolean flushCache, boolean useCache,
-      boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId,
-      LanguageDriver lang, String resultSets, boolean dirtySelect, ParamNameResolver paramNameResolver) {
+  // @formatter:off
+  public MappedStatement addMappedStatement(String id, SqlSource sqlSource,
+                                            StatementType statementType,
+                                            SqlCommandType sqlCommandType,
+                                            Integer fetchSize, Integer timeout, String parameterMap,
+                                            Class<?> parameterType,
+                                            String resultMap, Class<?> resultType,
+                                            ResultSetType resultSetType, boolean flushCache, boolean useCache,
+                                            boolean resultOrdered,
+                                            KeyGenerator keyGenerator, String keyProperty,
+                                            String keyColumn, String databaseId,
+                                            LanguageDriver lang, String resultSets,
+                                            boolean dirtySelect,
+                                            ParamNameResolver paramNameResolver) {
 
     if (unresolvedCacheRef) {
       throw new IncompleteElementException("Cache-ref not yet resolved");
     }
-
     id = applyCurrentNamespace(id, false);
 
-    // @formatter:off
     MappedStatement.Builder statementBuilder = new MappedStatement.Builder(configuration, id, sqlSource, sqlCommandType)
       .resource(currentResource)
       .fetchSize(fetchSize)
@@ -444,11 +480,84 @@ public class BuilderAssistant {
     return metaResultType.hasSetter(property);
   }
 
-  public <T> Class<? extends T> resolveClass(String alias) {
+  public <T> Class<? extends T> resolveClass(@Nullable String alias) {
     try {
       return alias == null ? null : configuration.resolveAlias(alias);
     } catch (Exception e) {
       throw new BuilderException("Error resolving class. Cause: " + e, e);
+    }
+  }
+
+  public ParameterMode resolveParameterMode(@Nullable String mode) {
+    try {
+      return mode == null ? null : ParameterMode.valueOf(mode);
+    } catch (IllegalArgumentException e) {
+      throw new BuilderException("Error resolving ParameterMode. Cause: " + e, e);
+    }
+  }
+
+  public JdbcType resolveJdbcType(@Nullable String alias) {
+    try {
+      return alias == null ? null : JdbcType.valueOf(alias);
+    } catch (IllegalArgumentException e) {
+      throw new BuilderException("Error resolving JdbcType. Cause: " + e, e);
+    }
+  }
+
+  public <T> Class<? extends T> resolveAlias(String alias) {
+    return configuration.getTypeAliasRegistry().resolveAlias(alias);
+  }
+
+  // pending builder handle start
+
+  public void addIncompleteStatement(XMLStatementBuilder incompleteStatement) {
+    configuration.addIncompleteStatement(incompleteStatement);
+  }
+
+  public void addIncompleteCacheRef(CacheRefResolver cacheRefResolver) {
+    configuration.addIncompleteCacheRef(cacheRefResolver);
+  }
+
+  public void addCacheRef(String namespace) {
+    configuration.addCacheRef(this.getCurrentNamespace(), namespace);
+  }
+
+  // pending builder handle end
+
+  public boolean determineLazy(String fetchType) {
+    if (StringUtils.isBlank(fetchType)) {
+      return configuration.isLazyLoadingEnabled();
+    }
+    if (FetchType.LAZY.name().equalsIgnoreCase(fetchType)) {
+      return true;
+    } else if (FetchType.EAGER.name().equalsIgnoreCase(fetchType)) {
+      return false;
+    } else {
+      throw new BuilderException("Error resolving fetchType.");
+    }
+  }
+
+  public ResultMap addResultMap(String id, Class<?> typeClass, String extend, Discriminator discriminator,
+      List<ResultMapping> resultMappings, Boolean autoMapping) {
+    ResultMapResolver resultMapResolver = new ResultMapResolver(this, id, typeClass, extend, discriminator,
+        resultMappings, autoMapping);
+    try {
+      ResultMap resultMap = resultMapResolver.resolve();
+      configuration.addResultMap(resultMap);
+      return resultMap;
+    } catch (IncompleteElementException e) {
+      this.addIncompleteResultMap(resultMapResolver);
+      throw e;
+    }
+  }
+
+  public void resolveCacheRef(String namespace) {
+    this.addCacheRef(namespace);
+    CacheRefResolver cacheRefResolver = new CacheRefResolver(this, namespace);
+    try {
+      cacheRefResolver.resolveCacheRef();
+    } catch (IncompleteElementException e) {
+      this.addIncompleteCacheRef(cacheRefResolver);
     }
   }
 }
