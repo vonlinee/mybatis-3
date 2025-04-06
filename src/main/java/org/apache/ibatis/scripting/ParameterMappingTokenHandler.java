@@ -18,6 +18,7 @@ package org.apache.ibatis.scripting;
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -106,7 +107,11 @@ public class ParameterMappingTokenHandler implements TokenHandler {
       String name = entry.getKey();
       String value = entry.getValue();
       if ("mode".equals(name)) {
-        mode = configuration.resolveParameterMode(value);
+        mode = ParameterMode.findByName(value);
+        if (mode == null) {
+          throw new BuilderException("An invalid property value for mode, Valid values are "
+              + Arrays.toString(ParameterMode.values()) + " (case insensitive).");
+        }
         builder.mode(mode);
       } else if ("numericScale".equals(name)) {
         builder.numericScale(Integer.valueOf(value));

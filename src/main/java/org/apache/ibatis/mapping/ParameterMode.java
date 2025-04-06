@@ -15,6 +15,8 @@
  */
 package org.apache.ibatis.mapping;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * @author Clinton Begin
  */
@@ -24,6 +26,18 @@ public enum ParameterMode {
 
   OUT,
 
-  INOUT
+  INOUT;
 
+  @Nullable
+  public static ParameterMode findByName(String name) {
+    if (name == null) {
+      return null;
+    }
+    for (ParameterMode mode : values()) {
+      if (mode.name().equalsIgnoreCase(name)) {
+        return mode;
+      }
+    }
+    return null;
+  }
 }
