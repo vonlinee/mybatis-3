@@ -42,7 +42,7 @@ public class ParameterExpression extends HashMap<String, String> {
   }
 
   private void parse(String expression) {
-    int p = StringUtils.skipWS(expression, 0);
+    int p = StringUtils.skipWhitespaces(expression, 0);
     if (expression.charAt(p) == '(') {
       expression(expression, p + 1);
     } else {
@@ -68,13 +68,13 @@ public class ParameterExpression extends HashMap<String, String> {
   private void property(String expression, int left) {
     if (left < expression.length()) {
       int right = StringUtils.skipUntil(expression, left, ",:");
-      put("property", StringUtils.trimmedStr(expression, left, right));
+      put("property", StringUtils.trim(expression, left, right));
       jdbcTypeOpt(expression, right);
     }
   }
 
   private void jdbcTypeOpt(String expression, int p) {
-    p = StringUtils.skipWS(expression, p);
+    p = StringUtils.skipWhitespaces(expression, p);
     if (p < expression.length()) {
       if (expression.charAt(p) == ':') {
         jdbcType(expression, p + 1);
@@ -87,23 +87,23 @@ public class ParameterExpression extends HashMap<String, String> {
   }
 
   private void jdbcType(String expression, int p) {
-    int left = StringUtils.skipWS(expression, p);
+    int left = StringUtils.skipWhitespaces(expression, p);
     int right = StringUtils.skipUntil(expression, left, ",");
     if (right <= left) {
       throw new BuilderException("Parsing error in {" + expression + "} in position " + p);
     }
-    put("jdbcType", StringUtils.trimmedStr(expression, left, right));
+    put("jdbcType", StringUtils.trim(expression, left, right));
     option(expression, right + 1);
   }
 
   private void option(String expression, int p) {
-    int left = StringUtils.skipWS(expression, p);
+    int left = StringUtils.skipWhitespaces(expression, p);
     if (left < expression.length()) {
       int right = StringUtils.skipUntil(expression, left, "=");
-      String name = StringUtils.trimmedStr(expression, left, right);
+      String name = StringUtils.trim(expression, left, right);
       left = right + 1;
       right = StringUtils.skipUntil(expression, left, ",");
-      String value = StringUtils.trimmedStr(expression, left, right);
+      String value = StringUtils.trim(expression, left, right);
       put(name, value);
       option(expression, right + 1);
     }

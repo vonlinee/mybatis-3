@@ -229,6 +229,12 @@ public final class StringUtils {
   }
 
   public static int skipUntil(String str, int p, final String endChars) {
+    if (isEmpty(str)) {
+      return -1;
+    }
+    if (p < 0 || p > str.length()) {
+      return str.length();
+    }
     for (int i = p; i < str.length(); i++) {
       char c = str.charAt(i);
       if (endChars.indexOf(c) > -1) {
@@ -238,7 +244,11 @@ public final class StringUtils {
     return str.length();
   }
 
-  public static String trimmedStr(String str, int start, int end) {
+  @NotNull
+  public static String trim(String str, int start, int end) {
+    if (isEmpty(str)) {
+      return EMPTY;
+    }
     while (str.charAt(start) <= 0x20) {
       start++;
     }
@@ -248,16 +258,23 @@ public final class StringUtils {
     return start >= end ? "" : str.substring(start, end);
   }
 
-  public static int skipWS(String expression, int p) {
-    for (int i = p; i < expression.length(); i++) {
-      if (expression.charAt(i) > 0x20) {
+  public static int skipWhitespaces(@Nullable String str, int start) {
+    if (isEmpty(str)) {
+      return -1;
+    }
+    for (int i = start; i < str.length(); i++) {
+      if (str.charAt(i) > 0x20) {
         return i;
       }
     }
-    return expression.length();
+    return str.length();
   }
 
-  public static String removeExtraWhitespaces(String original) {
+  @NotNull
+  public static String removeExtraWhitespaces(@Nullable String original) {
+    if (isEmpty(original)) {
+      return EMPTY;
+    }
     StringTokenizer tokenizer = new StringTokenizer(original);
     StringBuilder builder = new StringBuilder();
     boolean hasMoreTokens = tokenizer.hasMoreTokens();

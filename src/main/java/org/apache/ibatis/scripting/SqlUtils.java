@@ -15,6 +15,9 @@
  */
 package org.apache.ibatis.scripting;
 
+import org.apache.ibatis.internal.util.StringUtils;
+import org.jetbrains.annotations.Nullable;
+
 public final class SqlUtils {
 
   public static final String PLACEHOLDER = "?";
@@ -22,5 +25,9 @@ public final class SqlUtils {
   public static Class<?> getParameterType(Object parameterObject, Class<?> parameterType) {
     return parameterObject == null ? (parameterType == null ? Object.class : parameterType)
         : parameterObject.getClass();
+  }
+
+  public static String shrinkWhitespaces(@Nullable String sql) {
+    return StringUtils.removeExtraWhitespaces(sql);
   }
 }

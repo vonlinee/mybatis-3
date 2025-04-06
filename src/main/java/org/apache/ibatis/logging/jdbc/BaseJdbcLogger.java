@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.reflection.ArrayUtil;
 
@@ -116,10 +115,6 @@ public abstract class BaseJdbcLogger {
     columnMap.clear();
     columnNames.clear();
     columnValues.clear();
-  }
-
-  protected String removeExtraWhitespace(String original) {
-    return StringUtils.removeExtraWhitespaces(original);
   }
 
   protected boolean isDebugEnabled() {

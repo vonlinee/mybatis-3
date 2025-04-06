@@ -24,6 +24,7 @@ import java.sql.Statement;
 
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.reflection.ExceptionUtil;
+import org.apache.ibatis.scripting.SqlUtils;
 
 /**
  * Connection proxy to add logging.
@@ -48,7 +49,7 @@ public final class ConnectionLogger extends BaseJdbcLogger implements Invocation
       }
       if ("prepareStatement".equals(method.getName()) || "prepareCall".equals(method.getName())) {
         if (isDebugEnabled()) {
-          debug(" Preparing: " + removeExtraWhitespace((String) params[0]), true);
+          debug(" Preparing: " + SqlUtils.shrinkWhitespaces((String) params[0]), true);
         }
         PreparedStatement stmt = (PreparedStatement) method.invoke(connection, params);
         return PreparedStatementLogger.newInstance(stmt, statementLog, queryStack);

@@ -21,12 +21,12 @@ import java.util.List;
 
 import org.apache.ibatis.builder.ParameterMappingTokenHandler;
 import org.apache.ibatis.builder.StaticSqlSource;
-import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.SqlSource;
+import org.apache.ibatis.scripting.SqlUtils;
 import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
 import org.apache.ibatis.scripting.xmltags.SqlNode;
@@ -53,7 +53,7 @@ public class RawSqlSource implements SqlSource {
     rootSqlNode.apply(context);
     String sql = context.getSql();
 
-    sql = configuration.isShrinkWhitespacesInSql() ? StringUtils.removeExtraWhitespaces(sql) : sql;
+    sql = configuration.isShrinkWhitespacesInSql() ? SqlUtils.shrinkWhitespaces(sql) : sql;
 
     sqlSource = new StaticSqlSource(sql, context.getParameterMappings());
   }
@@ -66,7 +66,7 @@ public class RawSqlSource implements SqlSource {
         clazz, new HashMap<>(), paramNameResolver);
     String parsedSql = TokenParser.parse(sql, "#{", "}", tokenHandler);
 
-    parsedSql = configuration.isShrinkWhitespacesInSql() ? StringUtils.removeExtraWhitespaces(parsedSql) : parsedSql;
+    parsedSql = configuration.isShrinkWhitespacesInSql() ? SqlUtils.shrinkWhitespaces(parsedSql) : parsedSql;
     sqlSource = new StaticSqlSource(parsedSql, parameterMappings);
   }
 

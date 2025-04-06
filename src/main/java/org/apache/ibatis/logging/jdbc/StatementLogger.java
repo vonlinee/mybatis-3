@@ -23,6 +23,7 @@ import java.sql.Statement;
 
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.reflection.ExceptionUtil;
+import org.apache.ibatis.scripting.SqlUtils;
 
 /**
  * Statement proxy to add logging.
@@ -47,7 +48,7 @@ public final class StatementLogger extends BaseJdbcLogger implements InvocationH
       }
       if (EXECUTE_METHODS.contains(method.getName())) {
         if (isDebugEnabled()) {
-          debug(" Executing: " + removeExtraWhitespace((String) params[0]), true);
+          debug(" Executing: " + SqlUtils.shrinkWhitespaces((String) params[0]), true);
         }
         if ("executeQuery".equals(method.getName())) {
           ResultSet rs = (ResultSet) method.invoke(statement, params);
