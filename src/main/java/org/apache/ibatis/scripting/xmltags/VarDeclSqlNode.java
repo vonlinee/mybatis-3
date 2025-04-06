@@ -16,13 +16,14 @@
 package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
-import org.apache.ibatis.scripting.expression.OgnlCache;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 
 /**
  * @author Frank D. Martinez [mnesarco]
  */
 public class VarDeclSqlNode implements SqlNode {
 
+  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
   private final String name;
   private final String expression;
 
@@ -33,7 +34,7 @@ public class VarDeclSqlNode implements SqlNode {
 
   @Override
   public boolean apply(SqlBuildContext context) {
-    final Object value = OgnlCache.getValue(expression, context.getBindings());
+    final Object value = evaluator.getValue(expression, context.getBindings());
     context.bind(name, value);
     return true;
   }

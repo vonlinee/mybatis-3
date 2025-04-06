@@ -18,13 +18,14 @@ package org.apache.ibatis.scripting.xmltags;
 import org.apache.ibatis.parsing.TokenHandler;
 import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.scripting.SqlBuildContext;
-import org.apache.ibatis.scripting.expression.OgnlCache;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**
  * @author Clinton Begin
  */
 public class TextSqlNode implements SqlNode {
+
   private final String text;
 
   public TextSqlNode(String text) {
@@ -40,6 +41,7 @@ public class TextSqlNode implements SqlNode {
   private static class BindingTokenParser implements TokenHandler {
 
     private final SqlBuildContext context;
+    private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
 
     public BindingTokenParser(SqlBuildContext context) {
       this.context = context;
@@ -47,13 +49,13 @@ public class TextSqlNode implements SqlNode {
 
     @Override
     public String handleToken(String content) {
-      Object parameter = context.getBindings().get("_parameter");
+      Object parameter = context.getBindings().get(SqlBuildContext.PARAMETER_OBJECT_KEY);
       if (parameter == null) {
         context.getBindings().put("value", null);
       } else if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
         context.getBindings().put("value", parameter);
       }
-      Object value = OgnlCache.getValue(content, context.getBindings());
+      Object value = evaluator.getValue(content, context.getBindings());
       // issue #274 return "" instead of "null"
       return value == null ? "" : String.valueOf(value);
     }

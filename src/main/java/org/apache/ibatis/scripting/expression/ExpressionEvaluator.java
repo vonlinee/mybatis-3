@@ -21,7 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import ognl.OgnlContext;
+import ognl.OgnlRuntime;
+import ognl.PropertyAccessor;
+
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.scripting.ContextMap;
+import org.apache.ibatis.scripting.SqlBuildContext;
 
 /**
  * @author Clinton Begin
@@ -29,6 +35,14 @@ import org.apache.ibatis.builder.BuilderException;
 public class ExpressionEvaluator {
 
   public static final ExpressionEvaluator INSTANCE = new ExpressionEvaluator();
+
+  static {
+    OgnlRuntime.setPropertyAccessor(ContextMap.class, new ContextAccessor());
+  }
+
+  public Object getValue(String expression, Object root) {
+    return OgnlCache.getValue(expression, root);
+  }
 
   public boolean evaluateBoolean(String expression, Object parameterObject) {
     Object value = OgnlCache.getValue(expression, parameterObject);
@@ -72,10 +86,44 @@ public class ExpressionEvaluator {
       return answer;
     }
     if (value instanceof Map) {
-      return ((Map) value).entrySet();
+      return ((Map<?, ?>) value).entrySet();
     }
     throw new BuilderException(
         "Error evaluating expression '" + expression + "'.  Return value (" + value + ") was not iterable.");
   }
 
+  static class ContextAccessor implements PropertyAccessor {
+
+    @Override
+    public Object getProperty(OgnlContext context, Object target, Object name) {
+      Map<?, ?> map = (Map<?, ?>) target;
+
+      Object result = map.get(name);
+      if (map.containsKey(name) || result != null) {
+        return result;
+      }
+      Object parameterObject = map.get(SqlBuildContext.PARAMETER_OBJECT_KEY);
+      if (parameterObject instanceof Map) {
+        return ((Map<?, ?>) parameterObject).get(name);
+      }
+      return null;
+    }
+
+    @Override
+    public void setProperty(OgnlContext context, Object target, Object name, Object value) {
+      @SuppressWarnings("unchecked")
+      Map<Object, Object> map = (Map<Object, Object>) target;
+      map.put(name, value);
+    }
+
+    @Override
+    public String getSourceAccessor(OgnlContext arg0, Object arg1, Object arg2) {
+      return null;
+    }
+
+    @Override
+    public String getSourceSetter(OgnlContext arg0, Object arg1, Object arg2) {
+      return null;
+    }
+  }
 }

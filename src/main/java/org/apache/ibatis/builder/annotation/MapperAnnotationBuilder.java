@@ -638,13 +638,17 @@ public class MapperAnnotationBuilder {
   private Optional<AnnotationWrapper> getAnnotationWrapper(Method method, boolean errorIfNoMatch,
       Collection<Class<? extends Annotation>> targetTypes) {
     String databaseId = configuration.getDatabaseId();
+    // @formatter:off
     Map<String, AnnotationWrapper> statementAnnotations = targetTypes.stream()
-        .flatMap(x -> Arrays.stream(method.getAnnotationsByType(x))).map(AnnotationWrapper::new)
-        .collect(Collectors.toMap(AnnotationWrapper::getDatabaseId, x -> x, (existing, duplicate) -> {
+      .flatMap(x -> Arrays.stream(method.getAnnotationsByType(x)))
+      .map(AnnotationWrapper::new)
+      .collect(Collectors.toMap(AnnotationWrapper::getDatabaseId, x -> x,
+        (existing, duplicate) -> {
           throw new BuilderException(
-              String.format("Detected conflicting annotations '%s' and '%s' on '%s'.", existing.getAnnotation(),
-                  duplicate.getAnnotation(), method.getDeclaringClass().getName() + "." + method.getName()));
+            String.format("Detected conflicting annotations '%s' and '%s' on '%s'.", existing.getAnnotation(),
+              duplicate.getAnnotation(), method.getDeclaringClass().getName() + "." + method.getName()));
         }));
+    // @formatter:on
     AnnotationWrapper annotationWrapper = null;
     if (databaseId != null) {
       annotationWrapper = statementAnnotations.get(databaseId);
