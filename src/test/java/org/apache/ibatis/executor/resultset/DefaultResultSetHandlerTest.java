@@ -31,12 +31,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.SqlCommandType;
+import org.apache.ibatis.scripting.StaticSqlSource;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandler;

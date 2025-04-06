@@ -13,13 +13,11 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.builder;
+package org.apache.ibatis.scripting;
 
 import java.util.List;
 
 import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.scripting.BoundSql;
-import org.apache.ibatis.scripting.SqlSource;
 
 /**
  * @author Clinton Begin

@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.decorators.LoggingCache;
 import org.apache.ibatis.cache.decorators.ScheduledCache;
@@ -47,6 +46,7 @@ import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.SqlCommandType;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.StatementType;
+import org.apache.ibatis.scripting.StaticSqlSource;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
 import org.apache.ibatis.scripting.xmltags.TextSqlNode;
 import org.apache.ibatis.session.Configuration;

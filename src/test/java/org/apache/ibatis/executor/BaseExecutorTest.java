@@ -27,7 +27,6 @@ import javassist.util.proxy.Proxy;
 import javax.sql.DataSource;
 
 import org.apache.ibatis.BaseDataTest;
-import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.domain.blog.Blog;
@@ -37,6 +36,7 @@ import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.SqlCommandType;
+import org.apache.ibatis.scripting.StaticSqlSource;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;

@@ -19,14 +19,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.ibatis.builder.ParameterMappingTokenHandler;
-import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.BoundSql;
+import org.apache.ibatis.scripting.ParameterMappingTokenHandler;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.SqlUtils;
+import org.apache.ibatis.scripting.StaticSqlSource;
 import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
 import org.apache.ibatis.scripting.xmltags.SqlNode;
