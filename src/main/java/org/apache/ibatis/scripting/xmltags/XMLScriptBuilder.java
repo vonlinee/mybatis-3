@@ -26,7 +26,7 @@ import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.ParamNameResolver;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
+import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.defaults.RawSqlSource;

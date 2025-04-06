@@ -22,9 +22,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin

@@ -43,7 +43,6 @@ import org.apache.ibatis.reflection.invoker.GetFieldInvoker;
 import org.apache.ibatis.reflection.invoker.Invoker;
 import org.apache.ibatis.reflection.invoker.MethodInvoker;
 import org.apache.ibatis.reflection.invoker.SetFieldInvoker;
-import org.apache.ibatis.reflection.property.PropertyNamer;
 
 /**
  * This class represents a cached set of class definition information that allows for easy mapping between property
@@ -107,8 +106,8 @@ public class Reflector {
 
   private void addGetMethods(Method[] methods) {
     Map<String, List<Method>> conflictingGetters = new HashMap<>();
-    Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && PropertyNamer.isGetter(m.getName()))
-        .forEach(m -> addMethodConflict(conflictingGetters, PropertyNamer.methodToProperty(m.getName()), m));
+    Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && BeanUtils.isGetter(m.getName()))
+        .forEach(m -> addMethodConflict(conflictingGetters, BeanUtils.methodToProperty(m.getName()), m));
     resolveGetterConflicts(conflictingGetters);
   }
 
@@ -156,8 +155,8 @@ public class Reflector {
 
   private void addSetMethods(Method[] methods) {
     Map<String, List<Method>> conflictingSetters = new HashMap<>();
-    Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 1 && PropertyNamer.isSetter(m.getName()))
-        .forEach(m -> addMethodConflict(conflictingSetters, PropertyNamer.methodToProperty(m.getName()), m));
+    Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 1 && BeanUtils.isSetter(m.getName()))
+        .forEach(m -> addMethodConflict(conflictingSetters, BeanUtils.methodToProperty(m.getName()), m));
     resolveSetterConflicts(conflictingSetters);
   }
 

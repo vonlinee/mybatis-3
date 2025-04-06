@@ -17,6 +17,7 @@ package org.apache.ibatis.reflection.property;
 
 import java.util.Arrays;
 
+import org.apache.ibatis.reflection.BeanUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,7 @@ class PropertyCopierTest {
     sourceBeanCopierData.setMyInteger(0);
     sourceBeanCopierData.setMyList(Arrays.asList(1, 2, 3));
     SourceBeanCopierData destinationBeanTestClass = new SourceBeanCopierData();
-    PropertyCopier.copyBeanProperties(sourceBeanCopierData.getClass(), sourceBeanCopierData, destinationBeanTestClass);
+    BeanUtils.copyProperties(sourceBeanCopierData.getClass(), sourceBeanCopierData, destinationBeanTestClass);
     Assertions.assertEquals(sourceBeanCopierData.getMyString(), destinationBeanTestClass.getMyString());
     Assertions.assertEquals(sourceBeanCopierData.getMyInteger(), destinationBeanTestClass.getMyInteger());
     Assertions.assertEquals(sourceBeanCopierData.getMyList(), destinationBeanTestClass.getMyList());
