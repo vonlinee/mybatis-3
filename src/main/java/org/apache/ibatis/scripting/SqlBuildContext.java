@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.reflection.ParamNameResolver;
 
 public interface SqlBuildContext {
 

@@ -21,8 +21,8 @@ import java.util.List;
 
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.parsing.TokenParser;
-import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.BoundSql;
+import org.apache.ibatis.scripting.ParamNameResolver;
 import org.apache.ibatis.scripting.ParameterMappingTokenHandler;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.SqlUtils;

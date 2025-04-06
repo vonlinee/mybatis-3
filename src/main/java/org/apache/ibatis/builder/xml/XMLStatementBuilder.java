@@ -30,9 +30,9 @@ import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.parsing.XNode;
-import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.MappedStatement;
+import org.apache.ibatis.scripting.ParamNameResolver;
 import org.apache.ibatis.scripting.ResultSetType;
 import org.apache.ibatis.scripting.SqlCommandType;
 import org.apache.ibatis.scripting.SqlSource;
@@ -88,7 +88,8 @@ public class XMLStatementBuilder {
         .collect(Collectors.toList());
       // @formatter:on
       if (mapperMethods.size() == 1) {
-        paramNameResolver = new ParamNameResolver(configuration, mapperMethods.get(0), mapperClass);
+        paramNameResolver = ParamNameResolver.resolve(mapperClass, mapperMethods.get(0),
+            configuration.isUseActualParamName());
         if (paramNameResolver.isUseParamMap()) {
           parameterTypeClass = ParamMap.class;
         } else {

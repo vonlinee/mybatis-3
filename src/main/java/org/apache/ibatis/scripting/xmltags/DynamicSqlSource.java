@@ -15,8 +15,8 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.BoundSql;
+import org.apache.ibatis.scripting.ParamNameResolver;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.SqlUtils;
 import org.apache.ibatis.scripting.StaticSqlSource;

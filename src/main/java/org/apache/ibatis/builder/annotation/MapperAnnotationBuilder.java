@@ -79,11 +79,11 @@ import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.parsing.PropertyParser;
-import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.reflection.TypeParameterResolver;
 import org.apache.ibatis.scripting.FetchType;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.MappedStatement;
+import org.apache.ibatis.scripting.ParamNameResolver;
 import org.apache.ibatis.scripting.ResultSetType;
 import org.apache.ibatis.scripting.SqlCommandType;
 import org.apache.ibatis.scripting.SqlSource;
@@ -296,7 +296,8 @@ public class MapperAnnotationBuilder {
 
   void parseStatement(Class<?> type, Method method) {
     final Class<?> parameterTypeClass = getParameterType(method);
-    final ParamNameResolver paramNameResolver = new ParamNameResolver(configuration, method, type);
+    final ParamNameResolver paramNameResolver = ParamNameResolver.resolve(type, method,
+        configuration.isUseActualParamName());
     final LanguageDriver languageDriver = getLanguageDriver(method);
 
     getAnnotationWrapper(method, true, statementAnnotationTypes).ifPresent(statementAnnotation -> {

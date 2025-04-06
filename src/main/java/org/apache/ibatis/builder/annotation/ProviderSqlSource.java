@@ -24,9 +24,9 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Lang;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.reflection.ExceptionUtil;
-import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.LanguageDriver;
+import org.apache.ibatis.scripting.ParamNameResolver;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.session.Configuration;
 
@@ -100,7 +100,8 @@ public class ProviderSqlSource implements SqlSource {
           + "' not found in SqlProvider '" + this.providerType.getName() + "'.");
     }
     this.providerMethod = candidateProviderMethod;
-    this.paramNameResolver = new ParamNameResolver(configuration, this.providerMethod, mapperType);
+    this.paramNameResolver = ParamNameResolver.resolve(mapperType, this.providerMethod,
+        configuration.isUseActualParamName());
     this.providerMethodParameterTypes = this.providerMethod.getParameterTypes();
 
     ProviderContext candidateProviderContext = null;

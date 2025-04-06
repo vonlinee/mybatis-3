@@ -29,7 +29,6 @@ import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.mapping.ParameterMap;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.ResultMap;
-import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.session.Configuration;
 
 /**

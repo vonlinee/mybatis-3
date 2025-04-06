@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.reflection;
+package org.apache.ibatis.scripting;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.GenericArrayType;
@@ -32,7 +32,8 @@ import java.util.TreeMap;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.internal.util.ReflectionUtils;
-import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.reflection.PropertyTokenizer;
+import org.apache.ibatis.reflection.TypeParameterResolver;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
@@ -48,7 +49,7 @@ public class ParamNameResolver {
     }
   }
 
-  private final boolean useActualParamName;
+  private boolean useActualParamName;
 
   /**
    * The key is the index and the value is the name of the parameter.<br />
@@ -61,14 +62,32 @@ public class ParamNameResolver {
    * <li>aMethod(int a, RowBounds rb, int b) -&gt; {{0, "0"}, {2, "1"}}</li>
    * </ul>
    */
-  private final SortedMap<Integer, String> names;
+  private SortedMap<Integer, String> names;
+
+  /**
+   * type info of fields
+   */
   private final Map<String, Type> typeMap = new HashMap<>();
 
   private boolean hasParamAnnotation;
   private boolean useParamMap;
 
-  public ParamNameResolver(Configuration config, Method method, Class<?> mapperClass) {
-    this.useActualParamName = config.isUseActualParamName();
+  public boolean isUseActualParamName() {
+    return useActualParamName;
+  }
+
+  public void setUseActualParamName(boolean useActualParamName) {
+    this.useActualParamName = useActualParamName;
+  }
+
+  public static ParamNameResolver resolve(Class<?> mapperClass, Method method, boolean useActualParamName) {
+    ParamNameResolver resolver = new ParamNameResolver();
+    resolver.setUseActualParamName(useActualParamName);
+    resolver.initialize(mapperClass, method);
+    return resolver;
+  }
+
+  public void initialize(Class<?> mapperClass, Method method) {
     final Class<?>[] paramTypes = method.getParameterTypes();
     final Annotation[][] paramAnnotations = method.getParameterAnnotations();
     final SortedMap<Integer, String> map = new TreeMap<>();

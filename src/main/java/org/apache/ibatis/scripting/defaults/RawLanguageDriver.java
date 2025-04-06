@@ -17,7 +17,7 @@ package org.apache.ibatis.scripting.defaults;
 
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.parsing.XNode;
-import org.apache.ibatis.reflection.ParamNameResolver;
+import org.apache.ibatis.scripting.ParamNameResolver;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 import org.apache.ibatis.session.Configuration;
