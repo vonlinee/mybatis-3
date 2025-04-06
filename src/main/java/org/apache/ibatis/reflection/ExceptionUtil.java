@@ -21,7 +21,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 /**
  * @author Clinton Begin
  */
-public class ExceptionUtil {
+public final class ExceptionUtil {
 
   private ExceptionUtil() {
     // Prevent Instantiation
@@ -38,6 +38,14 @@ public class ExceptionUtil {
         return unwrapped;
       }
     }
+  }
+
+  public static Throwable getRootCause(Exception e) {
+    Throwable cause = e;
+    while (cause.getCause() != null) {
+      cause = cause.getCause();
+    }
+    return cause;
   }
 
 }

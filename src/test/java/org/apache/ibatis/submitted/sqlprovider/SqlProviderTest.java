@@ -300,19 +300,6 @@ class SqlProviderTest {
   }
 
   @Test
-  @SuppressWarnings("deprecation")
-  void notSqlProvider() throws NoSuchMethodException {
-    Object testAnnotation = getClass().getDeclaredMethod("notSqlProvider").getAnnotation(Test.class);
-    try {
-      new ProviderSqlSource(new Configuration(), testAnnotation);
-      fail();
-    } catch (BuilderException e) {
-      assertTrue(e.getMessage().contains(
-          "Error creating SqlSource for SqlProvider.  Cause: java.lang.NoSuchMethodException: org.junit.jupiter.api.Test.type()"));
-    }
-  }
-
-  @Test
   void omitType() throws NoSuchMethodException {
     try {
       Class<?> mapperType = ErrorMapper.class;
@@ -653,16 +640,6 @@ class SqlProviderTest {
   }
 
   @Test
-  @SuppressWarnings("deprecation")
-  void keepBackwardCompatibilityOnDeprecatedConstructorWithAnnotation() throws NoSuchMethodException {
-    Class<?> mapperType = StaticMethodSqlProviderMapper.class;
-    Method mapperMethod = mapperType.getMethod("noArgument");
-    ProviderSqlSource sqlSource = new ProviderSqlSource(new Configuration(),
-        (Object) mapperMethod.getAnnotation(SelectProvider.class), mapperType, mapperMethod);
-    assertEquals("SELECT 1 FROM INFORMATION_SCHEMA.SYSTEM_USERS", sqlSource.getBoundSql(null).getSql());
-  }
-
-  @Test
   void omitTypeWhenSpecifyDefaultType() throws NoSuchMethodException {
     Class<?> mapperType = DefaultSqlProviderMapper.class;
     Configuration configuration = new Configuration();
@@ -720,9 +697,7 @@ class SqlProviderTest {
 
       private SqlProvider() {
       }
-
     }
-
   }
 
   public interface ErrorMapper {
