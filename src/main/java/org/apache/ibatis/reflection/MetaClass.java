@@ -48,7 +48,7 @@ public class MetaClass {
 
   public String findProperty(String name) {
     StringBuilder prop = buildProperty(name, new StringBuilder());
-    return prop.length() > 0 ? prop.toString() : null;
+    return !prop.isEmpty() ? prop.toString() : null;
   }
 
   public String findProperty(String name, boolean useCamelCaseMapping) {
