@@ -13,13 +13,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.session;
+package org.apache.ibatis.builder;
 
 import java.lang.reflect.Type;
 
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.scripting.MappedStatement;
+import org.apache.ibatis.session.SqlSessionException;
 
 /**
  * Specify the behavior when detects an unknown column (or unknown property type) of automatic mapping target.
@@ -41,7 +42,7 @@ public enum AutoMappingUnknownColumnBehavior {
   },
 
   /**
-   * Output warning log. Note: The log level of {@code 'org.apache.ibatis.session.AutoMappingUnknownColumnBehavior'}
+   * Output warning log. Note: The log level of {@code 'org.apache.ibatis.builder.AutoMappingUnknownColumnBehavior'}
    * must be set to {@code WARN}.
    */
   WARNING {

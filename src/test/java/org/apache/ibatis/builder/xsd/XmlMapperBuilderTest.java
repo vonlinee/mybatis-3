@@ -17,12 +17,12 @@ package org.apache.ibatis.builder.xsd;
 
 import java.io.InputStream;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.ResultSetType;
 import org.apache.ibatis.scripting.StatementType;
-import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

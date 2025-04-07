@@ -23,6 +23,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.cursor.Cursor;
@@ -37,7 +38,6 @@ import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.ParamNameResolver;
 import org.apache.ibatis.scripting.StatementType;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;

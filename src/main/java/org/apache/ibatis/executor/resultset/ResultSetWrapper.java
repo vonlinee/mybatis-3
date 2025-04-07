@@ -28,9 +28,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.ResultMap;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.ObjectTypeHandler;
 import org.apache.ibatis.type.TypeHandler;

@@ -25,6 +25,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.apache.ibatis.BaseDataTest;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.domain.blog.Section;
 import org.apache.ibatis.domain.blog.immutable.ImmutableAuthor;
 import org.apache.ibatis.domain.blog.immutable.ImmutableBlog;
@@ -32,7 +33,6 @@ import org.apache.ibatis.domain.blog.immutable.ImmutablePost;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.reflection.ReflectionException;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;

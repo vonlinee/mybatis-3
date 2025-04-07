@@ -22,10 +22,10 @@ import java.util.Properties;
 
 import org.apache.ibatis.builder.BuilderAssistant;
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.IncompleteElementException;
 import org.apache.ibatis.parsing.PropertyParser;
 import org.apache.ibatis.parsing.XNode;
-import org.apache.ibatis.session.Configuration;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

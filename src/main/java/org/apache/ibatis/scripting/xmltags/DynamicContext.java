@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.reflection.MetaObject;
@@ -26,7 +27,6 @@ import org.apache.ibatis.scripting.ContextMap;
 import org.apache.ibatis.scripting.ParamNameResolver;
 import org.apache.ibatis.scripting.ParameterMappingTokenHandler;
 import org.apache.ibatis.scripting.SqlBuildContext;
-import org.apache.ibatis.session.Configuration;
 import org.jetbrains.annotations.Nullable;
 
 /**

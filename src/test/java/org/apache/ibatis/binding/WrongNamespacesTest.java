@@ -15,7 +15,7 @@
  */
 package org.apache.ibatis.binding;
 
-import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.builder.Configuration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -19,13 +19,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.jetbrains.annotations.Nullable;

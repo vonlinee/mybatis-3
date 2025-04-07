@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.SqlBuildContext;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin

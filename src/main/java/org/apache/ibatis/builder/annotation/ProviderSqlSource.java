@@ -23,12 +23,12 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Lang;
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.ParamNameResolver;
 import org.apache.ibatis.scripting.SqlSource;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin

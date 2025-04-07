@@ -17,6 +17,8 @@ package org.apache.ibatis.session;
 
 import java.sql.Connection;
 
+import org.apache.ibatis.builder.Configuration;
+
 /**
  * Creates an {@link SqlSession} out of a connection or a DataSource
  *

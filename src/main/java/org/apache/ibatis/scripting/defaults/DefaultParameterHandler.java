@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.ibatis.binding.ParamMap;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.ParameterMapping;
@@ -34,7 +35,6 @@ import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.ParamNameResolver;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.ObjectTypeHandler;
 import org.apache.ibatis.type.TypeException;

@@ -24,8 +24,8 @@ import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.result.ResultMapException;
-import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

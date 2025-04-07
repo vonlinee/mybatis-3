@@ -33,6 +33,7 @@ import javassist.util.proxy.Proxy;
 
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.binding.BindingException;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.domain.blog.Blog;

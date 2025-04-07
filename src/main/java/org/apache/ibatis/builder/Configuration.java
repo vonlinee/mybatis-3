@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.session;
+package org.apache.ibatis.builder;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -33,10 +33,6 @@ import java.util.function.BiFunction;
 import javax.sql.DataSource;
 
 import org.apache.ibatis.binding.MapperRegistry;
-import org.apache.ibatis.builder.BuilderException;
-import org.apache.ibatis.builder.CacheRefResolver;
-import org.apache.ibatis.builder.IncompleteElementException;
-import org.apache.ibatis.builder.ResultMapResolver;
 import org.apache.ibatis.builder.annotation.MethodResolver;
 import org.apache.ibatis.builder.xml.XMLStatementBuilder;
 import org.apache.ibatis.cache.Cache;
@@ -92,6 +88,11 @@ import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.ResultSetType;
 import org.apache.ibatis.scripting.defaults.RawLanguageDriver;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.LocalCacheScope;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;

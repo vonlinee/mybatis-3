@@ -19,7 +19,7 @@ import static com.googlecode.catchexception.apis.BDDCatchException.caughtExcepti
 import static com.googlecode.catchexception.apis.BDDCatchException.when;
 import static org.assertj.core.api.BDDAssertions.then;
 
-import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.builder.Configuration;
 import org.junit.jupiter.api.Test;
 
 class IdConflictTest {

@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin

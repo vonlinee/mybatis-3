@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -29,7 +30,6 @@ import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.mapping.ParameterMap;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.ResultMap;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin

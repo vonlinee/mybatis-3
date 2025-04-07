@@ -25,7 +25,6 @@ import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.ResultSetType;
 import org.apache.ibatis.scripting.StatementType;
-import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Test;
 
 class AnnotationMapperBuilderTest {

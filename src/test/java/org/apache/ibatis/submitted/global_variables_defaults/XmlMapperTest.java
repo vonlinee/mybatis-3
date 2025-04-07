@@ -19,9 +19,9 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Properties;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.parsing.PropertyParser;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;

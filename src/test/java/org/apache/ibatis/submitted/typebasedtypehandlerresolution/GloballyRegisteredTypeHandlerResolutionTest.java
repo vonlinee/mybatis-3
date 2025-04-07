@@ -22,9 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.ibatis.BaseDataTest;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
 import org.apache.ibatis.mapping.Environment;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;

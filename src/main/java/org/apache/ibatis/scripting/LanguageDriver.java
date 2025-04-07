@@ -15,10 +15,10 @@
  */
 package org.apache.ibatis.scripting;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
-import org.apache.ibatis.session.Configuration;
 
 public interface LanguageDriver {
 

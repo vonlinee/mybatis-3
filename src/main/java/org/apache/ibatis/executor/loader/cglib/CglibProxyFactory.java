@@ -26,6 +26,7 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.loader.AbstractEnhancedDeserializationProxy;
 import org.apache.ibatis.executor.loader.AbstractSerialStateHolder;
 import org.apache.ibatis.executor.loader.ProxyFactory;
@@ -37,7 +38,6 @@ import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.reflection.BeanUtils;
 import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin

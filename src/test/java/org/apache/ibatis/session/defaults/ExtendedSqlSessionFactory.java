@@ -15,8 +15,8 @@
  */
 package org.apache.ibatis.session.defaults;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 
 public class ExtendedSqlSessionFactory extends DefaultSqlSessionFactory {

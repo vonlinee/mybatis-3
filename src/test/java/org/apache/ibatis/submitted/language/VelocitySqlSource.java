@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.SqlSource;
-import org.apache.ibatis.session.Configuration;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;

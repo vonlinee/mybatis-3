@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.builder.Configuration;
 import org.junit.jupiter.api.Test;
 
 class OrphanResultMapTest {

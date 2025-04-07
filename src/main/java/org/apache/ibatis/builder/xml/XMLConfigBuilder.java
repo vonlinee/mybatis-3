@@ -21,7 +21,10 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import org.apache.ibatis.builder.AutoMappingBehavior;
+import org.apache.ibatis.builder.AutoMappingUnknownColumnBehavior;
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.datasource.DataSourceFactory;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.loader.ProxyFactory;
@@ -40,15 +43,14 @@ import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
-import org.apache.ibatis.session.AutoMappingBehavior;
-import org.apache.ibatis.session.AutoMappingUnknownColumnBehavior;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.type.JdbcType;
 
 /**
+ * load core config file
+ *
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -153,12 +155,7 @@ public class XMLConfigBuilder {
   }
 
   private void loadCustomVfsImpl(Properties props) throws ClassNotFoundException {
-    String value = props.getProperty("vfsImpl");
-    if (value == null) {
-      return;
-    }
-    String[] clazzes = value.split(",");
-    for (String clazz : clazzes) {
+    for (String clazz : StringUtils.splitToSet(props.getProperty("vfsImpl"), null)) {
       if (!clazz.isEmpty()) {
         @SuppressWarnings("unchecked")
         Class<? extends VFS> vfsImpl = (Class<? extends VFS>) Resources.classForName(clazz);

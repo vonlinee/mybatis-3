@@ -30,12 +30,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.SqlCommandType;
 import org.apache.ibatis.scripting.StaticSqlSource;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.junit.jupiter.api.Test;

@@ -16,6 +16,7 @@
 package org.apache.ibatis.internal.util;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -223,9 +224,15 @@ public final class StringUtils {
     return Objects.equals(str, str1) || Objects.equals(str, str2) || Objects.equals(str, str3);
   }
 
-  public static Set<String> splitToSet(String value, String defaultValue) {
-    value = value == null ? defaultValue : value;
-    return new HashSet<>(Arrays.asList(value.split(",")));
+  @NotNull
+  public static Set<String> splitToSet(@Nullable String str, @Nullable String defaultValue) {
+    if (str == null) {
+      str = defaultValue;
+    }
+    if (isEmpty(defaultValue)) {
+      return Collections.emptySet();
+    }
+    return new HashSet<>(Arrays.asList(str.split(",")));
   }
 
   public static int skipUntil(String str, int p, final String endChars) {

@@ -21,13 +21,13 @@ import java.io.Reader;
 import java.util.stream.Stream;
 
 import org.apache.ibatis.BaseDataTest;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.defaults.RawSqlSource;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
 import org.apache.ibatis.scripting.xmltags.SqlNode;
 import org.apache.ibatis.scripting.xmltags.StaticTextSqlNode;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;

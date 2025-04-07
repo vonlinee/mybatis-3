@@ -31,13 +31,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.ibatis.binding.ParamMap;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.reflection.ArrayUtil;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.ParamNameResolver;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.defaults.DefaultSqlSession.StrictMap;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;

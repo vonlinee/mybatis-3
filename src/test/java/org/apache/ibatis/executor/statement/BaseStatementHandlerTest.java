@@ -24,9 +24,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.StaticSqlSource;
-import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

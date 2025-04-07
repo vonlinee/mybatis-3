@@ -22,8 +22,8 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.scripting.ParamNameResolver;
-import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Test;
 
 class ParamNameResolverTest {

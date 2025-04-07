@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.scripting.BoundSql;
@@ -30,7 +31,6 @@ import org.apache.ibatis.scripting.StaticSqlSource;
 import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
 import org.apache.ibatis.scripting.xmltags.SqlNode;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * Static SqlSource. It is faster than {@link DynamicSqlSource} because mappings are calculated during startup.

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.ParameterExpression;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.parsing.TokenHandler;
@@ -28,7 +29,6 @@ import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.StaticSqlSource;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 
 /**

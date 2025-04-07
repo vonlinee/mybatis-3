@@ -53,7 +53,6 @@ import org.apache.ibatis.scripting.ResultSetType;
 import org.apache.ibatis.scripting.SqlCommandType;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.StatementType;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.jetbrains.annotations.NotNull;

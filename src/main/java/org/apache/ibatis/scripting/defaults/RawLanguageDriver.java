@@ -16,11 +16,11 @@
 package org.apache.ibatis.scripting.defaults;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.scripting.ParamNameResolver;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * As of 3.2.4 the default XML language is able to identify static statements and create a {@link RawSqlSource}. So

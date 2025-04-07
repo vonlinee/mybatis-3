@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.type.JdbcType;
 
 /**
