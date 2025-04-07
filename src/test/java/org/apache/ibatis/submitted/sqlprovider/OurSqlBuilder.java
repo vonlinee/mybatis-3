@@ -117,8 +117,8 @@ public class OurSqlBuilder {
   }
 
   public String buildGetUsersByNameUsingMap(Map<String, Object> params) {
-    final String name = String.class.cast(params.get("param1"));
-    final String orderByColumn = String.class.cast(params.get("param2"));
+    final String name = (String) params.get("param1");
+    final String orderByColumn = (String) params.get("param2");
     return new SQL() {
       {
         SELECT("*");
@@ -159,8 +159,8 @@ public class OurSqlBuilder {
   }
 
   public String buildGetUsersByNameWithParamNameQueryUsingMap(Map<String, Object> params) {
-    final String name = String.class.cast(params.get("name"));
-    final String orderByColumn = String.class.cast(params.get("orderByColumn"));
+    final String name = (String) params.get("name");
+    final String orderByColumn = (String) params.get("orderByColumn");
     return new SQL() {
       {
         SELECT("*");
@@ -287,13 +287,13 @@ public class OurSqlBuilder {
       BaseMapper.Column column = field.getAnnotation(BaseMapper.Column.class);
       if (column != null) {
         String columnName = column.value();
-        if (columnName == null || columnName.length() == 0) {
+        if (columnName == null || columnName.isEmpty()) {
           columnName = field.getName();
         }
         columnMap.put(columnName, field.getName());
       }
     }
-    if (columnMap.size() == 0) {
+    if (columnMap.isEmpty()) {
       throw new RuntimeException("There is no field in the class [" + entityClass.getCanonicalName()
           + "] that specifies the @BaseMapper.Column annotation.");
     }

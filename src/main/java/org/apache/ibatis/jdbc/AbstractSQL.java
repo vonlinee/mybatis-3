@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  * @author Adam Gent
  * @author Kazuki Shimizu
  */
-public abstract class AbstractSQL<T> {
+abstract class AbstractSQL<T> {
 
   private static final String AND = ") \nAND (";
   private static final String OR = ") \nOR (";
@@ -477,7 +477,7 @@ public abstract class AbstractSQL<T> {
    * Set the offset rows variable string(e.g. {@code "#{offset}"}).
    *
    * @param variable
-   *          a offset rows variable string
+   *          an offset rows variable string
    *
    * @return a self instance
    *
@@ -610,7 +610,7 @@ public abstract class AbstractSQL<T> {
 
     public SafeAppendable append(CharSequence s) {
       try {
-        if (empty && s.length() > 0) {
+        if (empty && !s.isEmpty()) {
           empty = false;
         }
         appendable.append(s);
