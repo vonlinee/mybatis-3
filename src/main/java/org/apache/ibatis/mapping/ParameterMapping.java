@@ -23,6 +23,8 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * parameter metadata in sql script.
+ *
  * @author Clinton Begin
  */
 public class ParameterMapping {
@@ -215,11 +217,21 @@ public class ParameterMapping {
     return value != UNSET;
   }
 
+  // @formatter:off
   @Override
   public String toString() {
-    return "ParameterMapping{" + "property='" + property + '\'' + ", mode=" + mode + ", javaType=" + javaType
-        + ", jdbcType=" + jdbcType + ", numericScale=" + numericScale + ", typeHandler=" + typeHandler
-        + ", resultMapId='" + resultMapId + '\'' + ", jdbcTypeName='" + jdbcTypeName + '\'' + ", expression='"
-        + expression + '\'' + ", value='" + value + '\'' + '}';
+    return "ParameterMapping{" +
+      "expression='" + expression + '\'' +
+      ", property='" + property + '\'' +
+      ", mode=" + mode +
+      ", javaType=" + javaType +
+      ", jdbcType=" + jdbcType +
+      ", numericScale=" + numericScale +
+      ", typeHandler=" + typeHandler +
+      ", resultMapId='" + resultMapId + '\'' +
+      ", jdbcTypeName='" + jdbcTypeName + '\'' +
+      ", value=" + value +
+      '}';
   }
+  // @formatter:on
 }
