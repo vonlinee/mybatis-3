@@ -35,6 +35,8 @@ import org.apache.ibatis.scripting.defaults.RawSqlSource;
  */
 public class XMLLanguageDriver implements LanguageDriver {
 
+  private XMLScriptBuilder builder;
+
   @Override
   public ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject,
       BoundSql boundSql) {
@@ -48,9 +50,11 @@ public class XMLLanguageDriver implements LanguageDriver {
 
   @Override
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType,
-      MethodParamMetadata paramNameResolver) {
-    XMLScriptBuilder builder = new XMLScriptBuilder(configuration, script, parameterType, paramNameResolver);
-    return builder.parseScriptNode();
+      MethodParamMetadata methodParamMetadata) {
+    if (builder == null) {
+      builder = new XMLScriptBuilder(configuration);
+    }
+    return builder.parseScriptNode(script, parameterType, methodParamMetadata);
   }
 
   @Override

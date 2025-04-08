@@ -57,7 +57,7 @@ public interface LanguageDriver {
   SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType);
 
   default SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType,
-      MethodParamMetadata paramNameResolver) {
+      MethodParamMetadata methodParamMetadata) {
     return createSqlSource(configuration, script, parameterType);
   }
 
@@ -78,7 +78,7 @@ public interface LanguageDriver {
   SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType);
 
   default SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType,
-      MethodParamMetadata paramNameResolver) {
+      MethodParamMetadata methodParamMetadata) {
     return createSqlSource(configuration, script, parameterType);
   }
 

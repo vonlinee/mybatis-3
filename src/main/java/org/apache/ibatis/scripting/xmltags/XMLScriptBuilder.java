@@ -32,6 +32,8 @@ import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.defaults.RawSqlSource;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -40,27 +42,12 @@ import org.w3c.dom.NodeList;
  */
 public class XMLScriptBuilder {
 
-  private final XNode context;
-  private final Class<?> parameterType;
-  private final MethodParamMetadata paramNameResolver;
   private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
   private static final Map<String, SqlNode> emptyNodeCache = new ConcurrentHashMap<>();
   private final Configuration configuration;
 
-  public XMLScriptBuilder(Configuration configuration, XNode context) {
-    this(configuration, context, null);
-  }
-
-  public XMLScriptBuilder(Configuration configuration, XNode context, Class<?> parameterType) {
-    this(configuration, context, parameterType, null);
-  }
-
-  public XMLScriptBuilder(Configuration configuration, XNode context, Class<?> parameterType,
-      MethodParamMetadata paramNameResolver) {
+  public XMLScriptBuilder(Configuration configuration) {
     this.configuration = configuration;
-    this.context = context;
-    this.parameterType = parameterType;
-    this.paramNameResolver = paramNameResolver;
     this.nodeHandlerMap.putAll(initNodeHandlerMap());
   }
 
@@ -82,13 +69,18 @@ public class XMLScriptBuilder {
     return nodeHandlerMap;
   }
 
-  public SqlSource parseScriptNode() {
+  public SqlSource parseScriptNode(@NotNull XNode context) {
+    return parseScriptNode(context, null, null);
+  }
+
+  public SqlSource parseScriptNode(@NotNull XNode context, @Nullable Class<?> parameterType,
+      @Nullable MethodParamMetadata methodParamMetadata) {
     MixedSqlNode rootSqlNode = parseDynamicTags(context);
     SqlSource sqlSource;
     if (rootSqlNode.isDynamic()) {
       sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
     } else {
-      sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType, paramNameResolver);
+      sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType, methodParamMetadata);
     }
     return sqlSource;
   }
