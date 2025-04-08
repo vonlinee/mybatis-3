@@ -24,8 +24,19 @@ import org.jetbrains.annotations.NotNull;
  */
 public class TokenParser {
 
+  /**
+   * ${}: String Interpolation or Variable Substitution Used for directly inserting variable values. Suitable for simple
+   * string replacements that do not involve complex expressions.
+   */
   public static final String OPEN_TOKEN_$ = "${";
 
+  /**
+   * #{}: Parameterized Variable or Prepared Statement Placeholder
+   * <p>
+   * Used to pass variables as parameters, typically with preprocessing (such as preventing SQL injection). Suitable for
+   * use in SQL queries, especially when type handling of variables is required.
+   * </p>
+   */
   public static final String OPEN_TOKEN_PARAMETER_PLACEHOLDER = "#{";
 
   public static final String CLOSE_TOKEN = "}";
