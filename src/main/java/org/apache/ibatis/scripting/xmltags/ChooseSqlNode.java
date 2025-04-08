@@ -22,7 +22,7 @@ import org.apache.ibatis.scripting.SqlBuildContext;
 /**
  * @author Clinton Begin
  */
-public class ChooseSqlNode implements SqlNode {
+public class ChooseSqlNode extends EvaluableSqlNode implements SqlNode {
   private final SqlNode defaultSqlNode;
   private final List<SqlNode> ifSqlNodes;
 

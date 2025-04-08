@@ -22,14 +22,12 @@ import java.util.Map;
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.SqlBuildContext;
-import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 
 /**
  * @author Clinton Begin
  */
-public class ForEachSqlNode implements SqlNode {
+public class ForEachSqlNode extends EvaluableSqlNode implements SqlNode {
 
-  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
   private final String collectionExpression;
   private final Boolean nullable;
   private final SqlNode contents;

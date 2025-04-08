@@ -24,6 +24,12 @@ import org.jetbrains.annotations.NotNull;
  */
 public class TokenParser {
 
+  public static final String OPEN_TOKEN_$ = "${";
+
+  public static final String OPEN_TOKEN_PARAMETER_PLACEHOLDER = "#{";
+
+  public static final String CLOSE_TOKEN = "}";
+
   public static String parse(String text, @NotNull String openToken, @NotNull String closeToken,
       @NotNull TokenHandler handler) {
     if (text == null || text.isEmpty()) {

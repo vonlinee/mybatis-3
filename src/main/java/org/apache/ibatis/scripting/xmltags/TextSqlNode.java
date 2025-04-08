@@ -33,9 +33,18 @@ public class TextSqlNode implements SqlNode {
   }
 
   @Override
+  public boolean isDynamic() {
+    return TokenParser.containsToken(this.text, TokenParser.OPEN_TOKEN_$, TokenParser.CLOSE_TOKEN);
+  }
+
+  @Override
   public boolean apply(SqlBuildContext context) {
     context.appendSql(context.parseParam(TokenParser.parse(text, "${", "}", new BindingTokenParser(context))));
     return true;
+  }
+
+  public String getText() {
+    return text;
   }
 
   private static class BindingTokenParser implements TokenHandler {

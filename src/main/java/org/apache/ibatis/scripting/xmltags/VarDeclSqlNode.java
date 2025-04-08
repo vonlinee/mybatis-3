@@ -16,14 +16,12 @@
 package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
-import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 
 /**
  * @author Frank D. Martinez [mnesarco]
  */
-public class VarDeclSqlNode implements SqlNode {
+public class VarDeclSqlNode extends EvaluableSqlNode implements SqlNode {
 
-  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
   private final String name;
   private final String expression;
 

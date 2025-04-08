@@ -15,40 +15,34 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import java.util.Collections;
-import java.util.List;
-
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.scripting.SqlBuildContext;
 
 /**
- * @author Clinton Begin
+ * base class for <and/> | <or/> sql node
+ *
+ * @see ConditionSqlNode
+ * @see ConditionConnectorSqlNode
  */
-public class MixedSqlNode implements SqlNode {
-  private final List<SqlNode> contents;
+abstract class ConditionItemSqlNode extends ConditionSqlNode {
 
-  public MixedSqlNode(List<SqlNode> contents) {
-    this.contents = contents;
-  }
+  protected final SqlNode sqlNode;
 
-  @Override
-  public boolean isDynamic() {
-    for (SqlNode content : contents) {
-      if (content.isDynamic()) {
-        return true;
-      }
-    }
-    return false;
+  ConditionItemSqlNode(Configuration configuration, SqlNode sqlNode) {
+    super(configuration);
+    this.sqlNode = sqlNode;
   }
 
   @Override
   public boolean apply(SqlBuildContext context) {
-    for (SqlNode content : contents) {
-      content.apply(context);
+    DynamicContextWrapper wrapperContext = new DynamicContextWrapper(configuration, context);
+    context.appendSql(" ");
+    context.appendSql(getConditionConnector());
+    context.appendSql(" ");
+    boolean res = sqlNode.apply(wrapperContext);
+    if (res) {
+      context.appendSql(wrapperContext.getSql());
     }
-    return true;
-  }
-
-  public final List<SqlNode> getContents() {
-    return Collections.unmodifiableList(this.contents);
+    return res;
   }
 }

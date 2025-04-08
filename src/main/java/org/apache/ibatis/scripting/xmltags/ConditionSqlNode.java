@@ -36,7 +36,7 @@ import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
  *
  * @since 2025-01-25 14:08
  **/
-abstract class ConditionSqlNode extends MixedSqlNode {
+abstract class ConditionSqlNode extends EvaluableSqlNode {
 
   /**
    * TODO support evaluate test condition to decide whether append the sql.
@@ -45,8 +45,7 @@ abstract class ConditionSqlNode extends MixedSqlNode {
   protected final Configuration configuration;
   protected final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
 
-  public ConditionSqlNode(Configuration configuration, List<SqlNode> contents) {
-    super(contents);
+  public ConditionSqlNode(Configuration configuration) {
     this.configuration = configuration;
   }
 
@@ -60,41 +59,11 @@ abstract class ConditionSqlNode extends MixedSqlNode {
    */
   public abstract String getConditionConnector();
 
-  @Override
-  public boolean apply(SqlBuildContext context) {
-    if (testExpression != null) {
-      if (!evaluator.evaluateBoolean(testExpression, context.getParameterObject())) {
-        return false;
-      }
-    }
-
-    boolean res;
-    if (getContents().size() > 1) {
-      DynamicContextWrapper wrapper = new DynamicContextWrapper(configuration, context);
-      res = super.apply(wrapper);
-      // remove leading and / or
-      // nested
-      context.appendSql(" ");
-      context.appendSql(getConditionConnector());
-      context.appendSql(" (");
-      context.appendSql(getNestedSqlFragments(wrapper.getSql()));
-      context.appendSql(")");
-    } else {
-      DynamicContextWrapper wrapperContext = new DynamicContextWrapper(configuration, context);
-      res = super.apply(wrapperContext);
-      context.appendSql(" ");
-      context.appendSql(getConditionConnector());
-      context.appendSql(" ");
-      context.appendSql(wrapperContext.getSql());
-    }
-    return res;
-  }
-
   protected String getNestedSqlFragments(String sql) {
     return StringUtils.deleteFirst(sql, getConditionConnector(), true);
   }
 
-  static class DynamicContextWrapper extends DynamicContext {
+  protected static class DynamicContextWrapper extends DynamicContext {
 
     private SqlBuildContext delegate;
     private final StringBuilder sqlBuffer;

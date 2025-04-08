@@ -15,40 +15,23 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import java.util.Collections;
-import java.util.List;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 
-import org.apache.ibatis.scripting.SqlBuildContext;
+abstract class EvaluableSqlNode implements SqlNode {
 
-/**
- * @author Clinton Begin
- */
-public class MixedSqlNode implements SqlNode {
-  private final List<SqlNode> contents;
+  // TODO init manually by setter
+  protected ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
 
-  public MixedSqlNode(List<SqlNode> contents) {
-    this.contents = contents;
+  public void setExpressionEvaluator(ExpressionEvaluator evaluator) {
+    this.evaluator = evaluator;
   }
 
   @Override
-  public boolean isDynamic() {
-    for (SqlNode content : contents) {
-      if (content.isDynamic()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @Override
-  public boolean apply(SqlBuildContext context) {
-    for (SqlNode content : contents) {
-      content.apply(context);
-    }
+  public final boolean isDynamic() {
     return true;
   }
 
-  public final List<SqlNode> getContents() {
-    return Collections.unmodifiableList(this.contents);
+  public ExpressionEvaluator getEvaluator() {
+    return this.evaluator;
   }
 }

@@ -28,7 +28,7 @@ import org.apache.ibatis.scripting.SqlBuildContext;
 /**
  * @author Clinton Begin
  */
-public class TrimSqlNode implements SqlNode {
+public class TrimSqlNode extends EvaluableSqlNode implements SqlNode {
 
   private final SqlNode contents;
   private final String prefix;

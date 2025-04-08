@@ -15,12 +15,10 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import java.util.List;
-
 import org.apache.ibatis.builder.Configuration;
 
-public class OrSqlNode extends ConditionSqlNode {
-  public OrSqlNode(Configuration configuration, String test, List<SqlNode> contents) {
+public class OrSqlNode extends ConditionItemSqlNode {
+  public OrSqlNode(Configuration configuration, String test, SqlNode contents) {
     super(configuration, contents);
     this.testExpression = test;
   }

@@ -20,16 +20,15 @@ import org.apache.ibatis.scripting.SqlBuildContext;
 /**
  * @author Clinton Begin
  */
-public class StaticTextSqlNode implements SqlNode {
-  private final String text;
+public class StaticTextSqlNode extends TextSqlNode implements SqlNode {
 
   public StaticTextSqlNode(String text) {
-    this.text = text;
+    super(text);
   }
 
   @Override
   public boolean apply(SqlBuildContext context) {
-    context.appendSql(context.parseParam(text));
+    context.appendSql(context.parseParam(getText()));
     return true;
   }
 

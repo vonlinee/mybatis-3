@@ -15,11 +15,28 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.scripting.SqlBuildContext;
 
 /**
  * @author Clinton Begin
  */
 public interface SqlNode {
+
+  /**
+   * 'dynamic' means contains ${xxx} or contains any dynamic sql xml tag like <if/>. etc. as children nodes.
+   *
+   * @return whether this node is dynamic
+   *
+   * @see EvaluableSqlNode
+   * @see IfSqlNode
+   * @see WhereSqlNode
+   * @see ChooseSqlNode
+   * @see TrimSqlNode
+   * @see SetSqlNode
+   * @see XMLScriptBuilder#parseDynamicTags(XNode)
+   */
+  boolean isDynamic();
+
   boolean apply(SqlBuildContext context);
 }

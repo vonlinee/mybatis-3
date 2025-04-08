@@ -15,40 +15,46 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import java.util.Collections;
 import java.util.List;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.scripting.SqlBuildContext;
 
-/**
- * @author Clinton Begin
- */
-public class MixedSqlNode implements SqlNode {
-  private final List<SqlNode> contents;
+class ConditionConnectorSqlNode extends ConditionSqlNode {
 
-  public MixedSqlNode(List<SqlNode> contents) {
+  private final List<SqlNode> contents;
+  private final String connector;
+
+  public ConditionConnectorSqlNode(Configuration configuration, String connector, List<SqlNode> contents) {
+    super(configuration);
+    this.connector = connector;
     this.contents = contents;
   }
 
   @Override
-  public boolean isDynamic() {
-    for (SqlNode content : contents) {
-      if (content.isDynamic()) {
-        return true;
-      }
-    }
-    return false;
+  public String getConditionConnector() {
+    return connector;
   }
 
   @Override
   public boolean apply(SqlBuildContext context) {
-    for (SqlNode content : contents) {
-      content.apply(context);
+    if (testExpression != null) {
+      if (!evaluator.evaluateBoolean(testExpression, context.getParameterObject())) {
+        return false;
+      }
     }
+    DynamicContextWrapper wrapper = new DynamicContextWrapper(configuration, context);
+    // remove leading and / or
+    // nested
+    context.appendSql(" ");
+    context.appendSql(getConditionConnector());
+    boolean res = false;
+    context.appendSql(" (");
+    for (SqlNode content : contents) {
+      res = res | content.apply(wrapper);
+    }
+    context.appendSql(getNestedSqlFragments(wrapper.getSql()));
+    context.appendSql(")");
     return true;
-  }
-
-  public final List<SqlNode> getContents() {
-    return Collections.unmodifiableList(this.contents);
   }
 }

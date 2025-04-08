@@ -15,18 +15,17 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import java.util.List;
-
 import org.apache.ibatis.builder.Configuration;
 
-public class AndSqlNode extends ConditionSqlNode {
-  public AndSqlNode(Configuration configuration, String test, List<SqlNode> contents) {
-    super(configuration, contents);
+public class AndSqlNode extends ConditionItemSqlNode {
+
+  public AndSqlNode(Configuration configuration, String test, SqlNode sqlNode) {
+    super(configuration, sqlNode);
     this.testExpression = test;
   }
 
   @Override
-  public final String getConditionConnector() {
+  public String getConditionConnector() {
     return "and";
   }
 }
