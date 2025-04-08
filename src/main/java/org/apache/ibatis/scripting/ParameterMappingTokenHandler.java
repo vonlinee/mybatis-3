@@ -43,14 +43,14 @@ public class ParameterMappingTokenHandler implements TokenHandler {
   private final MetaObject metaParameters;
   private final Object parameterObject;
   private final boolean paramExists;
-  private final ParamNameResolver paramNameResolver;
+  private final MethodParamMetadata paramNameResolver;
   private final Configuration configuration;
   private Type genericType = null;
   private TypeHandler<?> typeHandler = null;
 
   public ParameterMappingTokenHandler(List<ParameterMapping> parameterMappings, Configuration configuration,
       Object parameterObject, Class<?> parameterType, Map<String, Object> additionalParameters,
-      ParamNameResolver paramNameResolver, boolean paramExists) {
+      MethodParamMetadata paramNameResolver, boolean paramExists) {
     this.configuration = configuration;
     this.parameterType = SqlUtils.getParameterType(parameterObject, parameterType);
     this.metaParameters = configuration.newMetaObject(additionalParameters);
@@ -61,7 +61,7 @@ public class ParameterMappingTokenHandler implements TokenHandler {
   }
 
   public ParameterMappingTokenHandler(List<ParameterMapping> parameterMappings, Configuration configuration,
-      Class<?> parameterType, Map<String, Object> additionalParameters, ParamNameResolver paramNameResolver) {
+      Class<?> parameterType, Map<String, Object> additionalParameters, MethodParamMetadata paramNameResolver) {
     this.configuration = configuration;
     this.parameterType = parameterType;
     this.metaParameters = configuration.newMetaObject(additionalParameters);

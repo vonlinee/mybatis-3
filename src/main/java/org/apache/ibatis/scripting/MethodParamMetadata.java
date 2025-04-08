@@ -37,7 +37,10 @@ import org.apache.ibatis.reflection.TypeParameterResolver;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
-public class ParamNameResolver {
+/**
+ * mapper method info
+ */
+public class MethodParamMetadata {
 
   public static final String GENERIC_NAME_PREFIX = "param";
 
@@ -80,8 +83,8 @@ public class ParamNameResolver {
     this.useActualParamName = useActualParamName;
   }
 
-  public static ParamNameResolver resolve(Class<?> mapperClass, Method method, boolean useActualParamName) {
-    ParamNameResolver resolver = new ParamNameResolver();
+  public static MethodParamMetadata resolve(Class<?> mapperClass, Method method, boolean useActualParamName) {
+    MethodParamMetadata resolver = new MethodParamMetadata();
     resolver.setUseActualParamName(useActualParamName);
     resolver.initialize(mapperClass, method);
     return resolver;

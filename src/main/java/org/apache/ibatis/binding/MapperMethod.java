@@ -30,7 +30,7 @@ import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.TypeParameterResolver;
 import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.SqlCommandType;
 import org.apache.ibatis.scripting.StatementType;
 import org.apache.ibatis.session.ResultHandler;
@@ -264,7 +264,7 @@ public class MapperMethod {
     private final String mapKey;
     private final Integer resultHandlerIndex;
     private final Integer rowBoundsIndex;
-    private final ParamNameResolver paramNameResolver;
+    private final MethodParamMetadata paramNameResolver;
 
     public MethodSignature(Configuration configuration, Class<?> mapperInterface, Method method) {
       Type resolvedReturnType = TypeParameterResolver.resolveReturnType(method, mapperInterface);
@@ -283,7 +283,8 @@ public class MapperMethod {
       this.returnsMap = this.mapKey != null;
       this.rowBoundsIndex = getUniqueParamIndex(method, RowBounds.class);
       this.resultHandlerIndex = getUniqueParamIndex(method, ResultHandler.class);
-      this.paramNameResolver = ParamNameResolver.resolve(mapperInterface, method, configuration.isUseActualParamName());
+      this.paramNameResolver = MethodParamMetadata.resolve(mapperInterface, method,
+          configuration.isUseActualParamName());
     }
 
     public Object convertArgsToSqlCommandParam(Object[] args) {

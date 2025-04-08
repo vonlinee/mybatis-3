@@ -25,7 +25,7 @@ import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.scripting.defaults.RawSqlSource;
@@ -48,7 +48,7 @@ public class XMLLanguageDriver implements LanguageDriver {
 
   @Override
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType,
-      ParamNameResolver paramNameResolver) {
+      MethodParamMetadata paramNameResolver) {
     XMLScriptBuilder builder = new XMLScriptBuilder(configuration, script, parameterType, paramNameResolver);
     return builder.parseScriptNode();
   }
@@ -60,7 +60,7 @@ public class XMLLanguageDriver implements LanguageDriver {
 
   @Override
   public SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType,
-      ParamNameResolver paramNameResolver) {
+      MethodParamMetadata paramNameResolver) {
     // issue #3
     if (script.startsWith("<script>")) {
       XPathParser parser = new XPathParser(script, false, configuration.getVariables(), new XMLMapperEntityResolver());

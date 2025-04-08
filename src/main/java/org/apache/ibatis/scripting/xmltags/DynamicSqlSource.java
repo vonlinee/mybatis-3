@@ -17,7 +17,7 @@ package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.scripting.BoundSql;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.SqlUtils;
 import org.apache.ibatis.scripting.StaticSqlSource;
@@ -29,13 +29,13 @@ public class DynamicSqlSource implements SqlSource {
 
   private final Configuration configuration;
   private final SqlNode rootSqlNode;
-  private final ParamNameResolver paramNameResolver;
+  private final MethodParamMetadata paramNameResolver;
 
   public DynamicSqlSource(Configuration configuration, SqlNode rootSqlNode) {
     this(configuration, rootSqlNode, null);
   }
 
-  public DynamicSqlSource(Configuration configuration, SqlNode rootSqlNode, ParamNameResolver paramNameResolver) {
+  public DynamicSqlSource(Configuration configuration, SqlNode rootSqlNode, MethodParamMetadata paramNameResolver) {
     this.configuration = configuration;
     this.rootSqlNode = rootSqlNode;
     this.paramNameResolver = paramNameResolver;

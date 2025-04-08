@@ -59,7 +59,7 @@ public final class MappedStatement {
   private Log statementLog;
   private LanguageDriver lang;
   private String[] resultSets;
-  private ParamNameResolver paramNameResolver;
+  private MethodParamMetadata paramNameResolver;
   private boolean dirtySelect;
 
   MappedStatement() {
@@ -193,7 +193,7 @@ public final class MappedStatement {
       return this;
     }
 
-    public Builder paramNameResolver(ParamNameResolver paramNameResolver) {
+    public Builder paramNameResolver(MethodParamMetadata paramNameResolver) {
       mappedStatement.paramNameResolver = paramNameResolver;
       return this;
     }
@@ -309,7 +309,7 @@ public final class MappedStatement {
     return dirtySelect;
   }
 
-  public ParamNameResolver getParamNameResolver() {
+  public MethodParamMetadata getParamNameResolver() {
     return paramNameResolver;
   }
 

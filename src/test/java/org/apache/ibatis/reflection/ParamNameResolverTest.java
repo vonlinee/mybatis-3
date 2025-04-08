@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.builder.Configuration;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.junit.jupiter.api.Test;
 
 class ParamNameResolverTest {
@@ -42,7 +42,7 @@ class ParamNameResolverTest {
   void testGetTypeSimple() throws Exception {
     Class<?> clazz = A.class;
     Method method = clazz.getDeclaredMethod("m1", Integer.class);
-    ParamNameResolver resolver = ParamNameResolver.resolve(clazz, method, configuration.isUseActualParamName());
+    MethodParamMetadata resolver = MethodParamMetadata.resolve(clazz, method, configuration.isUseActualParamName());
     resolver.setUseActualParamName(configuration.isUseActualParamName());
     assertEquals(Integer.class, resolver.getType("p"));
     assertEquals(Integer.class, resolver.getType("param1"));
@@ -52,7 +52,7 @@ class ParamNameResolverTest {
   void testGetTypeList() throws Exception {
     Class<?> clazz = A.class;
     Method method = clazz.getDeclaredMethod("m2", List.class);
-    ParamNameResolver resolver = ParamNameResolver.resolve(clazz, method, configuration.isUseActualParamName());
+    MethodParamMetadata resolver = MethodParamMetadata.resolve(clazz, method, configuration.isUseActualParamName());
     assertEquals(List.class, ((ParameterizedType) resolver.getType("p")).getRawType());
     assertEquals(String.class, resolver.getType("p[0]"));
     assertEquals(String.class, resolver.getType("param1[0]"));
@@ -62,7 +62,7 @@ class ParamNameResolverTest {
   void testGetTypeArray() throws Exception {
     Class<?> clazz = A.class;
     Method method = clazz.getDeclaredMethod("m3", Integer[].class);
-    ParamNameResolver resolver = ParamNameResolver.resolve(clazz, method, configuration.isUseActualParamName());
+    MethodParamMetadata resolver = MethodParamMetadata.resolve(clazz, method, configuration.isUseActualParamName());
     resolver.setUseActualParamName(configuration.isUseActualParamName());
     assertEquals(Integer[].class, resolver.getType("p"));
     assertEquals(Integer.class, resolver.getType("p[0]"));

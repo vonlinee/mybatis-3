@@ -36,7 +36,7 @@ import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.StatementType;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.session.ResultHandler;
@@ -234,7 +234,7 @@ public abstract class BaseExecutor implements Executor {
         } else if (parameterObject == null) {
           value = null;
         } else {
-          ParamNameResolver paramNameResolver = ms.getParamNameResolver();
+          MethodParamMetadata paramNameResolver = ms.getParamNameResolver();
           if (paramNameResolver != null
               && typeHandlerRegistry.hasTypeHandler(paramNameResolver.getType(paramNameResolver.getNames()[0]))
               || typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {

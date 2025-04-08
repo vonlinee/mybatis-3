@@ -27,7 +27,7 @@ import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.PropertyTokenizer;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.defaults.RawSqlSource;
@@ -42,7 +42,7 @@ public class XMLScriptBuilder {
 
   private final XNode context;
   private final Class<?> parameterType;
-  private final ParamNameResolver paramNameResolver;
+  private final MethodParamMetadata paramNameResolver;
   private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
   private static final Map<String, SqlNode> emptyNodeCache = new ConcurrentHashMap<>();
   private final Configuration configuration;
@@ -56,7 +56,7 @@ public class XMLScriptBuilder {
   }
 
   public XMLScriptBuilder(Configuration configuration, XNode context, Class<?> parameterType,
-      ParamNameResolver paramNameResolver) {
+      MethodParamMetadata paramNameResolver) {
     this.configuration = configuration;
     this.context = context;
     this.parameterType = parameterType;

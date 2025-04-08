@@ -23,7 +23,7 @@ import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.scripting.BoundSql;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.ParameterMappingTokenHandler;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.SqlUtils;
@@ -48,7 +48,7 @@ public class RawSqlSource implements SqlSource {
   }
 
   public RawSqlSource(Configuration configuration, SqlNode rootSqlNode, Class<?> parameterType,
-      ParamNameResolver paramNameResolver) {
+      MethodParamMetadata paramNameResolver) {
     DynamicContext context = new DynamicContext(configuration, parameterType, paramNameResolver);
     rootSqlNode.apply(context);
     String sql = context.getSql();
@@ -59,7 +59,7 @@ public class RawSqlSource implements SqlSource {
   }
 
   public RawSqlSource(Configuration configuration, String sql, Class<?> parameterType,
-      ParamNameResolver paramNameResolver) {
+      MethodParamMetadata paramNameResolver) {
     Class<?> clazz = parameterType == null ? Object.class : parameterType;
     List<ParameterMapping> parameterMappings = new ArrayList<>();
     ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration,

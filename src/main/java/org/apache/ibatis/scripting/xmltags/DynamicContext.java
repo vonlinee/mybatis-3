@@ -24,7 +24,7 @@ import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.scripting.ContextMap;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.ParameterMappingTokenHandler;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.jetbrains.annotations.Nullable;
@@ -40,17 +40,17 @@ public class DynamicContext implements SqlBuildContext {
   private final Configuration configuration;
   private final Object parameterObject;
   private final Class<?> parameterType;
-  private final ParamNameResolver paramNameResolver;
+  private final MethodParamMetadata paramNameResolver;
   private final boolean paramExists;
 
   private ParameterMappingTokenHandler tokenHandler;
 
-  public DynamicContext(Configuration configuration, Class<?> parameterType, ParamNameResolver paramNameResolver) {
+  public DynamicContext(Configuration configuration, Class<?> parameterType, MethodParamMetadata paramNameResolver) {
     this(configuration, null, parameterType, paramNameResolver, false);
   }
 
   public DynamicContext(Configuration configuration, Object parameterObject, Class<?> parameterType,
-      ParamNameResolver paramNameResolver, boolean paramExists) {
+      MethodParamMetadata paramNameResolver, boolean paramExists) {
     this.bindings = createBindings(configuration, parameterObject);
     this.configuration = configuration;
     this.parameterObject = parameterObject;
@@ -123,7 +123,7 @@ public class DynamicContext implements SqlBuildContext {
   }
 
   @Override
-  public ParamNameResolver getParamNameResolver() {
+  public MethodParamMetadata getParamNameResolver() {
     return paramNameResolver;
   }
 

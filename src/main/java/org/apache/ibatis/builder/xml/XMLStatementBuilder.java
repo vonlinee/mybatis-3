@@ -33,7 +33,7 @@ import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.ResultSetType;
 import org.apache.ibatis.scripting.SqlCommandType;
 import org.apache.ibatis.scripting.SqlSource;
@@ -80,7 +80,7 @@ public class XMLStatementBuilder {
 
     String parameterType = context.getStringAttribute("parameterType");
     Class<?> parameterTypeClass = builderAssistant.resolveClass(parameterType);
-    ParamNameResolver paramNameResolver = null;
+    MethodParamMetadata paramNameResolver = null;
     if (parameterTypeClass == null && mapperClass != null) {
       // @formatter:off
       List<Method> mapperMethods = Arrays.stream(mapperClass.getMethods())
@@ -88,7 +88,7 @@ public class XMLStatementBuilder {
         .collect(Collectors.toList());
       // @formatter:on
       if (mapperMethods.size() == 1) {
-        paramNameResolver = ParamNameResolver.resolve(mapperClass, mapperMethods.get(0),
+        paramNameResolver = MethodParamMetadata.resolve(mapperClass, mapperMethods.get(0),
             configuration.isUseActualParamName());
         if (paramNameResolver.isUseParamMap()) {
           parameterTypeClass = ParamMap.class;

@@ -18,7 +18,7 @@ package org.apache.ibatis.scripting.defaults;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.parsing.XNode;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 
@@ -41,7 +41,7 @@ public class RawLanguageDriver extends XMLLanguageDriver {
 
   @Override
   public SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType,
-      ParamNameResolver paramNameResolver) {
+      MethodParamMetadata paramNameResolver) {
     SqlSource source = super.createSqlSource(configuration, script, parameterType, paramNameResolver);
     checkIsNotDynamic(source);
     return source;

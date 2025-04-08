@@ -22,7 +22,7 @@ import java.util.Set;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 
 public interface CountryMapper {
 
@@ -104,9 +104,9 @@ public interface CountryMapper {
   int insertWeirdCountries(List<NpeCountry> list);
 
   // If the only parameter has a name 'param2', keyProperty must include the prefix 'param2.'.
-  @Options(useGeneratedKeys = true, keyProperty = ParamNameResolver.GENERIC_NAME_PREFIX + "2.id")
+  @Options(useGeneratedKeys = true, keyProperty = MethodParamMetadata.GENERIC_NAME_PREFIX + "2.id")
   @Insert({ "insert into country (countryname,countrycode) values (#{param2.countryname},#{param2.countrycode})" })
-  int singleParamWithATrickyName(@Param(ParamNameResolver.GENERIC_NAME_PREFIX + "2") Country country);
+  int singleParamWithATrickyName(@Param(MethodParamMetadata.GENERIC_NAME_PREFIX + "2") Country country);
 
   @Options(useGeneratedKeys = true, keyProperty = "id")
   @Insert({ "insert into country (countryname,countrycode) values (#{countryname},#{countrycode})" })

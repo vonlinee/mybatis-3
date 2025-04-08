@@ -84,7 +84,7 @@ import org.apache.ibatis.reflection.TypeParameterResolver;
 import org.apache.ibatis.scripting.FetchType;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.ResultSetType;
 import org.apache.ibatis.scripting.SqlCommandType;
 import org.apache.ibatis.scripting.SqlSource;
@@ -296,7 +296,7 @@ public class MapperAnnotationBuilder {
 
   void parseStatement(Class<?> type, Method method) {
     final Class<?> parameterTypeClass = getParameterType(method);
-    final ParamNameResolver paramNameResolver = ParamNameResolver.resolve(type, method,
+    final MethodParamMetadata paramNameResolver = MethodParamMetadata.resolve(type, method,
         configuration.isUseActualParamName());
     final LanguageDriver languageDriver = getLanguageDriver(method);
 
@@ -575,7 +575,7 @@ public class MapperAnnotationBuilder {
   }
 
   private KeyGenerator handleSelectKeyAnnotation(SelectKey selectKeyAnnotation, String baseStatementId,
-      Class<?> parameterTypeClass, ParamNameResolver paramNameResolver, LanguageDriver languageDriver) {
+      Class<?> parameterTypeClass, MethodParamMetadata paramNameResolver, LanguageDriver languageDriver) {
     String id = baseStatementId + SelectKeyGenerator.SELECT_KEY_SUFFIX;
     Class<?> resultTypeClass = selectKeyAnnotation.resultType();
     StatementType statementType = selectKeyAnnotation.statementType();
@@ -608,7 +608,7 @@ public class MapperAnnotationBuilder {
   }
 
   private SqlSource buildSqlSource(Class<?> type, Annotation annotation, Class<?> parameterType,
-      ParamNameResolver paramNameResolver, LanguageDriver languageDriver, Method method) {
+      MethodParamMetadata paramNameResolver, LanguageDriver languageDriver, Method method) {
     if (annotation instanceof Select) {
       return buildSqlSourceFromStrings(((Select) annotation).value(), parameterType, paramNameResolver, languageDriver);
     } else if (annotation instanceof Update) {
@@ -625,7 +625,7 @@ public class MapperAnnotationBuilder {
   }
 
   private SqlSource buildSqlSourceFromStrings(String[] strings, Class<?> parameterTypeClass,
-      ParamNameResolver paramNameResolver, LanguageDriver languageDriver) {
+      MethodParamMetadata paramNameResolver, LanguageDriver languageDriver) {
     return languageDriver.createSqlSource(configuration, String.join(" ", strings).trim(), parameterTypeClass,
         paramNameResolver);
   }

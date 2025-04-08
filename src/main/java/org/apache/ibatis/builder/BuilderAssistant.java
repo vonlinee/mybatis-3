@@ -48,7 +48,7 @@ import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.scripting.FetchType;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.ResultSetType;
 import org.apache.ibatis.scripting.SqlCommandType;
 import org.apache.ibatis.scripting.SqlSource;
@@ -273,7 +273,7 @@ public class BuilderAssistant {
                                             String keyColumn, String databaseId,
                                             LanguageDriver lang, String resultSets,
                                             boolean dirtySelect,
-                                            ParamNameResolver paramNameResolver) {
+                                            MethodParamMetadata paramNameResolver) {
 
     if (unresolvedCacheRef) {
       throw new IncompleteElementException("Cache-ref not yet resolved");

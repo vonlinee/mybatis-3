@@ -27,7 +27,7 @@ import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.LanguageDriver;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.SqlSource;
 
 /**
@@ -41,7 +41,7 @@ public class ProviderSqlSource implements SqlSource {
   private final LanguageDriver languageDriver;
   private final Method mapperMethod;
   private final Method providerMethod;
-  private final ParamNameResolver paramNameResolver;
+  private final MethodParamMetadata paramNameResolver;
   private final Class<?>[] providerMethodParameterTypes;
   private final ProviderContext providerContext;
   private final Integer providerContextIndex;
@@ -100,7 +100,7 @@ public class ProviderSqlSource implements SqlSource {
           + "' not found in SqlProvider '" + this.providerType.getName() + "'.");
     }
     this.providerMethod = candidateProviderMethod;
-    this.paramNameResolver = ParamNameResolver.resolve(mapperType, this.providerMethod,
+    this.paramNameResolver = MethodParamMetadata.resolve(mapperType, this.providerMethod,
         configuration.isUseActualParamName());
     this.providerMethodParameterTypes = this.providerMethod.getParameterTypes();
 

@@ -37,7 +37,7 @@ import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.reflection.ArrayUtil;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.scripting.ParamNameResolver;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.session.defaults.DefaultSqlSession.StrictMap;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
@@ -49,7 +49,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  */
 public class Jdbc3KeyGenerator implements KeyGenerator {
 
-  private static final String SECOND_GENERIC_PARAM_NAME = ParamNameResolver.GENERIC_NAME_PREFIX + "2";
+  private static final String SECOND_GENERIC_PARAM_NAME = MethodParamMetadata.GENERIC_NAME_PREFIX + "2";
 
   /**
    * A shared instance.

@@ -41,7 +41,7 @@ public interface SqlBuildContext {
 
   Class<?> getParameterType();
 
-  ParamNameResolver getParamNameResolver();
+  MethodParamMetadata getParamNameResolver();
 
   boolean isParamExists();
 }
