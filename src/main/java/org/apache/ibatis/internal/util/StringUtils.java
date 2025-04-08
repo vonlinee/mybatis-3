@@ -94,6 +94,16 @@ public final class StringUtils {
     return cs == null || cs.isEmpty();
   }
 
+  /**
+   * check both two strings are empty
+   *
+   * @param str1
+   *          str1
+   * @param str2
+   *          str2
+   *
+   * @return whether both two strings are empty
+   */
   public static boolean isAllEmpty(final String str1, final String str2) {
     return isEmpty(str1) && isEmpty(str2);
   }
@@ -190,8 +200,11 @@ public final class StringUtils {
 
   @NotNull
   public static String deleteFirst(String str, String target, boolean ignoreCase) {
-    if (isEmpty(str) || isEmpty(target)) {
+    if (isEmpty(str)) {
       return EMPTY;
+    }
+    if (isEmpty(target)) {
+      return str;
     }
     int index = ignoreCase ? indexOfIgnoreCase(str, target) : str.indexOf(target);
     if (index > 0) {
