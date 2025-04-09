@@ -41,4 +41,8 @@ public final class ObjectUtils {
   public static Integer parseInteger(String value, Integer defaultValue) {
     return value == null ? defaultValue : Integer.valueOf(value);
   }
+
+  public static boolean isEmpty(Object[] objects) {
+    return objects == null || objects.length == 0;
+  }
 }

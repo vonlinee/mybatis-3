@@ -16,11 +16,14 @@
 package org.apache.ibatis.internal.util;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -306,5 +309,40 @@ public final class StringUtils {
       }
     }
     return builder.toString();
+  }
+
+  @NotNull
+  public static <T> String join(String separator, Collection<T> collection, Function<T, String> mapper) {
+    if (CollectionUtils.isEmpty(collection) || separator == null) {
+      return EMPTY;
+    }
+    return collection.stream().map(mapper).collect(Collectors.joining(separator));
+  }
+
+  /**
+   * join items with specified separator and mapper
+   *
+   * @param separator
+   *          separator
+   * @param collection
+   *          items to join
+   *
+   * @return joined string
+   *
+   * @see String#valueOf(Object)
+   */
+  @NotNull
+  public static String join(String separator, Collection<?> collection) {
+    if (CollectionUtils.isEmpty(collection) || separator == null) {
+      return EMPTY;
+    }
+    return collection.stream().map(String::valueOf).collect(Collectors.joining(separator));
+  }
+
+  public static String join(String separator, Object[] collection) {
+    if (ObjectUtils.isEmpty(collection) || separator == null) {
+      return EMPTY;
+    }
+    return Arrays.stream(collection).map(String::valueOf).collect(Collectors.joining(separator));
   }
 }
