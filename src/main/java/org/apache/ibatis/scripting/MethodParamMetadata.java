@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -245,13 +244,17 @@ public class MethodParamMetadata {
       if (object instanceof List) {
         map.put("list", object);
       }
-      Optional.ofNullable(actualParamName).ifPresent(name -> map.put(name, object));
+      if (actualParamName != null) {
+        map.put(actualParamName, object);
+      }
       return map;
     }
     if (object != null && object.getClass().isArray()) {
       ParamMap map = new ParamMap();
       map.put("array", object);
-      Optional.ofNullable(actualParamName).ifPresent(name -> map.put(name, object));
+      if (actualParamName != null) {
+        map.put(actualParamName, object);
+      }
       return map;
     }
     return object;
