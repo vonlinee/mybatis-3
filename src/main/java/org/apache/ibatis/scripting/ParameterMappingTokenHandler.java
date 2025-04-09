@@ -83,9 +83,18 @@ public class ParameterMappingTokenHandler implements TokenHandler {
 
   private ParameterMapping buildParameterMapping(String content) {
     ParameterExpression propertiesMap = parseParameterMapping(content);
-
     final String property = propertiesMap.remove("property");
-    final JdbcType jdbcType = configuration.resolveJdbcType(propertiesMap.remove("jdbcType"));
+
+    final String jdbcTypeName = propertiesMap.remove("jdbcType");
+    JdbcType jdbcType = null;
+    if (jdbcTypeName != null) {
+      // jdbcType is optional
+      jdbcType = JdbcType.forName(jdbcTypeName, false);
+      if (jdbcType == null) {
+        throw new BuilderException("An invalid property jdbcType was found in mapping #{" + content + "}");
+      }
+    }
+
     final String typeHandlerAlias = propertiesMap.remove("typeHandler");
 
     ParameterMapping.Builder builder = new ParameterMapping.Builder(property, (Class<?>) null);
@@ -149,7 +158,7 @@ public class ParameterMappingTokenHandler implements TokenHandler {
     if (metaParameters.hasGetter(propertyTokenizer.getName())) { // issue #448 get type from additional params
       return metaParameters.getGetterType(property);
     }
-    typeHandler = configuration.resolveTypeHandler(parameterType, jdbcType, (Class<? extends TypeHandler<?>>) null);
+    typeHandler = configuration.resolveTypeHandler(parameterType, jdbcType, null);
     if (typeHandler != null) {
       return parameterType;
     }
@@ -158,11 +167,10 @@ public class ParameterMappingTokenHandler implements TokenHandler {
     }
     if (paramNameResolver != null && ParamMap.class.equals(parameterType)) {
       Type actualParamType = paramNameResolver.getType(property);
-      if (actualParamType instanceof Type) {
+      if (actualParamType != null) {
         MetaClass metaClass = MetaClass.forClass(actualParamType, configuration.getReflectorFactory());
-        String multiParamsPropertyName;
         if (propertyTokenizer.hasNext()) {
-          multiParamsPropertyName = propertyTokenizer.getChildren();
+          String multiParamsPropertyName = propertyTokenizer.getChildren();
           if (metaClass.hasGetter(multiParamsPropertyName)) {
             Entry<Type, Class<?>> getterType = metaClass.getGenericGetterType(multiParamsPropertyName);
             genericType = getterType.getKey();

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.apache.ibatis.type;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
@@ -123,6 +125,23 @@ public enum JdbcType {
 
   public static JdbcType forCode(int code) {
     return codeLookup.get(code);
+  }
+
+  @Nullable
+  public static JdbcType forName(String name, boolean caseSensitive) {
+    if (name == null || name.isEmpty()) {
+      return null;
+    }
+    for (JdbcType type : values()) {
+      if (caseSensitive) {
+        if (type.name().equals(name)) {
+          return type;
+        }
+      } else if (type.name().equalsIgnoreCase(name)) {
+        return type;
+      }
+    }
+    return null;
   }
 
 }
