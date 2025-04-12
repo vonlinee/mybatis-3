@@ -15,9 +15,14 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
+import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.parsing.PropertyParser;
 import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.parsing.XNode;
@@ -26,9 +31,11 @@ import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.MethodParamMetadata;
+import org.apache.ibatis.scripting.ParameterMappingTokenHandler;
 import org.apache.ibatis.scripting.SqlSource;
+import org.apache.ibatis.scripting.SqlUtils;
+import org.apache.ibatis.scripting.StaticSqlSource;
 import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
-import org.apache.ibatis.scripting.defaults.RawSqlSource;
 
 /**
  * @author Eduardo Macarron
@@ -76,7 +83,13 @@ public class XMLLanguageDriver implements LanguageDriver {
       TextSqlNode textSqlNode = new TextSqlNode(script);
       return new DynamicSqlSource(configuration, textSqlNode);
     } else {
-      return new RawSqlSource(configuration, script, parameterType, paramNameResolver);
+      Class<?> clazz = parameterType == null ? Object.class : parameterType;
+      List<ParameterMapping> parameterMappings = new ArrayList<>();
+      ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration,
+          clazz, new HashMap<>(), paramNameResolver);
+      String parsedSql = TokenParser.parse(script, "#{", "}", tokenHandler);
+      parsedSql = configuration.isShrinkWhitespacesInSql() ? SqlUtils.shrinkWhitespaces(parsedSql) : parsedSql;
+      return new StaticSqlSource(parsedSql, parameterMappings);
     }
   }
 

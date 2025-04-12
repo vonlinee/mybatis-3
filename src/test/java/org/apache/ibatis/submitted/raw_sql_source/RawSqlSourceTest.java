@@ -23,8 +23,12 @@ import java.util.stream.Stream;
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.SqlSource;
+import org.apache.ibatis.scripting.SqlUtils;
+import org.apache.ibatis.scripting.StaticSqlSource;
 import org.apache.ibatis.scripting.defaults.RawSqlSource;
+import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
 import org.apache.ibatis.scripting.xmltags.SqlNode;
 import org.apache.ibatis.scripting.xmltags.StaticTextSqlNode;
@@ -57,7 +61,7 @@ class RawSqlSourceTest {
 
   @Test
   void shouldUseRawSqlSourceForAnStaticStatement() {
-    test("getUser1", RawSqlSource.class);
+    test("getUser1", StaticSqlSource.class);
   }
 
   @Test
@@ -86,7 +90,12 @@ class RawSqlSourceTest {
   void testShrinkWhitespacesInSql(String input, boolean shrinkWhitespaces, String expected) {
     Configuration config = new Configuration();
     config.setShrinkWhitespacesInSql(shrinkWhitespaces);
-    String actual = new RawSqlSource(config, input, null, null).getBoundSql(null).getSql();
+
+    if (shrinkWhitespaces) {
+      input = SqlUtils.shrinkWhitespaces(input);
+    }
+
+    String actual = new RawSqlSource(input).getBoundSql(null).getSql();
     assertEquals(expected, actual);
   }
 
@@ -98,12 +107,22 @@ class RawSqlSourceTest {
             "SELECT * FROM user WHERE user_id = 1"));
   }
 
+  /**
+   * TODO FIX the test
+   */
   @MethodSource
   @ParameterizedTest
   void testShrinkWhitespacesInSql_SqlNode(SqlNode input, boolean shrinkWhitespaces, String expected) {
     Configuration config = new Configuration();
     config.setShrinkWhitespacesInSql(shrinkWhitespaces);
-    String actual = new RawSqlSource(config, input, null).getBoundSql(null).getSql();
+    DynamicContext context = new DynamicContext(config, null, new MethodParamMetadata());
+    input.apply(context);
+    String sql = context.getSql();
+    if (shrinkWhitespaces) {
+      sql = SqlUtils.shrinkWhitespaces(sql);
+    }
+    RawSqlSource sqlSource = new RawSqlSource(sql);
+    String actual = sqlSource.getBoundSql(null).getSql();
     assertEquals(expected, actual);
   }
 

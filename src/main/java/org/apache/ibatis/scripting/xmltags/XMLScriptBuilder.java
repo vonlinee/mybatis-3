@@ -30,7 +30,8 @@ import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.scripting.MethodParamMetadata;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlSource;
-import org.apache.ibatis.scripting.defaults.RawSqlSource;
+import org.apache.ibatis.scripting.SqlUtils;
+import org.apache.ibatis.scripting.StaticSqlSource;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -80,7 +81,11 @@ public class XMLScriptBuilder {
     if (rootSqlNode.isDynamic()) {
       sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
     } else {
-      sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType, methodParamMetadata);
+      DynamicContext dynamicContext = new DynamicContext(configuration, parameterType, methodParamMetadata);
+      rootSqlNode.apply(dynamicContext);
+      String sql = dynamicContext.getSql();
+      sql = configuration.isShrinkWhitespacesInSql() ? SqlUtils.shrinkWhitespaces(sql) : sql;
+      sqlSource = new StaticSqlSource(sql, dynamicContext.getParameterMappings());
     }
     return sqlSource;
   }

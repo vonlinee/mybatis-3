@@ -15,22 +15,11 @@
  */
 package org.apache.ibatis.scripting.defaults;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Collections;
 
-import org.apache.ibatis.builder.Configuration;
-import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.parsing.TokenParser;
 import org.apache.ibatis.scripting.BoundSql;
-import org.apache.ibatis.scripting.MethodParamMetadata;
-import org.apache.ibatis.scripting.ParameterMappingTokenHandler;
 import org.apache.ibatis.scripting.SqlSource;
-import org.apache.ibatis.scripting.SqlUtils;
-import org.apache.ibatis.scripting.StaticSqlSource;
-import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
-import org.apache.ibatis.scripting.xmltags.SqlNode;
 
 /**
  * Static SqlSource. It is faster than {@link DynamicSqlSource} because mappings are calculated during startup.
@@ -41,37 +30,14 @@ import org.apache.ibatis.scripting.xmltags.SqlNode;
  */
 public class RawSqlSource implements SqlSource {
 
-  private final SqlSource sqlSource;
+  private final String rawSql;
 
-  public RawSqlSource(Configuration configuration, SqlNode rootSqlNode, Class<?> parameterType) {
-    this(configuration, rootSqlNode, parameterType, null);
-  }
-
-  public RawSqlSource(Configuration configuration, SqlNode rootSqlNode, Class<?> parameterType,
-      MethodParamMetadata paramNameResolver) {
-    DynamicContext context = new DynamicContext(configuration, parameterType, paramNameResolver);
-    rootSqlNode.apply(context);
-    String sql = context.getSql();
-
-    sql = configuration.isShrinkWhitespacesInSql() ? SqlUtils.shrinkWhitespaces(sql) : sql;
-
-    sqlSource = new StaticSqlSource(sql, context.getParameterMappings());
-  }
-
-  public RawSqlSource(Configuration configuration, String sql, Class<?> parameterType,
-      MethodParamMetadata paramNameResolver) {
-    Class<?> clazz = parameterType == null ? Object.class : parameterType;
-    List<ParameterMapping> parameterMappings = new ArrayList<>();
-    ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration,
-        clazz, new HashMap<>(), paramNameResolver);
-    String parsedSql = TokenParser.parse(sql, "#{", "}", tokenHandler);
-
-    parsedSql = configuration.isShrinkWhitespacesInSql() ? SqlUtils.shrinkWhitespaces(parsedSql) : parsedSql;
-    sqlSource = new StaticSqlSource(parsedSql, parameterMappings);
+  public RawSqlSource(String sql) {
+    this.rawSql = sql;
   }
 
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
-    return sqlSource.getBoundSql(parameterObject);
+    return new BoundSql(rawSql, Collections.emptyList(), parameterObject);
   }
 }
