@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.BiConsumer;
 
+import org.apache.ibatis.builder.xml.PendingXMLStatementResolver;
 import org.apache.ibatis.builder.xml.XMLStatementBuilder;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.decorators.LruCache;
@@ -44,6 +45,7 @@ import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
+import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.scripting.FetchType;
 import org.apache.ibatis.scripting.LanguageDriver;
@@ -509,8 +511,8 @@ public class BuilderAssistant {
 
   // pending builder handle start
 
-  public void addIncompleteStatement(XMLStatementBuilder incompleteStatement) {
-    configuration.addIncompleteStatement(incompleteStatement);
+  public void addIncompleteStatement(XMLStatementBuilder incompleteStatement, XNode context) {
+    configuration.addIncompleteStatement(new PendingXMLStatementResolver(incompleteStatement, context));
   }
 
   public void addIncompleteCacheRef(CacheRefResolver cacheRefResolver) {

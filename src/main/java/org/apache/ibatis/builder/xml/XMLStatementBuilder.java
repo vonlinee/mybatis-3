@@ -59,7 +59,7 @@ public class XMLStatementBuilder {
     this.mapperClass = mapperClass;
   }
 
-  public void parseStatementNode() {
+  public void parseStatementNode(XNode context) {
     String id = context.getStringAttribute("id");
     String databaseId = context.getStringAttribute("databaseId");
 

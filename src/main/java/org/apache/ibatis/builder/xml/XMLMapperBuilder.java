@@ -137,9 +137,9 @@ public class XMLMapperBuilder {
       final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, assistant, context,
           requiredDatabaseId, mapperClass);
       try {
-        statementParser.parseStatementNode();
+        statementParser.parseStatementNode(context);
       } catch (IncompleteElementException e) {
-        assistant.addIncompleteStatement(statementParser);
+        assistant.addIncompleteStatement(statementParser, context);
       }
     }
   }

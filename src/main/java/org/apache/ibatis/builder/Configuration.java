@@ -34,7 +34,7 @@ import javax.sql.DataSource;
 
 import org.apache.ibatis.binding.MapperRegistry;
 import org.apache.ibatis.builder.annotation.MethodResolver;
-import org.apache.ibatis.builder.xml.XMLStatementBuilder;
+import org.apache.ibatis.builder.xml.PendingXMLStatementResolver;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.decorators.FifoCache;
 import org.apache.ibatis.cache.decorators.LruCache;
@@ -172,7 +172,7 @@ public class Configuration {
 
   protected final Set<String> loadedResources = new HashSet<>();
   protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers");
-  protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>();
+  protected final Collection<PendingXMLStatementResolver> incompleteStatements = new LinkedList<>();
   protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<>();
   protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>();
   protected final Collection<MethodResolver> incompleteMethods = new LinkedList<>();
@@ -851,10 +851,10 @@ public class Configuration {
     return mappedStatements.values();
   }
 
-  public void addIncompleteStatement(XMLStatementBuilder incompleteStatement) {
+  public void addIncompleteStatement(PendingXMLStatementResolver statementResolver) {
     incompleteStatementsLock.lock();
     try {
-      incompleteStatements.add(incompleteStatement);
+      incompleteStatements.add(statementResolver);
     } finally {
       incompleteStatementsLock.unlock();
     }
@@ -985,10 +985,7 @@ public class Configuration {
     }
     incompleteStatementsLock.lock();
     try {
-      incompleteStatements.removeIf(x -> {
-        x.parseStatementNode();
-        return true;
-      });
+      incompleteStatements.removeIf(PendingXMLStatementResolver::resolve);
     } catch (IncompleteElementException e) {
       if (reportUnresolved) {
         throw e;
