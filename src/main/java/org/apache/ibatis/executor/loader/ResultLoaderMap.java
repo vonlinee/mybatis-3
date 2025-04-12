@@ -33,6 +33,7 @@ import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BaseExecutor;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.executor.ExecutorException;
+import org.apache.ibatis.executor.MapperUpdate;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.reflection.MetaObject;
@@ -289,7 +290,7 @@ public class ResultLoaderMap {
     }
 
     @Override
-    protected int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
+    protected int doUpdate(MapperUpdate update) throws SQLException {
       throw new UnsupportedOperationException("Not supported.");
     }
 

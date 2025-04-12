@@ -71,7 +71,8 @@ class BaseExecutorTest extends BaseDataTest {
       Author author = new Author(-1, "someone", "******", "someone@apache.org", null, Section.NEWS);
       MappedStatement insertStatement = ExecutorTestHelper.prepareInsertAuthorMappedStatementWithBeforeAutoKey(config);
       MappedStatement selectStatement = ExecutorTestHelper.prepareSelectOneAuthorMappedStatement(config);
-      int rows = executor.update(insertStatement, author);
+
+      int rows = executor.update(new MapperUpdate(insertStatement, author));
       assertTrue(rows > 0 || rows == BatchExecutor.BATCH_UPDATE_RETURN_VALUE);
       if (rows == BatchExecutor.BATCH_UPDATE_RETURN_VALUE) {
         executor.flushStatements();
@@ -98,7 +99,7 @@ class BaseExecutorTest extends BaseDataTest {
       Author author = new Author(99, "someone", "******", "someone@apache.org", null, Section.NEWS);
       MappedStatement insertStatement = ExecutorTestHelper.prepareInsertAuthorMappedStatement(config);
       MappedStatement selectStatement = ExecutorTestHelper.prepareSelectOneAuthorMappedStatement(config);
-      int rows = executor.update(insertStatement, author);
+      int rows = executor.update(new MapperUpdate(insertStatement, author));
       List<Author> authors = executor.query(selectStatement, 99, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
       executor.flushStatements();
       executor.rollback(true);
@@ -139,7 +140,7 @@ class BaseExecutorTest extends BaseDataTest {
       Author author = new Author(-1, "someone", "******", "someone@apache.org", null, Section.NEWS);
       MappedStatement insertStatement = ExecutorTestHelper.prepareInsertAuthorMappedStatementWithAutoKey(config);
       MappedStatement selectStatement = ExecutorTestHelper.prepareSelectOneAuthorMappedStatement(config);
-      int rows = executor.update(insertStatement, author);
+      int rows = executor.update(new MapperUpdate(insertStatement, author));
       assertTrue(rows > 0 || rows == BatchExecutor.BATCH_UPDATE_RETURN_VALUE);
       if (rows == BatchExecutor.BATCH_UPDATE_RETURN_VALUE) {
         executor.flushStatements();
@@ -166,7 +167,7 @@ class BaseExecutorTest extends BaseDataTest {
       Author author = new Author(97, "someone", "******", "someone@apache.org", null, null);
       MappedStatement insertStatement = ExecutorTestHelper.prepareInsertAuthorProc(config);
       MappedStatement selectStatement = ExecutorTestHelper.prepareSelectOneAuthorMappedStatement(config);
-      executor.update(insertStatement, author);
+      executor.update(new MapperUpdate(insertStatement, author));
       List<Author> authors = executor.query(selectStatement, 97, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
       executor.flushStatements();
       executor.rollback(true);
@@ -185,7 +186,7 @@ class BaseExecutorTest extends BaseDataTest {
       Author author = new Author(99, "someone", "******", "someone@apache.org", null, null);
       MappedStatement insertStatement = ExecutorTestHelper.createInsertAuthorWithIDof99MappedStatement(config);
       MappedStatement selectStatement = ExecutorTestHelper.createSelectAuthorWithIDof99MappedStatement(config);
-      int rows = executor.update(insertStatement, null);
+      int rows = executor.update(new MapperUpdate(insertStatement, null));
       List<Author> authors = executor.query(selectStatement, 99, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
       executor.flushStatements();
       executor.rollback(true);
@@ -204,8 +205,9 @@ class BaseExecutorTest extends BaseDataTest {
     try {
       Author author = new Author(101, "someone", "******", "someone@apache.org", null, Section.NEWS);
       MappedStatement updateStatement = ExecutorTestHelper.prepareUpdateAuthorMappedStatement(config);
+      int rows = executor.update(new MapperUpdate(updateStatement, author));
+
       MappedStatement selectStatement = ExecutorTestHelper.prepareSelectOneAuthorMappedStatement(config);
-      int rows = executor.update(updateStatement, author);
       List<Author> authors = executor.query(selectStatement, 101, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
       executor.flushStatements();
       executor.rollback(true);
@@ -224,8 +226,9 @@ class BaseExecutorTest extends BaseDataTest {
     try {
       Author author = new Author(101, null, null, null, null, null);
       MappedStatement deleteStatement = ExecutorTestHelper.prepareDeleteAuthorMappedStatement(config);
+      int rows = executor.update(new MapperUpdate(deleteStatement, author));
+
       MappedStatement selectStatement = ExecutorTestHelper.prepareSelectOneAuthorMappedStatement(config);
-      int rows = executor.update(deleteStatement, author);
       List<Author> authors = executor.query(selectStatement, 101, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
       executor.flushStatements();
       executor.rollback(true);
@@ -452,7 +455,7 @@ class BaseExecutorTest extends BaseDataTest {
         executor.query(selectPosts, 1, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
 
         Author author = new Author(-1, "someone", "******", "someone@apache.org", null, Section.NEWS);
-        executor.update(insertAuthor, author);
+        executor.update(new MapperUpdate(insertAuthor, author));
         executor.query(selectAuthor, -1, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
         executor.flushStatements();
         executor.rollback(true);

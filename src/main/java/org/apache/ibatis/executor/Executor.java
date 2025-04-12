@@ -33,7 +33,7 @@ public interface Executor {
 
   ResultHandler NO_RESULT_HANDLER = null;
 
-  int update(MappedStatement ms, Object parameter) throws SQLException;
+  int update(MapperUpdate update) throws SQLException;
 
   <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler<E> resultHandler,
       Object cacheKey, BoundSql boundSql) throws SQLException;

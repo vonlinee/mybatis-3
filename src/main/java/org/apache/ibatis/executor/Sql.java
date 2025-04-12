@@ -16,9 +16,13 @@
 package org.apache.ibatis.executor;
 
 import java.io.Serializable;
+import java.util.List;
+
+import org.apache.ibatis.mapping.ParameterMapping;
 
 public interface Sql extends Serializable {
 
-  @Override
-  String toString();
+  String getSql();
+
+  List<ParameterMapping> getParameterMappings();
 }

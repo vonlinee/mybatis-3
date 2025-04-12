@@ -48,10 +48,12 @@ public class BoundSql implements Sql {
     this.metaParameters = new MapWrapper();
   }
 
+  @Override
   public String getSql() {
     return sql;
   }
 
+  @Override
   public List<ParameterMapping> getParameterMappings() {
     return parameterMappings;
   }

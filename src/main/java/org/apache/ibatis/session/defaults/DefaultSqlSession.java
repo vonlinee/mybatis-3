@@ -30,6 +30,7 @@ import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.MapperUpdate;
 import org.apache.ibatis.executor.result.DefaultMapResultHandler;
 import org.apache.ibatis.executor.result.DefaultResultContext;
 import org.apache.ibatis.scripting.MappedStatement;
@@ -194,7 +195,7 @@ public class DefaultSqlSession implements SqlSession {
     try {
       dirty = true;
       MappedStatement ms = configuration.getMappedStatement(statement);
-      return executor.update(ms, wrapCollection(parameter));
+      return executor.update(new MapperUpdate(ms, wrapCollection(parameter)));
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error updating database.  Cause: " + e, e);
     } finally {

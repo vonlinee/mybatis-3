@@ -15,26 +15,9 @@
  */
 package org.apache.ibatis.executor;
 
-import java.util.Collections;
-import java.util.List;
+import org.apache.ibatis.scripting.SqlCommandType;
 
-import org.apache.ibatis.mapping.ParameterMapping;
+public interface JdbcStatement {
 
-public class RawSql implements Sql {
-
-  private final String sql;
-
-  public RawSql(String sql) {
-    this.sql = sql;
-  }
-
-  @Override
-  public String getSql() {
-    return sql;
-  }
-
-  @Override
-  public final List<ParameterMapping> getParameterMappings() {
-    return Collections.emptyList();
-  }
+  SqlCommandType getSqlCommandType();
 }

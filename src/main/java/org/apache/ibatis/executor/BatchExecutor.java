@@ -52,20 +52,20 @@ public class BatchExecutor extends BaseExecutor {
   }
 
   @Override
-  public int doUpdate(MappedStatement ms, Object parameterObject) throws SQLException {
-    final Configuration configuration = ms.getConfiguration();
-    final StatementHandler handler = configuration.newStatementHandler(this, ms, parameterObject, RowBounds.DEFAULT,
-        null, null);
+  public int doUpdate(MapperUpdate update) throws SQLException {
+    final StatementHandler handler = update.newStatementHandler(this);
     final BoundSql boundSql = handler.getBoundSql();
     final String sql = boundSql.getSql();
     final Statement stmt;
+
+    MappedStatement ms = update.getMappedStatement();
     if (sql.equals(currentSql) && ms.equals(currentStatement)) {
       int last = statementList.size() - 1;
       stmt = statementList.get(last);
       applyTransactionTimeout(stmt);
       handler.parameterize(stmt);// fix Issues 322
       BatchResult batchResult = batchResultList.get(last);
-      batchResult.addParameterObject(parameterObject);
+      batchResult.addParameterObject(update.getParameterObject());
     } else {
       Connection connection = getConnection(ms.getStatementLog());
       stmt = handler.prepare(connection, transaction.getTimeout());
@@ -73,7 +73,7 @@ public class BatchExecutor extends BaseExecutor {
       currentSql = sql;
       currentStatement = ms;
       statementList.add(stmt);
-      batchResultList.add(new BatchResult(ms, sql, parameterObject));
+      batchResultList.add(new BatchResult(ms, sql, update.getParameterObject()));
     }
     handler.batch(stmt);
     return BATCH_UPDATE_RETURN_VALUE;

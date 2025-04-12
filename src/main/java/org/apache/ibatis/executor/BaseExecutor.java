@@ -106,11 +106,11 @@ public abstract class BaseExecutor implements Executor {
   }
 
   @Override
-  public int update(MappedStatement ms, Object parameter) throws SQLException {
-    ErrorContext.instance().resource(ms.getResource()).activity("executing an update").object(ms.getId());
+  public int update(MapperUpdate update) throws SQLException {
     checkIfClosed();
     clearLocalCache();
-    return doUpdate(ms, parameter);
+    update.logBeforeExecuted();
+    return doUpdate(update);
   }
 
   @Override
@@ -295,7 +295,7 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
-  protected abstract int doUpdate(MappedStatement ms, Object parameter) throws SQLException;
+  protected abstract int doUpdate(MapperUpdate update) throws SQLException;
 
   protected abstract List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException;
 

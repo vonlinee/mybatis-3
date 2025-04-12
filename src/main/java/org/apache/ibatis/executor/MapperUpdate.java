@@ -15,26 +15,26 @@
  */
 package org.apache.ibatis.executor;
 
-import java.util.Collections;
-import java.util.List;
+import org.apache.ibatis.executor.statement.StatementHandler;
+import org.apache.ibatis.scripting.MappedStatement;
+import org.apache.ibatis.session.RowBounds;
 
-import org.apache.ibatis.mapping.ParameterMapping;
+public class MapperUpdate extends MapperStatement {
 
-public class RawSql implements Sql {
-
-  private final String sql;
-
-  public RawSql(String sql) {
-    this.sql = sql;
+  public MapperUpdate(MappedStatement ms, Object parameter) {
+    super(ms);
+    this.parameterObject = parameter;
   }
 
-  @Override
-  public String getSql() {
-    return sql;
+  MapperUpdate(MappedStatement ms) {
+    super(ms);
   }
 
-  @Override
-  public final List<ParameterMapping> getParameterMappings() {
-    return Collections.emptyList();
+  public void logBeforeExecuted() {
+    ErrorContext.instance().resource(ms.getResource()).activity("executing an update").object(ms.getId());
+  }
+
+  public StatementHandler newStatementHandler(Executor executor) {
+    return configuration.newStatementHandler(executor, ms, parameterObject, RowBounds.DEFAULT, null, null);
   }
 }

@@ -41,12 +41,11 @@ public class SimpleExecutor extends BaseExecutor {
   }
 
   @Override
-  public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
+  public int doUpdate(MapperUpdate update) throws SQLException {
     Statement stmt = null;
     try {
-      Configuration configuration = ms.getConfiguration();
-      StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
-      stmt = prepareStatement(handler, ms.getStatementLog());
+      StatementHandler handler = update.newStatementHandler(this);
+      stmt = prepareStatement(handler, update.getStatementLog());
       return handler.update(stmt);
     } finally {
       closeStatement(stmt);
