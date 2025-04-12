@@ -39,6 +39,7 @@ public class MetaObject {
   private final ObjectWrapperFactory objectWrapperFactory;
   private final ReflectorFactory reflectorFactory;
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   private MetaObject(Object object, ObjectFactory objectFactory, ObjectWrapperFactory objectWrapperFactory,
       ReflectorFactory reflectorFactory) {
     this.originalObject = object;
