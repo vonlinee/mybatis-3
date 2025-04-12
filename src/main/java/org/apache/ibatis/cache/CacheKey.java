@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-import org.apache.ibatis.reflection.ArrayUtil;
+import org.apache.ibatis.internal.util.ObjectUtils;
 
 /**
  * @author Clinton Begin
@@ -72,7 +72,7 @@ public class CacheKey implements Cloneable, Serializable {
   }
 
   public void update(Object object) {
-    int baseHashCode = object == null ? 1 : ArrayUtil.hashCode(object);
+    int baseHashCode = object == null ? 1 : ObjectUtils.hashCode(object);
 
     count++;
     checksum += baseHashCode;
@@ -107,7 +107,7 @@ public class CacheKey implements Cloneable, Serializable {
     for (int i = 0; i < updateList.size(); i++) {
       Object thisObject = updateList.get(i);
       Object thatObject = cacheKey.updateList.get(i);
-      if (!ArrayUtil.equals(thisObject, thatObject)) {
+      if (!ObjectUtils.equals(thisObject, thatObject)) {
         return false;
       }
     }
@@ -124,7 +124,7 @@ public class CacheKey implements Cloneable, Serializable {
     StringJoiner returnValue = new StringJoiner(":");
     returnValue.add(String.valueOf(hashcode));
     returnValue.add(String.valueOf(checksum));
-    updateList.stream().map(ArrayUtil::toString).forEach(returnValue::add);
+    updateList.stream().map(ObjectUtils::toString).forEach(returnValue::add);
     return returnValue.toString();
   }
 

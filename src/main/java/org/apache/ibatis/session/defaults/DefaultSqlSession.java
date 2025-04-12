@@ -148,7 +148,6 @@ public class DefaultSqlSession implements SqlSession {
     return selectList(statement, parameter, rowBounds, Executor.NO_RESULT_HANDLER);
   }
 
-  @SuppressWarnings("unchecked")
   private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler<?> handler) {
     try {
       MappedStatement ms = configuration.getMappedStatement(statement);

@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.ibatis.internal.util.ObjectUtils;
 import org.apache.ibatis.logging.Log;
-import org.apache.ibatis.reflection.ArrayUtil;
 
 /**
  * Base class for proxies to do logging.
@@ -99,7 +99,7 @@ public abstract class BaseJdbcLogger {
   protected String objectValueString(Object value) {
     if (value instanceof Array) {
       try {
-        return ArrayUtil.toString(((Array) value).getArray());
+        return ObjectUtils.toString(((Array) value).getArray());
       } catch (SQLException e) {
         // Intentionally fall through to return value.toString()
       }
