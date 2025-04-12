@@ -37,9 +37,7 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.MethodParamMetadata;
-import org.apache.ibatis.scripting.StatementType;
 import org.apache.ibatis.session.LocalCacheScope;
-import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.type.TypeHandlerRegistry;
@@ -123,33 +121,23 @@ public abstract class BaseExecutor implements Executor {
     return doFlushStatements(isRollBack);
   }
 
-  @Override
-  public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler<E> resultHandler)
-      throws SQLException {
-    BoundSql boundSql = ms.getBoundSql(parameter);
-    CacheKey key = createCacheKey(ms, parameter, rowBounds, boundSql);
-    return query(ms, parameter, rowBounds, resultHandler, key, boundSql);
-  }
-
   @SuppressWarnings("unchecked")
   @Override
-  public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler<E> resultHandler,
-      Object key, BoundSql boundSql) throws SQLException {
-    ErrorContext.instance().resource(ms.getResource()).activity("executing a query").object(ms.getId());
-    if (closed) {
-      throw new ExecutorException("Executor was closed.");
-    }
-    if (queryStack == 0 && ms.isFlushCacheRequired()) {
+  public <E> List<E> query(MapperQuery query) throws SQLException {
+    query.beforeExecuted(this);
+    query.logBeforeExecuted();
+    checkIfClosed();
+    if (queryStack == 0 && query.isFlushCacheRequired()) {
       clearLocalCache();
     }
     List<E> list;
     try {
       queryStack++;
-      list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
+      list = !query.hasResultHandler() ? (List<E>) localCache.getObject(query.getCacheKey()) : null;
       if (list != null) {
-        handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
+        handleLocallyCachedOutputParameters(query);
       } else {
-        list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
+        list = queryFromDatabase(query);
       }
     } finally {
       queryStack--;
@@ -299,8 +287,7 @@ public abstract class BaseExecutor implements Executor {
 
   protected abstract List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException;
 
-  protected abstract <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds,
-      ResultHandler<E> resultHandler, BoundSql boundSql) throws SQLException;
+  protected abstract <E> List<E> doQuery(MapperQuery query) throws SQLException;
 
   protected abstract <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds,
       BoundSql boundSql) throws SQLException;
@@ -326,36 +313,25 @@ public abstract class BaseExecutor implements Executor {
     JdbcUtils.applyTransactionTimeout(statement, statement.getQueryTimeout(), transaction.getTimeout());
   }
 
-  private void handleLocallyCachedOutputParameters(MappedStatement ms, Object key, Object parameter,
-      BoundSql boundSql) {
-    if (ms.getStatementType() == StatementType.CALLABLE) {
-      final Object cachedParameter = localOutputParameterCache.getObject(key);
-      if (cachedParameter != null && parameter != null) {
-        final MetaObject metaCachedParameter = configuration.newMetaObject(cachedParameter);
-        final MetaObject metaParameter = configuration.newMetaObject(parameter);
-        for (ParameterMapping parameterMapping : boundSql.getParameterMappings()) {
-          if (parameterMapping.getMode() != ParameterMode.IN) {
-            final String parameterName = parameterMapping.getProperty();
-            final Object cachedValue = metaCachedParameter.getValue(parameterName);
-            metaParameter.setValue(parameterName, cachedValue);
-          }
-        }
-      }
+  private void handleLocallyCachedOutputParameters(MapperQuery query) {
+    if (query.isCall()) {
+      final Object cachedParameter = localOutputParameterCache.getObject(query.getCacheKey());
+      query.handleLocallyCachedOutputParameters(cachedParameter);
     }
   }
 
-  private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds,
-      ResultHandler resultHandler, Object key, BoundSql boundSql) throws SQLException {
+  private <E> List<E> queryFromDatabase(MapperQuery query) throws SQLException {
     List<E> list;
-    localCache.putObject(key, EXECUTION_PLACEHOLDER);
+    final Object cacheKey = query.getCacheKey();
+    localCache.putObject(cacheKey, EXECUTION_PLACEHOLDER);
     try {
-      list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
+      list = doQuery(query);
     } finally {
-      localCache.removeObject(key);
+      localCache.removeObject(cacheKey);
     }
-    localCache.putObject(key, list);
-    if (ms.getStatementType() == StatementType.CALLABLE) {
-      localOutputParameterCache.putObject(key, parameter);
+    localCache.putObject(cacheKey, list);
+    if (query.isCall()) {
+      localOutputParameterCache.putObject(cacheKey, query.getParameterObject());
     }
     return list;
   }

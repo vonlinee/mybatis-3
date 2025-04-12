@@ -30,6 +30,7 @@ import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.MapperQuery;
 import org.apache.ibatis.executor.MapperUpdate;
 import org.apache.ibatis.executor.result.DefaultMapResultHandler;
 import org.apache.ibatis.executor.result.DefaultResultContext;
@@ -152,7 +153,9 @@ public class DefaultSqlSession implements SqlSession {
     try {
       MappedStatement ms = configuration.getMappedStatement(statement);
       dirty |= ms.isDirtySelect();
-      return (List<E>) executor.query(ms, wrapCollection(parameter), rowBounds, handler);
+      MapperQuery query = new MapperQuery(ms, wrapCollection(parameter));
+      query.rowBounds(rowBounds).resultHandler(handler);
+      return executor.query(query);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);
     } finally {

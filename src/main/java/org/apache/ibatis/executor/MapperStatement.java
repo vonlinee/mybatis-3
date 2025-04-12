@@ -15,12 +15,19 @@
  */
 package org.apache.ibatis.executor;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.logging.Log;
+import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.scripting.SqlCommandType;
+import org.apache.ibatis.scripting.StatementType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class MapperStatement implements JdbcStatement {
 
@@ -30,12 +37,18 @@ public abstract class MapperStatement implements JdbcStatement {
   protected final SqlCommandType sqlCommandType;
 
   protected BoundSql boundSql;
+
+  @Nullable
   protected Object parameterObject;
 
   protected MapperStatement(MappedStatement ms) {
     this.ms = ms;
     this.sqlCommandType = ms.getSqlCommandType();
     this.configuration = ms.getConfiguration();
+  }
+
+  public String getId() {
+    return ms.getId();
   }
 
   @Override
@@ -51,11 +64,21 @@ public abstract class MapperStatement implements JdbcStatement {
     return ms;
   }
 
+  @Nullable
   public Object getParameterObject() {
     return parameterObject;
   }
 
   public Log getStatementLog() {
     return ms.getStatementLog();
+  }
+
+  public boolean isCall() {
+    return ms.getStatementType() == StatementType.CALLABLE;
+  }
+
+  public List<ParameterMapping> getParameterMappings() {
+    Objects.requireNonNull(boundSql, "bound sql is not set");
+    return Collections.unmodifiableList(boundSql.getParameterMappings());
   }
 }

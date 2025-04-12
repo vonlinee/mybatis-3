@@ -21,10 +21,10 @@ import java.util.List;
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
+import org.apache.ibatis.executor.MapperQuery;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.session.ExecutorType;
-import org.apache.ibatis.session.RowBounds;
 
 /**
  * @author Clinton Begin
@@ -64,7 +64,7 @@ public class SelectKeyGenerator implements KeyGenerator {
         // Do not close keyExecutor.
         // The transaction will be closed by parent executor.
         Executor keyExecutor = configuration.newExecutor(executor.getTransaction(), ExecutorType.SIMPLE);
-        List<Object> values = keyExecutor.query(keyStatement, parameter, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
+        List<Object> values = keyExecutor.query(new MapperQuery(keyStatement, parameter));
         if (values.isEmpty()) {
           throw new ExecutorException("SelectKey returned no data.");
         }

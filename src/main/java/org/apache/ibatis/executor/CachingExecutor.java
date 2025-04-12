@@ -26,8 +26,6 @@ import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.scripting.StatementType;
-import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
@@ -82,31 +80,26 @@ public class CachingExecutor implements Executor {
   }
 
   @Override
-  public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds,
-      ResultHandler<E> resultHandler) throws SQLException {
-    BoundSql boundSql = ms.getBoundSql(parameterObject);
-    Object key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
-    return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
-  }
-
-  @Override
-  public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds,
-      ResultHandler<E> resultHandler, Object key, BoundSql boundSql) throws SQLException {
-    Cache cache = ms.getCache();
+  @SuppressWarnings("unchecked")
+  public <E> List<E> query(MapperQuery query) throws SQLException {
+    query.beforeExecuted(this);
+    Cache cache = query.getMappedStatement().getCache();
+    List<E> list;
     if (cache != null) {
-      flushCacheIfRequired(ms);
-      if (ms.isUseCache() && resultHandler == null) {
-        ensureNoOutParams(ms, boundSql);
-        @SuppressWarnings("unchecked")
-        List<E> list = (List<E>) tcm.getObject(cache, key);
-        if (list == null) {
-          list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
-          tcm.putObject(cache, key, list); // issue #578 and #116
+      flushCacheIfRequired(query.getMappedStatement());
+      if (query.isUseCache() && !query.hasResultHandler()) {
+        ensureNoOutParams(query);
+        list = (List<E>) tcm.getObject(cache, query.getCacheKey());
+        if (list != null) {
+          return list;
         }
-        return list;
       }
     }
-    return delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+    list = delegate.query(query);
+    if (list != null && cache != null) {
+      tcm.putObject(cache, query.getCacheKey(), list); // issue #578 and #116
+    }
+    return list;
   }
 
   @Override
@@ -131,9 +124,9 @@ public class CachingExecutor implements Executor {
     }
   }
 
-  private void ensureNoOutParams(MappedStatement ms, BoundSql boundSql) {
-    if (ms.getStatementType() == StatementType.CALLABLE) {
-      for (ParameterMapping parameterMapping : boundSql.getParameterMappings()) {
+  private void ensureNoOutParams(MapperStatement ms) {
+    if (ms.isCall()) {
+      for (ParameterMapping parameterMapping : ms.getParameterMappings()) {
         if (parameterMapping.getMode() != ParameterMode.IN) {
           throw new ExecutorException(
               "Caching stored procedures with OUT params is not supported.  Please configure useCache=false in "

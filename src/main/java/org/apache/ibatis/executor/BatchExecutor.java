@@ -31,7 +31,6 @@ import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
@@ -80,18 +79,15 @@ public class BatchExecutor extends BaseExecutor {
   }
 
   @Override
-  public <E> List<E> doQuery(MappedStatement ms, Object parameterObject, RowBounds rowBounds,
-      ResultHandler<E> resultHandler, BoundSql boundSql) throws SQLException {
+  public <E> List<E> doQuery(MapperQuery query) throws SQLException {
     Statement stmt = null;
     try {
       flushStatements();
-      Configuration configuration = ms.getConfiguration();
-      StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameterObject, rowBounds,
-          resultHandler, boundSql);
-      Connection connection = getConnection(ms.getStatementLog());
+      StatementHandler handler = query.newStatementHandler(wrapper);
+      Connection connection = getConnection(query.getStatementLog());
       stmt = handler.prepare(connection, transaction.getTimeout());
       handler.parameterize(stmt);
-      return handler.query(stmt, resultHandler);
+      return handler.query(stmt, query.getResultHandler());
     } finally {
       closeStatement(stmt);
     }

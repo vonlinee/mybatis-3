@@ -35,11 +35,7 @@ public interface Executor {
 
   int update(MapperUpdate update) throws SQLException;
 
-  <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler<E> resultHandler,
-      Object cacheKey, BoundSql boundSql) throws SQLException;
-
-  <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler<E> resultHandler)
-      throws SQLException;
+  <E> List<E> query(MapperQuery query) throws SQLException;
 
   <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException;
 

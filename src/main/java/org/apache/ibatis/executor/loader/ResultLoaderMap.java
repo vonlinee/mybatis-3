@@ -33,13 +33,13 @@ import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BaseExecutor;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.executor.ExecutorException;
+import org.apache.ibatis.executor.MapperQuery;
 import org.apache.ibatis.executor.MapperUpdate;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
 /**
@@ -300,8 +300,7 @@ public class ResultLoaderMap {
     }
 
     @Override
-    protected <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds,
-        ResultHandler<E> resultHandler, BoundSql boundSql) throws SQLException {
+    protected <E> List<E> doQuery(MapperQuery query) throws SQLException {
       throw new UnsupportedOperationException("Not supported.");
     }
 

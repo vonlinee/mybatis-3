@@ -20,11 +20,11 @@ import java.util.List;
 
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.MapperQuery;
 import org.apache.ibatis.executor.ResultExtractor;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.session.ExecutorType;
-import org.apache.ibatis.session.RowBounds;
 
 /**
  * @author Clinton Begin
@@ -67,8 +67,10 @@ public class ResultLoader {
       localExecutor = configuration.newExecutor(ExecutorType.SIMPLE);
     }
     try {
-      return localExecutor.query(mappedStatement, parameterObject, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER,
-          cacheKey, boundSql);
+      MapperQuery query = new MapperQuery(mappedStatement, parameterObject);
+      query.setCacheKey(cacheKey);
+      query.setBoundSql(boundSql);
+      return localExecutor.query(query);
     } finally {
       if (localExecutor != executor) {
         localExecutor.close(false);
