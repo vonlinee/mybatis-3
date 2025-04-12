@@ -133,9 +133,10 @@ public class XMLMapperBuilder {
   }
 
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
+    final XMLStatementBuilder statementParser = new XMLStatementBuilder(assistant);
+    statementParser.setMapperClass(mapperClass);
+    statementParser.setRequiredDatabaseId(requiredDatabaseId);
     for (XNode context : list) {
-      final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, assistant, context,
-          requiredDatabaseId, mapperClass);
       try {
         statementParser.parseStatementNode(context);
       } catch (IncompleteElementException e) {

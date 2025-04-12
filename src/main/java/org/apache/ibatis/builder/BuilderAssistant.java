@@ -497,6 +497,14 @@ public class BuilderAssistant {
     }
   }
 
+  public ResultSetType resolveResultSetType(String alias) {
+    try {
+      return alias == null ? null : ResultSetType.valueOf(alias);
+    } catch (IllegalArgumentException e) {
+      throw new BuilderException("Error resolving ResultSetType. Cause: " + e, e);
+    }
+  }
+
   public JdbcType resolveJdbcType(@Nullable String alias) {
     try {
       return alias == null ? null : JdbcType.valueOf(alias);
@@ -583,5 +591,13 @@ public class BuilderAssistant {
 
   public final Configuration getConfiguration() {
     return configuration;
+  }
+
+  public LanguageDriver resolveLanguageDriver(String lang) {
+    Class<? extends LanguageDriver> langClass = null;
+    if (lang != null) {
+      langClass = configuration.resolveClass(lang);
+    }
+    return configuration.getLanguageDriver(langClass);
   }
 }

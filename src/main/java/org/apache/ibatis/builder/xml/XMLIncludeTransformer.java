@@ -38,8 +38,8 @@ public class XMLIncludeTransformer {
   private final Configuration configuration;
   private final BuilderAssistant builderAssistant;
 
-  public XMLIncludeTransformer(Configuration configuration, BuilderAssistant builderAssistant) {
-    this.configuration = configuration;
+  public XMLIncludeTransformer(BuilderAssistant builderAssistant) {
+    this.configuration = builderAssistant.getConfiguration();
     this.builderAssistant = builderAssistant;
   }
 

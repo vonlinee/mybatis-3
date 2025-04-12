@@ -38,24 +38,33 @@ import org.apache.ibatis.scripting.ResultSetType;
 import org.apache.ibatis.scripting.SqlCommandType;
 import org.apache.ibatis.scripting.SqlSource;
 import org.apache.ibatis.scripting.StatementType;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
  */
 public class XMLStatementBuilder {
 
-  private final Configuration configuration;
   private final BuilderAssistant builderAssistant;
-  private final XNode context;
-  private final String requiredDatabaseId;
-  private final Class<?> mapperClass;
 
-  public XMLStatementBuilder(Configuration configuration, BuilderAssistant builderAssistant, XNode context,
-      String databaseId, Class<?> mapperClass) {
-    this.configuration = configuration;
+  @Nullable
+  private String requiredDatabaseId;
+
+  @Nullable
+  private Class<?> mapperClass;
+
+  private final Configuration configuration;
+
+  public XMLStatementBuilder(BuilderAssistant builderAssistant) {
     this.builderAssistant = builderAssistant;
-    this.context = context;
-    this.requiredDatabaseId = databaseId;
+    this.configuration = builderAssistant.getConfiguration();
+  }
+
+  public void setRequiredDatabaseId(@Nullable String requiredDatabaseId) {
+    this.requiredDatabaseId = requiredDatabaseId;
+  }
+
+  public void setMapperClass(@Nullable Class<?> mapperClass) {
     this.mapperClass = mapperClass;
   }
 
@@ -75,7 +84,7 @@ public class XMLStatementBuilder {
     boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
 
     // Include Fragments before parsing
-    XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
+    XMLIncludeTransformer includeParser = new XMLIncludeTransformer(builderAssistant);
     includeParser.applyIncludes(context.getNode());
 
     String parameterType = context.getStringAttribute("parameterType");
@@ -105,10 +114,10 @@ public class XMLStatementBuilder {
     }
 
     String lang = context.getStringAttribute("lang");
-    LanguageDriver langDriver = getLanguageDriver(lang);
+    LanguageDriver langDriver = builderAssistant.resolveLanguageDriver(lang);
 
     // Parse selectKey after includes and remove them.
-    processSelectKeyNodes(id, parameterTypeClass, langDriver);
+    processSelectKeyNodes(context, id, parameterTypeClass, langDriver);
 
     // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
     KeyGenerator keyGenerator;
@@ -129,13 +138,13 @@ public class XMLStatementBuilder {
     Integer timeout = context.getIntAttribute("timeout");
     String parameterMap = context.getStringAttribute("parameterMap");
     String resultType = context.getStringAttribute("resultType");
-    Class<?> resultTypeClass = configuration.resolveClass(resultType);
+    Class<?> resultTypeClass = builderAssistant.resolveClass(resultType);
     String resultMap = context.getStringAttribute("resultMap");
     if (resultTypeClass == null && resultMap == null) {
       resultTypeClass = MapperAnnotationBuilder.getMethodReturnType(builderAssistant.getCurrentNamespace(), id);
     }
     String resultSetType = context.getStringAttribute("resultSetType");
-    ResultSetType resultSetTypeEnum = configuration.resolveResultSetType(resultSetType);
+    ResultSetType resultSetTypeEnum = builderAssistant.resolveResultSetType(resultSetType);
     if (resultSetTypeEnum == null) {
       resultSetTypeEnum = configuration.getDefaultResultSetType();
     }
@@ -149,10 +158,10 @@ public class XMLStatementBuilder {
         keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect, paramNameResolver);
   }
 
-  private void processSelectKeyNodes(String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {
+  private void processSelectKeyNodes(XNode context, String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {
     List<XNode> selectKeyNodes = context.evalNodes("selectKey");
-    if (configuration.getDatabaseId() != null) {
-      parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, configuration.getDatabaseId());
+    if (builderAssistant.getDatabaseId() != null) {
+      parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, builderAssistant.getDatabaseId());
     }
     parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, null);
     removeSelectKeyNodes(selectKeyNodes);
@@ -172,7 +181,7 @@ public class XMLStatementBuilder {
   private void parseSelectKeyNode(String id, XNode nodeToHandle, Class<?> parameterTypeClass, LanguageDriver langDriver,
       String databaseId) {
     String resultType = nodeToHandle.getStringAttribute("resultType");
-    Class<?> resultTypeClass = configuration.resolveClass(resultType);
+    Class<?> resultTypeClass = builderAssistant.resolveClass(resultType);
     StatementType statementType = StatementType
         .valueOf(nodeToHandle.getStringAttribute("statementType", StatementType.PREPARED.toString()));
     String keyProperty = nodeToHandle.getStringAttribute("keyProperty");
@@ -224,13 +233,4 @@ public class XMLStatementBuilder {
     MappedStatement previous = this.configuration.getMappedStatement(id, false); // issue #2
     return previous.getDatabaseId() == null;
   }
-
-  private LanguageDriver getLanguageDriver(String lang) {
-    Class<? extends LanguageDriver> langClass = null;
-    if (lang != null) {
-      langClass = configuration.resolveClass(lang);
-    }
-    return configuration.getLanguageDriver(langClass);
-  }
-
 }
