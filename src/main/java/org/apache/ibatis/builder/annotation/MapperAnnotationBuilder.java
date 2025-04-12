@@ -68,7 +68,6 @@ import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.IncompleteElementException;
 import org.apache.ibatis.builder.ResultMappingConstructorResolver;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
-import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -177,15 +176,13 @@ public class MapperAnnotationBuilder {
       Long flushInterval = cacheDomain.flushInterval() == 0 ? null : cacheDomain.flushInterval();
       Properties props = convertToProperties(cacheDomain.properties());
       // @formatter:off
-      Cache cache = assistant.buildCache(cacheDomain.implementation(),
+      assistant.addCache(cacheDomain.implementation(),
         cacheDomain.eviction(),
         flushInterval,
         size,
         cacheDomain.readWrite(),
         cacheDomain.blocking(),
         props);
-      assistant.setCurrentCache(cache);
-      configuration.addCache(cache);
       // @formatter:on
     }
   }
@@ -216,7 +213,7 @@ public class MapperAnnotationBuilder {
       try {
         assistant.useCacheRef(namespace);
       } catch (IncompleteElementException e) {
-        configuration.addIncompleteCacheRef(new CacheRefResolver(assistant, namespace));
+        assistant.addIncompleteCacheRef(new CacheRefResolver(assistant, namespace));
       }
     }
   }
@@ -254,7 +251,7 @@ public class MapperAnnotationBuilder {
     applyResults(type, results, returnType, resultMappings);
     Discriminator disc = applyDiscriminator(resultMapId, returnType, discriminator);
     // TODO add AutoMappingBehaviour
-    configuration.addResultMap(assistant.buildResultMap(resultMapId, returnType, null, disc, resultMappings, null));
+    assistant.addResultMap(resultMapId, returnType, null, disc, resultMappings, null);
     createDiscriminatorResultMaps(type, resultMapId, returnType, discriminator);
   }
 
@@ -268,8 +265,7 @@ public class MapperAnnotationBuilder {
         applyConstructorArgs(c.constructArgs(), resultType, resultMappings, resultMapId);
         applyResults(type, c.results(), resultType, resultMappings);
         // TODO add AutoMappingBehaviour
-        configuration
-            .addResultMap(assistant.buildResultMap(caseResultMapId, c.type(), resultMapId, null, resultMappings, null));
+        assistant.addResultMap(caseResultMapId, c.type(), resultMapId, null, resultMappings, null);
       }
     }
   }

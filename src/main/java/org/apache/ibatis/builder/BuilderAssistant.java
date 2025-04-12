@@ -517,8 +517,16 @@ public class BuilderAssistant {
     configuration.addIncompleteCacheRef(cacheRefResolver);
   }
 
+  /**
+   * @param namespace
+   *          referred cache namespace of current namespace
+   */
   public void addCacheRef(String namespace) {
     configuration.addCacheRef(this.getCurrentNamespace(), namespace);
+  }
+
+  public String getDatabaseId() {
+    return configuration.getDatabaseId();
   }
 
   // pending builder handle end
@@ -550,6 +558,10 @@ public class BuilderAssistant {
     }
   }
 
+  public void addResultMap(ResultMap resultMap) {
+    configuration.addResultMap(resultMap);
+  }
+
   public void resolveCacheRef(String namespace) {
     this.addCacheRef(namespace);
     CacheRefResolver cacheRefResolver = new CacheRefResolver(this, namespace);
@@ -558,5 +570,16 @@ public class BuilderAssistant {
     } catch (IncompleteElementException e) {
       this.addIncompleteCacheRef(cacheRefResolver);
     }
+  }
+
+  public FetchType resolveFetchType(String fetchType) {
+    if (StringUtils.isBlank(fetchType)) {
+      fetchType = configuration.isLazyLoadingEnabled() ? "lazy" : "eager";
+    }
+    return "lazy".equals(fetchType) ? FetchType.LAZY : FetchType.EAGER;
+  }
+
+  public final Configuration getConfiguration() {
+    return configuration;
   }
 }

@@ -40,10 +40,31 @@ public class ResultMappingConstructorResolver {
 
   private static final Log log = LogFactory.getLog(ResultMappingConstructorResolver.class);
 
-  private final Configuration configuration;
   private final List<ResultMapping> constructorResultMappings;
   private final Class<?> resultType;
   private final String resultMapId;
+
+  /**
+   * it will inherit from {@link Configuration}
+   *
+   * @see Configuration#isLazyLoadingEnabled()
+   */
+  private boolean lazyLoadingEnabled;
+
+  /**
+   * it will inherit from {@link Configuration}
+   *
+   * @see Configuration#isUseActualParamName()
+   */
+  private boolean useActualParamName;
+
+  public void setLazyLoadingEnabled(boolean lazyLoadingEnabled) {
+    this.lazyLoadingEnabled = lazyLoadingEnabled;
+  }
+
+  public void setUseActualParamName(boolean useActualParamName) {
+    this.useActualParamName = useActualParamName;
+  }
 
   /**
    * @param configuration
@@ -55,7 +76,8 @@ public class ResultMappingConstructorResolver {
    */
   public ResultMappingConstructorResolver(Configuration configuration, List<ResultMapping> constructorResultMappings,
       Class<?> resultType, String resultMapId) {
-    this.configuration = configuration;
+    this.lazyLoadingEnabled = configuration.isLazyLoadingEnabled();
+    this.useActualParamName = configuration.isUseActualParamName();
     this.constructorResultMappings = Objects.requireNonNull(constructorResultMappings);
     this.resultType = Objects.requireNonNull(resultType);
     this.resultMapId = resultMapId;
@@ -263,7 +285,7 @@ public class ResultMappingConstructorResolver {
       adjustedAutoTypeResultMappings.add(
           new ResultMapping.Builder(originalMapping)
             .javaType(matchingArg.getType())
-            .lazy(configuration.isLazyLoadingEnabled())
+            .lazy(lazyLoadingEnabled)
             .typeHandler(typeHandler)
             .build());
       // @formatter:on
@@ -341,7 +363,7 @@ public class ResultMappingConstructorResolver {
           }
         }
 
-        if (name == null && configuration.isUseActualParamName()) {
+        if (name == null && useActualParamName) {
           if (actualParamNames == null) {
             actualParamNames = ReflectionUtils.getParamNames(constructor);
           }

@@ -235,8 +235,11 @@ class ResultMappingConstructorResolverTest {
 
     @Test
     void resolvesEmptyConstructor() {
-      List<ResultMappingConstructorResolver.ConstructorMetaInfo> constructorMetaInfos = new ResultMappingConstructorResolver(
-          configuration, List.of(), Result.class, TEST_ID).retrieveConstructorCandidates(0);
+      ResultMappingConstructorResolver resolver = new ResultMappingConstructorResolver(configuration, List.of(),
+          Result.class, TEST_ID);
+
+      List<ResultMappingConstructorResolver.ConstructorMetaInfo> constructorMetaInfos = resolver
+          .retrieveConstructorCandidates(0);
 
       Assertions.assertThat(constructorMetaInfos).isNotNull().hasSize(1);
 
