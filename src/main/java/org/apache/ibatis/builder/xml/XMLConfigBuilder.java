@@ -15,8 +15,12 @@
  */
 package org.apache.ibatis.builder.xml;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.file.Files;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -47,6 +51,7 @@ import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.type.JdbcType;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * load core config file
@@ -56,83 +61,108 @@ import org.apache.ibatis.type.JdbcType;
  */
 public class XMLConfigBuilder {
 
-  private final Configuration configuration;
-  private boolean parsed;
-  private final XPathParser parser;
+  /**
+   * the environment to load, nullable
+   */
+  @Nullable
   private String environment;
-  private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory();
 
-  public XMLConfigBuilder(Reader reader) {
-    this(reader, null, null);
+  @Nullable
+  private ReflectorFactory localReflectorFactory;
+
+  @Nullable
+  private Properties properties;
+
+  @Nullable
+  private Class<? extends Configuration> configurationClass;
+
+  public XMLConfigBuilder() {
   }
 
-  public XMLConfigBuilder(Reader reader, String environment) {
-    this(reader, environment, null);
-  }
-
-  public XMLConfigBuilder(Reader reader, String environment, Properties props) {
-    this(Configuration.class, reader, environment, props);
-  }
-
-  public XMLConfigBuilder(Class<? extends Configuration> configClass, Reader reader, String environment,
-      Properties props) {
-    this(configClass, new XPathParser(reader, true, props, new XMLMapperEntityResolver()), environment, props);
-  }
-
-  public XMLConfigBuilder(InputStream inputStream) {
-    this(inputStream, null, null);
-  }
-
-  public XMLConfigBuilder(InputStream inputStream, String environment) {
-    this(inputStream, environment, null);
-  }
-
-  public XMLConfigBuilder(InputStream inputStream, String environment, Properties props) {
-    this(Configuration.class, inputStream, environment, props);
-  }
-
-  public XMLConfigBuilder(Class<? extends Configuration> configClass, InputStream inputStream, String environment,
-      Properties props) {
-    this(configClass, new XPathParser(inputStream, true, props, new XMLMapperEntityResolver()), environment, props);
-  }
-
-  private XMLConfigBuilder(Class<? extends Configuration> configClass, XPathParser parser, String environment,
-      Properties props) {
-    this.configuration = newConfig(configClass);
-    ErrorContext.instance().resource("SQL Mapper Configuration");
-    this.configuration.setVariables(props);
-    this.parsed = false;
+  public XMLConfigBuilder(@Nullable String environment, @Nullable Properties properties) {
     this.environment = environment;
-    this.parser = parser;
+    this.properties = properties;
   }
 
-  public Configuration parse() {
-    if (parsed) {
-      throw new BuilderException("Each XMLConfigBuilder can only be used once.");
+  public void setProperties(@Nullable Properties props) {
+    this.properties = props;
+  }
+
+  public void setEnvironment(@Nullable String environment) {
+    this.environment = environment;
+  }
+
+  public void setLocalReflectorFactory(@Nullable ReflectorFactory localReflectorFactory) {
+    this.localReflectorFactory = localReflectorFactory;
+  }
+
+  public void setConfigurationClass(@Nullable Class<? extends Configuration> configurationClass) {
+    this.configurationClass = configurationClass;
+  }
+
+  protected Configuration createConfiguration() {
+    Class<? extends Configuration> configClass = this.configurationClass;
+    if (configClass == null) {
+      configClass = Configuration.class;
     }
-    parsed = true;
-    parseConfiguration(parser.evalNode("/configuration"));
+    Configuration configuration = newConfig(configClass);
+    if (this.properties != null) {
+      configuration.setVariables(this.properties);
+    }
     return configuration;
   }
 
-  private void parseConfiguration(XNode root) {
+  /**
+   * parse specified xml config file with default settings
+   *
+   * @param file
+   *          xml config file
+   *
+   * @return Configuration
+   */
+  public static Configuration load(File file) {
+    XMLConfigBuilder builder = new XMLConfigBuilder();
+    try (Reader reader = Files.newBufferedReader(file.toPath())) {
+      return builder.parse(reader);
+    } catch (IOException e) {
+      throw new BuilderException("failed to parse mybatis config file, cause ", e);
+    }
+  }
+
+  public Configuration parse(Reader reader) {
+    ErrorContext.instance().resource("SQL Mapper Configuration");
+    final Configuration config = createConfiguration();
+    final XPathParser parser = new XPathParser(reader, true, this.properties, new XMLMapperEntityResolver());
+    parseConfiguration(config, parser, parser.evalNode("/configuration"));
+    return config;
+  }
+
+  public Configuration parse(InputStream inputStream) {
+    try (Reader reader = new InputStreamReader(inputStream)) {
+      return parse(reader);
+    } catch (IOException e) {
+      throw new BuilderException(e);
+    }
+  }
+
+  private void parseConfiguration(Configuration config, XPathParser parser, XNode root) throws BuilderException {
     try {
       // issue #117 read properties first
-      propertiesElement(root.evalNode("properties"));
+      propertiesElement(config, parser, root.evalNode("properties"));
       Properties settings = settingsAsProperties(root.evalNode("settings"));
-      loadCustomVfsImpl(settings);
-      loadCustomLogImpl(settings);
-      typeAliasesElement(root.evalNode("typeAliases"));
-      pluginsElement(root.evalNode("plugins"));
-      objectFactoryElement(root.evalNode("objectFactory"));
-      objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
-      reflectorFactoryElement(root.evalNode("reflectorFactory"));
-      settingsElement(settings);
+      loadCustomVfsImpl(config, settings);
+      loadCustomLogImpl(config, settings);
+      typeAliasesElement(config, root.evalNode("typeAliases"));
+      pluginsElement(config, root.evalNode("plugins"));
+      objectFactoryElement(config, root.evalNode("objectFactory"));
+      objectWrapperFactoryElement(config, root.evalNode("objectWrapperFactory"));
+      reflectorFactoryElement(config, root.evalNode("reflectorFactory"));
+      settingsElement(config, settings);
       // read it after objectFactory and objectWrapperFactory issue #631
-      environmentsElement(root.evalNode("environments"));
-      databaseIdProviderElement(root.evalNode("databaseIdProvider"));
-      typeHandlersElement(root.evalNode("typeHandlers"));
-      mappersElement(root.evalNode("mappers"));
+      environmentsElement(config, root.evalNode("environments"));
+      databaseIdProviderElement(config, root.evalNode("databaseIdProvider"));
+      typeHandlersElement(config, root.evalNode("typeHandlers"));
+      mappersElement(config, root.evalNode("mappers"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
     }
@@ -144,7 +174,11 @@ public class XMLConfigBuilder {
     }
     Properties props = context.getChildrenAsProperties();
     // Check that all settings are known to the configuration class
-    MetaClass metaConfig = MetaClass.forClass(Configuration.class, localReflectorFactory);
+    ReflectorFactory reflectorFactory = this.localReflectorFactory;
+    if (reflectorFactory == null) {
+      reflectorFactory = new DefaultReflectorFactory();
+    }
+    MetaClass metaConfig = MetaClass.forClass(Configuration.class, reflectorFactory);
     for (Object key : props.keySet()) {
       if (!metaConfig.hasSetter(String.valueOf(key))) {
         throw new BuilderException(
@@ -154,7 +188,7 @@ public class XMLConfigBuilder {
     return props;
   }
 
-  private void loadCustomVfsImpl(Properties props) throws ClassNotFoundException {
+  private void loadCustomVfsImpl(Configuration configuration, Properties props) throws ClassNotFoundException {
     for (String clazz : StringUtils.splitToSet(props.getProperty("vfsImpl"), null)) {
       if (!clazz.isEmpty()) {
         @SuppressWarnings("unchecked")
@@ -164,12 +198,12 @@ public class XMLConfigBuilder {
     }
   }
 
-  private void loadCustomLogImpl(Properties props) {
+  private void loadCustomLogImpl(Configuration configuration, Properties props) {
     Class<? extends Log> logImpl = configuration.resolveClass(props.getProperty("logImpl"));
     configuration.setLogImpl(logImpl);
   }
 
-  private void typeAliasesElement(XNode context) {
+  private void typeAliasesElement(Configuration configuration, XNode context) {
     if (context == null) {
       return;
     }
@@ -183,9 +217,9 @@ public class XMLConfigBuilder {
         try {
           Class<?> clazz = Resources.classForName(type);
           if (alias == null) {
-            this.configuration.getTypeAliasRegistry().registerAlias(clazz);
+            configuration.getTypeAliasRegistry().registerAlias(clazz);
           } else {
-            this.configuration.getTypeAliasRegistry().registerAlias(alias, clazz);
+            configuration.getTypeAliasRegistry().registerAlias(alias, clazz);
           }
         } catch (ClassNotFoundException e) {
           throw new BuilderException("Error registering typeAlias for '" + alias + "'. Cause: " + e, e);
@@ -194,7 +228,7 @@ public class XMLConfigBuilder {
     }
   }
 
-  private void pluginsElement(XNode context) throws Exception {
+  private void pluginsElement(Configuration configuration, XNode context) throws Exception {
     if (context != null) {
       for (XNode child : context.getChildren()) {
         String interceptor = child.getStringAttribute("interceptor");
@@ -207,7 +241,7 @@ public class XMLConfigBuilder {
     }
   }
 
-  private void objectFactoryElement(XNode context) throws Exception {
+  private void objectFactoryElement(Configuration configuration, XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
       Properties properties = context.getChildrenAsProperties();
@@ -217,7 +251,7 @@ public class XMLConfigBuilder {
     }
   }
 
-  private void objectWrapperFactoryElement(XNode context) throws Exception {
+  private void objectWrapperFactoryElement(Configuration configuration, XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
       ObjectWrapperFactory factory = (ObjectWrapperFactory) configuration.resolveClass(type).getDeclaredConstructor()
@@ -226,7 +260,7 @@ public class XMLConfigBuilder {
     }
   }
 
-  private void reflectorFactoryElement(XNode context) throws Exception {
+  private void reflectorFactoryElement(Configuration configuration, XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
       ReflectorFactory factory = (ReflectorFactory) configuration.resolveClass(type).getDeclaredConstructor()
@@ -235,7 +269,7 @@ public class XMLConfigBuilder {
     }
   }
 
-  private void propertiesElement(XNode context) throws Exception {
+  private void propertiesElement(Configuration configuration, XPathParser parser, XNode context) throws Exception {
     if (context == null) {
       return;
     }
@@ -259,7 +293,7 @@ public class XMLConfigBuilder {
     configuration.setVariables(defaults);
   }
 
-  private void settingsElement(Properties props) {
+  private void settingsElement(Configuration configuration, Properties props) {
     configuration
         .setAutoMappingBehavior(AutoMappingBehavior.valueOf(props.getProperty("autoMappingBehavior", "PARTIAL")));
     configuration.setAutoMappingUnknownColumnBehavior(
@@ -302,7 +336,7 @@ public class XMLConfigBuilder {
     configuration.setNullableOnForEach(ObjectUtils.parseBoolean(props.getProperty("nullableOnForEach"), false));
   }
 
-  private void environmentsElement(XNode context) throws Exception {
+  private void environmentsElement(Configuration configuration, XNode context) throws Exception {
     if (context == null) {
       return;
     }
@@ -312,8 +346,8 @@ public class XMLConfigBuilder {
     for (XNode child : context.getChildren()) {
       String id = child.getStringAttribute("id");
       if (isSpecifiedEnvironment(id)) {
-        TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
-        DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
+        TransactionFactory txFactory = transactionManagerElement(configuration, child.evalNode("transactionManager"));
+        DataSourceFactory dsFactory = dataSourceElement(configuration, child.evalNode("dataSource"));
         DataSource dataSource = dsFactory.getDataSource();
         configuration.setEnvironment(new Environment(id, txFactory, dataSource));
         break;
@@ -321,7 +355,7 @@ public class XMLConfigBuilder {
     }
   }
 
-  private void databaseIdProviderElement(XNode context) throws Exception {
+  private void databaseIdProviderElement(Configuration configuration, XNode context) throws Exception {
     if (context == null) {
       return;
     }
@@ -341,7 +375,7 @@ public class XMLConfigBuilder {
     }
   }
 
-  private TransactionFactory transactionManagerElement(XNode context) throws Exception {
+  private TransactionFactory transactionManagerElement(Configuration configuration, XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
       Properties props = context.getChildrenAsProperties();
@@ -353,7 +387,7 @@ public class XMLConfigBuilder {
     throw new BuilderException("Environment declaration requires a TransactionFactory.");
   }
 
-  private DataSourceFactory dataSourceElement(XNode context) throws Exception {
+  private DataSourceFactory dataSourceElement(Configuration configuration, XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
       Properties props = context.getChildrenAsProperties();
@@ -365,14 +399,14 @@ public class XMLConfigBuilder {
     throw new BuilderException("Environment declaration requires a DataSourceFactory.");
   }
 
-  private void typeHandlersElement(XNode context) {
+  private void typeHandlersElement(Configuration configuration, XNode context) {
     if (context == null) {
       return;
     }
     for (XNode child : context.getChildren()) {
       if ("package".equals(child.getName())) {
         String typeHandlerPackage = child.getStringAttribute("name");
-        this.configuration.getTypeHandlerRegistry().register(typeHandlerPackage);
+        configuration.getTypeHandlerRegistry().register(typeHandlerPackage);
       } else {
         String javaTypeName = child.getStringAttribute("javaType");
         String jdbcTypeName = child.getStringAttribute("jdbcType");
@@ -382,18 +416,18 @@ public class XMLConfigBuilder {
         Class<?> typeHandlerClass = configuration.resolveClass(handlerTypeName);
         if (javaTypeClass != null) {
           if (jdbcType == null) {
-            this.configuration.getTypeHandlerRegistry().register(javaTypeClass, typeHandlerClass);
+            configuration.getTypeHandlerRegistry().register(javaTypeClass, typeHandlerClass);
           } else {
-            this.configuration.getTypeHandlerRegistry().register(javaTypeClass, jdbcType, typeHandlerClass);
+            configuration.getTypeHandlerRegistry().register(javaTypeClass, jdbcType, typeHandlerClass);
           }
         } else {
-          this.configuration.getTypeHandlerRegistry().register(typeHandlerClass);
+          configuration.getTypeHandlerRegistry().register(typeHandlerClass);
         }
       }
     }
   }
 
-  private void mappersElement(XNode context) throws Exception {
+  private void mappersElement(Configuration configuration, XNode context) throws Exception {
     if (context == null) {
       return;
     }

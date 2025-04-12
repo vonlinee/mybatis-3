@@ -47,8 +47,8 @@ public class SqlSessionFactoryBuilder {
 
   public SqlSessionFactory build(Reader reader, String environment, Properties properties) {
     try {
-      XMLConfigBuilder parser = new XMLConfigBuilder(reader, environment, properties);
-      return build(parser.parse());
+      XMLConfigBuilder parser = new XMLConfigBuilder(environment, properties);
+      return build(parser.parse(reader));
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error building SqlSession.", e);
     } finally {
@@ -72,8 +72,8 @@ public class SqlSessionFactoryBuilder {
 
   public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
     try {
-      XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
-      return build(parser.parse());
+      XMLConfigBuilder parser = new XMLConfigBuilder(environment, properties);
+      return build(parser.parse(inputStream));
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error building SqlSession.", e);
     } finally {

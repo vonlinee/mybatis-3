@@ -15,11 +15,7 @@
  */
 package org.apache.ibatis.builder.xsd;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -66,13 +62,13 @@ class XmlConfigBuilderTest {
     // System.setProperty(XPathParser.KEY_USE_XSD, "true");
     String resource = "org/apache/ibatis/builder/xsd/MinimalMapperConfig.xml";
     try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
-      XMLConfigBuilder builder = new XMLConfigBuilder(inputStream);
-      Configuration config = builder.parse();
+      XMLConfigBuilder builder = new XMLConfigBuilder();
+      Configuration config = builder.parse(inputStream);
       assertNotNull(config);
       assertEquals(AutoMappingBehavior.PARTIAL, config.getAutoMappingBehavior());
       assertEquals(AutoMappingUnknownColumnBehavior.NONE, config.getAutoMappingUnknownColumnBehavior());
       assertTrue(config.isCacheEnabled());
-      assertTrue(config.getProxyFactory() instanceof JavassistProxyFactory);
+      assertInstanceOf(JavassistProxyFactory.class, config.getProxyFactory());
       assertFalse(config.isLazyLoadingEnabled());
       assertFalse(config.isAggressiveLazyLoading());
       assertTrue(config.isUseColumnLabel());
@@ -87,15 +83,13 @@ class XmlConfigBuilderTest {
       assertEquals(new HashSet<>(Arrays.asList("equals", "clone", "hashCode", "toString")),
           config.getLazyLoadTriggerMethods());
       assertTrue(config.isSafeResultHandlerEnabled());
-      assertTrue(config.getDefaultScriptingLanguageInstance() instanceof XMLLanguageDriver);
+      assertInstanceOf(XMLLanguageDriver.class, config.getDefaultScriptingLanguageInstance());
       assertFalse(config.isCallSettersOnNulls());
       assertNull(config.getLogPrefix());
       assertNull(config.getLogImpl());
       assertNull(config.getConfigurationFactory());
       assertFalse(config.isShrinkWhitespacesInSql());
       assertFalse(config.isArgNameBasedConstructorAutoMapping());
-    } finally {
-      // System.clearProperty(XPathParser.KEY_USE_XSD);
     }
   }
 
@@ -104,13 +98,13 @@ class XmlConfigBuilderTest {
     // System.setProperty(XPathParser.KEY_USE_XSD, "true");
     String resource = "org/apache/ibatis/builder/xsd/CustomizedSettingsMapperConfig.xml";
     try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
-      XMLConfigBuilder builder = new XMLConfigBuilder(inputStream);
-      Configuration config = builder.parse();
+      XMLConfigBuilder builder = new XMLConfigBuilder();
+      Configuration config = builder.parse(inputStream);
 
       assertEquals(AutoMappingBehavior.NONE, config.getAutoMappingBehavior());
       assertEquals(AutoMappingUnknownColumnBehavior.WARNING, config.getAutoMappingUnknownColumnBehavior());
       assertFalse(config.isCacheEnabled());
-      assertTrue(config.getProxyFactory() instanceof CglibProxyFactory);
+      assertInstanceOf(CglibProxyFactory.class, config.getProxyFactory());
       assertTrue(config.isLazyLoadingEnabled());
       assertTrue(config.isAggressiveLazyLoading());
       assertFalse(config.isUseColumnLabel());
@@ -125,7 +119,7 @@ class XmlConfigBuilderTest {
       assertEquals(new HashSet<>(Arrays.asList("equals", "clone", "hashCode", "toString", "xxx")),
           config.getLazyLoadTriggerMethods());
       assertFalse(config.isSafeResultHandlerEnabled());
-      assertTrue(config.getDefaultScriptingLanguageInstance() instanceof RawLanguageDriver);
+      assertInstanceOf(RawLanguageDriver.class, config.getDefaultScriptingLanguageInstance());
       assertTrue(config.isCallSettersOnNulls());
       assertEquals("mybatis_", config.getLogPrefix());
       assertEquals(Slf4jImpl.class.getName(), config.getLogImpl().getName());
@@ -138,19 +132,19 @@ class XmlConfigBuilderTest {
       assertEquals(Blog.class, config.getTypeAliasRegistry().getTypeAliases().get("blog"));
       assertEquals(Cart.class, config.getTypeAliasRegistry().getTypeAliases().get("cart"));
 
-      assertTrue(config.getTypeHandlerRegistry().getTypeHandler(Integer.class) instanceof CustomIntegerTypeHandler);
-      assertTrue(config.getTypeHandlerRegistry().getTypeHandler(Long.class) instanceof CustomLongTypeHandler);
-      assertTrue(config.getTypeHandlerRegistry().getTypeHandler(String.class) instanceof CustomStringTypeHandler);
-      assertTrue(config.getTypeHandlerRegistry().getTypeHandler(String.class,
-          JdbcType.VARCHAR) instanceof CustomStringTypeHandler);
+      assertInstanceOf(CustomIntegerTypeHandler.class, config.getTypeHandlerRegistry().getTypeHandler(Integer.class));
+      assertInstanceOf(CustomLongTypeHandler.class, config.getTypeHandlerRegistry().getTypeHandler(Long.class));
+      assertInstanceOf(CustomStringTypeHandler.class, config.getTypeHandlerRegistry().getTypeHandler(String.class));
+      assertInstanceOf(CustomStringTypeHandler.class,
+          config.getTypeHandlerRegistry().getTypeHandler(String.class, JdbcType.VARCHAR));
 
       ExampleObjectFactory objectFactory = (ExampleObjectFactory) config.getObjectFactory();
       assertEquals(1, objectFactory.getProperties().size());
       assertEquals("100", objectFactory.getProperties().getProperty("objectFactoryProperty"));
 
-      assertTrue(config.getObjectWrapperFactory() instanceof CustomObjectWrapperFactory);
+      assertInstanceOf(CustomObjectWrapperFactory.class, config.getObjectWrapperFactory());
 
-      assertTrue(config.getReflectorFactory() instanceof CustomReflectorFactory);
+      assertInstanceOf(CustomReflectorFactory.class, config.getReflectorFactory());
 
       ExamplePlugin plugin = (ExamplePlugin) config.getInterceptors().get(0);
       assertEquals(1, plugin.getProperties().size());
@@ -158,8 +152,8 @@ class XmlConfigBuilderTest {
 
       Environment environment = config.getEnvironment();
       assertEquals("development", environment.getId());
-      assertTrue(environment.getDataSource() instanceof UnpooledDataSource);
-      assertTrue(environment.getTransactionFactory() instanceof JdbcTransactionFactory);
+      assertInstanceOf(UnpooledDataSource.class, environment.getDataSource());
+      assertInstanceOf(JdbcTransactionFactory.class, environment.getTransactionFactory());
 
       assertEquals("derby", config.getDatabaseId());
 
@@ -168,8 +162,6 @@ class XmlConfigBuilderTest {
       assertTrue(config.getMapperRegistry().hasMapper(CustomMapper.class));
       assertTrue(config.getMapperRegistry().hasMapper(BlogMapper.class));
       assertTrue(config.getMapperRegistry().hasMapper(NestedBlogMapper.class));
-    } finally {
-      // System.clearProperty(XPathParser.KEY_USE_XSD);
     }
   }
 

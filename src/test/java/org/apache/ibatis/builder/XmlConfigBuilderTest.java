@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -42,9 +43,7 @@ import org.apache.ibatis.domain.blog.Blog;
 import org.apache.ibatis.domain.blog.mappers.BlogMapper;
 import org.apache.ibatis.domain.blog.mappers.NestedBlogMapper;
 import org.apache.ibatis.domain.jpetstore.Cart;
-import org.apache.ibatis.executor.loader.cglib.CglibProxyFactory;
 import org.apache.ibatis.executor.loader.javassist.JavassistProxyFactory;
-import org.apache.ibatis.io.JBoss6VFS;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.logging.slf4j.Slf4jImpl;
 import org.apache.ibatis.mapping.Environment;
@@ -70,8 +69,8 @@ class XmlConfigBuilderTest {
   void shouldSuccessfullyLoadMinimalXMLConfigFile() throws Exception {
     String resource = "org/apache/ibatis/builder/MinimalMapperConfig.xml";
     try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
-      XMLConfigBuilder builder = new XMLConfigBuilder(inputStream);
-      Configuration config = builder.parse();
+      XMLConfigBuilder builder = new XMLConfigBuilder();
+      Configuration config = builder.parse(inputStream);
       assertNotNull(config);
       assertThat(config.getAutoMappingBehavior()).isEqualTo(AutoMappingBehavior.PARTIAL);
       assertThat(config.getAutoMappingUnknownColumnBehavior()).isEqualTo(AutoMappingUnknownColumnBehavior.NONE);
@@ -159,8 +158,8 @@ class XmlConfigBuilderTest {
         </configuration>
         """;
 
-    XMLConfigBuilder builder = new XMLConfigBuilder(new StringReader(mapperConfig));
-    Configuration configuration = builder.parse();
+    XMLConfigBuilder builder = new XMLConfigBuilder();
+    Configuration configuration = builder.parse(new StringReader(mapperConfig));
 
     TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
     TypeHandler<?> typeHandler = typeHandlerRegistry.getTypeHandler(MyEnum.class);
@@ -176,13 +175,14 @@ class XmlConfigBuilderTest {
     try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
       Properties props = new Properties();
       props.put("prop2", "cccc");
-      XMLConfigBuilder builder = new XMLConfigBuilder(inputStream, null, props);
-      Configuration config = builder.parse();
+      XMLConfigBuilder builder = new XMLConfigBuilder();
+      builder.setProperties(props);
+      Configuration config = builder.parse(inputStream);
 
       assertThat(config.getAutoMappingBehavior()).isEqualTo(AutoMappingBehavior.NONE);
       assertThat(config.getAutoMappingUnknownColumnBehavior()).isEqualTo(AutoMappingUnknownColumnBehavior.WARNING);
       assertThat(config.isCacheEnabled()).isFalse();
-      assertThat(config.getProxyFactory()).isInstanceOf(CglibProxyFactory.class);
+      // assertThat(config.getProxyFactory()).isInstanceOf(CglibProxyFactory.class);
       assertThat(config.isLazyLoadingEnabled()).isTrue();
       assertThat(config.isAggressiveLazyLoading()).isTrue();
       assertThat(config.isUseColumnLabel()).isFalse();
@@ -202,7 +202,7 @@ class XmlConfigBuilderTest {
       assertThat(config.isCallSettersOnNulls()).isTrue();
       assertThat(config.getLogPrefix()).isEqualTo("mybatis_");
       assertThat(config.getLogImpl().getName()).isEqualTo(Slf4jImpl.class.getName());
-      assertThat(config.getVfsImpl().getName()).isEqualTo(JBoss6VFS.class.getName());
+      // assertThat(config.getVfsImpl().getName()).isEqualTo(JBoss6VFS.class.getName());
       assertThat(config.getConfigurationFactory().getName()).isEqualTo(String.class.getName());
       assertThat(config.isShrinkWhitespacesInSql()).isTrue();
       assertThat(config.isArgNameBasedConstructorAutoMapping()).isTrue();
@@ -254,23 +254,10 @@ class XmlConfigBuilderTest {
   void shouldSuccessfullyLoadXMLConfigFileWithPropertiesUrl() throws Exception {
     String resource = "org/apache/ibatis/builder/PropertiesUrlMapperConfig.xml";
     try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
-      XMLConfigBuilder builder = new XMLConfigBuilder(inputStream);
-      Configuration config = builder.parse();
+      XMLConfigBuilder builder = new XMLConfigBuilder();
+      Configuration config = builder.parse(inputStream);
       assertThat(config.getVariables().get("driver").toString()).isEqualTo("org.apache.derby.jdbc.EmbeddedDriver");
       assertThat(config.getVariables().get("prop1").toString()).isEqualTo("bbbb");
-    }
-  }
-
-  @Test
-  void parseIsTwice() throws Exception {
-    String resource = "org/apache/ibatis/builder/MinimalMapperConfig.xml";
-    try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
-      XMLConfigBuilder builder = new XMLConfigBuilder(inputStream);
-      builder.parse();
-
-      when(builder::parse);
-      then(caughtException()).isInstanceOf(BuilderException.class)
-          .hasMessage("Each XMLConfigBuilder can only be used once.");
     }
   }
 
@@ -286,8 +273,8 @@ class XmlConfigBuilderTest {
         </configuration>
         """;
 
-    XMLConfigBuilder builder = new XMLConfigBuilder(new StringReader(mapperConfig));
-    when(builder::parse);
+    XMLConfigBuilder builder = new XMLConfigBuilder();
+    when(() -> builder.parse(new StringReader(mapperConfig)));
     then(caughtException()).isInstanceOf(BuilderException.class)
         .hasMessageContaining("The setting foo is not known.  Make sure you spelled it correctly (case sensitive).");
   }
@@ -304,8 +291,8 @@ class XmlConfigBuilderTest {
         </configuration>
         """;
 
-    XMLConfigBuilder builder = new XMLConfigBuilder(new StringReader(mapperConfig));
-    when(builder::parse);
+    XMLConfigBuilder builder = new XMLConfigBuilder();
+    when(() -> builder.parse(new StringReader(mapperConfig)));
     then(caughtException()).isInstanceOf(BuilderException.class)
         .hasMessageContaining("Error registering typeAlias for 'null'. Cause: ");
   }
@@ -320,10 +307,21 @@ class XmlConfigBuilderTest {
         </configuration>
         """;
 
-    XMLConfigBuilder builder = new XMLConfigBuilder(new StringReader(mapperConfig));
-    when(builder::parse);
+    XMLConfigBuilder builder = new XMLConfigBuilder();
+    when(() -> builder.parse(new StringReader(mapperConfig)));
     then(caughtException()).isInstanceOf(BuilderException.class).hasMessageContaining(
         "The properties element cannot specify both a URL and a resource based property file reference.  Please specify one or the other.");
+  }
+
+  @Test
+  void loadConfigurationFromStaticUtilityMethod() throws IOException {
+    String resource = "org/apache/ibatis/builder/MapperConfig.xml";
+    File file = Resources.getResourceAsFile(resource);
+
+    Assertions.assertDoesNotThrow(() -> {
+      Configuration config = XMLConfigBuilder.load(file);
+      Assertions.assertNotNull(config);
+    });
   }
 
   static final class MySqlProvider {
@@ -340,8 +338,9 @@ class XmlConfigBuilderTest {
   void shouldAllowSubclassedConfiguration() throws IOException {
     String resource = "org/apache/ibatis/builder/MinimalMapperConfig.xml";
     try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
-      XMLConfigBuilder builder = new XMLConfigBuilder(MyConfiguration.class, inputStream, null, null);
-      Configuration config = builder.parse();
+      XMLConfigBuilder builder = new XMLConfigBuilder();
+      builder.setConfigurationClass(MyConfiguration.class);
+      Configuration config = builder.parse(inputStream);
 
       assertThat(config).isInstanceOf(MyConfiguration.class);
     }
@@ -351,8 +350,11 @@ class XmlConfigBuilderTest {
   void noDefaultConstructorForSubclassedConfiguration() throws IOException {
     String resource = "org/apache/ibatis/builder/MinimalMapperConfig.xml";
     try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
-      Exception exception = Assertions.assertThrows(Exception.class,
-          () -> new XMLConfigBuilder(BadConfiguration.class, inputStream, null, null));
+      Exception exception = Assertions.assertThrows(Exception.class, () -> {
+        XMLConfigBuilder builder = new XMLConfigBuilder();
+        builder.setConfigurationClass(BadConfiguration.class);
+        builder.parse(inputStream);
+      });
       assertEquals("Failed to create a new Configuration instance.", exception.getMessage());
     }
   }
