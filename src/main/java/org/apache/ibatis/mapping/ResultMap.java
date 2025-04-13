@@ -31,17 +31,64 @@ import org.apache.ibatis.type.JdbcType;
 public class ResultMap {
   private Configuration configuration;
 
+  /**
+   * id of the <resultMap/>
+   */
   private String id;
+
+  /**
+   * java type that this resultMap will be mapped to.
+   */
   private Class<?> type;
+
+  /**
+   * all kinds of result mappings
+   */
   private List<ResultMapping> resultMappings;
+
+  /**
+   * result mapping of <id/> element
+   */
   private List<ResultMapping> idResultMappings;
+
+  /**
+   * result mapping of <constructor/> element
+   */
   private List<ResultMapping> constructorResultMappings;
+
+  /**
+   * result mapping of <result/> element
+   */
   private List<ResultMapping> propertyResultMappings;
+
+  /**
+   * all column names in this resultMap
+   */
   private Set<String> mappedColumns;
+
+  /**
+   * all name of properties in this resultMap
+   */
   private Set<String> mappedProperties;
+
+  /**
+   * <discriminator/> element
+   */
   private Discriminator discriminator;
+
+  /**
+   * whether this resultMap contains <constructor/> element.
+   */
   private boolean hasResultMapsUsingConstructorCollection;
+
+  /**
+   * whether this resultMap contains nested resultMap
+   */
   private boolean hasNestedResultMaps;
+
+  /**
+   * whether this resultMap contains nested resultMap which specified by {@code <result select='nested select id'/>}
+   */
   private boolean hasNestedQueries;
   private Boolean autoMapping;
 
