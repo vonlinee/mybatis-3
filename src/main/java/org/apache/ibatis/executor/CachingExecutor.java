@@ -74,9 +74,9 @@ public class CachingExecutor implements Executor {
   }
 
   @Override
-  public <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException {
-    flushCacheIfRequired(ms);
-    return delegate.queryCursor(ms, parameter, rowBounds);
+  public <E> Cursor<E> queryCursor(MapperQuery query) throws SQLException {
+    flushCacheIfRequired(query.getMappedStatement());
+    return delegate.queryCursor(query);
   }
 
   @Override

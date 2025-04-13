@@ -38,9 +38,7 @@ import org.apache.ibatis.executor.MapperUpdate;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.session.RowBounds;
 
 /**
  * @author Clinton Begin
@@ -305,8 +303,7 @@ public class ResultLoaderMap {
     }
 
     @Override
-    protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
-        throws SQLException {
+    protected <E> Cursor<E> doQueryCursor(MapperQuery query) throws SQLException {
       throw new UnsupportedOperationException("Not supported.");
     }
   }

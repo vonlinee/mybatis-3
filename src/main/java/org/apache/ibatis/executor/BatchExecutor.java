@@ -31,7 +31,6 @@ import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
@@ -94,12 +93,10 @@ public class BatchExecutor extends BaseExecutor {
   }
 
   @Override
-  protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
-      throws SQLException {
+  protected <E> Cursor<E> doQueryCursor(MapperQuery query) throws SQLException {
     flushStatements();
-    Configuration configuration = ms.getConfiguration();
-    StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
-    Connection connection = getConnection(ms.getStatementLog());
+    StatementHandler handler = query.newStatementHandler(wrapper);
+    Connection connection = getConnection(query.getStatementLog());
     Statement stmt = handler.prepare(connection, transaction.getTimeout());
     handler.parameterize(stmt);
     Cursor<E> cursor = handler.queryCursor(stmt);

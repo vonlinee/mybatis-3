@@ -37,7 +37,7 @@ public interface Executor {
 
   <E> List<E> query(MapperQuery query) throws SQLException;
 
-  <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException;
+  <E> Cursor<E> queryCursor(MapperQuery query) throws SQLException;
 
   List<BatchResult> flushStatements() throws SQLException;
 

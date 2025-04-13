@@ -28,8 +28,6 @@ import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.scripting.BoundSql;
-import org.apache.ibatis.scripting.MappedStatement;
-import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
@@ -58,11 +56,9 @@ public class ReuseExecutor extends BaseExecutor {
   }
 
   @Override
-  protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
-      throws SQLException {
-    Configuration configuration = ms.getConfiguration();
-    StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
-    Statement stmt = prepareStatement(handler, ms.getStatementLog());
+  protected <E> Cursor<E> doQueryCursor(MapperQuery query) throws SQLException {
+    StatementHandler handler = query.newStatementHandler(wrapper);
+    Statement stmt = prepareStatement(handler, query.getStatementLog());
     return handler.queryCursor(stmt);
   }
 

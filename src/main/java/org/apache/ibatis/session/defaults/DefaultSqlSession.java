@@ -123,7 +123,8 @@ public class DefaultSqlSession implements SqlSession {
     try {
       MappedStatement ms = configuration.getMappedStatement(statement);
       dirty |= ms.isDirtySelect();
-      Cursor<T> cursor = executor.queryCursor(ms, wrapCollection(parameter), rowBounds);
+      MapperQuery query = new MapperQuery(ms, wrapCollection(parameter)).rowBounds(rowBounds);
+      Cursor<T> cursor = executor.queryCursor(query);
       registerCursor(cursor);
       return cursor;
     } catch (Exception e) {

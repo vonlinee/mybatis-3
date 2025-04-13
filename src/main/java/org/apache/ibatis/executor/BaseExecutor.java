@@ -161,9 +161,9 @@ public abstract class BaseExecutor implements Executor {
   }
 
   @Override
-  public <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException {
-    BoundSql boundSql = ms.getBoundSql(parameter);
-    return doQueryCursor(ms, parameter, rowBounds, boundSql);
+  public <E> Cursor<E> queryCursor(MapperQuery query) throws SQLException {
+    query.setBoundSql();
+    return doQueryCursor(query);
   }
 
   @Override
@@ -289,8 +289,7 @@ public abstract class BaseExecutor implements Executor {
 
   protected abstract <E> List<E> doQuery(MapperQuery query) throws SQLException;
 
-  protected abstract <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds,
-      BoundSql boundSql) throws SQLException;
+  protected abstract <E> Cursor<E> doQueryCursor(MapperQuery query) throws SQLException;
 
   protected void closeStatement(Statement statement) {
     JdbcUtils.closeSilently(statement);
