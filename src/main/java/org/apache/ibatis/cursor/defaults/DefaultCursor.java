@@ -27,6 +27,7 @@ import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This is the default implementation of a MyBatis Cursor. This implementation is not thread safe.
@@ -92,6 +93,7 @@ public class DefaultCursor<T> implements Cursor<T> {
   }
 
   @Override
+  @NotNull
   public Iterator<T> iterator() {
     if (iteratorRetrieved) {
       throw new IllegalStateException("Cannot open more than one iterator on a Cursor");

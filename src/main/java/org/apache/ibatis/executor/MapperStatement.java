@@ -33,6 +33,7 @@ public abstract class MapperStatement implements JdbcStatement {
 
   @NotNull
   protected final MappedStatement ms;
+  @NotNull
   protected final Configuration configuration;
   protected final SqlCommandType sqlCommandType;
 

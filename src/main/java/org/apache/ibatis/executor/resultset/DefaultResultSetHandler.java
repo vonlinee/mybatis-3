@@ -83,16 +83,16 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
   // pending creations property tracker
   private final Map<Object, PendingRelation> pendingPccRelations = new IdentityHashMap<>();
 
-  // nested resultmaps
+  // nested result maps
   private final Map<CacheKey, Object> nestedResultObjects = new HashMap<>();
   private final Map<String, Object> ancestorObjects = new HashMap<>();
   private Object previousRowValue;
 
-  // multiple resultsets
+  // multiple resultSets
   private final Map<String, ResultMapping> nextResultMaps = new HashMap<>();
   private final Map<CacheKey, List<PendingRelation>> pendingRelations = new HashMap<>();
 
-  // Cached Automappings
+  // Cached AutoMappings
   private final Map<String, List<UnMappedColumnAutoMapping>> autoMappingsCache = new HashMap<>();
   private final Map<String, List<String>> constructorAutoMappingColumns = new HashMap<>();
 
@@ -196,7 +196,7 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
         handleRowValues(rsw, resultMap, resultHandler, rowBounds, null);
       }
     } finally {
-      // issue #228 (close resultsets)
+      // issue #228 (close resultSets)
       closeResultSet(rsw.getResultSet());
     }
   }
@@ -207,7 +207,7 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
   }
 
   //
-  // HANDLE ROWS FOR SIMPLE RESULTMAP
+  // HANDLE ROWS FOR SIMPLE RESULT MAP
   //
   @Override
   public void handleRowValues(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler,
@@ -701,7 +701,7 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
     }
     if (configuration.isArgNameBasedConstructorAutoMapping()) {
       // Finding-best-match type implementation is possible,
-      // but using @AutomapConstructor seems sufficient.
+      // but using @AutoMapConstructor seems sufficient.
       throw new ExecutorException(MessageFormat.format(
           "'argNameBasedConstructorAutoMapping' is enabled and the class ''{0}'' has multiple constructors, so @AutomapConstructor must be added to one of the constructors.",
           resultType.getName()));
@@ -1176,6 +1176,7 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
     return foundValues;
   }
 
+  @SuppressWarnings("unchecked")
   private void createPendingConstructorCreations(Object rowValue) {
     // handle possible pending creations within this object
     // by now, the property mapping has been completely built, we can reconstruct it

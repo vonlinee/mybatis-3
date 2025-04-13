@@ -71,12 +71,12 @@ public abstract class BaseResultSetHandler implements ResultSetHandler {
 
     try {
       while (rs == null) {
-        // move forward to get the first resultset in case the driver
-        // doesn't return the resultset as the first result (HSQLDB)
+        // move forward to get the first resultSet in case the driver
+        // doesn't return the resultSet as the first result (HSQLDB)
         if (stmt.getMoreResults()) {
           rs = stmt.getResultSet();
         } else if (stmt.getUpdateCount() == -1) {
-          // no more results. Must be no resultset
+          // no more results. Must be no resultSet
           break;
         }
       }
