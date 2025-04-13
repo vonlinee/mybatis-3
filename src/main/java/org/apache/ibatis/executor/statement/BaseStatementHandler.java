@@ -72,11 +72,6 @@ public abstract class BaseStatementHandler implements StatementHandler {
   }
 
   @Override
-  public ParameterHandler getParameterHandler() {
-    return parameterHandler;
-  }
-
-  @Override
   public Statement prepare(Connection connection, Integer transactionTimeout) throws SQLException {
     ErrorContext.instance().sql(boundSql.getSql());
     Statement statement = null;

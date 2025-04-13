@@ -23,7 +23,6 @@ import java.util.List;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
-import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.scripting.BoundSql;
 import org.apache.ibatis.scripting.MappedStatement;
 import org.apache.ibatis.session.ResultHandler;
@@ -88,10 +87,5 @@ public class RoutingStatementHandler implements StatementHandler {
   @Override
   public BoundSql getBoundSql() {
     return delegate.getBoundSql();
-  }
-
-  @Override
-  public ParameterHandler getParameterHandler() {
-    return delegate.getParameterHandler();
   }
 }
