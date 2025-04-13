@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.builder.BuilderAssistant;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.ParameterExpression;
@@ -73,7 +74,7 @@ public class VelocitySqlSourceBuilder {
     private ParameterMapping buildParameterMapping(String content) {
       Map<String, String> propertiesMap = parseParameterMapping(content);
       String property = propertiesMap.get("property");
-      JdbcType jdbcType = configuration.resolveJdbcType(propertiesMap.get("jdbcType"));
+      JdbcType jdbcType = BuilderAssistant.resolveJdbcType(propertiesMap.get("jdbcType"));
       Class<?> propertyType;
       if (configuration.getTypeHandlerRegistry().hasTypeHandler(parameterType)) {
         propertyType = parameterType;
@@ -105,7 +106,7 @@ public class VelocitySqlSourceBuilder {
               builder.javaType(javaType);
               break;
             case "mode":
-              builder.mode(configuration.resolveParameterMode(value));
+              builder.mode(BuilderAssistant.resolveParameterMode(value));
               break;
             case "numericScale":
               builder.numericScale(Integer.valueOf(value));

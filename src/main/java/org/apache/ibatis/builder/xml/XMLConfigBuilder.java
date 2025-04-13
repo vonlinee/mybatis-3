@@ -47,6 +47,7 @@ import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
+import org.apache.ibatis.scripting.ResultSetType;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.transaction.TransactionFactory;
@@ -308,8 +309,17 @@ public class XMLConfigBuilder {
     configuration
         .setDefaultStatementTimeout(ObjectUtils.parseInteger(props.getProperty("defaultStatementTimeout"), null));
     configuration.setDefaultFetchSize(ObjectUtils.parseInteger(props.getProperty("defaultFetchSize"), null));
-    configuration
-        .setDefaultResultSetType(configuration.resolveResultSetType(props.getProperty("defaultResultSetType")));
+
+    try {
+      String defaultResultSetType = props.getProperty("defaultResultSetType");
+      if (defaultResultSetType != null) {
+        ResultSetType resultSetType = ResultSetType.valueOf(defaultResultSetType);
+        configuration.setDefaultResultSetType(resultSetType);
+      }
+    } catch (IllegalArgumentException e) {
+      throw new BuilderException("Error resolving ResultSetType. Cause: " + e, e);
+    }
+
     configuration
         .setMapUnderscoreToCamelCase(ObjectUtils.parseBoolean(props.getProperty("mapUnderscoreToCamelCase"), false));
     configuration.setSafeRowBoundsEnabled(ObjectUtils.parseBoolean(props.getProperty("safeRowBoundsEnabled"), false));
@@ -412,7 +422,7 @@ public class XMLConfigBuilder {
         String jdbcTypeName = child.getStringAttribute("jdbcType");
         String handlerTypeName = child.getStringAttribute("handler");
         Class<?> javaTypeClass = configuration.resolveClass(javaTypeName);
-        JdbcType jdbcType = configuration.resolveJdbcType(jdbcTypeName);
+        JdbcType jdbcType = JdbcType.forName(jdbcTypeName, true);
         Class<?> typeHandlerClass = configuration.resolveClass(handlerTypeName);
         if (javaTypeClass != null) {
           if (jdbcType == null) {

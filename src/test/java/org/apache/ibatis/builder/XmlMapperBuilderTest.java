@@ -86,22 +86,21 @@ class XmlMapperBuilderTest {
 
   @Test
   void parseExpression() {
-    {
-      Pattern pattern = ObjectUtils.parseExpression("[0-9]", "[a-z]");
-      assertThat(pattern.matcher("0").find()).isTrue();
-      assertThat(pattern.matcher("a").find()).isFalse();
-    }
-    {
-      Pattern pattern = ObjectUtils.parseExpression(null, "[a-z]");
-      assertThat(pattern.matcher("0").find()).isFalse();
-      assertThat(pattern.matcher("a").find()).isTrue();
-    }
+    Pattern pattern = ObjectUtils.parseExpression("[0-9]", "[a-z]");
+    assertThat(pattern.matcher("0").find()).isTrue();
+    assertThat(pattern.matcher("a").find()).isFalse();
+  }
+
+  @Test
+  void parseExpressionExpressionIsNull() {
+    Pattern pattern = ObjectUtils.parseExpression(null, "[a-z]");
+    assertThat(pattern.matcher("0").find()).isFalse();
+    assertThat(pattern.matcher("a").find()).isTrue();
   }
 
   @Test
   void resolveJdbcTypeWithUndefinedValue() {
-    Configuration configuration = new Configuration();
-    when(() -> configuration.resolveJdbcType("aaa"));
+    when(() -> BuilderAssistant.resolveJdbcType("aaa"));
     then(caughtException()).isInstanceOf(BuilderException.class)
         .hasMessageStartingWith("Error resolving JdbcType. Cause: java.lang.IllegalArgumentException: No enum")
         .hasMessageEndingWith("org.apache.ibatis.type.JdbcType.aaa");
@@ -109,8 +108,7 @@ class XmlMapperBuilderTest {
 
   @Test
   void resolveResultSetTypeWithUndefinedValue() {
-    Configuration configuration = new Configuration();
-    when(() -> configuration.resolveResultSetType("bbb"));
+    when(() -> BuilderAssistant.resolveResultSetType("bbb"));
     then(caughtException()).isInstanceOf(BuilderException.class)
         .hasMessageStartingWith("Error resolving ResultSetType. Cause: java.lang.IllegalArgumentException: No enum")
         .hasMessageEndingWith("org.apache.ibatis.scripting.ResultSetType.bbb");
@@ -118,8 +116,7 @@ class XmlMapperBuilderTest {
 
   @Test
   void resolveParameterModeWithUndefinedValue() {
-    Configuration configuration = new Configuration();
-    when(() -> configuration.resolveParameterMode("ccc"));
+    when(() -> BuilderAssistant.resolveParameterMode("ccc"));
     then(caughtException()).isInstanceOf(BuilderException.class)
         .hasMessageStartingWith("Error resolving ParameterMode. Cause: java.lang.IllegalArgumentException: No enum")
         .hasMessageEndingWith("org.apache.ibatis.mapping.ParameterMode.ccc");

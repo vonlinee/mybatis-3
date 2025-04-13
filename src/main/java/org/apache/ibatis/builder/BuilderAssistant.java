@@ -489,7 +489,7 @@ public class BuilderAssistant {
     }
   }
 
-  public ParameterMode resolveParameterMode(@Nullable String mode) {
+  public static ParameterMode resolveParameterMode(@Nullable String mode) {
     try {
       return mode == null ? null : ParameterMode.valueOf(mode);
     } catch (IllegalArgumentException e) {
@@ -497,7 +497,7 @@ public class BuilderAssistant {
     }
   }
 
-  public ResultSetType resolveResultSetType(String alias) {
+  public static ResultSetType resolveResultSetType(String alias) {
     try {
       return alias == null ? null : ResultSetType.valueOf(alias);
     } catch (IllegalArgumentException e) {
@@ -505,7 +505,7 @@ public class BuilderAssistant {
     }
   }
 
-  public JdbcType resolveJdbcType(@Nullable String alias) {
+  public static JdbcType resolveJdbcType(@Nullable String alias) {
     try {
       return alias == null ? null : JdbcType.valueOf(alias);
     } catch (IllegalArgumentException e) {

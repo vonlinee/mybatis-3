@@ -1192,30 +1192,6 @@ public class Configuration {
     }
   }
 
-  public JdbcType resolveJdbcType(String alias) {
-    try {
-      return alias == null ? null : JdbcType.valueOf(alias);
-    } catch (IllegalArgumentException e) {
-      throw new BuilderException("Error resolving JdbcType. Cause: " + e, e);
-    }
-  }
-
-  public ResultSetType resolveResultSetType(String alias) {
-    try {
-      return alias == null ? null : ResultSetType.valueOf(alias);
-    } catch (IllegalArgumentException e) {
-      throw new BuilderException("Error resolving ResultSetType. Cause: " + e, e);
-    }
-  }
-
-  public ParameterMode resolveParameterMode(String alias) {
-    try {
-      return alias == null ? null : ParameterMode.valueOf(alias);
-    } catch (IllegalArgumentException e) {
-      throw new BuilderException("Error resolving ParameterMode. Cause: " + e, e);
-    }
-  }
-
   public Object createInstance(String alias) {
     Class<?> clazz = resolveClass(alias);
     try {

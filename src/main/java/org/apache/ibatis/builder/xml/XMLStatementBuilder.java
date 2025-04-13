@@ -144,7 +144,7 @@ public class XMLStatementBuilder {
       resultTypeClass = MapperAnnotationBuilder.getMethodReturnType(builderAssistant.getCurrentNamespace(), id);
     }
     String resultSetType = context.getStringAttribute("resultSetType");
-    ResultSetType resultSetTypeEnum = builderAssistant.resolveResultSetType(resultSetType);
+    ResultSetType resultSetTypeEnum = BuilderAssistant.resolveResultSetType(resultSetType);
     if (resultSetTypeEnum == null) {
       resultSetTypeEnum = configuration.getDefaultResultSetType();
     }
