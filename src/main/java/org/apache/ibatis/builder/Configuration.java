@@ -58,7 +58,9 @@ import org.apache.ibatis.executor.loader.javassist.JavassistProxyFactory;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
-import org.apache.ibatis.executor.statement.RoutingStatementHandler;
+import org.apache.ibatis.executor.statement.CallableStatementHandler;
+import org.apache.ibatis.executor.statement.PreparedStatementHandler;
+import org.apache.ibatis.executor.statement.SimpleStatementHandler;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.io.VFS;
 import org.apache.ibatis.logging.Log;
@@ -705,19 +707,30 @@ public class Configuration {
     return (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
   }
 
-  public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement,
-      Object parameterObject, RowBounds rowBounds, ResultHandler<?> resultHandler, BoundSql boundSql) {
+  public StatementHandler newStatementHandler(Executor executor, MappedStatement ms, Object parameter,
+      RowBounds rowBounds, ResultHandler<?> resultHandler, BoundSql boundSql) {
 
     if (boundSql == null) { // issue #435, get the key before calculating the statement
-      KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
+      KeyGenerator keyGenerator = ms.getKeyGenerator();
       ErrorContext.instance().store();
-      keyGenerator.processBefore(executor, mappedStatement, null, parameterObject);
+      keyGenerator.processBefore(executor, ms, null, parameter);
       ErrorContext.instance().recall();
-      boundSql = mappedStatement.getBoundSql(parameterObject);
+      boundSql = ms.getBoundSql(parameter);
     }
-
-    StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject,
-        rowBounds, resultHandler, boundSql);
+    StatementHandler statementHandler;
+    switch (ms.getStatementType()) {
+      case STATEMENT:
+        statementHandler = new SimpleStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);
+        break;
+      case PREPARED:
+        statementHandler = new PreparedStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);
+        break;
+      case CALLABLE:
+        statementHandler = new CallableStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);
+        break;
+      default:
+        throw new ExecutorException("Unknown statement type: " + ms.getStatementType());
+    }
     return (StatementHandler) interceptorChain.pluginAll(statementHandler);
   }
 
