@@ -188,9 +188,9 @@ public class XMLMapperBuilder {
         String mode = parameterNode.getStringAttribute("mode");
         String typeHandler = parameterNode.getStringAttribute("typeHandler");
         Integer numericScale = parameterNode.getIntAttribute("numericScale");
-        ParameterMode modeEnum = assistant.resolveParameterMode(mode);
+        ParameterMode modeEnum = BuilderAssistant.resolveParameterMode(mode);
+        JdbcType jdbcTypeEnum = BuilderAssistant.resolveJdbcType(jdbcType);
         Class<?> javaTypeClass = assistant.resolveClass(javaType);
-        JdbcType jdbcTypeEnum = assistant.resolveJdbcType(jdbcType);
         Class<? extends TypeHandler<?>> typeHandlerClass = assistant.resolveClass(typeHandler);
         ParameterMapping parameterMapping = assistant.buildParameterMapping(parameterClass, property, javaTypeClass,
             jdbcTypeEnum, resultMap, modeEnum, typeHandlerClass, numericScale);
@@ -307,7 +307,7 @@ public class XMLMapperBuilder {
     String typeHandler = context.getStringAttribute("typeHandler");
     Class<?> javaTypeClass = assistant.resolveClass(javaType);
     Class<? extends TypeHandler<?>> typeHandlerClass = assistant.resolveClass(typeHandler);
-    JdbcType jdbcTypeEnum = assistant.resolveJdbcType(jdbcType);
+    JdbcType jdbcTypeEnum = BuilderAssistant.resolveJdbcType(jdbcType);
     Map<String, String> discriminatorMap = new HashMap<>();
     for (XNode caseChild : context.getChildren()) {
       String value = caseChild.getStringAttribute("value");
@@ -377,7 +377,7 @@ public class XMLMapperBuilder {
     boolean lazy = assistant.resolveFetchType(context.getStringAttribute("fetchType")) == FetchType.LAZY;
     Class<?> javaTypeClass = assistant.resolveClass(javaType);
     Class<? extends TypeHandler<?>> typeHandlerClass = assistant.resolveClass(typeHandler);
-    JdbcType jdbcTypeEnum = assistant.resolveJdbcType(jdbcType);
+    JdbcType jdbcTypeEnum = BuilderAssistant.resolveJdbcType(jdbcType);
     return assistant.buildResultMapping(resultType, property, column, javaTypeClass, jdbcTypeEnum, nestedSelect,
         nestedResultMap, notNullColumn, columnPrefix, typeHandlerClass, flags, resultSet, foreignColumn, lazy);
   }
