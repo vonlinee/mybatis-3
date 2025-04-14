@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
+import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.ResultHandler;
@@ -36,23 +37,32 @@ public class RoutingStatementHandler implements StatementHandler {
 
   private final StatementHandler delegate;
 
-  public RoutingStatementHandler(Executor executor, MappedStatement ms, Object parameter, RowBounds rowBounds,
-      ResultHandler resultHandler, BoundSql boundSql) {
+  public RoutingStatementHandler(Executor executor, MappedStatement ms, RowBounds rowBounds, BoundSql boundSql) {
 
     switch (ms.getStatementType()) {
       case STATEMENT:
-        delegate = new SimpleStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);
+        delegate = new SimpleStatementHandler(executor, ms, rowBounds, boundSql);
         break;
       case PREPARED:
-        delegate = new PreparedStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);
+        delegate = new PreparedStatementHandler(executor, ms, rowBounds, boundSql);
         break;
       case CALLABLE:
-        delegate = new CallableStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);
+        delegate = new CallableStatementHandler(executor, ms, rowBounds, boundSql);
         break;
       default:
         throw new ExecutorException("Unknown statement type: " + ms.getStatementType());
     }
 
+  }
+
+  @Override
+  public void setParameterHandler(ParameterHandler parameterHandler) {
+    delegate.setParameterHandler(parameterHandler);
+  }
+
+  @Override
+  public void setResultSetHandler(ResultSetHandler resultSetHandler) {
+    delegate.setResultSetHandler(resultSetHandler);
   }
 
   @Override

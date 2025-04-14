@@ -205,7 +205,7 @@ public class ResultLoaderMap {
         }
 
         this.metaResultObject = config.newMetaObject(userObject);
-        this.resultLoader = new ResultLoader(config, new ClosedExecutor(), ms, this.mappedParameter,
+        this.resultLoader = new ResultLoader(config, new ClosedExecutor(config), ms, this.mappedParameter,
             metaResultObject.getSetterType(this.property), null, null);
       }
 
@@ -215,7 +215,8 @@ public class ResultLoaderMap {
        */
       if (this.serializationCheck == null) {
         final ResultLoader old = this.resultLoader;
-        this.resultLoader = new ResultLoader(old.configuration, new ClosedExecutor(), old.mappedStatement,
+        final Configuration config = this.getConfiguration();
+        this.resultLoader = new ResultLoader(old.configuration, new ClosedExecutor(config), old.mappedStatement,
             old.parameterObject, old.targetType, old.cacheKey, old.boundSql);
       }
 
@@ -279,8 +280,8 @@ public class ResultLoaderMap {
 
   private static final class ClosedExecutor extends BaseExecutor {
 
-    public ClosedExecutor() {
-      super(null, null);
+    public ClosedExecutor(Configuration configuration) {
+      super(configuration, null);
     }
 
     @Override

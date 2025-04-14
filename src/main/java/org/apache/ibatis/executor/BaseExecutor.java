@@ -38,6 +38,8 @@ import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
+import org.apache.ibatis.scripting.ExtensionFactory;
+import org.apache.ibatis.scripting.defaults.DefaultExtensionFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.session.ResultHandler;
@@ -59,7 +61,7 @@ public abstract class BaseExecutor implements Executor {
   protected PerpetualCache localCache;
   protected PerpetualCache localOutputParameterCache;
   protected Configuration configuration;
-
+  protected ExtensionFactory extensionFactory;
   protected int queryStack;
   private boolean closed;
 
@@ -70,6 +72,7 @@ public abstract class BaseExecutor implements Executor {
     this.localOutputParameterCache = new PerpetualCache("LocalOutputParameterCache");
     this.closed = false;
     this.configuration = configuration;
+    this.extensionFactory = new DefaultExtensionFactory(configuration);
     this.wrapper = this;
   }
 
@@ -77,6 +80,11 @@ public abstract class BaseExecutor implements Executor {
   public Transaction getTransaction() {
     checkIfClosed();
     return transaction;
+  }
+
+  @Override
+  public void setExtensionFactory(ExtensionFactory extensionFactory) {
+    this.extensionFactory = extensionFactory;
   }
 
   @Override

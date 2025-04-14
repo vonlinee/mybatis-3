@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,14 +22,12 @@ import java.sql.Statement;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
-import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
@@ -41,8 +39,8 @@ public abstract class BaseStatementHandler implements StatementHandler {
   protected final Configuration configuration;
   protected final ObjectFactory objectFactory;
   protected final TypeHandlerRegistry typeHandlerRegistry;
-  protected final ResultSetHandler resultSetHandler;
-  protected final ParameterHandler parameterHandler;
+  protected ResultSetHandler resultSetHandler;
+  protected ParameterHandler parameterHandler;
 
   protected final Executor executor;
   protected final MappedStatement mappedStatement;
@@ -50,8 +48,8 @@ public abstract class BaseStatementHandler implements StatementHandler {
 
   protected BoundSql boundSql;
 
-  protected BaseStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject,
-      RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+  protected BaseStatementHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds,
+      BoundSql boundSql) {
     this.configuration = mappedStatement.getConfiguration();
     this.executor = executor;
     this.mappedStatement = mappedStatement;
@@ -59,22 +57,22 @@ public abstract class BaseStatementHandler implements StatementHandler {
 
     this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
     this.objectFactory = configuration.getObjectFactory();
-
-    if (boundSql == null) { // issue #435, get the key before calculating the statement
-      generateKeys(parameterObject);
-      boundSql = mappedStatement.getBoundSql(parameterObject);
-    }
-
     this.boundSql = boundSql;
-
-    this.parameterHandler = configuration.newParameterHandler(mappedStatement, parameterObject, boundSql);
-    this.resultSetHandler = configuration.newResultSetHandler(executor, mappedStatement, rowBounds, parameterHandler,
-        resultHandler, boundSql);
   }
 
   @Override
   public BoundSql getBoundSql() {
     return boundSql;
+  }
+
+  @Override
+  public void setParameterHandler(ParameterHandler parameterHandler) {
+    this.parameterHandler = parameterHandler;
+  }
+
+  @Override
+  public void setResultSetHandler(ResultSetHandler resultSetHandler) {
+    this.resultSetHandler = resultSetHandler;
   }
 
   @Override
@@ -135,13 +133,6 @@ public abstract class BaseStatementHandler implements StatementHandler {
     } catch (SQLException e) {
       // ignore
     }
-  }
-
-  protected void generateKeys(Object parameter) {
-    KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
-    ErrorContext.instance().store();
-    keyGenerator.processBefore(executor, mappedStatement, null, parameter);
-    ErrorContext.instance().recall();
   }
 
 }

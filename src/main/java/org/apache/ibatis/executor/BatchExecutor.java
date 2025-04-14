@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -53,8 +53,7 @@ public class BatchExecutor extends BaseExecutor {
 
   @Override
   public int doUpdate(MappedStatement ms, Object parameterObject) throws SQLException {
-    final Configuration configuration = ms.getConfiguration();
-    final StatementHandler handler = configuration.newStatementHandler(this, ms, parameterObject, RowBounds.DEFAULT,
+    final StatementHandler handler = extensionFactory.newStatementHandler(this, ms, parameterObject, RowBounds.DEFAULT,
         null, null);
     final BoundSql boundSql = handler.getBoundSql();
     final String sql = boundSql.getSql();
@@ -85,8 +84,7 @@ public class BatchExecutor extends BaseExecutor {
     Statement stmt = null;
     try {
       flushStatements();
-      Configuration configuration = ms.getConfiguration();
-      StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameterObject, rowBounds,
+      StatementHandler handler = extensionFactory.newStatementHandler(wrapper, ms, parameterObject, rowBounds,
           resultHandler, boundSql);
       Connection connection = getConnection(ms.getStatementLog());
       stmt = handler.prepare(connection, transaction.getTimeout());
@@ -101,8 +99,7 @@ public class BatchExecutor extends BaseExecutor {
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
       throws SQLException {
     flushStatements();
-    Configuration configuration = ms.getConfiguration();
-    StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
+    StatementHandler handler = extensionFactory.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
     Connection connection = getConnection(ms.getStatementLog());
     Statement stmt = handler.prepare(connection, transaction.getTimeout());
     handler.parameterize(stmt);

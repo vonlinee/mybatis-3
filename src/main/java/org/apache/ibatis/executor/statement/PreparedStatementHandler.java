@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ import org.apache.ibatis.session.RowBounds;
  */
 public class PreparedStatementHandler extends BaseStatementHandler {
 
-  public PreparedStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameter,
-      RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
-    super(executor, mappedStatement, parameter, rowBounds, resultHandler, boundSql);
+  public PreparedStatementHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds,
+      BoundSql boundSql) {
+    super(executor, mappedStatement, rowBounds, boundSql);
   }
 
   @Override
