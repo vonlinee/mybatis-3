@@ -451,6 +451,9 @@
               <maxJdkVersion>${java.version}</maxJdkVersion>
               <ignoredScopes>provided,test</ignoredScopes>
             </enforceBytecodeVersion>
+            <requireMavenVersion>
+              <version>[3.9.6,)</version>
+            </requireMavenVersion>
           </rules>
         </configuration>
       </plugin>
