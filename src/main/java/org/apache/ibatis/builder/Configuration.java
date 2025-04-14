@@ -900,14 +900,6 @@ public class Configuration {
     }
   }
 
-  /**
-   * @deprecated call {@link #parsePendingMethods(boolean)}
-   */
-  @Deprecated
-  public Collection<MethodResolver> getIncompleteMethods() {
-    return incompleteMethods;
-  }
-
   public MappedStatement getMappedStatement(String id) {
     return this.getMappedStatement(id, true);
   }
@@ -1207,16 +1199,6 @@ public class Configuration {
     } catch (Exception e) {
       throw new BuilderException("Error resolving class. Cause: " + e, e);
     }
-  }
-
-  @Deprecated(since = "3.6.0", forRemoval = true)
-  public TypeHandler<?> resolveTypeHandler(Class<?> javaType, String typeHandlerAlias) {
-    return resolveTypeHandler(null, javaType, null, typeHandlerAlias);
-  }
-
-  @Deprecated(since = "3.6.0", forRemoval = true)
-  public TypeHandler<?> resolveTypeHandler(Class<?> javaType, Class<? extends TypeHandler<?>> typeHandlerType) {
-    return resolveTypeHandler(javaType, null, typeHandlerType);
   }
 
   public TypeHandler<?> resolveTypeHandler(Class<?> parameterType, Type propertyType, JdbcType jdbcType,

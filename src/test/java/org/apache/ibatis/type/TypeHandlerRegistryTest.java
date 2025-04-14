@@ -93,7 +93,7 @@ class TypeHandlerRegistryTest {
     };
 
     typeHandlerRegistry.register(type, fakeHandler);
-    assertSame(fakeHandler, typeHandlerRegistry.getTypeHandler(type));
+    assertSame(fakeHandler, typeHandlerRegistry.getTypeHandler(type, null));
   }
 
   @Test

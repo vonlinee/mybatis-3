@@ -175,18 +175,8 @@ public final class TypeHandlerRegistry {
     return hasTypeHandler(javaType, null);
   }
 
-  @Deprecated(since = "3.6.0", forRemoval = true)
-  public boolean hasTypeHandler(TypeReference<?> javaTypeReference) {
-    return hasTypeHandler(javaTypeReference, null);
-  }
-
   public boolean hasTypeHandler(Type javaType, JdbcType jdbcType) {
     return javaType != null && getTypeHandler(javaType, jdbcType) != null;
-  }
-
-  @Deprecated(since = "3.6.0", forRemoval = true)
-  public boolean hasTypeHandler(TypeReference<?> javaTypeReference, JdbcType jdbcType) {
-    return javaTypeReference != null && getTypeHandler(javaTypeReference, jdbcType) != null;
   }
 
   @Deprecated(since = "3.6.0", forRemoval = true)
@@ -221,7 +211,8 @@ public final class TypeHandlerRegistry {
     if (typeHandlerClass == null) {
       typeHandler = getSmartHandler(type, jdbcType);
     } else {
-      typeHandler = getMappingTypeHandler(typeHandlerClass);
+      typeHandler = allTypeHandlersMap.get(typeHandlerClass);
+      ;
       if (typeHandler == null) {
         typeHandler = getInstance(type, typeHandlerClass);
       }
@@ -375,7 +366,6 @@ public final class TypeHandlerRegistry {
     register(new Type[] { mappedJavaType }, mappedJdbcTypes(handler.getClass()), handler);
   }
 
-  @Deprecated(since = "3.6.0", forRemoval = true)
   public <T> void register(TypeReference<T> javaTypeReference, TypeHandler<? extends T> handler) {
     register(javaTypeReference.getRawType(), handler);
   }
@@ -429,7 +419,6 @@ public final class TypeHandlerRegistry {
 
   // java type + handler type
 
-  @Deprecated(since = "3.6.0", forRemoval = true)
   public void register(String javaTypeClassName, String typeHandlerClassName) throws ClassNotFoundException {
     register(Resources.classForName(javaTypeClassName), Resources.classForName(typeHandlerClassName));
   }

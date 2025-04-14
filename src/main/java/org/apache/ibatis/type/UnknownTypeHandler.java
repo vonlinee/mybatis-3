@@ -30,7 +30,6 @@ import org.apache.ibatis.io.Resources;
 /**
  * @author Clinton Begin
  */
-// @Deprecated(since = "3.6.0", forRemoval = true)
 public class UnknownTypeHandler extends BaseTypeHandler<Object> {
 
   // TODO Rename to 'configuration' after removing the 'configuration' property(deprecated property) on parent class
@@ -58,7 +57,6 @@ public class UnknownTypeHandler extends BaseTypeHandler<Object> {
    *
    * @deprecated Since 3.5.4, please use the {@link #UnknownTypeHandler(Configuration)}.
    */
-  @Deprecated
   public UnknownTypeHandler(TypeHandlerRegistry typeHandlerRegistry) {
     this.config = new Configuration();
     this.typeHandlerRegistrySupplier = () -> typeHandlerRegistry;
