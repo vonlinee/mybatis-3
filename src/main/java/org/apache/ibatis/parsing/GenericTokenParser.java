@@ -84,4 +84,44 @@ public class GenericTokenParser {
     }
     return builder.toString();
   }
+
+  public static boolean containsToken(String text, String openToken, String closeToken) {
+    if (text == null || text.isEmpty() || openToken == null || closeToken == null) {
+      return false;
+    }
+    // search open token
+    int start = text.indexOf(openToken);
+    if (start == -1) {
+      return false;
+    }
+    char[] src = text.toCharArray();
+    int offset;
+    do {
+      if (start > 0 && src[start - 1] == '\\') {
+        // this open token is escaped. remove the backslash and continue.
+        offset = start + openToken.length();
+      } else {
+        // found open token. let's search close token.
+        offset = start + openToken.length();
+        int end = text.indexOf(closeToken, offset);
+        while (end > -1) {
+          if ((end <= offset) || (src[end - 1] != '\\')) {
+            break;
+          }
+          // this close token is escaped. remove the backslash and continue.
+          offset = end + closeToken.length();
+          end = text.indexOf(closeToken, offset);
+        }
+        if (end == -1) {
+          // close token was not found.
+          offset = src.length;
+        } else {
+          // an integral token found
+          return true;
+        }
+      }
+      start = text.indexOf(openToken, offset);
+    } while (start > -1);
+    return false;
+  }
 }
