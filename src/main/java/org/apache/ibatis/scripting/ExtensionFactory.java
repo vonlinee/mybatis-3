@@ -21,6 +21,7 @@ import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
@@ -28,6 +29,22 @@ import org.apache.ibatis.transaction.Transaction;
 
 public interface ExtensionFactory {
 
+  /**
+   * Creates a {@link ParameterHandler} that passes the actual parameters to the JDBC statement.
+   *
+   * @author Frank D. Martinez [mnesarco]
+   *
+   * @param mappedStatement
+   *          The mapped statement that is being executed
+   * @param parameterObject
+   *          The input parameter object (can be null)
+   * @param boundSql
+   *          The resulting SQL once the dynamic language has been executed.
+   *
+   * @return the parameter handler
+   *
+   * @see DefaultParameterHandler
+   */
   ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql);
 
   ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds,

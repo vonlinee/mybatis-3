@@ -16,16 +16,12 @@
 package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
-import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.PropertyParser;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.LanguageDriver;
-import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.scripting.defaults.RawSqlSource;
 import org.apache.ibatis.session.Configuration;
 
@@ -33,12 +29,6 @@ import org.apache.ibatis.session.Configuration;
  * @author Eduardo Macarron
  */
 public class XMLLanguageDriver implements LanguageDriver {
-
-  @Override
-  public ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject,
-      BoundSql boundSql) {
-    return new DefaultParameterHandler(mappedStatement, parameterObject, boundSql);
-  }
 
   @Override
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) {

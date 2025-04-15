@@ -20,9 +20,6 @@ import static com.googlecode.catchexception.apis.BDDCatchException.when;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
 
-import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.scripting.defaults.RawLanguageDriver;
@@ -101,12 +98,6 @@ class LanguageDriverRegistryTest {
   }
 
   private static class PrivateLanguageDriver implements LanguageDriver {
-
-    @Override
-    public ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject,
-        BoundSql boundSql) {
-      return null;
-    }
 
     @Override
     public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) {

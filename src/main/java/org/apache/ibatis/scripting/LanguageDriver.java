@@ -15,34 +15,12 @@
  */
 package org.apache.ibatis.scripting;
 
-import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.ParamNameResolver;
-import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.session.Configuration;
 
 public interface LanguageDriver {
-
-  /**
-   * Creates a {@link ParameterHandler} that passes the actual parameters to the the JDBC statement.
-   *
-   * @author Frank D. Martinez [mnesarco]
-   *
-   * @param mappedStatement
-   *          The mapped statement that is being executed
-   * @param parameterObject
-   *          The input parameter object (can be null)
-   * @param boundSql
-   *          The resulting SQL once the dynamic language has been executed.
-   *
-   * @return the parameter handler
-   *
-   * @see DefaultParameterHandler
-   */
-  ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql);
 
   /**
    * Creates an {@link SqlSource} that will hold the statement read from a mapper xml file. It is called during startup,
