@@ -60,7 +60,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
         if (m.isDefault()) {
           return new DefaultMethodInvoker(method);
         }
-        return new PlainMethodInvoker(new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
+        return new PlainMethodInvoker(mapperInterface, method, sqlSession.getConfiguration());
       });
     } catch (RuntimeException re) {
       Throwable cause = re.getCause();
