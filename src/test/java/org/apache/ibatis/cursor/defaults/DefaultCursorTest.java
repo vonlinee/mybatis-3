@@ -111,7 +111,7 @@ class DefaultCursorTest {
     }).build();
     config.addResultMap(nestedResultMap);
 
-    return new MappedStatement.Builder(config, "selectPerson", new StaticSqlSource(config, "select person..."),
+    return new MappedStatement.Builder(config, "selectPerson", new StaticSqlSource("select person..."),
         SqlCommandType.SELECT).resultMaps(new ArrayList<ResultMap>() {
           private static final long serialVersionUID = 1L;
           {

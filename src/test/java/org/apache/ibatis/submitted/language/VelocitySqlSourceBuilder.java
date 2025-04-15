@@ -47,7 +47,7 @@ public class VelocitySqlSourceBuilder extends BaseBuilder {
     ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType);
     GenericTokenParser parser = new GenericTokenParser("@{", "}", handler);
     String sql = parser.parse(originalSql);
-    return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
+    return new StaticSqlSource(sql, handler.getParameterMappings());
   }
 
   private static class ParameterMappingTokenHandler extends BaseBuilder implements TokenHandler {

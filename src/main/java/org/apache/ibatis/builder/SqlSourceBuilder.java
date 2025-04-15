@@ -33,7 +33,7 @@ public class SqlSourceBuilder {
 
   public static SqlSource buildSqlSource(Configuration configuration, String sql,
       List<ParameterMapping> parameterMappings) {
-    return new StaticSqlSource(configuration,
+    return new StaticSqlSource(
         configuration.isShrinkWhitespacesInSql() ? SqlSourceBuilder.removeExtraWhitespaces(sql) : sql,
         parameterMappings);
   }

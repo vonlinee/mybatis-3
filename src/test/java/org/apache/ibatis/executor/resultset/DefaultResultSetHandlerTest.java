@@ -130,7 +130,7 @@ class DefaultResultSetHandlerTest {
   MappedStatement getMappedStatement() {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
-    return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource(config, "some select statement"),
+    return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource("some select statement"),
         SqlCommandType.SELECT).resultMaps(new ArrayList<ResultMap>() {
           private static final long serialVersionUID = 1L;
           {

@@ -94,7 +94,7 @@ class DefaultParameterHandlerTest {
   MappedStatement getMappedStatement() {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
-    return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource(config, "some select statement"),
+    return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource("some select statement"),
         SqlCommandType.SELECT).resultMaps(new ArrayList<ResultMap>() {
           private static final long serialVersionUID = 1L;
 
@@ -117,7 +117,7 @@ class DefaultParameterHandlerTest {
     TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
     MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
+        new StaticSqlSource("some select statement"), SqlCommandType.SELECT).build();
 
     Object parameterObject = 1;
 
@@ -152,7 +152,7 @@ class DefaultParameterHandlerTest {
     TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
     MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
+        new StaticSqlSource("some select statement"), SqlCommandType.SELECT).build();
 
     Object parameterObject = null;
 
@@ -183,7 +183,7 @@ class DefaultParameterHandlerTest {
     TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
     MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
+        new StaticSqlSource("some select statement"), SqlCommandType.SELECT).build();
 
     Object parameterObject = 1;
 
@@ -214,7 +214,7 @@ class DefaultParameterHandlerTest {
     TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
     MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
+        new StaticSqlSource("some select statement"), SqlCommandType.SELECT).build();
 
     Author parameterObject = new Author(-1, "cbegin", "******", "cbegin@nowhere.com", "N/A", Section.NEWS);
 
@@ -269,7 +269,7 @@ class DefaultParameterHandlerTest {
     TypeHandlerRegistry registry = mockConfig.getTypeHandlerRegistry();
 
     MappedStatement mappedStatement = new MappedStatement.Builder(mockConfig, "testSelect",
-        new StaticSqlSource(mockConfig, "some select statement"), SqlCommandType.SELECT).build();
+        new StaticSqlSource("some select statement"), SqlCommandType.SELECT).build();
 
     BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
       private static final long serialVersionUID = 1L;
