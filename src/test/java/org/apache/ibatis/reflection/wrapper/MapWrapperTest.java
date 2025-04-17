@@ -31,8 +31,6 @@ import java.util.Map;
 import org.apache.ibatis.reflection.DefaultReflectorFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
-import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -44,7 +42,7 @@ class MapWrapperTest {
     Map<String, Object> map = new LinkedHashMap<>();
     map.put("a", "100");
     map.put("b", null);
-    map.put("my_name", Integer.valueOf(200));
+    map.put("my_name", 200);
     MetaObject metaObj = MetaObject.forObject(map, new DefaultObjectFactory(), new DefaultObjectWrapperFactory(),
         new DefaultReflectorFactory());
     assertFalse(metaObj.isCollection());
@@ -65,7 +63,7 @@ class MapWrapperTest {
     assertEquals(Integer.class, metaObj.getSetterType("my_name"));
     assertEquals("100", metaObj.getValue("a"));
     assertNull(metaObj.getValue("b"));
-    assertEquals(Integer.valueOf(200), metaObj.getValue("my_name"));
+    assertEquals(200, metaObj.getValue("my_name"));
     try {
       metaObj.add("x");
       fail();
@@ -78,8 +76,8 @@ class MapWrapperTest {
     } catch (UnsupportedOperationException e) {
       // pass
     }
-    metaObj.setValue("a", Long.valueOf(900L));
-    assertEquals(Long.valueOf(900L), map.get("a"));
+    metaObj.setValue("a", 900L);
+    assertEquals(900L, map.get("a"));
   }
 
   @Test
@@ -99,13 +97,13 @@ class MapWrapperTest {
     assertEquals(Object.class, metaObj.getSetterType("child.anykey"));
     assertNull(metaObj.getValue("anykey"));
 
-    metaObj.setValue("anykey", Integer.valueOf(200));
-    metaObj.setValue("child.anykey", Integer.valueOf(300));
+    metaObj.setValue("anykey", 200);
+    metaObj.setValue("child.anykey", 300);
     assertEquals(3, map.size());
-    assertEquals(Integer.valueOf(200), map.get("anykey"));
+    assertEquals(200, map.get("anykey"));
     @SuppressWarnings("unchecked")
     Map<String, Object> childMap = (Map<String, Object>) map.get("child");
-    assertEquals(Integer.valueOf(300), childMap.get("anykey"));
+    assertEquals(300, childMap.get("anykey"));
   }
 
   @Test
@@ -210,46 +208,4 @@ class MapWrapperTest {
     assertEquals("1", map.get(key));
     assertEquals("1", metaObj.getValue(key));
   }
-
-  static class FlatMapWrapperFactory implements ObjectWrapperFactory {
-    @Override
-    public boolean hasWrapperFor(Object object) {
-      return object instanceof Map;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public ObjectWrapper getWrapperFor(MetaObject metaObject, Object object) {
-      return new FlatMapWrapper(metaObject, (Map<String, Object>) object, metaObject.getObjectFactory());
-    }
-  }
-
-  static class FlatMapWrapper extends MapWrapper {
-    public FlatMapWrapper(MetaObject metaObject, Map<String, Object> map, ObjectFactory objectFactory) {
-      super(metaObject, map);
-    }
-
-    @Override
-    public Object get(PropertyTokenizer prop) {
-      String key;
-      if (prop.getChildren() == null) {
-        key = prop.getIndexedName();
-      } else {
-        key = prop.getIndexedName() + "." + prop.getChildren();
-      }
-      return map.get(key);
-    }
-
-    @Override
-    public void set(PropertyTokenizer prop, Object value) {
-      String key;
-      if (prop.getChildren() == null) {
-        key = prop.getIndexedName();
-      } else {
-        key = prop.getIndexedName() + "." + prop.getChildren();
-      }
-      map.put(key, value);
-    }
-  }
-
 }
