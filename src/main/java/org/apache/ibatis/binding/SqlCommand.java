@@ -18,6 +18,7 @@ package org.apache.ibatis.binding;
 import java.lang.reflect.Method;
 
 import org.apache.ibatis.annotations.Flush;
+import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
@@ -30,7 +31,8 @@ public class SqlCommand {
   public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
     final String methodName = method.getName();
     final Class<?> declaringClass = method.getDeclaringClass();
-    MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass, configuration);
+    MappedStatement ms = MapperBuilderAssistant.resolveMappedStatement(mapperInterface, methodName, declaringClass,
+        configuration);
     if (ms == null) {
       if (method.getAnnotation(Flush.class) == null) {
         throw new BindingException(
@@ -53,25 +55,5 @@ public class SqlCommand {
 
   public SqlCommandType getType() {
     return type;
-  }
-
-  private MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName, Class<?> declaringClass,
-      Configuration configuration) {
-    String statementId = mapperInterface.getName() + "." + methodName;
-    if (configuration.hasStatement(statementId)) {
-      return configuration.getMappedStatement(statementId);
-    }
-    if (mapperInterface.equals(declaringClass)) {
-      return null;
-    }
-    for (Class<?> superInterface : mapperInterface.getInterfaces()) {
-      if (declaringClass.isAssignableFrom(superInterface)) {
-        MappedStatement ms = resolveMappedStatement(superInterface, methodName, declaringClass, configuration);
-        if (ms != null) {
-          return ms;
-        }
-      }
-    }
-    return null;
   }
 }

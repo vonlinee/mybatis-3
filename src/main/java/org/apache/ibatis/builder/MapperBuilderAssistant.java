@@ -346,7 +346,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     if ((nestedSelect == null || nestedSelect.isEmpty()) && (foreignColumn == null || foreignColumn.isEmpty())) {
       composites = Collections.emptyList();
     } else {
-      composites = parseCompositeColumnName(column);
+      composites = parseCompositeColumnName(configuration, column);
     }
     return new ResultMapping.Builder(configuration, property, column, setterType.getValue()).jdbcType(jdbcType)
         .nestedQueryId(applyCurrentNamespace(nestedSelect, true))
@@ -406,7 +406,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return configuration.getLanguageDriver(langClass);
   }
 
-  private Set<String> parseMultipleColumnNames(String columnName) {
+  public static Set<String> parseMultipleColumnNames(String columnName) {
     Set<String> columns = new HashSet<>();
     if (columnName != null) {
       if (columnName.indexOf(',') > -1) {
@@ -422,7 +422,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return columns;
   }
 
-  private List<ResultMapping> parseCompositeColumnName(String columnName) {
+  public static List<ResultMapping> parseCompositeColumnName(Configuration configuration, String columnName) {
     List<ResultMapping> composites = new ArrayList<>();
     if (columnName != null && (columnName.indexOf('=') > -1 || columnName.indexOf(',') > -1)) {
       StringTokenizer parser = new StringTokenizer(columnName, "{}=, ", false);
@@ -468,5 +468,25 @@ public class MapperBuilderAssistant extends BaseBuilder {
       javaType = Object.class;
     }
     return javaType;
+  }
+
+  public static MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName,
+      Class<?> declaringClass, Configuration configuration) {
+    String statementId = mapperInterface.getName() + "." + methodName;
+    if (configuration.hasStatement(statementId)) {
+      return configuration.getMappedStatement(statementId);
+    }
+    if (mapperInterface.equals(declaringClass)) {
+      return null;
+    }
+    for (Class<?> superInterface : mapperInterface.getInterfaces()) {
+      if (declaringClass.isAssignableFrom(superInterface)) {
+        MappedStatement ms = resolveMappedStatement(superInterface, methodName, declaringClass, configuration);
+        if (ms != null) {
+          return ms;
+        }
+      }
+    }
+    return null;
   }
 }
