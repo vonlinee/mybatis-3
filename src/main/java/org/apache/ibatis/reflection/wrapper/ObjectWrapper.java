@@ -28,9 +28,6 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
  */
 public interface ObjectWrapper {
 
-  @Deprecated
-  Object get(PropertyTokenizer prop);
-
   /**
    * @param property
    *          like richType.richProperty, richMap[key2], richList[1]
@@ -38,9 +35,6 @@ public interface ObjectWrapper {
    * @return value
    */
   Object get(String property);
-
-  @Deprecated
-  void set(PropertyTokenizer prop, Object value);
 
   void set(String property, Object value);
 

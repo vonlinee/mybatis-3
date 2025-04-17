@@ -34,17 +34,7 @@ public class CollectionWrapper implements ObjectWrapper {
   }
 
   @Override
-  public Object get(PropertyTokenizer prop) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public Object get(String property) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void set(PropertyTokenizer prop, Object value) {
     throw new UnsupportedOperationException();
   }
 

@@ -24,27 +24,16 @@ import org.apache.ibatis.reflection.wrapper.ObjectWrapper;
 
 public class CustomObjectWrapper implements ObjectWrapper {
 
-  private final CustomCollection collection;
+  private final CustomCollection<Object> collection;
 
-  public CustomObjectWrapper(CustomCollection collection) {
+  public CustomObjectWrapper(CustomCollection<Object> collection) {
     this.collection = collection;
-  }
-
-  @Override
-  public Object get(PropertyTokenizer prop) {
-    // Not Implemented
-    return null;
   }
 
   @Override
   public Object get(String property) {
     // Not Implemented
     return null;
-  }
-
-  @Override
-  public void set(PropertyTokenizer prop, Object value) {
-    // Not Implemented
   }
 
   @Override
@@ -113,12 +102,12 @@ public class CustomObjectWrapper implements ObjectWrapper {
 
   @Override
   public void add(Object element) {
-    ((CustomCollection<Object>) collection).add(element);
+    collection.add(element);
   }
 
   @Override
   public <E> void addAll(List<E> element) {
-    ((CustomCollection<Object>) collection).addAll(element);
+    collection.addAll(element);
   }
 
 }

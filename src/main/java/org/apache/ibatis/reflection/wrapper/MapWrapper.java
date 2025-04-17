@@ -47,8 +47,7 @@ public class MapWrapper extends BaseWrapper {
     this.map = map;
   }
 
-  @Override
-  public Object get(PropertyTokenizer prop) {
+  protected Object get(PropertyTokenizer prop) {
     if (prop.hasNext()) {
       return getChildValue(prop);
     } else if (prop.getIndex() != null) {
@@ -63,8 +62,7 @@ public class MapWrapper extends BaseWrapper {
     return get(new PropertyTokenizer(property));
   }
 
-  @Override
-  public void set(PropertyTokenizer prop, Object value) {
+  protected void set(PropertyTokenizer prop, Object value) {
     if (prop.hasNext()) {
       setChildValue(prop, value);
     } else if (prop.getIndex() != null) {

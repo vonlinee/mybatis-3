@@ -1,8 +1,10 @@
 package org.apache.ibatis.reflection.wrapper;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 public class FlatMapWrapper extends MapWrapper {
@@ -10,8 +12,16 @@ public class FlatMapWrapper extends MapWrapper {
     super(metaObject, map);
   }
 
+  public FlatMapWrapper(Map<String, Object> map) {
+    super(SystemMetaObject.forObject(map), map);
+  }
+
+  public FlatMapWrapper() {
+    this(new HashMap<>());
+  }
+
   @Override
-  public Object get(PropertyTokenizer prop) {
+  protected Object get(PropertyTokenizer prop) {
     String key;
     if (prop.getChildren() == null) {
       key = prop.getIndexedName();
@@ -22,7 +32,7 @@ public class FlatMapWrapper extends MapWrapper {
   }
 
   @Override
-  public void set(PropertyTokenizer prop, Object value) {
+  protected void set(PropertyTokenizer prop, Object value) {
     String key;
     if (prop.getChildren() == null) {
       key = prop.getIndexedName();
