@@ -195,4 +195,8 @@ public class MapWrapper extends BaseWrapper {
     String paramName = new PropertyTokenizer(key).getName();
     return this.map.containsKey(paramName);
   }
+
+  public Map<String, Object> getMap() {
+    return map;
+  }
 }

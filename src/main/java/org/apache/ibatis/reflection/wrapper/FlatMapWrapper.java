@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 public class FlatMapWrapper extends MapWrapper {
@@ -13,11 +12,11 @@ public class FlatMapWrapper extends MapWrapper {
   }
 
   public FlatMapWrapper(Map<String, Object> map) {
-    super(SystemMetaObject.forObject(map), map);
+    super(map);
   }
 
   public FlatMapWrapper() {
-    this(new HashMap<>());
+    super(new HashMap<>());
   }
 
   @Override

@@ -15,10 +15,10 @@
  */
 package org.apache.ibatis.mapping;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.reflection.wrapper.FlatMapWrapper;
 import org.apache.ibatis.reflection.wrapper.MapWrapper;
 
 /**
@@ -35,15 +35,13 @@ public class BoundSql {
   private final String sql;
   private final List<ParameterMapping> parameterMappings;
   private final Object parameterObject;
-  private final Map<String, Object> additionalParameters;
   private final MapWrapper metaParameters;
 
   public BoundSql(String sql, List<ParameterMapping> parameterMappings, Object parameterObject) {
     this.sql = sql;
     this.parameterMappings = parameterMappings;
     this.parameterObject = parameterObject;
-    this.additionalParameters = new HashMap<>();
-    this.metaParameters = new MapWrapper();
+    this.metaParameters = new FlatMapWrapper();
   }
 
   public String getSql() {
@@ -71,6 +69,6 @@ public class BoundSql {
   }
 
   public Map<String, Object> getAdditionalParameters() {
-    return additionalParameters;
+    return metaParameters.getMap();
   }
 }
