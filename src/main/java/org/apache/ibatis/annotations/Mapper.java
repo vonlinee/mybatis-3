@@ -39,7 +39,15 @@ import java.lang.annotation.Target;
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+@Target({ ElementType.TYPE })
 public @interface Mapper {
-  // Interface Mapper
+
+  /**
+   * namespace of this mapper statement id will be ${namespace}.${methodName}
+   *
+   * @return namespace, default the qualified name of the annotated class.
+   *
+   * @see Class#getSimpleName()
+   */
+  String namespace() default "";
 }

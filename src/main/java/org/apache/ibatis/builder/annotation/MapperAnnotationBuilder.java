@@ -46,6 +46,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Lang;
 import org.apache.ibatis.annotations.MapKey;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Options.FlushCachePolicy;
 import org.apache.ibatis.annotations.Param;
@@ -72,6 +73,7 @@ import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.FetchType;
@@ -294,7 +296,16 @@ public class MapperAnnotationBuilder {
       final SqlCommandType sqlCommandType = statementAnnotation.getSqlCommandType();
       final Options options = getAnnotationWrapper(method, false, Options.class).map(x -> (Options) x.getAnnotation())
           .orElse(null);
-      final String mappedStatementId = type.getName() + "." + method.getName();
+
+      String namespace = type.getName();
+      if (type.isAnnotationPresent(Mapper.class)) {
+        Mapper mapper = type.getAnnotation(Mapper.class);
+        if (StringUtils.hasText(mapper.namespace())) {
+          namespace = mapper.namespace();
+        }
+      }
+
+      final String mappedStatementId = namespace + "." + method.getName();
 
       final KeyGenerator keyGenerator;
       String keyProperty = null;
