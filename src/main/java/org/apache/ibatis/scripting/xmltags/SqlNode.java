@@ -21,5 +21,12 @@ import org.apache.ibatis.scripting.SqlBuildContext;
  * @author Clinton Begin
  */
 public interface SqlNode {
+
+  /**
+   * apply the sql build process.
+   *
+   * @param context
+   *          context
+   */
   boolean apply(SqlBuildContext context);
 }

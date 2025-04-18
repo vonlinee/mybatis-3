@@ -71,7 +71,7 @@ public class VelocitySqlSourceBuilder extends BaseBuilder {
     }
 
     private ParameterMapping buildParameterMapping(String content) {
-      Map<String, String> propertiesMap = parseParameterMapping(content);
+      ParameterExpression propertiesMap = parseParameterMapping(content);
       String property = propertiesMap.get("property");
       JdbcType jdbcType = resolveJdbcType(propertiesMap.get("jdbcType"));
       Class<?> propertyType;
@@ -139,7 +139,7 @@ public class VelocitySqlSourceBuilder extends BaseBuilder {
       return builder.build();
     }
 
-    private Map<String, String> parseParameterMapping(String content) {
+    private ParameterExpression parseParameterMapping(String content) {
       try {
         return new ParameterExpression(content);
       } catch (BuilderException ex) {

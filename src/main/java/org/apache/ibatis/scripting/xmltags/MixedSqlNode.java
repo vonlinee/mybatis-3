@@ -32,7 +32,9 @@ public class MixedSqlNode implements SqlNode {
 
   @Override
   public boolean apply(SqlBuildContext context) {
-    contents.forEach(node -> node.apply(context));
+    for (int i = 0; i < contents.size(); i++) {
+      contents.get(i).apply(context);
+    }
     return true;
   }
 

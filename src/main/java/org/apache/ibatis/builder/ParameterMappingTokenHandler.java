@@ -81,7 +81,7 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
   }
 
   private ParameterMapping buildParameterMapping(String content) {
-    Map<String, String> propertiesMap = parseParameterMapping(content);
+    ParameterExpression propertiesMap = parseParameterMapping(content);
 
     final String property = propertiesMap.remove("property");
     final JdbcType jdbcType = resolveJdbcType(propertiesMap.remove("jdbcType"));
@@ -181,7 +181,7 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
     return Object.class;
   }
 
-  private Map<String, String> parseParameterMapping(String content) {
+  private ParameterExpression parseParameterMapping(String content) {
     try {
       return new ParameterExpression(content);
     } catch (BuilderException ex) {
