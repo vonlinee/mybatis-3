@@ -24,6 +24,10 @@ import org.apache.ibatis.type.SimpleTypeRegistry;
  * @author Clinton Begin
  */
 public class TextSqlNode implements SqlNode {
+
+  /**
+   * the text
+   */
   private final String text;
 
   public TextSqlNode(String text) {
@@ -32,6 +36,10 @@ public class TextSqlNode implements SqlNode {
 
   public boolean isDynamic() {
     return DynamicCheckerTokenParser.isDynamic(text);
+  }
+
+  public String getText() {
+    return text;
   }
 
   @Override
