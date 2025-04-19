@@ -909,7 +909,7 @@ class SqlProviderTest {
         return "SELECT '" + map.get("value") + "' FROM INFORMATION_SCHEMA.SYSTEM_USERS";
       }
 
-      public static String providerContextAndParamMap(ProviderContext context, ParamMap<Object> map) {
+      public static String providerContextAndParamMap(ProviderContext context, ParamMap map) {
         return "SELECT '" + map.get("value") + "' FROM INFORMATION_SCHEMA.SYSTEM_USERS";
       }
 

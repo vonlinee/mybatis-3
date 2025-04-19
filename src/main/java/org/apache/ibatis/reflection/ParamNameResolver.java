@@ -163,7 +163,7 @@ public class ParamNameResolver {
       Object value = args[names.firstKey()];
       return wrapToMapIfCollection(value, useActualParamName ? names.get(names.firstKey()) : null);
     } else {
-      final Map<String, Object> param = new ParamMap<>();
+      final ParamMap param = new ParamMap();
       int i = 0;
       for (Map.Entry<Integer, String> entry : names.entrySet()) {
         param.put(entry.getValue(), args[entry.getKey()]);
@@ -186,7 +186,7 @@ public class ParamNameResolver {
 
     if (type == null && unindexed.startsWith(GENERIC_NAME_PREFIX)) {
       try {
-        Integer paramIndex = Integer.valueOf(unindexed.substring(GENERIC_NAME_PREFIX.length())) - 1;
+        Integer paramIndex = Integer.parseInt(unindexed.substring(GENERIC_NAME_PREFIX.length())) - 1;
         unindexed = names.get(paramIndex);
         if (unindexed != null) {
           type = typeMap.get(unindexed);
@@ -221,7 +221,7 @@ public class ParamNameResolver {
    */
   public static Object wrapToMapIfCollection(Object object, String actualParamName) {
     if (object instanceof Collection) {
-      ParamMap<Object> map = new ParamMap<>();
+      ParamMap map = new ParamMap();
       map.put("collection", object);
       if (object instanceof List) {
         map.put("list", object);
@@ -230,7 +230,7 @@ public class ParamNameResolver {
       return map;
     }
     if (object != null && object.getClass().isArray()) {
-      ParamMap<Object> map = new ParamMap<>();
+      ParamMap map = new ParamMap();
       map.put("array", object);
       Optional.ofNullable(actualParamName).ifPresent(name -> map.put(name, object));
       return map;
