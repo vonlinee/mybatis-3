@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -47,14 +47,15 @@ class ValueInMapTest {
         "org/apache/ibatis/submitted/valueinmap/CreateDB.sql");
   }
 
-  @Test // issue #165
+  @Test
+  // issue #165
   void shouldWorkWithAPropertyNamedValue() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Map<String, String> map = new HashMap<>();
       map.put("table", "users");
       map.put("column", "name");
       map.put("value", "User1");
-      Integer count = sqlSession.selectOne("count", map);
+      Integer count = sqlSession.createSelect("count").bind(map).toInteger();
       Assertions.assertEquals(Integer.valueOf(1), count);
     }
   }
@@ -64,7 +65,7 @@ class ValueInMapTest {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       List<String> list = new ArrayList<>();
       list.add("users");
-      Assertions.assertThrows(PersistenceException.class, () -> sqlSession.selectOne("count2", list));
+      Assertions.assertThrows(PersistenceException.class, () -> sqlSession.createSelect("count2").bind(list).execute());
     }
   }
 

@@ -258,8 +258,10 @@ class LocallySpecifiedTypeHandlerResolutionTest {
   @Test
   void specifyHandlerInXmlResultMap() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      User user = sqlSession.selectOne(
-          "org.apache.ibatis.submitted.typebasedtypehandlerresolution.LocallySpecifiedHandlerMapper.selectXml", 1);
+      User user = sqlSession
+          .createSelect(
+              "org.apache.ibatis.submitted.typebasedtypehandlerresolution.LocallySpecifiedHandlerMapper.selectXml")
+          .bind(1).toOne(User.class);
       assertEquals("garden", user.getStrvalue().getValue());
       assertEquals(31, user.getIntvalue().getValue());
       assertEquals(LocalDate.of(2020, 5, 11), user.getDatevalue());

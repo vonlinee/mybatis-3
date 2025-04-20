@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.apache.ibatis.cursor.Cursor;
@@ -155,103 +154,33 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
   }
 
   @Override
-  public <T> T selectOne(String statement) {
-    return sqlSessionProxy.selectOne(statement);
+  public Select createSelect(String statement) {
+    return sqlSessionProxy.createSelect(statement);
   }
 
   @Override
-  public <T> T selectOne(String statement, Object parameter) {
-    return sqlSessionProxy.selectOne(statement, parameter);
+  public Insert createInsert(String statement) {
+    return sqlSessionProxy.createInsert(statement);
   }
 
   @Override
-  public <K, V> Map<K, V> selectMap(String statement, String mapKey) {
-    return sqlSessionProxy.selectMap(statement, mapKey);
+  public Update createUpdate(String statement) {
+    return sqlSessionProxy.createUpdate(statement);
   }
 
   @Override
-  public <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey) {
-    return sqlSessionProxy.selectMap(statement, parameter, mapKey);
+  public boolean markDirty(boolean dirty) {
+    return sqlSessionProxy.markDirty(dirty);
   }
 
   @Override
-  public <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds) {
-    return sqlSessionProxy.selectMap(statement, parameter, mapKey, rowBounds);
+  public boolean isDirty() {
+    return sqlSessionProxy.isDirty();
   }
 
   @Override
-  public <T> Cursor<T> selectCursor(String statement) {
-    return sqlSessionProxy.selectCursor(statement);
-  }
-
-  @Override
-  public <T> Cursor<T> selectCursor(String statement, Object parameter) {
-    return sqlSessionProxy.selectCursor(statement, parameter);
-  }
-
-  @Override
-  public <T> Cursor<T> selectCursor(String statement, Object parameter, RowBounds rowBounds) {
-    return sqlSessionProxy.selectCursor(statement, parameter, rowBounds);
-  }
-
-  @Override
-  public <E> List<E> selectList(String statement) {
-    return sqlSessionProxy.selectList(statement);
-  }
-
-  @Override
-  public <E> List<E> selectList(String statement, Object parameter) {
-    return sqlSessionProxy.selectList(statement, parameter);
-  }
-
-  @Override
-  public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
-    return sqlSessionProxy.selectList(statement, parameter, rowBounds);
-  }
-
-  @Override
-  public void select(String statement, ResultHandler handler) {
-    sqlSessionProxy.select(statement, handler);
-  }
-
-  @Override
-  public void select(String statement, Object parameter, ResultHandler handler) {
-    sqlSessionProxy.select(statement, parameter, handler);
-  }
-
-  @Override
-  public void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
-    sqlSessionProxy.select(statement, parameter, rowBounds, handler);
-  }
-
-  @Override
-  public int insert(String statement) {
-    return sqlSessionProxy.insert(statement);
-  }
-
-  @Override
-  public int insert(String statement, Object parameter) {
-    return sqlSessionProxy.insert(statement, parameter);
-  }
-
-  @Override
-  public int update(String statement) {
-    return sqlSessionProxy.update(statement);
-  }
-
-  @Override
-  public int update(String statement, Object parameter) {
-    return sqlSessionProxy.update(statement, parameter);
-  }
-
-  @Override
-  public int delete(String statement) {
-    return sqlSessionProxy.delete(statement);
-  }
-
-  @Override
-  public int delete(String statement, Object parameter) {
-    return sqlSessionProxy.delete(statement, parameter);
+  public Delete createDelete(String statement) {
+    return sqlSessionProxy.createDelete(statement);
   }
 
   @Override
@@ -266,6 +195,11 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
       throw new SqlSessionException("Error:  Cannot get connection.  No managed session is started.");
     }
     return sqlSession.getConnection();
+  }
+
+  @Override
+  public <T> void registerCursor(Cursor<T> cursor) {
+    sqlSessionProxy.registerCursor(cursor);
   }
 
   @Override
@@ -350,6 +284,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
           throw ExceptionUtil.unwrapThrowable(t);
         }
       }
+      // TODO fix bug: session closed
       try (SqlSession autoSqlSession = openSession()) {
         try {
           final Object result = method.invoke(autoSqlSession, args);

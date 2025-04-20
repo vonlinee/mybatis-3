@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ class DynSqlTest {
       parameter.setNames(names);
 
       List<Map<String, Object>> answer = sqlSession
-          .selectList("org.apache.ibatis.submitted.dynsql2.dynamicSelectWithTypeHandler", parameter);
+          .createSelect("org.apache.ibatis.submitted.dynsql2.dynamicSelectWithTypeHandler").bind(parameter).toMapList();
 
       assertEquals(2, answer.size());
     }
@@ -72,7 +72,8 @@ class DynSqlTest {
   @Test
   void simpleSelect() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Map<String, Object> answer = sqlSession.selectOne("org.apache.ibatis.submitted.dynsql2.simpleSelect", 1);
+      Map<String, Object> answer = sqlSession.createSelect("org.apache.ibatis.submitted.dynsql2.simpleSelect").bind(1)
+          .toMap();
 
       assertEquals(1, answer.get("ID"));
       assertEquals("Fred", answer.get("FIRSTNAME"));

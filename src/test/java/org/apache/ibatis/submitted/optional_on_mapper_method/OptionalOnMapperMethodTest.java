@@ -15,10 +15,7 @@
  */
 package org.apache.ibatis.submitted.optional_on_mapper_method;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
@@ -27,6 +24,7 @@ import java.util.Optional;
 
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.Select;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -37,9 +35,9 @@ import org.mockito.Mockito;
 /**
  * Tests for support the {@code java.util.Optional} as return type of mapper method.
  *
- * @since 3.5.0
- *
  * @author Kazuki Shimizu
+ *
+ * @since 3.5.0
  */
 class OptionalOnMapperMethodTest {
 
@@ -102,7 +100,13 @@ class OptionalOnMapperMethodTest {
       User mockUser = new User();
       mockUser.setName("mock user");
       Optional<User> optionalMockUser = Optional.of(mockUser);
-      doReturn(optionalMockUser).when(sqlSession).selectOne(any(String.class), any(Object.class));
+
+      Select select = Mockito.mock(Select.class);
+      doReturn(select).when(sqlSession).createSelect(any(String.class));
+
+      doReturn(select).when(select).bind(Mockito.any());
+
+      doReturn(optionalMockUser).when(select).toOne();
 
       Mapper mapper = sqlSession.getMapper(Mapper.class);
       Optional<User> user = mapper.getUserUsingAnnotation(3);

@@ -19,15 +19,7 @@ import static com.googlecode.catchexception.apis.BDDCatchException.caughtExcepti
 import static com.googlecode.catchexception.apis.BDDCatchException.when;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -105,6 +97,7 @@ class BindingTest {
       BoundAuthorMapper mapper = session.getMapper(BoundAuthorMapper.class);
       List<Post> posts = mapper.findPostsInList(new ArrayList<>() {
         private static final long serialVersionUID = 1L;
+
         {
           add(1);
           add(3);
@@ -233,12 +226,12 @@ class BindingTest {
   void shouldExecuteMultipleBoundSelectOfBlogsByIdInWithProvidedResultHandlerBetweenSessions() {
     final DefaultResultHandler handler = new DefaultResultHandler();
     try (SqlSession session = sqlSessionFactory.openSession()) {
-      session.select("selectBlogsAsMapById", handler);
+      session.createSelect("selectBlogsAsMapById").resultHandler(handler).execute();
     }
 
     final DefaultResultHandler moreHandler = new DefaultResultHandler();
     try (SqlSession session = sqlSessionFactory.openSession()) {
-      session.select("selectBlogsAsMapById", moreHandler);
+      session.createSelect("selectBlogsAsMapById").resultHandler(moreHandler).execute();
     }
     assertEquals(2, handler.getResultList().size());
     assertEquals(2, moreHandler.getResultList().size());
@@ -248,10 +241,10 @@ class BindingTest {
   void shouldExecuteMultipleBoundSelectOfBlogsByIdInWithProvidedResultHandlerInSameSession() {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       final DefaultResultHandler handler = new DefaultResultHandler();
-      session.select("selectBlogsAsMapById", handler);
+      session.createSelect("selectBlogsAsMapById").resultHandler(handler).execute();
 
       final DefaultResultHandler moreHandler = new DefaultResultHandler();
-      session.select("selectBlogsAsMapById", moreHandler);
+      session.createSelect("selectBlogsAsMapById").resultHandler(moreHandler).execute();
 
       assertEquals(2, handler.getResultList().size());
       assertEquals(2, moreHandler.getResultList().size());
@@ -396,7 +389,8 @@ class BindingTest {
     }
   }
 
-  @Test // issue #480 and #101
+  @Test
+  // issue #480 and #101
   void shouldExecuteBoundSelectBlogUsingConstructorWithResultMapCollection() {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       BoundBlogMapper mapper = session.getMapper(BoundBlogMapper.class);
@@ -428,6 +422,7 @@ class BindingTest {
       BoundBlogMapper mapper = session.getMapper(BoundBlogMapper.class);
       Map<String, Object> blog = mapper.selectBlogAsMap(new HashMap<>() {
         private static final long serialVersionUID = 1L;
+
         {
           put("id", 1);
         }
@@ -546,7 +541,8 @@ class BindingTest {
     }
   }
 
-  @Test // Decided that maps are dynamic so no existent params do not fail
+  @Test
+  // Decided that maps are dynamic so no existent params do not fail
   void shouldFailWhenSelectingOneBlogWithNonExistentNestedParam() {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       BoundBlogMapper mapper = session.getMapper(BoundBlogMapper.class);

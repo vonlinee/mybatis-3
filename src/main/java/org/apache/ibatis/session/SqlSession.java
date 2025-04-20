@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,6 +32,71 @@ import org.apache.ibatis.executor.BatchResult;
 public interface SqlSession extends Closeable {
 
   /**
+   * create an insert statement.
+   *
+   * @param statement
+   *          Unique identifier matching the statement to execute.
+   *
+   * @return int The number of rows affected by the insert.
+   */
+  Insert createInsert(String statement);
+
+  /**
+   * create an delete statement.
+   *
+   * @param statement
+   *          Unique identifier matching the statement to execute.
+   *
+   * @return int The number of rows affected by the insert.
+   */
+  Delete createDelete(String statement);
+
+  /**
+   * Execute an update statement. The number of rows affected will be returned.
+   *
+   * @param statement
+   *          Unique identifier matching the statement to execute.
+   *
+   * @return int The number of rows affected by the update.
+   */
+  Update createUpdate(String statement);
+
+  /**
+   * create an select statement.
+   *
+   * @param statement
+   *          Unique identifier matching the statement to execute.
+   *
+   * @return int The number of rows affected by the insert.
+   */
+  Select createSelect(String statement);
+
+  /**
+   * Retrieve inner database connection.
+   *
+   * @return DataBase connection
+   */
+  Connection getConnection();
+
+  /**
+   * Commit inner database connection.
+   */
+  void commit();
+
+  void commit(boolean force);
+
+  /**
+   * Rollback inner database connection.
+   */
+  void rollback();
+
+  void rollback(boolean force);
+
+  boolean markDirty(boolean dirty);
+
+  boolean isDirty();
+
+  /**
    * Retrieve a single row mapped from the statement key.
    *
    * @param <T>
@@ -41,7 +106,9 @@ public interface SqlSession extends Closeable {
    *
    * @return Mapped object
    */
-  <T> T selectOne(String statement);
+  default <T> T selectOne(String statement) {
+    return createSelect(statement).toOne();
+  }
 
   /**
    * Retrieve a single row mapped from the statement key and parameter.
@@ -55,7 +122,9 @@ public interface SqlSession extends Closeable {
    *
    * @return Mapped object
    */
-  <T> T selectOne(String statement, Object parameter);
+  default <T> T selectOne(String statement, Object parameter) {
+    return createSelect(statement).bind(parameter).toOne();
+  }
 
   /**
    * Retrieve a list of mapped objects from the statement key.
@@ -67,7 +136,9 @@ public interface SqlSession extends Closeable {
    *
    * @return List of mapped object
    */
-  <E> List<E> selectList(String statement);
+  default <E> List<E> selectList(String statement) {
+    return createSelect(statement).toList();
+  }
 
   /**
    * Retrieve a list of mapped objects from the statement key and parameter.
@@ -81,7 +152,9 @@ public interface SqlSession extends Closeable {
    *
    * @return List of mapped object
    */
-  <E> List<E> selectList(String statement, Object parameter);
+  default <E> List<E> selectList(String statement, Object parameter) {
+    return createSelect(statement).bind(parameter).toList();
+  }
 
   /**
    * Retrieve a list of mapped objects from the statement key and parameter, within the specified row bounds.
@@ -97,11 +170,13 @@ public interface SqlSession extends Closeable {
    *
    * @return List of mapped object
    */
-  <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds);
+  default <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
+    return createSelect(statement).bind(parameter).rowBounds(rowBounds).toList();
+  }
 
   /**
    * The selectMap is a special case in that it is designed to convert a list of results into a Map based on one of the
-   * properties in the resulting objects. Eg. Return a of Map[Integer,Author] for selectMap("selectAuthors","id")
+   * properties in the resulting objects. E.g. Return an of Map[Integer,Author] for selectMap("selectAuthors","id")
    *
    * @param <K>
    *          the returned Map keys type
@@ -114,7 +189,9 @@ public interface SqlSession extends Closeable {
    *
    * @return Map containing key pair data.
    */
-  <K, V> Map<K, V> selectMap(String statement, String mapKey);
+  default <K, V> Map<K, V> selectMap(String statement, String mapKey) {
+    return createSelect(statement).toMap(mapKey);
+  }
 
   /**
    * The selectMap is a special case in that it is designed to convert a list of results into a Map based on one of the
@@ -133,7 +210,9 @@ public interface SqlSession extends Closeable {
    *
    * @return Map containing key pair data.
    */
-  <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey);
+  default <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey) {
+    return createSelect(statement).bind(parameter).toMap(mapKey);
+  }
 
   /**
    * The selectMap is a special case in that it is designed to convert a list of results into a Map based on one of the
@@ -154,7 +233,9 @@ public interface SqlSession extends Closeable {
    *
    * @return Map containing key pair data.
    */
-  <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds);
+  default <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds) {
+    return createSelect(statement).bind(parameter).rowBounds(rowBounds).toMap(mapKey);
+  }
 
   /**
    * A Cursor offers the same results as a List, except it fetches data lazily using an Iterator.
@@ -166,7 +247,9 @@ public interface SqlSession extends Closeable {
    *
    * @return Cursor of mapped objects
    */
-  <T> Cursor<T> selectCursor(String statement);
+  default <T> Cursor<T> selectCursor(String statement) {
+    return createSelect(statement).toCursor();
+  }
 
   /**
    * A Cursor offers the same results as a List, except it fetches data lazily using an Iterator.
@@ -180,7 +263,9 @@ public interface SqlSession extends Closeable {
    *
    * @return Cursor of mapped objects
    */
-  <T> Cursor<T> selectCursor(String statement, Object parameter);
+  default <T> Cursor<T> selectCursor(String statement, Object parameter) {
+    return createSelect(statement).bind(parameter).toCursor();
+  }
 
   /**
    * A Cursor offers the same results as a List, except it fetches data lazily using an Iterator.
@@ -196,7 +281,9 @@ public interface SqlSession extends Closeable {
    *
    * @return Cursor of mapped objects
    */
-  <T> Cursor<T> selectCursor(String statement, Object parameter, RowBounds rowBounds);
+  default <T> Cursor<T> selectCursor(String statement, Object parameter, RowBounds rowBounds) {
+    return createSelect(statement).bind(parameter).rowBounds(rowBounds).toCursor();
+  }
 
   /**
    * Retrieve a single row mapped from the statement key and parameter using a {@code ResultHandler}.
@@ -208,7 +295,9 @@ public interface SqlSession extends Closeable {
    * @param handler
    *          ResultHandler that will handle each retrieved row
    */
-  void select(String statement, Object parameter, ResultHandler handler);
+  default <T> void select(String statement, Object parameter, ResultHandler<T> handler) {
+    createSelect(statement).bind(parameter).resultHandler(handler).execute();
+  }
 
   /**
    * Retrieve a single row mapped from the statement using a {@code ResultHandler}.
@@ -218,7 +307,9 @@ public interface SqlSession extends Closeable {
    * @param handler
    *          ResultHandler that will handle each retrieved row
    */
-  void select(String statement, ResultHandler handler);
+  default <T> void select(String statement, ResultHandler<T> handler) {
+    createSelect(statement).resultHandler(handler).execute();
+  }
 
   /**
    * Retrieve a single row mapped from the statement key and parameter using a {@code ResultHandler} and
@@ -233,17 +324,23 @@ public interface SqlSession extends Closeable {
    * @param handler
    *          ResultHandler that will handle each retrieved row
    */
-  void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler);
+  default <T> void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler<T> handler) {
+    createSelect(statement).bind(parameter).resultHandler(handler).rowBounds(rowBounds).execute();
+  }
 
   /**
-   * Execute an insert statement.
+   * Execute an update statement. The number of rows affected will be returned.
    *
    * @param statement
    *          Unique identifier matching the statement to execute.
+   * @param parameter
+   *          A parameter object to pass to the statement.
    *
-   * @return int The number of rows affected by the insert.
+   * @return int The number of rows affected by the update.
    */
-  int insert(String statement);
+  default int update(String statement, Object parameter) {
+    return createUpdate(statement).bind(parameter).execute();
+  }
 
   /**
    * Execute an insert statement with the given parameter object. Any generated autoincrement values or selectKey
@@ -256,29 +353,9 @@ public interface SqlSession extends Closeable {
    *
    * @return int The number of rows affected by the insert.
    */
-  int insert(String statement, Object parameter);
-
-  /**
-   * Execute an update statement. The number of rows affected will be returned.
-   *
-   * @param statement
-   *          Unique identifier matching the statement to execute.
-   *
-   * @return int The number of rows affected by the update.
-   */
-  int update(String statement);
-
-  /**
-   * Execute an update statement. The number of rows affected will be returned.
-   *
-   * @param statement
-   *          Unique identifier matching the statement to execute.
-   * @param parameter
-   *          A parameter object to pass to the statement.
-   *
-   * @return int The number of rows affected by the update.
-   */
-  int update(String statement, Object parameter);
+  default int insert(String statement, Object parameter) {
+    return createInsert(statement).bind(parameter).execute();
+  }
 
   /**
    * Execute a delete statement. The number of rows affected will be returned.
@@ -286,9 +363,11 @@ public interface SqlSession extends Closeable {
    * @param statement
    *          Unique identifier matching the statement to execute.
    *
-   * @return int The number of rows affected by the delete.
+   * @return int The number of rows affected by the deletion.
    */
-  int delete(String statement);
+  default int delete(String statement) {
+    return delete(statement, null);
+  }
 
   /**
    * Execute a delete statement. The number of rows affected will be returned.
@@ -298,39 +377,11 @@ public interface SqlSession extends Closeable {
    * @param parameter
    *          A parameter object to pass to the statement.
    *
-   * @return int The number of rows affected by the delete.
+   * @return int The number of rows affected by the deletion.
    */
-  int delete(String statement, Object parameter);
-
-  /**
-   * Flushes batch statements and commits database connection. Note that database connection will not be committed if no
-   * updates/deletes/inserts were called. To force the commit call {@link SqlSession#commit(boolean)}
-   */
-  void commit();
-
-  /**
-   * Flushes batch statements and commits database connection.
-   *
-   * @param force
-   *          forces connection commit
-   */
-  void commit(boolean force);
-
-  /**
-   * Discards pending batch statements and rolls database connection back. Note that database connection will not be
-   * rolled back if no updates/deletes/inserts were called. To force the rollback call
-   * {@link SqlSession#rollback(boolean)}
-   */
-  void rollback();
-
-  /**
-   * Discards pending batch statements and rolls database connection back. Note that database connection will not be
-   * rolled back if no updates/deletes/inserts were called.
-   *
-   * @param force
-   *          forces connection rollback
-   */
-  void rollback(boolean force);
+  default int delete(String statement, Object parameter) {
+    return createDelete(statement).bind(parameter).execute();
+  }
 
   /**
    * Flushes batch statements.
@@ -371,10 +422,5 @@ public interface SqlSession extends Closeable {
    */
   <T> T getMapper(Class<T> type);
 
-  /**
-   * Retrieves inner database connection.
-   *
-   * @return Connection
-   */
-  Connection getConnection();
+  <T> void registerCursor(Cursor<T> cursor);
 }

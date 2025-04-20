@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -46,15 +46,15 @@ class NonFullyQualifiedNamespaceTest {
       initDb(sqlSessionFactory);
 
       try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-        Person person = sqlSession.selectOne("person namespace.select", 1);
+        Person person = sqlSession.createSelect("person namespace.select").bind(1).toOne(Person.class);
         assertEquals((Integer) 1, person.getId());
         assertEquals(2, person.getPets().size());
         assertEquals((Integer) 2, person.getPets().get(1).getId());
 
-        Pet pet = sqlSession.selectOne("person namespace.selectPet", 1);
+        Pet pet = sqlSession.createSelect("person namespace.selectPet").bind(1).toOne(Pet.class);
         assertEquals(Integer.valueOf(1), pet.getId());
 
-        Pet pet2 = sqlSession.selectOne("pet namespace.select", 3);
+        Pet pet2 = sqlSession.createSelect("pet namespace.select").bind(3).toOne(Pet.class);
         assertEquals((Integer) 3, pet2.getId());
         assertEquals((Integer) 2, pet2.getOwner().getId());
       }

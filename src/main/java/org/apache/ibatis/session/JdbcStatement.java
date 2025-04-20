@@ -13,24 +13,29 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.mapping;
+package org.apache.ibatis.session;
 
-/**
- * @author Clinton Begin
- */
-public enum SqlCommandType {
+import org.apache.ibatis.mapping.SqlCommandType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-  UNKNOWN,
+public interface JdbcStatement<S extends JdbcStatement<S>> {
 
-  INSERT,
+  @NotNull
+  SqlCommandType getSqlCommandType();
 
-  UPDATE,
+  int execute();
 
-  DELETE,
+  /**
+   * @param parameter
+   *          A parameter object to pass to the statement.
+   */
+  @NotNull
+  S bind(Object parameter);
 
-  SELECT,
-
-  FLUSH,
-
-  BATCH
+  /**
+   * @return current sql
+   */
+  @Nullable
+  String getSql();
 }

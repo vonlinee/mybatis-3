@@ -13,24 +13,16 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.mapping;
+package org.apache.ibatis.session;
 
-/**
- * @author Clinton Begin
- */
-public enum SqlCommandType {
+import java.sql.Statement;
 
-  UNKNOWN,
+public interface Insert extends JdbcStatement<Insert> {
 
-  INSERT,
-
-  UPDATE,
-
-  DELETE,
-
-  SELECT,
-
-  FLUSH,
-
-  BATCH
+  /**
+   * @return affected rows
+   *
+   * @see Statement#getUpdateCount()
+   */
+  int execute();
 }

@@ -75,8 +75,8 @@ class GloballyRegisteredTypeHandlerResolutionTest {
       {
         User user = new User();
         user.setId(12);
-        user.setStrvalue(new FuzzyBean<String>("park"));
-        user.setIntvalue(new FuzzyBean<Integer>(7));
+        user.setStrvalue(new FuzzyBean<>("park"));
+        user.setIntvalue(new FuzzyBean<>(7));
         user.setStrings(Arrays.asList("aa", "bb"));
         user.setIntegers(Arrays.asList(11, 22));
         mapper.insertUser(user);
@@ -98,8 +98,8 @@ class GloballyRegisteredTypeHandlerResolutionTest {
       {
         User user = new User();
         user.setId(13);
-        user.setStrvalue(new FuzzyBean<String>("well"));
-        user.setIntvalue(new FuzzyBean<Integer>(23));
+        user.setStrvalue(new FuzzyBean<>("well"));
+        user.setIntvalue(new FuzzyBean<>(23));
         user.setStrings(Arrays.asList("aa", "bb"));
         user.setIntegers(Arrays.asList(11, 22));
         mapper.insertUserMultiParam(user, "whatevs");
@@ -117,8 +117,10 @@ class GloballyRegisteredTypeHandlerResolutionTest {
   @Test
   void handlerResolutionInXmlResultMap() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      User user = sqlSession.selectOne(
-          "org.apache.ibatis.submitted.typebasedtypehandlerresolution.GloballyRegisteredHandlerMapper.selectXml", 1);
+      User user = sqlSession
+          .createSelect(
+              "org.apache.ibatis.submitted.typebasedtypehandlerresolution.GloballyRegisteredHandlerMapper.selectXml")
+          .bind(1).toOne();
       assertEquals("garden", user.getStrvalue().getValue());
       assertEquals(31, user.getIntvalue().getValue());
       assertEquals(Arrays.asList("a", "b", "c"), user.getStrings());
@@ -132,8 +134,8 @@ class GloballyRegisteredTypeHandlerResolutionTest {
       {
         User user = new User();
         user.setId(13);
-        user.setStrvalue(new FuzzyBean<String>("pond"));
-        user.setIntvalue(new FuzzyBean<Integer>(23));
+        user.setStrvalue(new FuzzyBean<>("pond"));
+        user.setIntvalue(new FuzzyBean<>(23));
         user.setStrings(Arrays.asList("aa", "bb"));
         user.setIntegers(Arrays.asList(11, 22));
         sqlSession.insert(
@@ -157,8 +159,8 @@ class GloballyRegisteredTypeHandlerResolutionTest {
       {
         User user = new User();
         user.setId(14);
-        user.setStrvalue(new FuzzyBean<String>("library"));
-        user.setIntvalue(new FuzzyBean<Integer>(38));
+        user.setStrvalue(new FuzzyBean<>("library"));
+        user.setIntvalue(new FuzzyBean<>(38));
         user.setStrings(Arrays.asList("aa", "bb"));
         user.setIntegers(Arrays.asList(11, 22));
         sqlSession.insert(
@@ -189,7 +191,7 @@ class GloballyRegisteredTypeHandlerResolutionTest {
   void shouldHandlerBeAppliedToSoleParam() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       GloballyRegisteredHandlerMapper mapper = sqlSession.getMapper(GloballyRegisteredHandlerMapper.class);
-      User user = mapper.getUserByFuzzyBean(new FuzzyBean<String>("garden"));
+      User user = mapper.getUserByFuzzyBean(new FuzzyBean<>("garden"));
       assertEquals(1, user.getId());
     }
   }
@@ -198,7 +200,7 @@ class GloballyRegisteredTypeHandlerResolutionTest {
   void shouldHandlerBeAppliedToMultiParams() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       GloballyRegisteredHandlerMapper mapper = sqlSession.getMapper(GloballyRegisteredHandlerMapper.class);
-      User user = mapper.getUserByFuzzyBeans(new FuzzyBean<String>("garden"), new FuzzyBean<Integer>(31));
+      User user = mapper.getUserByFuzzyBeans(new FuzzyBean<>("garden"), new FuzzyBean<>(31));
       assertEquals(1, user.getId());
     }
   }

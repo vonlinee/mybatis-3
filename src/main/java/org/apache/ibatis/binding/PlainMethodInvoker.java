@@ -31,18 +31,15 @@ import org.apache.ibatis.session.SqlSession;
 
 class PlainMethodInvoker implements MapperMethodInvoker {
   private final MapperMethod mapperMethod;
+  private final SqlCommand command;
 
   public PlainMethodInvoker(Class<?> mapperInterface, Method method, Configuration configuration) {
     this.mapperMethod = new MapperMethod(mapperInterface, method, configuration);
+    this.command = this.mapperMethod.getCommand();
   }
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args, SqlSession sqlSession) throws Throwable {
-    return execute(sqlSession, args);
-  }
-
-  private Object execute(SqlSession sqlSession, Object[] args) {
-    SqlCommand command = mapperMethod.getCommand();
     Object result;
     switch (command.getType()) {
       case INSERT: {
@@ -72,7 +69,7 @@ class PlainMethodInvoker implements MapperMethodInvoker {
           result = executeForCursor(sqlSession, args);
         } else {
           Object param = mapperMethod.convertArgsToSqlCommandParam(args);
-          result = sqlSession.selectOne(command.getName(), param);
+          result = sqlSession.createSelect(command.getName()).bind(param).toOne();
           if (mapperMethod.returnsOptional()
               && (result == null || !mapperMethod.getReturnType().equals(result.getClass()))) {
             result = Optional.ofNullable(result);
@@ -125,9 +122,11 @@ class PlainMethodInvoker implements MapperMethodInvoker {
     Object param = mapperMethod.convertArgsToSqlCommandParam(args);
     if (mapperMethod.hasRowBounds()) {
       RowBounds rowBounds = mapperMethod.extractRowBounds(args);
-      sqlSession.select(command.getName(), param, rowBounds, mapperMethod.extractResultHandler(args));
+      sqlSession.createSelect(command.getName()).bind(param).rowBounds(rowBounds)
+          .resultHandler(mapperMethod.extractResultHandler(args)).execute();
     } else {
-      sqlSession.select(command.getName(), param, mapperMethod.extractResultHandler(args));
+      sqlSession.createSelect(command.getName()).bind(param).resultHandler(mapperMethod.extractResultHandler(args))
+          .execute();
     }
   }
 
@@ -137,9 +136,9 @@ class PlainMethodInvoker implements MapperMethodInvoker {
     Object param = mapperMethod.convertArgsToSqlCommandParam(args);
     if (mapperMethod.hasRowBounds()) {
       RowBounds rowBounds = mapperMethod.extractRowBounds(args);
-      result = sqlSession.selectList(command.getName(), param, rowBounds);
+      result = sqlSession.createSelect(command.getName()).bind(param).rowBounds(rowBounds).toList();
     } else {
-      result = sqlSession.selectList(command.getName(), param);
+      result = sqlSession.createSelect(command.getName()).bind(param).toList();
     }
     // issue #510 Collections & arrays support
     if (!mapperMethod.getReturnType().isAssignableFrom(result.getClass())) {

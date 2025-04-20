@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -64,7 +64,8 @@ class CommonPropertyDeferLoadTest {
         }
       }
       MyResultHandler myResultHandler = new MyResultHandler();
-      sqlSession.select("org.apache.ibatis.submitted.deferload_common_property.ChildMapper.selectAll", myResultHandler);
+      sqlSession.createSelect("org.apache.ibatis.submitted.deferload_common_property.ChildMapper.selectAll")
+          .resultHandler(myResultHandler).execute();
       for (Child child : myResultHandler.children) {
         assertNotNull(child.getFather());
       }
@@ -81,8 +82,8 @@ class CommonPropertyDeferLoadTest {
           assertNotNull(child.getFather());
         }
       }
-      sqlSession.select("org.apache.ibatis.submitted.deferload_common_property.ChildMapper.selectAll",
-          new MyResultHandler());
+      sqlSession.createSelect("org.apache.ibatis.submitted.deferload_common_property.ChildMapper.selectAll")
+          .resultHandler(new MyResultHandler()).execute();
     }
   }
 
@@ -99,7 +100,8 @@ class CommonPropertyDeferLoadTest {
         }
       }
       MyResultHandler myResultHandler = new MyResultHandler();
-      sqlSession.select("org.apache.ibatis.submitted.deferload_common_property.ChildMapper.selectAll", myResultHandler);
+      sqlSession.createSelect("org.apache.ibatis.submitted.deferload_common_property.ChildMapper.selectAll")
+          .resultHandler(myResultHandler).execute();
       for (Child child : myResultHandler.children) {
         assertNotNull(child.getFather());
       }
@@ -116,8 +118,10 @@ class CommonPropertyDeferLoadTest {
           assertNotNull(child.getFather());
         }
       }
-      sqlSession.select("org.apache.ibatis.submitted.deferload_common_property.ChildMapper.selectAll",
-          new MyResultHandler());
+
+      MyResultHandler handler = new MyResultHandler();
+      sqlSession.createSelect("org.apache.ibatis.submitted.deferload_common_property.ChildMapper.selectAll")
+          .resultHandler(handler).execute();
     }
   }
 }

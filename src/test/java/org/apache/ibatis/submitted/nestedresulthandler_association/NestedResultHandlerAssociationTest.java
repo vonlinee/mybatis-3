@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -55,10 +55,11 @@ class NestedResultHandlerAssociationTest {
     Date targetMonth = fmt.parse("2014-01-01");
     final List<Account> accounts = new ArrayList<>();
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      sqlSession.select("collectPageByBirthMonth", targetMonth, new RowBounds(1, 2), context -> {
-        Account account = (Account) context.getResultObject();
-        accounts.add(account);
-      });
+      sqlSession.createSelect("collectPageByBirthMonth").bind(targetMonth).rowBounds(new RowBounds(1, 2))
+          .resultHandler(context -> {
+            Account account = (Account) context.getResultObject();
+            accounts.add(account);
+          }).execute();
     }
     assertEquals(2, accounts.size());
     assertEquals("Bob2", accounts.get(0).getAccountName());
@@ -71,13 +72,13 @@ class NestedResultHandlerAssociationTest {
     final List<Account> accounts = new ArrayList<>();
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Date targetMonth = fmt.parse("2014-01-01");
-      sqlSession.select("collectPageByBirthMonth", targetMonth, context -> {
+      sqlSession.createSelect("collectPageByBirthMonth").bind(targetMonth).resultHandler(context -> {
         Account account = (Account) context.getResultObject();
         accounts.add(account);
         if (accounts.size() > 1) {
           context.stop();
         }
-      });
+      }).execute();
     }
     assertEquals(2, accounts.size());
     assertEquals("Bob1", accounts.get(0).getAccountName());

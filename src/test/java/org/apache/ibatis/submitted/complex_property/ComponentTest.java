@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ class ComponentTest {
       sqlSession.insert("User.insert", user);
 
       // Retrieve User
-      user = sqlSession.selectOne("User.find", user.getId());
+      user = sqlSession.createSelect("User.find").bind(user.getId()).toOne();
 
       assertNotNull(user.getId());
 

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -74,25 +75,31 @@ class NestedResultHandlerTest {
   // issue #542
   void getPersonWithHandler() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      sqlSession.select("getPersons", context -> {
+
+      ResultHandler handler = context -> {
         Person person = (Person) context.getResultObject();
         if ("grandma".equals(person.getName())) {
           Assertions.assertEquals(2, person.getItems().size());
         }
-      });
+      };
+
+      sqlSession.createSelect("getPersons").resultHandler(handler).execute();
     }
   }
 
   @Test
   void unorderedGetPersonWithHandler() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+
+      ResultHandler handler = context -> {
+        Person person = (Person) context.getResultObject();
+        if ("grandma".equals(person.getName())) {
+          person.getItems().size();
+        }
+      };
+
       Assertions.assertThrows(PersistenceException.class,
-          () -> sqlSession.select("getPersonsWithItemsOrdered", context -> {
-            Person person = (Person) context.getResultObject();
-            if ("grandma".equals(person.getName())) {
-              person.getItems().size();
-            }
-          }));
+          () -> sqlSession.createSelect("getPersonsWithItemsOrdered").resultHandler(handler).execute());
     }
   }
 
@@ -126,7 +133,8 @@ class NestedResultHandlerTest {
     }
   }
 
-  @Test // reopen issue 39? (not a bug?)
+  @Test
+  // reopen issue 39? (not a bug?)
   void getPersonItemPairs() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Mapper mapper = sqlSession.getMapper(Mapper.class);

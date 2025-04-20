@@ -20,23 +20,20 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.exceptions.ExceptionFactory;
-import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.executor.result.DefaultMapResultHandler;
-import org.apache.ibatis.executor.result.DefaultResultContext;
 import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.session.Delete;
+import org.apache.ibatis.session.Insert;
+import org.apache.ibatis.session.Select;
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.Update;
 
 /**
  * The default implementation for {@link SqlSession}. Note that this class is not Thread-Safe.
@@ -49,13 +46,12 @@ public class DefaultSqlSession implements SqlSession {
   private final Executor executor;
 
   private final boolean autoCommit;
-  private boolean dirty;
+  private boolean dirty = false;
   private List<Cursor<?>> cursorList;
 
   public DefaultSqlSession(Configuration configuration, Executor executor, boolean autoCommit) {
     this.configuration = configuration;
     this.executor = executor;
-    this.dirty = false;
     this.autoCommit = autoCommit;
   }
 
@@ -64,163 +60,61 @@ public class DefaultSqlSession implements SqlSession {
   }
 
   @Override
-  public <T> T selectOne(String statement) {
-    return this.selectOne(statement, null);
+  public boolean markDirty(boolean dirty) {
+    boolean _dirty = this.dirty;
+    this.dirty = dirty;
+    return _dirty;
   }
 
   @Override
-  public <T> T selectOne(String statement, Object parameter) {
-    // Popular vote was to return null on 0 results and throw exception on too many.
-    List<T> list = this.selectList(statement, parameter);
-    if (list.size() == 1) {
-      return list.get(0);
-    }
-    if (list.size() > 1) {
-      throw new TooManyResultsException(
-          "Expected one result (or null) to be returned by selectOne(), but found: " + list.size());
-    } else {
-      return null;
-    }
+  public boolean isDirty() {
+    return dirty;
   }
 
   @Override
-  public <K, V> Map<K, V> selectMap(String statement, String mapKey) {
-    return this.selectMap(statement, null, mapKey, RowBounds.DEFAULT);
+  public Select createSelect(String statement) {
+    MappedStatement ms = configuration.getMappedStatement(statement);
+    return new MapperSelect(this, executor, ms);
   }
 
   @Override
-  public <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey) {
-    return this.selectMap(statement, parameter, mapKey, RowBounds.DEFAULT);
+  public Insert createInsert(String statement) {
+    MappedStatement ms = configuration.getMappedStatement(statement);
+    return new MapperInsert(this, executor, ms);
   }
 
   @Override
-  public <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds) {
-    final List<? extends V> list = selectList(statement, parameter, rowBounds);
-    final DefaultMapResultHandler<K, V> mapResultHandler = new DefaultMapResultHandler<>(mapKey,
-        configuration.getObjectFactory(), configuration.getObjectWrapperFactory(), configuration.getReflectorFactory());
-    final DefaultResultContext<V> context = new DefaultResultContext<>();
-    for (V o : list) {
-      context.nextResultObject(o);
-      mapResultHandler.handleResult(context);
-    }
-    return mapResultHandler.getMappedResults();
+  public Delete createDelete(String statement) {
+    MappedStatement ms = configuration.getMappedStatement(statement);
+    return new MapperDelete(this, executor, ms);
   }
 
   @Override
-  public <T> Cursor<T> selectCursor(String statement) {
-    return selectCursor(statement, null);
+  public Update createUpdate(String statement) {
+    MappedStatement ms = configuration.getMappedStatement(statement);
+    return new MapperUpdate(this, executor, ms);
   }
 
-  @Override
-  public <T> Cursor<T> selectCursor(String statement, Object parameter) {
-    return selectCursor(statement, parameter, RowBounds.DEFAULT);
-  }
-
-  @Override
-  public <T> Cursor<T> selectCursor(String statement, Object parameter, RowBounds rowBounds) {
-    try {
-      MappedStatement ms = configuration.getMappedStatement(statement);
-      dirty |= ms.isDirtySelect();
-      Cursor<T> cursor = executor.queryCursor(ms, wrapCollection(parameter), rowBounds);
-      registerCursor(cursor);
-      return cursor;
-    } catch (Exception e) {
-      throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);
-    } finally {
-      ErrorContext.instance().reset();
-    }
-  }
-
-  @Override
-  public <E> List<E> selectList(String statement) {
-    return this.selectList(statement, null);
-  }
-
-  @Override
-  public <E> List<E> selectList(String statement, Object parameter) {
-    return this.selectList(statement, parameter, RowBounds.DEFAULT);
-  }
-
-  @Override
-  public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
-    return selectList(statement, parameter, rowBounds, Executor.NO_RESULT_HANDLER);
-  }
-
-  private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
-    try {
-      MappedStatement ms = configuration.getMappedStatement(statement);
-      dirty |= ms.isDirtySelect();
-      return executor.query(ms, wrapCollection(parameter), rowBounds, handler);
-    } catch (Exception e) {
-      throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);
-    } finally {
-      ErrorContext.instance().reset();
-    }
-  }
-
-  @Override
-  public void select(String statement, Object parameter, ResultHandler handler) {
-    select(statement, parameter, RowBounds.DEFAULT, handler);
-  }
-
-  @Override
-  public void select(String statement, ResultHandler handler) {
-    select(statement, null, RowBounds.DEFAULT, handler);
-  }
-
-  @Override
-  public void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
-    selectList(statement, parameter, rowBounds, handler);
-  }
-
-  @Override
-  public int insert(String statement) {
-    return insert(statement, null);
-  }
-
-  @Override
-  public int insert(String statement, Object parameter) {
-    return update(statement, parameter);
-  }
-
-  @Override
-  public int update(String statement) {
-    return update(statement, null);
-  }
-
-  @Override
-  public int update(String statement, Object parameter) {
-    try {
-      dirty = true;
-      MappedStatement ms = configuration.getMappedStatement(statement);
-      return executor.update(ms, wrapCollection(parameter));
-    } catch (Exception e) {
-      throw ExceptionFactory.wrapException("Error updating database.  Cause: " + e, e);
-    } finally {
-      ErrorContext.instance().reset();
-    }
-  }
-
-  @Override
-  public int delete(String statement) {
-    return update(statement, null);
-  }
-
-  @Override
-  public int delete(String statement, Object parameter) {
-    return update(statement, parameter);
-  }
-
+  /**
+   * Flushes batch statements and commits database connection. Note that database connection will not be committed if no
+   * updates/deletes/inserts were called. To force the commit call {@link SqlSession#commit(boolean)}
+   */
   @Override
   public void commit() {
     commit(false);
   }
 
+  /**
+   * Flushes batch statements and commits database connection.
+   *
+   * @param force
+   *          forces connection commit
+   */
   @Override
   public void commit(boolean force) {
     try {
       executor.commit(isCommitOrRollbackRequired(force));
-      dirty = false;
+      markDirty(false);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error committing transaction.  Cause: " + e, e);
     } finally {
@@ -228,16 +122,28 @@ public class DefaultSqlSession implements SqlSession {
     }
   }
 
+  /**
+   * Discards pending batch statements and rolls database connection back. Note that database connection will not be
+   * rolled back if no updates/deletes/inserts were called. To force the rollback call
+   * {@link SqlSession#rollback(boolean)}
+   */
   @Override
   public void rollback() {
     rollback(false);
   }
 
+  /**
+   * Discards pending batch statements and rolls database connection back. Note that database connection will not be
+   * rolled back if no updates/deletes/inserts were called.
+   *
+   * @param force
+   *          forces connection rollback
+   */
   @Override
   public void rollback(boolean force) {
     try {
       executor.rollback(isCommitOrRollbackRequired(force));
-      dirty = false;
+      markDirty(false);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error rolling back transaction.  Cause: " + e, e);
     } finally {
@@ -261,7 +167,7 @@ public class DefaultSqlSession implements SqlSession {
     try {
       executor.close(isCommitOrRollbackRequired(false));
       closeCursors();
-      dirty = false;
+      markDirty(false);
     } finally {
       ErrorContext.instance().reset();
     }
@@ -300,7 +206,8 @@ public class DefaultSqlSession implements SqlSession {
     executor.clearLocalCache();
   }
 
-  private <T> void registerCursor(Cursor<T> cursor) {
+  @Override
+  public <T> void registerCursor(Cursor<T> cursor) {
     if (cursorList == null) {
       cursorList = new ArrayList<>();
     }
@@ -308,11 +215,7 @@ public class DefaultSqlSession implements SqlSession {
   }
 
   private boolean isCommitOrRollbackRequired(boolean force) {
-    return !autoCommit && dirty || force;
-  }
-
-  private Object wrapCollection(final Object object) {
-    return ParamNameResolver.wrapToMapIfCollection(object, null);
+    return !autoCommit && isDirty() || force;
   }
 
   /**

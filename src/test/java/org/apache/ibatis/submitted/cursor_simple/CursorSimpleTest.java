@@ -135,7 +135,8 @@ class CursorSimpleTest {
   void cursorWithRowBound() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       // RowBound starting at offset 1 and limiting to 2 items
-      Cursor<User> usersCursor = sqlSession.selectCursor("getAllUsers", null, new RowBounds(1, 3));
+      Cursor<User> usersCursor = sqlSession.createSelect("getAllUsers").bind(null).rowBounds(new RowBounds(1, 3))
+          .toCursor(User.class);
 
       Iterator<User> iterator = usersCursor.iterator();
 
@@ -162,8 +163,8 @@ class CursorSimpleTest {
 
   @Test
   void cursorIteratorNoSuchElementExceptionWithHasNext() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession();
-        Cursor<User> usersCursor = sqlSession.selectCursor("getAllUsers", null, new RowBounds(1, 1))) {
+    try (SqlSession sqlSession = sqlSessionFactory.openSession(); Cursor<User> usersCursor = sqlSession
+        .createSelect("getAllUsers").bind(null).rowBounds(new RowBounds(1, 1)).toCursor(User.class)) {
       try {
         Iterator<User> iterator = usersCursor.iterator();
 
@@ -183,8 +184,8 @@ class CursorSimpleTest {
 
   @Test
   void cursorIteratorNoSuchElementExceptionNoHasNext() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession();
-        Cursor<User> usersCursor = sqlSession.selectCursor("getAllUsers", null, new RowBounds(1, 1))) {
+    try (SqlSession sqlSession = sqlSessionFactory.openSession(); Cursor<User> usersCursor = sqlSession
+        .createSelect("getAllUsers").bind(null).rowBounds(new RowBounds(1, 1)).toCursor(User.class)) {
       try {
         Iterator<User> iterator = usersCursor.iterator();
         User user = iterator.next();
@@ -205,7 +206,8 @@ class CursorSimpleTest {
   void cursorWithBadRowBound() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       // Trying to start at offset 10 (which does not exist, since there is only 4 items)
-      Cursor<User> usersCursor = sqlSession.selectCursor("getAllUsers", null, new RowBounds(10, 2));
+      Cursor<User> usersCursor = sqlSession.createSelect("getAllUsers").bind(null).rowBounds(new RowBounds(10, 2))
+          .toCursor(User.class);
       Iterator<User> iterator = usersCursor.iterator();
 
       Assertions.assertFalse(iterator.hasNext());
