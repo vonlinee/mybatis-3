@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,6 +26,9 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.ibatis.executor.statement.JdbcUtils;
+import org.apache.ibatis.internal.util.IOUtils;
 
 /**
  * This is an internal testing utility.<br>
@@ -112,8 +115,7 @@ public class ScriptRunner {
   }
 
   public void runScript(Reader reader) {
-    setAutoCommit();
-
+    JdbcUtils.setAutoCommit(this.connection, autoCommit);
     try {
       if (sendFullScript) {
         executeFullScript(reader);
@@ -121,23 +123,17 @@ public class ScriptRunner {
         executeLineByLine(reader);
       }
     } finally {
-      rollbackConnection();
+      JdbcUtils.rollbackSilently(this.connection);
     }
   }
 
   private void executeFullScript(Reader reader) {
-    StringBuilder script = new StringBuilder();
+    String script = null;
     try {
-      BufferedReader lineReader = new BufferedReader(reader);
-      String line;
-      while ((line = lineReader.readLine()) != null) {
-        script.append(line);
-        script.append(LINE_SEPARATOR);
-      }
-      String command = script.toString();
-      println(command);
-      executeStatement(command);
-      commitConnection();
+      script = IOUtils.readLinesToString(reader);
+      println(script);
+      executeStatement(script);
+      JdbcUtils.commit(this.connection);
     } catch (Exception e) {
       String message = "Error executing: " + script + ".  Cause: " + e;
       printlnError(message);
@@ -153,7 +149,7 @@ public class ScriptRunner {
       while ((line = lineReader.readLine()) != null) {
         handleLine(command, line);
       }
-      commitConnection();
+      JdbcUtils.commit(this.connection);
       checkForMissingLineTerminator(command);
     } catch (Exception e) {
       String message = "Error executing: " + command + ".  Cause: " + e;
@@ -167,41 +163,7 @@ public class ScriptRunner {
    */
   @Deprecated
   public void closeConnection() {
-    try {
-      connection.close();
-    } catch (Exception e) {
-      // ignore
-    }
-  }
-
-  private void setAutoCommit() {
-    try {
-      if (autoCommit != connection.getAutoCommit()) {
-        connection.setAutoCommit(autoCommit);
-      }
-    } catch (Throwable t) {
-      throw new RuntimeSqlException("Could not set AutoCommit to " + autoCommit + ". Cause: " + t, t);
-    }
-  }
-
-  private void commitConnection() {
-    try {
-      if (!connection.getAutoCommit()) {
-        connection.commit();
-      }
-    } catch (Throwable t) {
-      throw new RuntimeSqlException("Could not commit transaction. Cause: " + t, t);
-    }
-  }
-
-  private void rollbackConnection() {
-    try {
-      if (!connection.getAutoCommit()) {
-        connection.rollback();
-      }
-    } catch (Throwable t) {
-      // ignore
-    }
+    JdbcUtils.closeSilently(this.connection);
   }
 
   private void checkForMissingLineTerminator(StringBuilder command) {
@@ -252,7 +214,9 @@ public class ScriptRunner {
         // It's important that getUpdateCount() is called here.
         while (!(!hasResults && statement.getUpdateCount() == -1)) {
           checkWarnings(statement);
-          printResults(statement, hasResults);
+          if (hasResults) {
+            printResults(statement);
+          }
           hasResults = statement.getMoreResults();
         }
       } catch (SQLWarning e) {
@@ -279,10 +243,7 @@ public class ScriptRunner {
     }
   }
 
-  private void printResults(Statement statement, boolean hasResults) {
-    if (!hasResults) {
-      return;
-    }
+  private void printResults(Statement statement) {
     try (ResultSet rs = statement.getResultSet()) {
       ResultSetMetaData md = rs.getMetaData();
       int cols = md.getColumnCount();

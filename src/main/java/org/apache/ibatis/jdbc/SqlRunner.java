@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.ibatis.executor.statement.JdbcUtils;
+import org.apache.ibatis.internal.util.ObjectUtils;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.type.ObjectTypeHandler;
 import org.apache.ibatis.type.TypeHandler;
@@ -110,14 +112,7 @@ public class SqlRunner {
    *           If statement preparation or execution fails
    */
   public int insert(String sql, Object... args) throws SQLException {
-    PreparedStatement ps;
-    if (useGeneratedKeySupport) {
-      ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-    } else {
-      ps = connection.prepareStatement(sql);
-    }
-
-    try {
+    try (PreparedStatement ps = JdbcUtils.prepare(connection, sql, useGeneratedKeySupport)) {
       setParameters(ps, args);
       ps.executeUpdate();
       if (useGeneratedKeySupport) {
@@ -127,25 +122,16 @@ public class SqlRunner {
             Map<String, Object> key = keys.get(0);
             Iterator<Object> i = key.values().iterator();
             if (i.hasNext()) {
-              Object genkey = i.next();
-              if (genkey != null) {
-                try {
-                  return Integer.parseInt(genkey.toString());
-                } catch (NumberFormatException e) {
-                  // ignore, no numeric key support
-                }
+              Object generatedKey = i.next();
+              if (generatedKey != null) {
+                // ignore, no numeric key support
+                return ObjectUtils.parseInt(generatedKey, 0);
               }
             }
           }
         }
       }
       return NO_GENERATED_KEY;
-    } finally {
-      try {
-        ps.close();
-      } catch (SQLException e) {
-        // ignore
-      }
     }
   }
 
@@ -206,11 +192,7 @@ public class SqlRunner {
    */
   @Deprecated
   public void closeConnection() {
-    try {
-      connection.close();
-    } catch (SQLException e) {
-      // ignore
-    }
+    JdbcUtils.closeSilently(connection);
   }
 
   private void setParameters(PreparedStatement ps, Object... args) throws SQLException {

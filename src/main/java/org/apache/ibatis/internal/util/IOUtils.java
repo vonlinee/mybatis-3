@@ -15,8 +15,10 @@
  */
 package org.apache.ibatis.internal.util;
 
+import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.Reader;
 
 /**
  * Utility class for common I/O operations.
@@ -39,5 +41,16 @@ public final class IOUtils {
       } catch (IOException ignore) {
       }
     }
+  }
+
+  public static String readLinesToString(Reader reader) throws IOException {
+    BufferedReader lineReader = new BufferedReader(reader);
+    String line;
+    StringBuilder sb = new StringBuilder();
+    while ((line = lineReader.readLine()) != null) {
+      sb.append(line);
+      sb.append(System.lineSeparator());
+    }
+    return sb.toString();
   }
 }

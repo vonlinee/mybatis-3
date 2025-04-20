@@ -50,6 +50,7 @@ import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.result.DefaultResultContext;
 import org.apache.ibatis.executor.result.DefaultResultHandler;
 import org.apache.ibatis.executor.result.ResultMapException;
+import org.apache.ibatis.executor.statement.JdbcUtils;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -316,13 +317,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private void closeResultSet(ResultSet rs) {
-    try {
-      if (rs != null) {
-        rs.close();
-      }
-    } catch (SQLException e) {
-      // ignore
-    }
+    JdbcUtils.closeSilently(rs);
   }
 
   private void cleanUpAfterHandlingResultSet() {

@@ -110,7 +110,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
     if (queryTimeout != null) {
       stmt.setQueryTimeout(queryTimeout);
     }
-    StatementUtil.applyTransactionTimeout(stmt, queryTimeout, transactionTimeout);
+    JdbcUtils.applyTransactionTimeout(stmt, queryTimeout, transactionTimeout);
   }
 
   protected void setFetchSize(Statement stmt) throws SQLException {
