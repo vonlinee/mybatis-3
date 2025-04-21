@@ -17,6 +17,7 @@ package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.TokenHandler;
+import org.apache.ibatis.scripting.ExpressionEvaluator;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 
@@ -24,6 +25,8 @@ import org.apache.ibatis.type.SimpleTypeRegistry;
  * @author Clinton Begin
  */
 public class TextSqlNode implements SqlNode {
+
+  protected final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
 
   /**
    * the text
@@ -44,30 +47,21 @@ public class TextSqlNode implements SqlNode {
 
   @Override
   public boolean apply(SqlBuildContext context) {
-    GenericTokenParser parser = new GenericTokenParser("${", "}", new BindingTokenParser(context));
+    GenericTokenParser parser = new GenericTokenParser("${", "}", new TokenHandler() {
+      @Override
+      public String handleToken(String content) {
+        Object parameter = context.getBindings().get("_parameter");
+        if (parameter == null) {
+          context.getBindings().put("value", null);
+        } else if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
+          context.getBindings().put("value", parameter);
+        }
+        Object value = evaluator.getValue(content, context.getBindings());
+        // issue #274 return "" instead of "null"
+        return value == null ? "" : String.valueOf(value);
+      }
+    });
     context.appendSql(context.parseParam(parser.parse(text)));
     return true;
-  }
-
-  private static class BindingTokenParser implements TokenHandler {
-
-    private final SqlBuildContext context;
-
-    public BindingTokenParser(SqlBuildContext context) {
-      this.context = context;
-    }
-
-    @Override
-    public String handleToken(String content) {
-      Object parameter = context.getBindings().get("_parameter");
-      if (parameter == null) {
-        context.getBindings().put("value", null);
-      } else if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
-        context.getBindings().put("value", parameter);
-      }
-      Object value = OgnlCache.getValue(content, context.getBindings());
-      // issue #274 return "" instead of "null"
-      return value == null ? "" : String.valueOf(value);
-    }
   }
 }

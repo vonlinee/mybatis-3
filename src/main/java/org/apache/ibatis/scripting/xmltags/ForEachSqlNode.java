@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.scripting.ExpressionEvaluator;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.session.Configuration;
 

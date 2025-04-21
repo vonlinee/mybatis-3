@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting.expression;
 
 import ognl.DefaultClassResolver;
 
@@ -27,7 +27,7 @@ import org.apache.ibatis.io.Resources;
  *
  * @see <a href='https://github.com/mybatis/mybatis-3/issues/161'>Issue 161</a>
  */
-public class OgnlClassResolver extends DefaultClassResolver {
+class OgnlClassResolver extends DefaultClassResolver {
 
   @Override
   protected Class toClassForName(String className) throws ClassNotFoundException {
