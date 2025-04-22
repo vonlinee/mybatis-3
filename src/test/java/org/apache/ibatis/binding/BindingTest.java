@@ -96,8 +96,6 @@ class BindingTest {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       BoundAuthorMapper mapper = session.getMapper(BoundAuthorMapper.class);
       List<Post> posts = mapper.findPostsInList(new ArrayList<>() {
-        private static final long serialVersionUID = 1L;
-
         {
           add(1);
           add(3);
@@ -478,9 +476,9 @@ class BindingTest {
       BoundBlogMapper mapper = session.getMapper(BoundBlogMapper.class);
       List<Post> posts = mapper.selectPosts();
       assertEquals(5, posts.size());
-      assertTrue(posts.get(0) instanceof DraftPost);
+      assertInstanceOf(DraftPost.class, posts.get(0));
       assertFalse(posts.get(1) instanceof DraftPost);
-      assertTrue(posts.get(2) instanceof DraftPost);
+      assertInstanceOf(DraftPost.class, posts.get(2));
       assertFalse(posts.get(3) instanceof DraftPost);
       assertFalse(posts.get(4) instanceof DraftPost);
     }
@@ -492,9 +490,9 @@ class BindingTest {
       BoundBlogMapper mapper = session.getMapper(BoundBlogMapper.class);
       List<Post> posts = mapper.selectPostsWithResultMap();
       assertEquals(5, posts.size());
-      assertTrue(posts.get(0) instanceof DraftPost);
+      assertInstanceOf(DraftPost.class, posts.get(0));
       assertFalse(posts.get(1) instanceof DraftPost);
-      assertTrue(posts.get(2) instanceof DraftPost);
+      assertInstanceOf(DraftPost.class, posts.get(2));
       assertFalse(posts.get(3) instanceof DraftPost);
       assertFalse(posts.get(4) instanceof DraftPost);
     }
@@ -582,11 +580,9 @@ class BindingTest {
     try (SqlSession session = sqlSessionFactory.openSession()) {
 
       // Create another mapper instance with a method cache we can test against:
-      final SimpleMapperProxyFactory<BoundBlogMapper> mapperProxyFactory = new SimpleMapperProxyFactory<>(
-          BoundBlogMapper.class);
-      assertEquals(BoundBlogMapper.class, mapperProxyFactory.getMapperInterface());
-      final BoundBlogMapper mapper = mapperProxyFactory.newInstance(session);
-      assertNotSame(mapper, mapperProxyFactory.newInstance(session));
+      final SimpleMapperProxyFactory mapperProxyFactory = new SimpleMapperProxyFactory();
+      final BoundBlogMapper mapper = mapperProxyFactory.newInstance(BoundBlogMapper.class, session);
+      assertNotSame(mapper, mapperProxyFactory.newInstance(BoundBlogMapper.class, session));
       assertTrue(mapperProxyFactory.getMethodCache().isEmpty());
 
       // Mapper methods we will call later:
@@ -621,11 +617,11 @@ class BindingTest {
       BoundBlogMapper mapper = session.getMapper(BoundBlogMapper.class);
       List<Blog> blogs = mapper.selectBlogsWithAuthorAndPosts();
       assertEquals(2, blogs.size());
-      assertTrue(blogs.get(0) instanceof Proxy);
+      assertInstanceOf(Proxy.class, blogs.get(0));
       assertEquals(101, blogs.get(0).getAuthor().getId());
       assertEquals(1, blogs.get(0).getPosts().size());
       assertEquals(1, blogs.get(0).getPosts().get(0).getId());
-      assertTrue(blogs.get(1) instanceof Proxy);
+      assertInstanceOf(Proxy.class, blogs.get(1));
       assertEquals(102, blogs.get(1).getAuthor().getId());
       assertEquals(1, blogs.get(1).getPosts().size());
       assertEquals(2, blogs.get(1).getPosts().get(0).getId());

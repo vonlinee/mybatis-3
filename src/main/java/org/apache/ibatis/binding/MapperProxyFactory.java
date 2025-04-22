@@ -15,21 +15,14 @@
  */
 package org.apache.ibatis.binding;
 
-import java.util.Collection;
+import java.lang.reflect.Method;
 
 import org.apache.ibatis.session.SqlSession;
 
-public interface MapperRegistry {
+public interface MapperProxyFactory {
 
-  <T> T getMapper(Class<T> type, SqlSession sqlSession);
+  <T> T newInstance(Class<T> type, SqlSession sqlSession);
 
-  <T> boolean hasMapper(Class<T> type);
-
-  <T> void addMapper(Class<T> type);
-
-  Collection<Class<?>> getMappers();
-
-  void addMappers(String packageName, Class<?> superType);
-
-  void addMappers(String packageName);
+  MapperMethodInvoker lookupInvoker(SqlSession sqlSession, Class<?> targetClass, Object proxy, Method method,
+      Object[] args) throws Throwable;
 }

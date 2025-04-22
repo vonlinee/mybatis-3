@@ -25,31 +25,34 @@ import org.apache.ibatis.session.SqlSession;
 /**
  * @author Lasse Voss
  */
-public class SimpleMapperProxyFactory<T> {
+class SimpleMapperProxyFactory implements MapperProxyFactory {
 
-  private final Class<T> mapperInterface;
   private final Map<Method, MapperMethodInvoker> methodCache = new ConcurrentHashMap<>();
-
-  public SimpleMapperProxyFactory(Class<T> mapperInterface) {
-    this.mapperInterface = mapperInterface;
-  }
-
-  public Class<T> getMapperInterface() {
-    return mapperInterface;
-  }
 
   public Map<Method, MapperMethodInvoker> getMethodCache() {
     return methodCache;
   }
 
   @SuppressWarnings("unchecked")
-  protected T newInstance(MapperProxy<T> mapperProxy) {
-    return (T) Proxy.newProxyInstance(mapperInterface.getClassLoader(), new Class[] { mapperInterface }, mapperProxy);
+  @Override
+  public <T> T newInstance(Class<T> type, SqlSession sqlSession) {
+    final JdkMapperProxy mapperProxy = new JdkMapperProxy(sqlSession, type, this);
+    return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[] { type }, mapperProxy);
   }
 
-  public T newInstance(SqlSession sqlSession) {
-    final MapperProxy<T> mapperProxy = new MapperProxy<>(sqlSession, mapperInterface, methodCache);
-    return newInstance(mapperProxy);
+  @Override
+  public MapperMethodInvoker lookupInvoker(SqlSession sqlSession, Class<?> targetClass, Object proxy, Method method,
+      Object[] args) throws Throwable {
+    try {
+      return methodCache.computeIfAbsent(method, m -> {
+        if (m.isDefault()) {
+          return new DefaultMethodInvoker(method);
+        }
+        return new PlainMethodInvoker(targetClass, method, sqlSession.getConfiguration());
+      });
+    } catch (RuntimeException re) {
+      Throwable cause = re.getCause();
+      throw cause == null ? re : cause;
+    }
   }
-
 }

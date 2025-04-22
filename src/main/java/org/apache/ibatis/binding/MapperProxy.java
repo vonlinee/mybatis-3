@@ -15,56 +15,11 @@
  */
 package org.apache.ibatis.binding;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Map;
 
-import org.apache.ibatis.reflection.ExceptionUtil;
-import org.apache.ibatis.session.SqlSession;
+public interface MapperProxy {
 
-/**
- * all mapper proxy will hold a SqlSession instance
- *
- * @author Clinton Begin
- * @author Eduardo Macarron
- */
-public class MapperProxy<T> implements InvocationHandler, Serializable {
+  MapperProxyFactory getMapperProxyFactory();
 
-  private static final long serialVersionUID = -4724728412955527868L;
-  private final SqlSession sqlSession;
-  private final Class<T> mapperInterface;
-  private final Map<Method, MapperMethodInvoker> methodCache;
-
-  public MapperProxy(SqlSession sqlSession, Class<T> mapperInterface, Map<Method, MapperMethodInvoker> methodCache) {
-    this.sqlSession = sqlSession;
-    this.mapperInterface = mapperInterface;
-    this.methodCache = methodCache;
-  }
-
-  @Override
-  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    try {
-      if (Object.class.equals(method.getDeclaringClass())) {
-        return method.invoke(this, args);
-      }
-      return cachedInvoker(method).invoke(proxy, method, args, sqlSession);
-    } catch (Throwable t) {
-      throw ExceptionUtil.unwrapThrowable(t);
-    }
-  }
-
-  private MapperMethodInvoker cachedInvoker(Method method) throws Throwable {
-    try {
-      return methodCache.computeIfAbsent(method, m -> {
-        if (m.isDefault()) {
-          return new DefaultMethodInvoker(method);
-        }
-        return new PlainMethodInvoker(mapperInterface, method, sqlSession.getConfiguration());
-      });
-    } catch (RuntimeException re) {
-      Throwable cause = re.getCause();
-      throw cause == null ? re : cause;
-    }
-  }
+  Object invoke(Object proxy, Method method, Object[] args) throws Throwable;
 }
