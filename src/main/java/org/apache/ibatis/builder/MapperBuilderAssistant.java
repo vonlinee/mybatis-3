@@ -425,21 +425,6 @@ public class MapperBuilderAssistant extends BaseBuilder {
         notNullColumn, columnPrefix, typeHandler, flags, null, null, configuration.isLazyLoadingEnabled());
   }
 
-  /**
-   * Gets the language driver.
-   *
-   * @param langClass
-   *          the lang class
-   *
-   * @return the language driver
-   *
-   * @deprecated Use {@link Configuration#getLanguageDriver(Class)}
-   */
-  @Deprecated
-  public LanguageDriver getLanguageDriver(Class<? extends LanguageDriver> langClass) {
-    return configuration.getLanguageDriver(langClass);
-  }
-
   public static Set<String> parseMultipleColumnNames(String columnName) {
     Set<String> columns = new HashSet<>();
     if (columnName != null) {

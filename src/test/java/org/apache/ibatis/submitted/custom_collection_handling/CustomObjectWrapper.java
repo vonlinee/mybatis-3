@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapper;
 
 public class CustomObjectWrapper implements ObjectWrapper {
@@ -81,12 +80,6 @@ public class CustomObjectWrapper implements ObjectWrapper {
   public boolean hasGetter(String name) {
     // Not Implemented
     return false;
-  }
-
-  @Override
-  public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
-    // Not Implemented
-    return null;
   }
 
   @Override

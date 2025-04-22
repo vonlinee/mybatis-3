@@ -205,7 +205,7 @@ class XmlConfigBuilderTest {
       assertThat(config.getLazyLoadTriggerMethods())
           .isEqualTo(new HashSet<>(Arrays.asList("equals", "clone", "hashCode", "toString", "xxx")));
       assertThat(config.isSafeResultHandlerEnabled()).isFalse();
-      assertThat(config.getDefaultScriptingLanuageInstance()).isInstanceOf(RawLanguageDriver.class);
+      assertThat(config.getDefaultScriptingLanguageInstance()).isInstanceOf(RawLanguageDriver.class);
       assertThat(config.isCallSettersOnNulls()).isTrue();
       assertThat(config.getLogPrefix()).isEqualTo("mybatis_");
       assertThat(config.getLogImpl().getName()).isEqualTo(Slf4jImpl.class.getName());

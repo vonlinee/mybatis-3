@@ -50,11 +50,6 @@ public class BatchResult {
     return sql;
   }
 
-  @Deprecated
-  public Object getParameterObject() {
-    return parameterObjects.get(0);
-  }
-
   public List<Object> getParameterObjects() {
     return parameterObjects;
   }

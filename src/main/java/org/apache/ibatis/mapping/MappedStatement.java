@@ -188,22 +188,6 @@ public final class MappedStatement {
       return this;
     }
 
-    /**
-     * Resul sets.
-     *
-     * @param resultSet
-     *          the result set
-     *
-     * @return the builder
-     *
-     * @deprecated Use {@link #resultSets}
-     */
-    @Deprecated
-    public Builder resulSets(String resultSet) {
-      mappedStatement.resultSets = delimitedStringToArray(resultSet);
-      return this;
-    }
-
     public MappedStatement build() {
       assert mappedStatement.configuration != null;
       assert mappedStatement.id != null;
@@ -312,18 +296,6 @@ public final class MappedStatement {
 
   public ParamNameResolver getParamNameResolver() {
     return paramNameResolver;
-  }
-
-  /**
-   * Gets the resul sets.
-   *
-   * @return the resul sets
-   *
-   * @deprecated Use {@link #getResultSets()}
-   */
-  @Deprecated
-  public String[] getResulSets() {
-    return resultSets;
   }
 
   public BoundSql getBoundSql(Object parameterObject) {

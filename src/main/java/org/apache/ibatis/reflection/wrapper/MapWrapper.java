@@ -164,16 +164,11 @@ public class MapWrapper extends BaseWrapper {
   }
 
   @Override
-  public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
+  public MetaObject instantiatePropertyValue(String name, String property, ObjectFactory objectFactory) {
     HashMap<String, Object> map = new HashMap<>();
-    set(prop, map);
+    set(new PropertyTokenizer(property), map);
     return MetaObject.forObject(map, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory(),
         metaObject.getReflectorFactory());
-  }
-
-  @Override
-  public MetaObject instantiatePropertyValue(String name, String property, ObjectFactory objectFactory) {
-    return instantiatePropertyValue(name, new PropertyTokenizer(property), objectFactory);
   }
 
   @Override
