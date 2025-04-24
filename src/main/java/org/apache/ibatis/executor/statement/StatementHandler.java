@@ -50,5 +50,4 @@ public interface StatementHandler {
   BoundSql getBoundSql();
 
   ParameterHandler getParameterHandler();
-
 }

@@ -32,16 +32,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.ibatis.builder.StaticSqlSource;
-import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
-import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
@@ -75,13 +71,8 @@ class DefaultResultSetHandlerTest {
 
     final MappedStatement ms = getMappedStatement();
 
-    final Executor executor = null;
-    final ParameterHandler parameterHandler = null;
-    final ResultHandler resultHandler = null;
-    final BoundSql boundSql = null;
     final RowBounds rowBounds = new RowBounds(0, 100);
-    final DefaultResultSetHandler fastResultSetHandler = new DefaultResultSetHandler(executor, ms, parameterHandler,
-        resultHandler, boundSql, rowBounds);
+    final DefaultResultSetHandler fastResultSetHandler = new DefaultResultSetHandler(null, ms, null, rowBounds);
 
     when(stmt.getResultSet()).thenReturn(rs);
     when(rs.getMetaData()).thenReturn(rsmd);
@@ -104,7 +95,7 @@ class DefaultResultSetHandlerTest {
     final RowBounds rowBounds = new RowBounds(0, 100);
 
     final DefaultResultSetHandler defaultResultSetHandler = new DefaultResultSetHandler(null/* executor */, ms,
-        null/* parameterHandler */, null/* resultHandler */, null/* boundSql */, rowBounds);
+        null/* resultHandler */, rowBounds);
 
     final ResultSetWrapper rsw = mock(ResultSetWrapper.class);
     when(rsw.getResultSet()).thenReturn(mock(ResultSet.class));
@@ -122,7 +113,7 @@ class DefaultResultSetHandlerTest {
           /* useCollectionConstructorInjection */ null/* parentRowKey */);
       Assertions.fail("Should have thrown ExecutorException");
     } catch (Exception e) {
-      Assertions.assertTrue(e instanceof ExecutorException, "Expected ExecutorException");
+      Assertions.assertInstanceOf(ExecutorException.class, e, "Expected ExecutorException");
       Assertions.assertTrue(e.getMessage().contains("mapping: " + resultMapping.toString()));
     }
   }
@@ -131,11 +122,9 @@ class DefaultResultSetHandlerTest {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource("some select statement"),
-        SqlCommandType.SELECT).resultMaps(new ArrayList<ResultMap>() {
-          private static final long serialVersionUID = 1L;
+        SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
           {
-            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<ResultMapping>() {
-              private static final long serialVersionUID = 1L;
+            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<>() {
               {
                 add(new ResultMapping.Builder(config, "cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class))
                     .build());
