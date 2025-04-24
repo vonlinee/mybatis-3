@@ -19,13 +19,16 @@ import org.apache.ibatis.executor.BatchExecutor;
 import org.apache.ibatis.executor.CachingExecutor;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.ReuseExecutor;
 import org.apache.ibatis.executor.SimpleExecutor;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
-import org.apache.ibatis.executor.statement.RoutingStatementHandler;
+import org.apache.ibatis.executor.statement.CallableStatementHandler;
+import org.apache.ibatis.executor.statement.PreparedStatementHandler;
+import org.apache.ibatis.executor.statement.SimpleStatementHandler;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -73,7 +76,20 @@ public class DefaultExtensionFactory implements ExtensionFactory {
       boundSql = mappedStatement.getBoundSql(parameterObject);
     }
 
-    StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, rowBounds, boundSql);
+    StatementHandler statementHandler;
+    switch (mappedStatement.getStatementType()) {
+      case STATEMENT:
+        statementHandler = new SimpleStatementHandler(executor, mappedStatement, rowBounds, boundSql);
+        break;
+      case PREPARED:
+        statementHandler = new PreparedStatementHandler(executor, mappedStatement, rowBounds, boundSql);
+        break;
+      case CALLABLE:
+        statementHandler = new CallableStatementHandler(executor, mappedStatement, rowBounds, boundSql);
+        break;
+      default:
+        throw new ExecutorException("Unknown statement type: " + mappedStatement.getStatementType());
+    }
 
     // set ParameterHandler
     statementHandler.setParameterHandler(createParameterHandler(mappedStatement, parameterObject, boundSql));
