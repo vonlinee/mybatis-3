@@ -15,11 +15,7 @@
  */
 package org.apache.ibatis.executor;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -302,7 +298,6 @@ class BaseExecutorTest extends BaseDataTest {
     try {
       MappedStatement selectStatement = ExecutorTestHelper.prepareSelectTwoSetsOfAuthorsProc(config);
       List<List<Author>> authorSets = executor.query(selectStatement, new HashMap<String, Object>() {
-        private static final long serialVersionUID = 1L;
         {
           put("id1", 101);
           put("id2", 102);
@@ -312,7 +307,7 @@ class BaseExecutorTest extends BaseDataTest {
       for (List<Author> authors : authorSets) {
         assertEquals(2, authors.size());
         for (Object author : authors) {
-          assertTrue(author instanceof Author);
+          assertInstanceOf(Author.class, author);
         }
       }
     } finally {
@@ -357,7 +352,7 @@ class BaseExecutorTest extends BaseDataTest {
       List<Post> posts = executor.query(selectPosts, 1, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
       executor.flushStatements();
       assertEquals(2, posts.size());
-      assertTrue(posts.get(1) instanceof Proxy);
+      assertInstanceOf(Proxy.class, posts.get(1));
       assertNotNull(posts.get(1).getBlog());
       assertEquals(1, posts.get(1).getBlog().getId());
       executor.rollback(true);
@@ -489,9 +484,7 @@ class BaseExecutorTest extends BaseDataTest {
 
     Object parameterObject = 1;
 
-    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
-      private static final long serialVersionUID = 1L;
-
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
         add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
       }
@@ -521,18 +514,14 @@ class BaseExecutorTest extends BaseDataTest {
     MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
         new StaticSqlSource("some select statement"), SqlCommandType.SELECT).build();
 
-    Object parameterObject = null;
-
-    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
-      private static final long serialVersionUID = 1L;
-
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
         add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
       }
-    }, parameterObject);
+    }, null);
 
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
-    CacheKey cacheKey = executor.createCacheKey(mappedStatement, parameterObject, RowBounds.DEFAULT, boundSql);
+    CacheKey cacheKey = executor.createCacheKey(mappedStatement, null, RowBounds.DEFAULT, boundSql);
 
     CacheKey expected = new CacheKey();
     expected.update(mappedStatement.getId());
@@ -553,9 +542,7 @@ class BaseExecutorTest extends BaseDataTest {
 
     Object parameterObject = 1;
 
-    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
-      private static final long serialVersionUID = 1L;
-
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
         add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
       }
@@ -583,9 +570,7 @@ class BaseExecutorTest extends BaseDataTest {
 
     Author parameterObject = new Author(-1, "cbegin", "******", "cbegin@nowhere.com", "N/A", Section.NEWS);
 
-    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<ParameterMapping>() {
-      private static final long serialVersionUID = 1L;
-
+    BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
         add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
         add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
