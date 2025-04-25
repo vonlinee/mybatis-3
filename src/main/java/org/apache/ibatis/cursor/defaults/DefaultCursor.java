@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.apache.ibatis.cursor.Cursor;
-import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
+import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.executor.resultset.ResultSetWrapper;
 import org.apache.ibatis.executor.statement.JdbcUtils;
 import org.apache.ibatis.mapping.ResultMap;
@@ -36,7 +36,7 @@ import org.apache.ibatis.session.RowBounds;
 public class DefaultCursor<T> implements Cursor<T> {
 
   // ResultSetHandler stuff
-  private final DefaultResultSetHandler resultSetHandler;
+  private final ResultSetHandler resultSetHandler;
   private final ResultMap resultMap;
   private final ResultSetWrapper rsw;
   private final RowBounds rowBounds;
@@ -68,7 +68,7 @@ public class DefaultCursor<T> implements Cursor<T> {
     CONSUMED
   }
 
-  public DefaultCursor(DefaultResultSetHandler resultSetHandler, ResultMap resultMap, ResultSetWrapper rsw,
+  public DefaultCursor(ResultSetHandler resultSetHandler, ResultMap resultMap, ResultSetWrapper rsw,
       RowBounds rowBounds) {
     this.resultSetHandler = resultSetHandler;
     this.resultMap = resultMap;
