@@ -107,25 +107,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   // temporary marking flag that indicate using constructor mapping (use field to reduce memory usage)
   private boolean useConstructorMappings;
 
-  private static class PendingRelation {
-    public MetaObject metaObject;
-    public ResultMapping propertyMapping;
-  }
-
-  private static class UnMappedColumnAutoMapping {
-    private final String column;
-    private final String property;
-    private final TypeHandler<?> typeHandler;
-    private final boolean primitive;
-
-    public UnMappedColumnAutoMapping(String column, String property, TypeHandler<?> typeHandler, boolean primitive) {
-      this.column = column;
-      this.property = property;
-      this.typeHandler = typeHandler;
-      this.primitive = primitive;
-    }
-  }
-
   public DefaultResultSetHandler(Executor executor, MappedStatement mappedStatement, ResultHandler<?> resultHandler,
       RowBounds rowBounds) {
     this.executor = executor;
@@ -604,13 +585,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     boolean foundValues = false;
     if (!autoMapping.isEmpty()) {
       for (UnMappedColumnAutoMapping mapping : autoMapping) {
-        final Object value = mapping.typeHandler.getResult(rsw.getResultSet(), mapping.column);
+        final Object value = mapping.getResult(rsw.getResultSet());
         if (value != null) {
           foundValues = true;
         }
-        if (value != null || configuration.isCallSettersOnNulls() && !mapping.primitive) {
+        if (value != null || configuration.isCallSettersOnNulls() && !mapping.isPrimitive()) {
           // gcode issue #377, call setter on nulls (value is not 'found')
-          metaObject.setValue(mapping.property, value);
+          metaObject.setValue(mapping.getProperty(), value);
         }
       }
     }
@@ -636,12 +617,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       throws SQLException {
     CacheKey cacheKey = createKeyForMultipleResults(rs, parentMapping, parentMapping.getColumn(),
         parentMapping.getColumn());
-    PendingRelation deferLoad = new PendingRelation();
-    deferLoad.metaObject = metaResultObject;
-    deferLoad.propertyMapping = parentMapping;
     List<PendingRelation> relations = pendingRelations.computeIfAbsent(cacheKey, k -> new ArrayList<>());
     // issue #255
-    relations.add(deferLoad);
+    relations.add(new PendingRelation(metaResultObject, parentMapping));
     ResultMapping previous = nextResultMaps.get(parentMapping.getResultSet());
     if (previous == null) {
       nextResultMaps.put(parentMapping.getResultSet(), parentMapping);
@@ -1063,7 +1041,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private String prependPrefix(String columnName, String prefix) {
-    if (columnName == null || columnName.length() == 0 || prefix == null || prefix.length() == 0) {
+    if (columnName == null || columnName.isEmpty() || prefix == null || prefix.isEmpty()) {
       return columnName;
     }
     return prefix + columnName;
@@ -1540,10 +1518,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       // keep track of these, so we can rebuild them.
       final Object originalObject = metaObject.getOriginalObject();
       if (rowValue instanceof PendingConstructorCreation && !pendingPccRelations.containsKey(originalObject)) {
-        PendingRelation pendingRelation = new PendingRelation();
-        pendingRelation.propertyMapping = resultMapping;
-        pendingRelation.metaObject = metaObject;
-
+        PendingRelation pendingRelation = new PendingRelation(metaObject, resultMapping);
         pendingPccRelations.put(originalObject, pendingRelation);
       }
     } else {
