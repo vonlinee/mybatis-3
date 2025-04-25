@@ -15,6 +15,11 @@
  */
 package org.apache.ibatis.internal.util;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.jetbrains.annotations.Nullable;
+
 public final class StringUtils {
 
   public static final String EMPTY = "";
@@ -94,6 +99,18 @@ public final class StringUtils {
       return EMPTY;
     }
     return prefix + prefix;
+  }
+
+  @Nullable
+  public static Set<String> prependPrefixes(@Nullable Set<String> columnNames, String prefix) {
+    if (columnNames == null || columnNames.isEmpty() || prefix == null || prefix.length() == 0) {
+      return columnNames;
+    }
+    final Set<String> prefixed = new HashSet<>();
+    for (String columnName : columnNames) {
+      prefixed.add(prefix + columnName);
+    }
+    return prefixed;
   }
 
   /**

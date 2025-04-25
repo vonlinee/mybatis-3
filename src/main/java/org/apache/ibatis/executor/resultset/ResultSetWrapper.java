@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.session.Configuration;
@@ -137,7 +138,7 @@ public class ResultSetWrapper {
     Set<String> mappedColumnNames = new HashSet<>();
     List<String> unmappedColumnNames = new ArrayList<>();
     final String upperColumnPrefix = columnPrefix == null ? null : columnPrefix.toUpperCase(Locale.ENGLISH);
-    final Set<String> mappedColumns = prependPrefixes(resultMap.getMappedColumns(), upperColumnPrefix);
+    final Set<String> mappedColumns = StringUtils.prependPrefixes(resultMap.getMappedColumns(), upperColumnPrefix);
     for (String columnName : columnNames) {
       final String upperColumnName = columnName.toUpperCase(Locale.ENGLISH);
       if (mappedColumns.contains(upperColumnName)) {
@@ -171,16 +172,4 @@ public class ResultSetWrapper {
   private String getMapKey(ResultMap resultMap, String columnPrefix) {
     return resultMap.getId() + ":" + columnPrefix;
   }
-
-  private Set<String> prependPrefixes(Set<String> columnNames, String prefix) {
-    if (columnNames == null || columnNames.isEmpty() || prefix == null || prefix.length() == 0) {
-      return columnNames;
-    }
-    final Set<String> prefixed = new HashSet<>();
-    for (String columnName : columnNames) {
-      prefixed.add(prefix + columnName);
-    }
-    return prefixed;
-  }
-
 }
