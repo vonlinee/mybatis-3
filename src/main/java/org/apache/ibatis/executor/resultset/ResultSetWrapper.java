@@ -107,7 +107,10 @@ public class ResultSetWrapper {
         return handler;
       }
 
-      Class<?> javaType = resolveClass(classNames.get(index));
+      Class<?> javaType = Resources.resolveClass(classNames.get(index));
+      if (javaType == null) {
+        return null;
+      }
       if (!(k instanceof Class && ((Class<?>) k).isAssignableFrom(javaType))) {
         // Clearly incompatible
         return null;
@@ -119,18 +122,6 @@ public class ResultSetWrapper {
       }
       return handler == null ? ObjectTypeHandler.INSTANCE : handler;
     });
-  }
-
-  static Class<?> resolveClass(String className) {
-    try {
-      // #699 className could be null
-      if (className != null) {
-        return Resources.classForName(className);
-      }
-    } catch (ClassNotFoundException e) {
-      // ignore
-    }
-    return null;
   }
 
   private int getColumnIndex(String columnName) {

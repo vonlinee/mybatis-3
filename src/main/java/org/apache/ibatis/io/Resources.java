@@ -25,6 +25,8 @@ import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.Properties;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * A class to simplify access to resources through the classloader.
  *
@@ -320,6 +322,19 @@ public class Resources {
    */
   public static Class<?> classForName(String className) throws ClassNotFoundException {
     return classLoaderWrapper.classForName(className);
+  }
+
+  @Nullable
+  public static Class<?> resolveClass(@Nullable String className) {
+    try {
+      // #699 className could be null
+      if (className != null) {
+        return Resources.classForName(className);
+      }
+    } catch (ClassNotFoundException e) {
+      // ignore
+    }
+    return null;
   }
 
   public static Charset getCharset() {
