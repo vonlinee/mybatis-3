@@ -137,7 +137,7 @@ public final class TypeHandlerRegistry {
     // as a last resort when no matching handler is found for the target Java type.
     // It is also used in some internal purposes like creating cache keys.
     // Although it is possible for users to override these mappings via register(JdbcType, TypeHandler),
-    // it might have unexpected side-effect.
+    // it might have unexpected side effect.
     // To configure type handlers for mapping to Map, for example, it is recommended to call the 3-args
     // version of register method. e.g. register(Object.class, JdbcType.DATE, new DateTypeHandler())
     jdbcTypeHandlerMap.put(JdbcType.BOOLEAN, BooleanTypeHandler.INSTANCE);
@@ -271,7 +271,7 @@ public final class TypeHandlerRegistry {
       handler = getSmartHandler(type, jdbcType);
     }
     if (handler == null && type instanceof ParameterizedType) {
-      handler = getTypeHandler((Class<?>) ((ParameterizedType) type).getRawType(), jdbcType);
+      handler = getTypeHandler(((ParameterizedType) type).getRawType(), jdbcType);
     }
     return handler;
   }
@@ -301,8 +301,7 @@ public final class TypeHandlerRegistry {
     }
 
     if (candidate == null) {
-      if (type instanceof Class) {
-        Class<?> clazz = (Class<?>) type;
+      if (type instanceof Class<?> clazz) {
         if (Enum.class.isAssignableFrom(clazz)) {
           Class<?> enumClass = clazz.isAnonymousClass() ? clazz.getSuperclass() : clazz;
           TypeHandler<?> enumHandler = getInstance(enumClass, defaultEnumTypeHandler);
@@ -318,7 +317,7 @@ public final class TypeHandlerRegistry {
       register(type, jdbcType, typeHandler);
       return typeHandler;
     } catch (ReflectiveOperationException e) {
-      throw new TypeException("Failed to invoke constructor " + candidate.toString(), e);
+      throw new TypeException("Failed to invoke constructor " + candidate, e);
     }
   }
 
@@ -327,8 +326,7 @@ public final class TypeHandlerRegistry {
     if (jdbcHandlerMap != null) {
       return NULL_TYPE_HANDLER_MAP.equals(jdbcHandlerMap) ? null : jdbcHandlerMap;
     }
-    if (type instanceof Class) {
-      Class<?> clazz = (Class<?>) type;
+    if (type instanceof Class<?> clazz) {
       if (!Enum.class.isAssignableFrom(clazz)) {
         jdbcHandlerMap = getJdbcHandlerMapForSuperclass(clazz);
       }
@@ -466,7 +464,7 @@ public final class TypeHandlerRegistry {
       Class<?> argType = constructor.getParameterTypes()[0];
       if (Type.class.equals(argType) || Class.class.equals(argType)) {
         for (Type javaType : mappedJavaTypes) {
-          smartHandlers.computeIfAbsent(javaType, k -> constructor);
+          smartHandlers.putIfAbsent(javaType, constructor);
         }
         return;
       }
