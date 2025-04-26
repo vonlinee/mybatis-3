@@ -34,7 +34,12 @@ import org.apache.ibatis.type.TypeHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+/**
+ * TODO fix some test case
+ */
 class XmlMapperBuilderTest {
+
+  Configuration configuration = new Configuration();
 
   @Test
   void shouldSuccessfullyLoadXMLMapperFile() {
@@ -99,9 +104,7 @@ class XmlMapperBuilderTest {
 
   @Test
   void resolveJdbcTypeWithUndefinedValue() {
-    BaseBuilder builder = new BaseBuilder(new Configuration()) {
-    };
-    when(() -> builder.resolveJdbcType("aaa"));
+    when(() -> MapperBuilderAssistant.resolveJdbcType("aaa"));
     then(caughtException()).isInstanceOf(BuilderException.class)
         .hasMessageStartingWith("Error resolving JdbcType. Cause: java.lang.IllegalArgumentException: No enum")
         .hasMessageEndingWith("org.apache.ibatis.type.JdbcType.aaa");
@@ -129,9 +132,7 @@ class XmlMapperBuilderTest {
 
   @Test
   void createInstanceWithAbstractClass() {
-    BaseBuilder builder = new BaseBuilder(new Configuration()) {
-    };
-    when(() -> builder.createInstance("org.apache.ibatis.builder.BaseBuilder"));
+    when(() -> MapperBuilderAssistant.resolveInstance(configuration, "org.apache.ibatis.builder.BaseBuilder"));
     then(caughtException()).isInstanceOf(BuilderException.class).hasMessage(
         "Error creating instance. Cause: java.lang.NoSuchMethodException: org.apache.ibatis.builder.BaseBuilder.<init>()");
   }
@@ -148,8 +149,6 @@ class XmlMapperBuilderTest {
   @Test
   void resolveTypeHandlerTypeHandlerAliasIsNull() {
     BaseBuilder builder = new BaseBuilder(new Configuration()) {
-      {
-      }
     };
     TypeHandler<?> typeHandler = builder.resolveTypeHandler(String.class, null, null, (String) null);
     assertThat(typeHandler).isNull();
@@ -158,8 +157,6 @@ class XmlMapperBuilderTest {
   @Test
   void resolveTypeHandlerNoAssignable() {
     BaseBuilder builder = new BaseBuilder(new Configuration()) {
-      {
-      }
     };
     when(() -> builder.resolveTypeHandler(String.class, null, null, "integer"));
     then(caughtException()).isInstanceOf(BuilderException.class).hasMessage(

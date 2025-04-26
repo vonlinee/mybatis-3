@@ -51,12 +51,24 @@ import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandler;
+import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
+ *
+ * @see BuilderException
  */
-public class MapperBuilderAssistant extends BaseBuilder {
+public class MapperBuilderAssistant {
+
+  private static final String parameterProperties = "javaType,jdbcType,mode,numericScale,resultMap,typeHandler,jdbcTypeName";
+
+  protected final Configuration configuration;
+  protected final TypeAliasRegistry typeAliasRegistry;
+  protected final TypeHandlerRegistry typeHandlerRegistry;
 
   private String currentNamespace;
   private final String resource;
@@ -64,7 +76,10 @@ public class MapperBuilderAssistant extends BaseBuilder {
   private boolean unresolvedCacheRef; // issue #676
 
   public MapperBuilderAssistant(Configuration configuration, String resource) {
-    super(configuration);
+    this.configuration = configuration;
+    this.typeAliasRegistry = this.configuration.getTypeAliasRegistry();
+    this.typeHandlerRegistry = this.configuration.getTypeHandlerRegistry();
+
     ErrorContext.instance().resource(resource);
     this.resource = resource;
   }
@@ -425,6 +440,89 @@ public class MapperBuilderAssistant extends BaseBuilder {
         notNullColumn, columnPrefix, typeHandler, flags, null, null, configuration.isLazyLoadingEnabled());
   }
 
+  // non-static utility method start
+
+  @Nullable
+  public Object resolveInstance(@Nullable String alias) {
+    Class<?> clazz = resolveClass(alias);
+    try {
+      return clazz == null ? null : clazz.getDeclaredConstructor().newInstance();
+    } catch (Exception e) {
+      throw new BuilderException("Error creating instance. Cause: " + e, e);
+    }
+  }
+
+  /**
+   * @param config
+   *          configuration
+   * @param alias
+   *          type alias
+   * @param <T>
+   *          the type of instance
+   *
+   * @return instance
+   */
+  @Nullable
+  @SuppressWarnings("unchecked")
+  public static <T> T resolveInstance(@NotNull Configuration config, @Nullable String alias) {
+    TypeAliasRegistry typeAliasRegistry = config.getTypeAliasRegistry();
+    Class<?> clazz = typeAliasRegistry.resolveAlias(alias);
+    try {
+      return clazz == null ? null : (T) clazz.getDeclaredConstructor().newInstance();
+    } catch (Exception e) {
+      throw new BuilderException("Error creating instance. Cause: " + e, e);
+    }
+  }
+
+  @Nullable
+  public <T> Class<? extends T> resolveClass(@Nullable String alias) {
+    try {
+      return alias == null ? null : resolveAlias(alias);
+    } catch (Exception e) {
+      throw new BuilderException("Error resolving class. Cause: " + e, e);
+    }
+  }
+
+  @Nullable
+  public TypeHandler<?> resolveTypeHandler(Class<?> javaType, String typeHandlerAlias) {
+    return resolveTypeHandler(null, javaType, null, typeHandlerAlias);
+  }
+
+  @Nullable
+  public TypeHandler<?> resolveTypeHandler(Class<?> javaType, Class<? extends TypeHandler<?>> typeHandlerType) {
+    return resolveTypeHandler(javaType, null, typeHandlerType);
+  }
+
+  @Nullable
+  public TypeHandler<?> resolveTypeHandler(Class<?> parameterType, Type propertyType, JdbcType jdbcType,
+      String typeHandlerAlias) {
+    Class<? extends TypeHandler<?>> typeHandlerType = null;
+    typeHandlerType = resolveClass(typeHandlerAlias);
+    if (typeHandlerType != null && !TypeHandler.class.isAssignableFrom(typeHandlerType)) {
+      throw new BuilderException("Type " + typeHandlerType.getName()
+          + " is not a valid TypeHandler because it does not implement TypeHandler interface");
+    }
+    return resolveTypeHandler(propertyType, jdbcType, typeHandlerType);
+  }
+
+  @Nullable
+  public TypeHandler<?> resolveTypeHandler(Type javaType, JdbcType jdbcType,
+      Class<? extends TypeHandler<?>> typeHandlerType) {
+    if (typeHandlerType == null && jdbcType == null) {
+      return null;
+    }
+    return configuration.getTypeHandlerRegistry().getTypeHandler(javaType, jdbcType, typeHandlerType);
+  }
+
+  @Nullable
+  public <T> Class<? extends T> resolveAlias(String alias) {
+    return typeAliasRegistry.resolveAlias(alias);
+  }
+
+  // non-static utility method end
+
+  // Static Utility Method START
+
   public static Set<String> parseMultipleColumnNames(String columnName) {
     Set<String> columns = new HashSet<>();
     if (columnName != null) {
@@ -508,4 +606,141 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
     return null;
   }
+
+  public static ParameterExpression parseParameterMapping(String content) {
+    try {
+      return new ParameterExpression(content);
+    } catch (BuilderException ex) {
+      throw ex;
+    } catch (Exception ex) {
+      throw new BuilderException("Parsing error was found in mapping @{" + content
+          + "}.  Check syntax #{property|(expression), var1=value1, var2=value2, ...} ", ex);
+    }
+  }
+
+  public static JdbcType resolveJdbcType(String alias) {
+    try {
+      return alias == null ? null : JdbcType.valueOf(alias);
+    } catch (IllegalArgumentException e) {
+      throw new BuilderException("Error resolving JdbcType. Cause: " + e, e);
+    }
+  }
+
+  @Nullable
+  public static <T> Class<? extends T> resolveClass(Configuration config, @Nullable String alias) {
+    try {
+      TypeAliasRegistry typeAliasRegistry = config.getTypeAliasRegistry();
+      return alias == null ? null : typeAliasRegistry.resolveAlias(alias);
+    } catch (Exception e) {
+      throw new BuilderException("Error resolving class. Cause: " + e, e);
+    }
+  }
+
+  @Nullable
+  public static TypeHandler<?> resolveTypeHandler(@NotNull Configuration config, Class<?> parameterType,
+      Type propertyType, JdbcType jdbcType, String typeHandlerAlias) {
+    Class<? extends TypeHandler<?>> typeHandlerType;
+    TypeAliasRegistry typeAliasRegistry = config.getTypeAliasRegistry();
+    typeHandlerType = typeAliasRegistry.resolveAlias(typeHandlerAlias);
+    if (typeHandlerType != null && !TypeHandler.class.isAssignableFrom(typeHandlerType)) {
+      throw new BuilderException("Type " + typeHandlerType.getName()
+          + " is not a valid TypeHandler because it does not implement TypeHandler interface");
+    }
+    if (typeHandlerType == null && jdbcType == null) {
+      return null;
+    }
+    return config.getTypeHandlerRegistry().getTypeHandler(propertyType, jdbcType, typeHandlerType);
+  }
+
+  public static ResultSetType resolveResultSetType(String alias) {
+    try {
+      return alias == null ? null : ResultSetType.valueOf(alias);
+    } catch (IllegalArgumentException e) {
+      throw new BuilderException("Error resolving ResultSetType. Cause: " + e, e);
+    }
+  }
+
+  public static ParameterMode resolveParameterMode(String alias) {
+    try {
+      return alias == null ? null : ParameterMode.valueOf(alias);
+    } catch (IllegalArgumentException e) {
+      throw new BuilderException("Error resolving ParameterMode. Cause: " + e, e);
+    }
+  }
+
+  @NotNull
+  public static ParameterMapping buildParameterMapping(@NotNull Configuration config, String content,
+      Class<?> parameterType) {
+    ParameterExpression propertiesMap = parseParameterMapping(content);
+    String property = propertiesMap.get("property");
+    JdbcType jdbcType = resolveJdbcType(propertiesMap.get("jdbcType"));
+    Class<?> propertyType;
+
+    final TypeHandlerRegistry typeHandlerRegistry = config.getTypeHandlerRegistry();
+
+    if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
+      propertyType = parameterType;
+    } else if (JdbcType.CURSOR.equals(jdbcType)) {
+      propertyType = ResultSet.class;
+    } else if (property != null) {
+      MetaClass metaClass = MetaClass.forClass(parameterType, config.getReflectorFactory());
+      if (metaClass.hasGetter(property)) {
+        propertyType = metaClass.getGetterType(property);
+      } else {
+        propertyType = Object.class;
+      }
+    } else {
+      propertyType = Object.class;
+    }
+    ParameterMapping.Builder builder = new ParameterMapping.Builder(property, propertyType);
+    if (jdbcType != null) {
+      builder.jdbcType(jdbcType);
+    }
+    Class<?> javaType = null;
+    String typeHandlerAlias = null;
+    for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
+      String name = entry.getKey();
+      String value = entry.getValue();
+      if (name != null) {
+        switch (name) {
+          case "javaType":
+            javaType = resolveClass(config, value);
+            builder.javaType(javaType);
+            break;
+          case "mode":
+            builder.mode(resolveParameterMode(value));
+            break;
+          case "numericScale":
+            builder.numericScale(Integer.valueOf(value));
+            break;
+          case "resultMap":
+            builder.resultMapId(value);
+            break;
+          case "typeHandler":
+            typeHandlerAlias = value;
+            break;
+          case "jdbcTypeName":
+            builder.jdbcTypeName(value);
+            break;
+          case "property":
+            break;
+          case "expression":
+            builder.expression(value);
+            break;
+          default:
+            throw new BuilderException("An invalid property '" + name + "' was found in mapping @{" + content
+                + "}.  Valid properties are " + parameterProperties);
+        }
+      } else {
+        throw new BuilderException("An invalid property '" + name + "' was found in mapping @{" + content
+            + "}.  Valid properties are " + parameterProperties);
+      }
+    }
+    if (typeHandlerAlias != null) {
+      builder.typeHandler(resolveTypeHandler(config, javaType, propertyType, jdbcType, typeHandlerAlias));
+    }
+    return builder.build();
+  }
+
+  // Static Utility Method END
 }

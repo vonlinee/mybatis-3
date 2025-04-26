@@ -80,6 +80,14 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
     return "?";
   }
 
+  /**
+   * TODO compare with {@link MapperBuilderAssistant#buildParameterMapping(Configuration, String, Class)}
+   *
+   * @param content
+   *          literal parameter expression
+   *
+   * @return ParameterMapping
+   */
   private ParameterMapping buildParameterMapping(String content) {
     ParameterExpression propertiesMap = parseParameterMapping(content);
 

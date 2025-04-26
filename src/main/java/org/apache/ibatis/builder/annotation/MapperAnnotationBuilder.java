@@ -165,7 +165,7 @@ public class MapperAnnotationBuilder {
         }
       }
       if (inputStream != null) {
-        XMLMapperBuilder xmlParser = new XMLMapperBuilder(inputStream, assistant.getConfiguration(), xmlResource,
+        XMLMapperBuilder xmlParser = new XMLMapperBuilder(inputStream, configuration, xmlResource,
             configuration.getSqlFragments(), type);
         xmlParser.parse();
       }
@@ -608,7 +608,7 @@ public class MapperAnnotationBuilder {
       return buildSqlSourceFromStrings(((SelectKey) annotation).statement(), parameterType, paramNameResolver,
           languageDriver);
     }
-    return new ProviderSqlSource(assistant.getConfiguration(), annotation, type, method);
+    return new ProviderSqlSource(configuration, annotation, type, method);
   }
 
   private SqlSource buildSqlSourceFromStrings(String[] strings, Class<?> parameterTypeClass,
