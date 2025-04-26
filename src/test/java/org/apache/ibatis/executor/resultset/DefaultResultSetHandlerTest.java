@@ -84,7 +84,7 @@ class DefaultResultSetHandlerTest {
     when(rsmd.getColumnType(1)).thenReturn(Types.INTEGER);
     when(rsmd.getColumnClassName(1)).thenReturn(Integer.class.getCanonicalName());
 
-    final List<Object> results = fastResultSetHandler.handleResultSets(stmt);
+    final List<Object> results = fastResultSetHandler.handleResultSets(stmt, null);
     assertEquals(1, results.size());
     assertEquals(100, ((HashMap) results.get(0)).get("cOlUmN1"));
   }
@@ -114,7 +114,7 @@ class DefaultResultSetHandlerTest {
       Assertions.fail("Should have thrown ExecutorException");
     } catch (Exception e) {
       Assertions.assertInstanceOf(ExecutorException.class, e, "Expected ExecutorException");
-      Assertions.assertTrue(e.getMessage().contains("mapping: " + resultMapping.toString()));
+      Assertions.assertTrue(e.getMessage().contains("mapping: " + resultMapping));
     }
   }
 

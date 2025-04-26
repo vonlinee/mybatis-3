@@ -74,10 +74,10 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
   }
 
   @Override
-  public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
+  public <E> List<E> query(Statement statement, ResultHandler<E> resultHandler) throws SQLException {
     CallableStatement cs = (CallableStatement) statement;
     cs.execute();
-    List<E> resultList = resultSetHandler.handleResultSets(cs);
+    List<E> resultList = resultSetHandler.handleResultSets(cs, resultHandler);
     handleOutputParameters(cs);
     return resultList;
   }

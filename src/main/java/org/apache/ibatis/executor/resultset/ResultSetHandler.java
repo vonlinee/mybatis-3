@@ -31,7 +31,7 @@ import org.apache.ibatis.session.RowBounds;
  */
 public interface ResultSetHandler {
 
-  <E> List<E> handleResultSets(Statement stmt) throws SQLException;
+  <E> List<E> handleResultSets(Statement stmt, ResultHandler<E> resultHandler) throws SQLException;
 
   <E> Cursor<E> handleCursorResultSets(Statement stmt) throws SQLException;
 

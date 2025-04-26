@@ -82,7 +82,7 @@ class DefaultResultSetHandlerTest2 {
     when(rsmd.getColumnType(1)).thenReturn(Types.INTEGER);
     when(rsmd.getColumnClassName(1)).thenReturn(Integer.class.getCanonicalName());
 
-    final List<Object> results = resultSetHandler.handleResultSets(stmt);
+    final List<Object> results = resultSetHandler.handleResultSets(stmt, null);
     assertEquals(0, results.size());
   }
 
@@ -117,7 +117,7 @@ class DefaultResultSetHandlerTest2 {
     when(rsmd.getColumnType(1)).thenReturn(Types.INTEGER);
     when(rsmd.getColumnClassName(1)).thenReturn(Integer.class.getCanonicalName());
 
-    final List<Object> results = resultSetHandler.handleResultSets(stmt);
+    final List<Object> results = resultSetHandler.handleResultSets(stmt, null);
     assertEquals(0, results.size());
   }
 

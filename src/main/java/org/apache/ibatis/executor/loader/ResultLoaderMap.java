@@ -267,7 +267,7 @@ public class ResultLoaderMap {
             + (configurationObject == null ? "null" : configurationObject.getClass()) + "].");
       }
 
-      return Configuration.class.cast(configurationObject);
+      return (Configuration) configurationObject;
     }
 
     private Log getLogger() {
@@ -301,7 +301,7 @@ public class ResultLoaderMap {
 
     @Override
     protected <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds,
-        ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
+        ResultHandler<E> resultHandler, BoundSql boundSql) throws SQLException {
       throw new UnsupportedOperationException("Not supported.");
     }
 

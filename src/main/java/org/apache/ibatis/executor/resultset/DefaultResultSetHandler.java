@@ -120,7 +120,8 @@ public class DefaultResultSetHandler extends BaseResultSetHandler implements Res
   // HANDLE RESULT SETS
   //
   @Override
-  public List<Object> handleResultSets(Statement stmt) throws SQLException {
+  @SuppressWarnings("unchecked")
+  public <E> List<E> handleResultSets(Statement stmt, ResultHandler<E> resultHandler) throws SQLException {
     ErrorContext.instance().activity("handling results").object(mappedStatement.getId());
 
     final List<Object> multipleResults = new ArrayList<>();
@@ -154,7 +155,7 @@ public class DefaultResultSetHandler extends BaseResultSetHandler implements Res
       }
     }
 
-    return collapseSingleResultList(multipleResults);
+    return (List<E>) collapseSingleResultList(multipleResults);
   }
 
   @Override
@@ -1201,8 +1202,7 @@ public class DefaultResultSetHandler extends BaseResultSetHandler implements Res
 
       // create the pending objects
       for (Object pendingCreation : pendingCreations) {
-        if (pendingCreation instanceof PendingConstructorCreation) {
-          final PendingConstructorCreation pendingConstructorCreation = (PendingConstructorCreation) pendingCreation;
+        if (pendingCreation instanceof PendingConstructorCreation pendingConstructorCreation) {
           targetMetaObject.add(pendingConstructorCreation.create(objectFactory));
         }
       }

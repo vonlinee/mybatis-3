@@ -288,7 +288,7 @@ public abstract class BaseExecutor implements Executor {
   protected abstract List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException;
 
   protected abstract <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds,
-      ResultHandler resultHandler, BoundSql boundSql) throws SQLException;
+      ResultHandler<E> resultHandler, BoundSql boundSql) throws SQLException;
 
   protected abstract <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds,
       BoundSql boundSql) throws SQLException;
