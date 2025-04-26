@@ -21,7 +21,7 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.Delete;
 
-class MapperDelete extends MapperStatement<Delete> implements Delete {
+public class MapperDelete extends MapperStatement<Delete> implements Delete {
 
   MapperDelete(DefaultSqlSession sqlSession, Executor executor, MappedStatement statement) {
     super(sqlSession, executor, statement);

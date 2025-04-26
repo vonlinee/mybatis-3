@@ -21,7 +21,7 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.Update;
 
-class MapperUpdate extends MapperStatement<Update> implements Update {
+public class MapperUpdate extends MapperStatement<Update> implements Update {
 
   MapperUpdate(DefaultSqlSession sqlSession, Executor executor, MappedStatement statement) {
     super(sqlSession, executor, statement);

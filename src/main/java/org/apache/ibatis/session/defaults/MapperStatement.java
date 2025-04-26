@@ -25,12 +25,10 @@ import org.apache.ibatis.session.SqlSession;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-abstract class MapperStatement<S extends JdbcStatement<S>> implements JdbcStatement<S> {
+public abstract class MapperStatement<S extends JdbcStatement<S>> implements JdbcStatement<S> {
 
-  @NotNull
   protected SqlSession sqlSession;
 
-  @NotNull
   protected Executor executor;
 
   @NotNull
@@ -63,12 +61,12 @@ abstract class MapperStatement<S extends JdbcStatement<S>> implements JdbcStatem
     return ParamNameResolver.wrapToMapIfCollection(object, null);
   }
 
-  MappedStatement getMappedStatement() {
+  public MappedStatement getMappedStatement() {
     return ms;
   }
 
   @Nullable
-  Object getParameterObject() {
+  public Object getParameterObject() {
     return parameter;
   }
 
@@ -78,5 +76,13 @@ abstract class MapperStatement<S extends JdbcStatement<S>> implements JdbcStatem
       return null;
     }
     return boundSql.getSql();
+  }
+
+  public String getStatementId() {
+    return ms.getId();
+  }
+
+  public String getResource() {
+    return ms.getResource();
   }
 }

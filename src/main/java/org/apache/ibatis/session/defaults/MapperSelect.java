@@ -34,7 +34,7 @@ import org.apache.ibatis.session.Select;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-class MapperSelect extends MapperStatement<Select> implements Select {
+public class MapperSelect extends MapperStatement<Select> implements Select {
 
   @Nullable
   RowBounds rowBounds = RowBounds.DEFAULT;

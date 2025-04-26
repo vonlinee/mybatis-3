@@ -21,7 +21,7 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.Insert;
 
-class MapperInsert extends MapperStatement<Insert> implements Insert {
+public class MapperInsert extends MapperStatement<Insert> implements Insert {
 
   MapperInsert(DefaultSqlSession sqlSession, Executor executor, MappedStatement statement) {
     super(sqlSession, executor, statement);
