@@ -486,7 +486,7 @@ class BaseExecutorTest extends BaseDataTest {
 
     BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
     }, parameterObject) {
       {
@@ -516,7 +516,7 @@ class BaseExecutorTest extends BaseDataTest {
 
     BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
     }, null);
 
@@ -544,7 +544,7 @@ class BaseExecutorTest extends BaseDataTest {
 
     BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
     }, parameterObject);
 
@@ -572,13 +572,13 @@ class BaseExecutorTest extends BaseDataTest {
 
     BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-        add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-        add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-        add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
-        add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-        add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("username", registry.getTypeHandler(String.class)).build());
+        add(new ParameterMapping.Builder("password", registry.getTypeHandler(String.class)).build());
+        add(new ParameterMapping.Builder("email", registry.getTypeHandler(String.class)).build());
+        add(new ParameterMapping.Builder("bio", registry.getTypeHandler(String.class)).jdbcType(JdbcType.VARCHAR)
+            .build());
+        add(new ParameterMapping.Builder("favouriteSection", registry.getTypeHandler(Section.class))
             .jdbcType(JdbcType.VARCHAR).build());
       }
     }, parameterObject);

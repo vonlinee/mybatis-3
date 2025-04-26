@@ -158,7 +158,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     Class<?> javaTypeClass = resolveParameterJavaType(parameterType, property, javaType, jdbcType);
     TypeHandler<?> typeHandlerInstance = resolveTypeHandler(javaTypeClass, jdbcType, typeHandler);
     // @formatter:off
-    return new ParameterMapping.Builder(configuration, property, javaTypeClass)
+    return new ParameterMapping.Builder(property, javaTypeClass)
       .jdbcType(jdbcType)
       .resultMapId(resultMap)
       .mode(parameterMode)
