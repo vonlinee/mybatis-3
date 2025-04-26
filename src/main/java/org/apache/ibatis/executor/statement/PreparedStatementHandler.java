@@ -43,7 +43,7 @@ public class PreparedStatementHandler extends BaseStatementHandler {
   }
 
   @Override
-  public int update(Statement statement) throws SQLException {
+  public int update(Statement statement, MappedStatement ms, BoundSql boundSql) throws SQLException {
     PreparedStatement ps = (PreparedStatement) statement;
     ps.execute();
     int rows = ps.getUpdateCount();

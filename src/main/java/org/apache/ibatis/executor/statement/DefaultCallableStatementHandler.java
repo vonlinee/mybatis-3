@@ -61,7 +61,7 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
   }
 
   @Override
-  public int update(Statement statement) throws SQLException {
+  public int update(Statement statement, MappedStatement ms, BoundSql boundSql) throws SQLException {
     CallableStatement cs = (CallableStatement) statement;
     cs.execute();
     int rows = cs.getUpdateCount();

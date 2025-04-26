@@ -48,7 +48,7 @@ public class ReuseExecutor extends BaseExecutor {
   public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
     StatementHandler handler = extensionFactory.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
     Statement stmt = prepareStatement(handler, ms.getStatementLog());
-    return handler.update(stmt);
+    return handler.update(stmt, ms, handler.getBoundSql());
   }
 
   @Override

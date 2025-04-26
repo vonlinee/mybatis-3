@@ -43,7 +43,7 @@ public class SimpleStatementHandler extends BaseStatementHandler {
   }
 
   @Override
-  public int update(Statement statement) throws SQLException {
+  public int update(Statement statement, MappedStatement mappedStatement, BoundSql boundSql) throws SQLException {
     String sql = boundSql.getSql();
     Object parameterObject = boundSql.getParameterObject();
     KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();

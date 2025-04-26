@@ -21,15 +21,19 @@ import java.sql.Statement;
 import java.util.List;
 
 import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
+import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.ResultHandler;
 
 /**
  * @author Clinton Begin
  */
 public interface StatementHandler {
+
+  void setExecutor(Executor executor);
 
   void setParameterHandler(ParameterHandler parameterHandler);
 
@@ -41,7 +45,7 @@ public interface StatementHandler {
 
   void batch(Statement statement) throws SQLException;
 
-  int update(Statement statement) throws SQLException;
+  int update(Statement statement, MappedStatement ms, BoundSql boundSql) throws SQLException;
 
   <E> List<E> query(Statement statement, ResultHandler<E> resultHandler) throws SQLException;
 

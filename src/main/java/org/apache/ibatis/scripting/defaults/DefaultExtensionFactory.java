@@ -100,6 +100,9 @@ public class DefaultExtensionFactory implements ExtensionFactory {
         statementHandler.getParameterHandler(), resultHandler, boundSql);
     statementHandler.setResultSetHandler(resultSetHandler);
 
+    // set Executor
+    statementHandler.setExecutor(executor);
+
     return (StatementHandler) interceptorChain.pluginAll(statementHandler);
   }
 

@@ -38,7 +38,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
   protected ResultSetHandler resultSetHandler;
   protected ParameterHandler parameterHandler;
 
-  protected final Executor executor;
+  protected Executor executor;
   protected final MappedStatement mappedStatement;
   protected final RowBounds rowBounds;
 
@@ -52,6 +52,11 @@ public abstract class BaseStatementHandler implements StatementHandler {
     this.rowBounds = rowBounds;
 
     this.boundSql = boundSql;
+  }
+
+  @Override
+  public void setExecutor(Executor executor) {
+    this.executor = executor;
   }
 
   @Override
@@ -81,7 +86,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
     try {
       statement = instantiateStatement(connection, mappedStatement);
       setStatementTimeout(statement, mappedStatement, transactionTimeout);
-      setFetchSize(statement);
+      setFetchSize(statement, mappedStatement);
       return statement;
     } catch (SQLException e) {
       closeStatement(statement);
@@ -110,10 +115,11 @@ public abstract class BaseStatementHandler implements StatementHandler {
     JdbcUtils.applyTransactionTimeout(stmt, queryTimeout, transactionTimeout);
   }
 
-  protected void setFetchSize(Statement stmt) throws SQLException {
+  protected void setFetchSize(Statement stmt, MappedStatement mappedStatement) throws SQLException {
     Integer fetchSize = mappedStatement.getFetchSize();
     if (fetchSize == null) {
-      fetchSize = configuration.getDefaultFetchSize();
+      Configuration config = mappedStatement.getConfiguration();
+      fetchSize = config.getDefaultFetchSize();
     }
     if (fetchSize != null) {
       stmt.setFetchSize(fetchSize);

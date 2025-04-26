@@ -47,7 +47,7 @@ public class SimpleExecutor extends BaseExecutor {
       StatementHandler handler = extensionFactory.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null,
           null);
       stmt = prepareStatement(handler, ms.getStatementLog());
-      return handler.update(stmt);
+      return handler.update(stmt, ms, handler.getBoundSql());
     } finally {
       closeStatement(stmt);
     }
