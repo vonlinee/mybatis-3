@@ -107,11 +107,13 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
 
   @Override
   public void parameterize(Statement statement) throws SQLException {
-    registerOutputParameters((CallableStatement) statement);
+    registerOutputParameters((CallableStatement) statement, this.boundSql, parameterHandler.getParameterObject());
     parameterHandler.setParameters((CallableStatement) statement);
   }
 
-  private void registerOutputParameters(CallableStatement cs) throws SQLException {
+  @Override
+  public void registerOutputParameters(CallableStatement cs, BoundSql boundSql, Object parameterObject)
+      throws SQLException {
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     for (int i = 0, n = parameterMappings.size(); i < n; i++) {
       ParameterMapping parameterMapping = parameterMappings.get(i);

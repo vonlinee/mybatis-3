@@ -19,6 +19,7 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.ResultHandler;
@@ -26,6 +27,8 @@ import org.apache.ibatis.type.TypeHandler;
 import org.jetbrains.annotations.Nullable;
 
 public interface CallableStatementHandler extends StatementHandler {
+
+  void registerOutputParameters(CallableStatement cs, BoundSql boundSql, Object parameterObject) throws SQLException;
 
   <E> void handleOutputParameters(CallableStatement cs, Object parameterObject,
       @Nullable ResultHandler<E> resultHandler) throws SQLException;
