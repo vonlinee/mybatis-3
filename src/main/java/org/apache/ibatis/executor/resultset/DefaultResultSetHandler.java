@@ -824,7 +824,7 @@ public class DefaultResultSetHandler extends BaseResultSetHandler implements Res
       final ResultMapping mapping = resultMappingList.get(0);
       columnName = prependPrefix(mapping.getColumn(), columnPrefix);
     } else {
-      columnName = rsw.getColumnNames().get(0);
+      columnName = rsw.getColumnName(0);
     }
     final TypeHandler<?> typeHandler = rsw.getTypeHandler(resultType, columnName);
     return typeHandler.getResult(rsw.getResultSet(), columnName);

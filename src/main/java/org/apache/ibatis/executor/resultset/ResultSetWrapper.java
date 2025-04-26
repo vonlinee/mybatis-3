@@ -33,9 +33,8 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
-import org.apache.ibatis.type.ObjectTypeHandler;
 import org.apache.ibatis.type.TypeHandler;
-import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Iwao AVE!
@@ -43,21 +42,25 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 public class ResultSetWrapper {
 
   private final ResultSet resultSet;
-  private final TypeHandlerRegistry typeHandlerRegistry;
   private final List<String> columnNames = new ArrayList<>();
   private final List<String> classNames = new ArrayList<>();
   private final List<JdbcType> jdbcTypes = new ArrayList<>();
-  private final Map<String, Map<Type, TypeHandler<?>>> typeHandlerMap = new HashMap<>();
   private final Map<String, Set<String>> mappedColumnNamesMap = new HashMap<>();
   private final Map<String, List<String>> unMappedColumnNamesMap = new HashMap<>();
 
+  private final TypeHandlerLookup handlerLookup;
+
   public ResultSetWrapper(ResultSet rs, Configuration configuration) throws SQLException {
-    this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+    this.handlerLookup = new ResultSetTypeHandlerLookup(configuration.getTypeHandlerRegistry());
     this.resultSet = rs;
+    this.initialize(rs, configuration.isUseColumnLabel());
+  }
+
+  public void initialize(ResultSet rs, boolean useColumnLabel) throws SQLException {
     final ResultSetMetaData metaData = rs.getMetaData();
     final int columnCount = metaData.getColumnCount();
     for (int i = 1; i <= columnCount; i++) {
-      columnNames.add(configuration.isUseColumnLabel() ? metaData.getColumnLabel(i) : metaData.getColumnName(i));
+      columnNames.add(useColumnLabel ? metaData.getColumnLabel(i) : metaData.getColumnName(i));
       jdbcTypes.add(JdbcType.forCode(metaData.getColumnType(i)));
       classNames.add(metaData.getColumnClassName(i));
     }
@@ -76,62 +79,48 @@ public class ResultSetWrapper {
   }
 
   public List<JdbcType> getJdbcTypes() {
-    return jdbcTypes;
+    return Collections.unmodifiableList(jdbcTypes);
   }
 
+  @Nullable
   public JdbcType getJdbcType(String columnName) {
     int columnIndex = getColumnIndex(columnName);
     return columnIndex == -1 ? null : jdbcTypes.get(columnIndex);
   }
 
-  /**
-   * Gets the type handler to use when reading the result set. Tries to get from the TypeHandlerRegistry by searching
-   * for the property type. If not found it gets the column JDBC type and tries to get a handler for it.
-   *
-   * @param propertyType
-   *          the property type
-   * @param columnName
-   *          the column name
-   *
-   * @return the type handler
-   */
-  public TypeHandler<?> getTypeHandler(Type propertyType, String columnName) {
-    return typeHandlerMap.computeIfAbsent(columnName, k -> new HashMap<>()).computeIfAbsent(propertyType, k -> {
-      int index = getColumnIndex(columnName);
-      if (index == -1) {
-        return ObjectTypeHandler.INSTANCE;
-      }
-
-      JdbcType jdbcType = jdbcTypes.get(index);
-      TypeHandler<?> handler = typeHandlerRegistry.getTypeHandler(k, jdbcType, null);
-      if (handler != null) {
-        return handler;
-      }
-
-      Class<?> javaType = Resources.resolveClass(classNames.get(index));
-      if (javaType == null) {
-        return null;
-      }
-      if (!(k instanceof Class && ((Class<?>) k).isAssignableFrom(javaType))) {
-        // Clearly incompatible
-        return null;
-      }
-
-      handler = typeHandlerRegistry.getTypeHandler(javaType, jdbcType, null);
-      if (handler == null) {
-        handler = typeHandlerRegistry.getTypeHandler(jdbcType);
-      }
-      return handler == null ? ObjectTypeHandler.INSTANCE : handler;
-    });
+  @Nullable
+  public Class<?> getJavaType(int columnIndex) {
+    return Resources.resolveClass(getClassName(columnIndex));
   }
 
-  private int getColumnIndex(String columnName) {
+  public int getColumnIndex(String columnName) {
     for (int i = 0; i < columnNames.size(); i++) {
       if (columnNames.get(i).equalsIgnoreCase(columnName)) {
         return i;
       }
     }
     return -1;
+  }
+
+  public String getColumnName(int columnIndex) {
+    if (columnIndex < 0 || columnIndex > jdbcTypes.size() - 1) {
+      return null;
+    }
+    return columnNames.get(columnIndex);
+  }
+
+  public JdbcType getJdbcType(int columnIndex) {
+    if (columnIndex < 0 || columnIndex > jdbcTypes.size() - 1) {
+      return null;
+    }
+    return jdbcTypes.get(columnIndex);
+  }
+
+  public String getClassName(int columnIndex) {
+    if (columnIndex < 0 || columnIndex > classNames.size() - 1) {
+      return null;
+    }
+    return classNames.get(columnIndex);
   }
 
   private void loadMappedAndUnmappedColumnNames(ResultMap resultMap, String columnPrefix) throws SQLException {
@@ -171,5 +160,9 @@ public class ResultSetWrapper {
 
   private String getMapKey(ResultMap resultMap, String columnPrefix) {
     return resultMap.getId() + ":" + columnPrefix;
+  }
+
+  public TypeHandler<?> getTypeHandler(Type javaType, String column) {
+    return handlerLookup.getTypeHandler(this, javaType, column);
   }
 }
