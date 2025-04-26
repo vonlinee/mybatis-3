@@ -36,11 +36,14 @@ import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultSetType;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.ObjectTypeHandler;
 import org.apache.ibatis.type.TypeHandler;
+import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
@@ -48,11 +51,13 @@ import org.apache.ibatis.type.TypeHandler;
 public class DefaultCallableStatementHandler extends BaseStatementHandler implements CallableStatementHandler {
 
   private final ResultHandler<?> resultHandler;
+  protected final TypeHandlerRegistry typeHandlerRegistry;
 
   public DefaultCallableStatementHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds,
       BoundSql boundSql, ResultHandler<?> resultHandler) {
     super(executor, mappedStatement, rowBounds, boundSql);
     this.resultHandler = resultHandler;
+    this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
   }
 
   @Override
@@ -63,7 +68,7 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
     Object parameterObject = boundSql.getParameterObject();
     KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
     keyGenerator.processAfter(executor, mappedStatement, cs, parameterObject);
-    handleOutputParameters(cs);
+    handleOutputParameters(cs, parameterHandler.getParameterObject(), null);
     return rows;
   }
 
@@ -78,7 +83,7 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
     CallableStatement cs = (CallableStatement) statement;
     cs.execute();
     List<E> resultList = resultSetHandler.handleResultSets(cs, resultHandler);
-    handleOutputParameters(cs);
+    handleOutputParameters(cs, parameterHandler.getParameterObject(), resultHandler);
     return resultList;
   }
 
@@ -87,12 +92,12 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
     CallableStatement cs = (CallableStatement) statement;
     cs.execute();
     Cursor<E> resultList = resultSetHandler.handleCursorResultSets(cs);
-    handleOutputParameters(cs);
+    handleOutputParameters(cs, parameterHandler.getParameterObject(), null);
     return resultList;
   }
 
   @Override
-  protected Statement instantiateStatement(Connection connection) throws SQLException {
+  protected Statement instantiateStatement(Connection connection, MappedStatement mappedStatement) throws SQLException {
     String sql = boundSql.getSql();
     if (mappedStatement.getResultSetType() == ResultSetType.DEFAULT) {
       return connection.prepareCall(sql);
@@ -131,56 +136,64 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
   }
 
   @Override
-  public void handleOutputParameters(CallableStatement cs) throws SQLException {
-    final Object parameterObject = parameterHandler.getParameterObject();
+  public <E> void handleOutputParameters(CallableStatement cs, Object parameterObject,
+      @Nullable ResultHandler<E> resultHandler) throws SQLException {
     final MetaObject metaParam = configuration.newMetaObject(parameterObject);
     final List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     for (int i = 0; i < parameterMappings.size(); i++) {
       final ParameterMapping parameterMapping = parameterMappings.get(i);
       if (parameterMapping.getMode() == ParameterMode.OUT || parameterMapping.getMode() == ParameterMode.INOUT) {
         if (ResultSet.class.equals(parameterMapping.getJavaType())) {
-          handleRefCursorOutputParameter((ResultSet) cs.getObject(i + 1), parameterMapping, metaParam);
+          ResultSet rs = (ResultSet) cs.getObject(i + 1);
+          if (rs != null) {
+            handleRefCursorOutputParameter(rs, parameterMapping, metaParam, this.resultHandler);
+          }
         } else {
           final String property = parameterMapping.getProperty();
-          TypeHandler<?> typeHandler = parameterMapping.getTypeHandler();
-          if (typeHandler == null) {
-            Type javaType = parameterMapping.getJavaType();
-            if (javaType == null || javaType == Object.class) {
-              javaType = metaParam.getGenericSetterType(property).getKey();
-            }
-            JdbcType jdbcType = parameterMapping.getJdbcType();
-            typeHandler = typeHandlerRegistry.getTypeHandler(javaType, jdbcType, null);
-            if (typeHandler == null) {
-              typeHandler = typeHandlerRegistry.getTypeHandler(jdbcType);
-              if (typeHandler == null) {
-                typeHandler = ObjectTypeHandler.INSTANCE;
-              }
-            }
-          }
+          TypeHandler<?> typeHandler = getOutputParameterTypeHandler(metaParam, parameterMapping);
           metaParam.setValue(property, typeHandler.getResult(cs, i + 1));
         }
       }
     }
   }
 
-  private void handleRefCursorOutputParameter(ResultSet rs, ParameterMapping parameterMapping, MetaObject metaParam)
-      throws SQLException {
-    if (rs == null) {
-      return;
+  @Override
+  public TypeHandler<?> getOutputParameterTypeHandler(MetaObject metaParam, ParameterMapping parameterMapping) {
+    TypeHandler<?> typeHandler = parameterMapping.getTypeHandler();
+    if (typeHandler == null) {
+      Type javaType = parameterMapping.getJavaType();
+      if (javaType == null || javaType == Object.class) {
+        javaType = metaParam.getGenericSetterType(parameterMapping.getProperty()).getKey();
+      }
+      JdbcType jdbcType = parameterMapping.getJdbcType();
+      typeHandler = typeHandlerRegistry.getTypeHandler(javaType, jdbcType, null);
+      if (typeHandler == null) {
+        typeHandler = typeHandlerRegistry.getTypeHandler(jdbcType);
+        if (typeHandler == null) {
+          typeHandler = ObjectTypeHandler.INSTANCE;
+        }
+      }
     }
+    return typeHandler;
+  }
+
+  @Override
+  public <T> void handleRefCursorOutputParameter(ResultSet rs, ParameterMapping pm, MetaObject metaParam,
+      ResultHandler<T> handler) throws SQLException {
     try {
-      final String resultMapId = parameterMapping.getResultMapId();
+      final String resultMapId = pm.getResultMapId();
       final ResultMap resultMap = configuration.getResultMap(resultMapId);
       final ResultSetWrapper rsw = new ResultSetWrapper(rs, configuration);
       if (this.resultHandler == null) {
+        ObjectFactory objectFactory = configuration.getObjectFactory();
         final DefaultResultHandler resultHandler = new DefaultResultHandler(objectFactory);
-        resultSetHandler.handleRowValues(rsw, resultMap, resultHandler, new RowBounds(), null);
-        metaParam.setValue(parameterMapping.getProperty(), resultHandler.getResultList());
+        resultSetHandler.handleRowValues(rsw, resultMap, resultHandler, RowBounds.DEFAULT, null);
+        metaParam.setValue(pm.getProperty(), resultHandler.getResultList());
       } else {
-        resultSetHandler.handleRowValues(rsw, resultMap, resultHandler, new RowBounds(), null);
+        resultSetHandler.handleRowValues(rsw, resultMap, resultHandler, RowBounds.DEFAULT, null);
       }
     } finally {
-      // issue #228 (close resultsets)
+      // issue #228 (close result sets)
       resultSetHandler.closeResultSet(rs);
     }
   }

@@ -84,7 +84,7 @@ public class SimpleStatementHandler extends BaseStatementHandler {
   }
 
   @Override
-  protected Statement instantiateStatement(Connection connection) throws SQLException {
+  protected Statement instantiateStatement(Connection connection, MappedStatement mappedStatement) throws SQLException {
     if (mappedStatement.getResultSetType() == ResultSetType.DEFAULT) {
       return connection.createStatement();
     }

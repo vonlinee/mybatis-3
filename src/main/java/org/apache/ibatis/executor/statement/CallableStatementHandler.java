@@ -16,9 +16,22 @@
 package org.apache.ibatis.executor.statement;
 
 import java.sql.CallableStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.type.TypeHandler;
+import org.jetbrains.annotations.Nullable;
 
 public interface CallableStatementHandler extends StatementHandler {
 
-  void handleOutputParameters(CallableStatement cs) throws SQLException;
+  <E> void handleOutputParameters(CallableStatement cs, Object parameterObject,
+      @Nullable ResultHandler<E> resultHandler) throws SQLException;
+
+  <T> void handleRefCursorOutputParameter(ResultSet rs, ParameterMapping pm, MetaObject metaParam,
+      ResultHandler<T> handler) throws SQLException;
+
+  TypeHandler<?> getOutputParameterTypeHandler(MetaObject metaParam, ParameterMapping parameterMapping);
 }

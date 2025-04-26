@@ -26,10 +26,8 @@ import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.RowBounds;
-import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
@@ -37,8 +35,6 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 public abstract class BaseStatementHandler implements StatementHandler {
 
   protected final Configuration configuration;
-  protected final ObjectFactory objectFactory;
-  protected final TypeHandlerRegistry typeHandlerRegistry;
   protected ResultSetHandler resultSetHandler;
   protected ParameterHandler parameterHandler;
 
@@ -55,8 +51,6 @@ public abstract class BaseStatementHandler implements StatementHandler {
     this.mappedStatement = mappedStatement;
     this.rowBounds = rowBounds;
 
-    this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
-    this.objectFactory = configuration.getObjectFactory();
     this.boundSql = boundSql;
   }
 
@@ -85,8 +79,8 @@ public abstract class BaseStatementHandler implements StatementHandler {
     ErrorContext.instance().sql(boundSql.getSql());
     Statement statement = null;
     try {
-      statement = instantiateStatement(connection);
-      setStatementTimeout(statement, transactionTimeout);
+      statement = instantiateStatement(connection, mappedStatement);
+      setStatementTimeout(statement, mappedStatement, transactionTimeout);
       setFetchSize(statement);
       return statement;
     } catch (SQLException e) {
@@ -98,14 +92,17 @@ public abstract class BaseStatementHandler implements StatementHandler {
     }
   }
 
-  protected abstract Statement instantiateStatement(Connection connection) throws SQLException;
+  protected abstract Statement instantiateStatement(Connection connection, MappedStatement mappedStatement)
+      throws SQLException;
 
-  protected void setStatementTimeout(Statement stmt, Integer transactionTimeout) throws SQLException {
+  protected void setStatementTimeout(Statement stmt, MappedStatement mappedStatement, Integer transactionTimeout)
+      throws SQLException {
     Integer queryTimeout = null;
+    Configuration config = mappedStatement.getConfiguration();
     if (mappedStatement.getTimeout() != null) {
       queryTimeout = mappedStatement.getTimeout();
-    } else if (configuration.getDefaultStatementTimeout() != null) {
-      queryTimeout = configuration.getDefaultStatementTimeout();
+    } else if (config.getDefaultStatementTimeout() != null) {
+      queryTimeout = config.getDefaultStatementTimeout();
     }
     if (queryTimeout != null) {
       stmt.setQueryTimeout(queryTimeout);
@@ -115,24 +112,16 @@ public abstract class BaseStatementHandler implements StatementHandler {
 
   protected void setFetchSize(Statement stmt) throws SQLException {
     Integer fetchSize = mappedStatement.getFetchSize();
+    if (fetchSize == null) {
+      fetchSize = configuration.getDefaultFetchSize();
+    }
     if (fetchSize != null) {
       stmt.setFetchSize(fetchSize);
-      return;
-    }
-    Integer defaultFetchSize = configuration.getDefaultFetchSize();
-    if (defaultFetchSize != null) {
-      stmt.setFetchSize(defaultFetchSize);
     }
   }
 
   protected void closeStatement(Statement statement) {
-    try {
-      if (statement != null) {
-        statement.close();
-      }
-    } catch (SQLException e) {
-      // ignore
-    }
+    JdbcUtils.closeSilently(statement);
   }
 
 }

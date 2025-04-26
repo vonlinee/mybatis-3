@@ -15,11 +15,7 @@
  */
 package org.apache.ibatis.executor.statement;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.*;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -58,8 +54,9 @@ class BaseStatementHandlerTest {
 
   @Test
   void notSpecifyTimeout() throws SQLException {
-    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatementBuilder.build(), null, null);
-    handler.setStatementTimeout(statement, null);
+    MappedStatement mappedStatement = mappedStatementBuilder.build();
+    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatement, null, null);
+    handler.setStatementTimeout(statement, mappedStatement, null);
 
     verifyNoInteractions(statement); // not apply anything
   }
@@ -67,9 +64,9 @@ class BaseStatementHandlerTest {
   @Test
   void specifyMappedStatementTimeoutOnly() throws SQLException {
     mappedStatementBuilder.timeout(10);
-
-    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatementBuilder.build(), null, null);
-    handler.setStatementTimeout(statement, null);
+    MappedStatement mappedStatement = mappedStatementBuilder.build();
+    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatement, null, null);
+    handler.setStatementTimeout(statement, mappedStatement, null);
 
     verify(statement).setQueryTimeout(10); // apply a mapped statement timeout
   }
@@ -77,17 +74,18 @@ class BaseStatementHandlerTest {
   @Test
   void specifyDefaultTimeoutOnly() throws SQLException {
     doReturn(20).when(configuration).getDefaultStatementTimeout();
-
-    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatementBuilder.build(), null, null);
-    handler.setStatementTimeout(statement, null);
+    MappedStatement mappedStatement = mappedStatementBuilder.build();
+    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatement, null, null);
+    handler.setStatementTimeout(statement, mappedStatement, null);
 
     verify(statement).setQueryTimeout(20); // apply a default timeout
   }
 
   @Test
   void specifyTransactionTimeout() throws SQLException {
-    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatementBuilder.build(), null, null);
-    handler.setStatementTimeout(statement, 5);
+    MappedStatement mappedStatement = mappedStatementBuilder.build();
+    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatement, null, null);
+    handler.setStatementTimeout(statement, mappedStatement, 5);
 
     verify(statement).setQueryTimeout(5); // apply a transaction timeout
   }
@@ -95,9 +93,9 @@ class BaseStatementHandlerTest {
   @Test
   void specifyQueryTimeoutZeroAndTransactionTimeout() throws SQLException {
     doReturn(0).when(configuration).getDefaultStatementTimeout();
-
-    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatementBuilder.build(), null, null);
-    handler.setStatementTimeout(statement, 5);
+    MappedStatement mappedStatement = mappedStatementBuilder.build();
+    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatement, null, null);
+    handler.setStatementTimeout(statement, mappedStatement, 5);
 
     verify(statement).setQueryTimeout(5); // apply a transaction timeout
   }
@@ -106,9 +104,9 @@ class BaseStatementHandlerTest {
   void specifyMappedStatementTimeoutAndDefaultTimeout() throws SQLException {
     doReturn(20).when(configuration).getDefaultStatementTimeout();
     mappedStatementBuilder.timeout(30);
-
-    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatementBuilder.build(), null, null);
-    handler.setStatementTimeout(statement, null);
+    MappedStatement mappedStatement = mappedStatementBuilder.build();
+    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatement, null, null);
+    handler.setStatementTimeout(statement, mappedStatement, null);
 
     verify(statement).setQueryTimeout(30); // apply a mapped statement timeout
     verify(configuration, never()).getDefaultStatementTimeout();
@@ -117,9 +115,9 @@ class BaseStatementHandlerTest {
   @Test
   void specifyQueryTimeoutAndTransactionTimeoutMinIsQueryTimeout() throws SQLException {
     doReturn(10).when(configuration).getDefaultStatementTimeout();
-
-    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatementBuilder.build(), null, null);
-    handler.setStatementTimeout(statement, 20);
+    MappedStatement mappedStatement = mappedStatementBuilder.build();
+    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatement, null, null);
+    handler.setStatementTimeout(statement, mappedStatement, 20);
 
     verify(statement).setQueryTimeout(10); // apply a query timeout
   }
@@ -128,8 +126,9 @@ class BaseStatementHandlerTest {
   void specifyQueryTimeoutAndTransactionTimeoutMinIsTransactionTimeout() throws SQLException {
     doReturn(10).when(configuration).getDefaultStatementTimeout();
 
-    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatementBuilder.build(), null, null);
-    handler.setStatementTimeout(statement, 5);
+    MappedStatement mappedStatement = mappedStatementBuilder.build();
+    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatement, null, null);
+    handler.setStatementTimeout(statement, mappedStatement, 5);
 
     verify(statement).setQueryTimeout(10);
     verify(statement).setQueryTimeout(5); // apply a transaction timeout
@@ -138,9 +137,9 @@ class BaseStatementHandlerTest {
   @Test
   void specifyQueryTimeoutAndTransactionTimeoutWithSameValue() throws SQLException {
     doReturn(10).when(configuration).getDefaultStatementTimeout();
-
-    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatementBuilder.build(), null, null);
-    handler.setStatementTimeout(statement, 10);
+    MappedStatement mappedStatement = mappedStatementBuilder.build();
+    BaseStatementHandler handler = new SimpleStatementHandler(null, mappedStatement, null, null);
+    handler.setStatementTimeout(statement, mappedStatement, 10);
 
     verify(statement).setQueryTimeout(10);
   }
