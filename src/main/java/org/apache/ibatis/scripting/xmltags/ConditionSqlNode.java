@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.session.Configuration;
 
 /**
@@ -41,12 +42,10 @@ abstract class ConditionSqlNode extends MixedSqlNode {
    * TODO support evaluate test condition to decide whether append the sql.
    */
   protected String testExpression;
-  protected final Configuration configuration;
   protected final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
 
-  public ConditionSqlNode(Configuration configuration, List<SqlNode> contents) {
+  public ConditionSqlNode(List<SqlNode> contents) {
     super(contents);
-    this.configuration = configuration;
   }
 
   /**
@@ -66,7 +65,7 @@ abstract class ConditionSqlNode extends MixedSqlNode {
         return false;
       }
     }
-
+    Configuration configuration = context.getConfiguration();
     boolean res;
     if (getContents().size() > 1) {
       DynamicContextWrapper wrapper = new DynamicContextWrapper(configuration, context);

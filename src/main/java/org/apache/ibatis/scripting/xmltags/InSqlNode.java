@@ -16,14 +16,14 @@
 package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
-import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.scripting.SqlNode;
 
 /**
  * used when write sql with syntax like t.column in (1, 2, 3).
  *
  * @author vonlinee
  */
-public class InSqlNode extends ForEachSqlNode {
+class InSqlNode extends ForEachSqlNode {
 
   protected final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
 
@@ -32,9 +32,9 @@ public class InSqlNode extends ForEachSqlNode {
    */
   private final String testExpression;
 
-  public InSqlNode(Configuration configuration, SqlNode contents, String collectionExpression, String testExpression,
-      String itemExpression, boolean nullable) {
-    super(configuration, contents, collectionExpression, nullable, "index", itemExpression, "(", ")", ",");
+  public InSqlNode(SqlNode contents, String collectionExpression, String testExpression, String itemExpression,
+      Boolean nullable) {
+    super(contents, collectionExpression, nullable, "index", itemExpression, "(", ")", ",");
     this.testExpression = testExpression;
   }
 

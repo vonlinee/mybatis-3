@@ -18,6 +18,9 @@ package org.apache.ibatis.scripting;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Frank D. Martinez [mnesarco]
  */
@@ -25,7 +28,13 @@ public class LanguageDriverRegistry {
 
   private final Map<Class<? extends LanguageDriver>, LanguageDriver> languageDriverMap = new HashMap<>();
 
+  @NotNull
+  private final Configuration configuration;
   private Class<? extends LanguageDriver> defaultDriverClass;
+
+  public LanguageDriverRegistry(@NotNull Configuration configuration) {
+    this.configuration = configuration;
+  }
 
   public void register(Class<? extends LanguageDriver> cls) {
     if (cls == null) {
@@ -33,7 +42,9 @@ public class LanguageDriverRegistry {
     }
     languageDriverMap.computeIfAbsent(cls, k -> {
       try {
-        return k.getDeclaredConstructor().newInstance();
+        LanguageDriver languageDriver = k.getDeclaredConstructor().newInstance();
+        languageDriver.setConfiguration(this.configuration);
+        return languageDriver;
       } catch (Exception ex) {
         throw new ScriptingException("Failed to load language driver for " + cls.getName(), ex);
       }

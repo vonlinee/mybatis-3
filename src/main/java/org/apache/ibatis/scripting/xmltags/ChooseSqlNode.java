@@ -18,11 +18,12 @@ package org.apache.ibatis.scripting.xmltags;
 import java.util.List;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.SqlNode;
 
 /**
  * @author Clinton Begin
  */
-public class ChooseSqlNode implements SqlNode {
+class ChooseSqlNode extends XmlSqlNode {
   private final SqlNode defaultSqlNode;
   private final List<SqlNode> ifSqlNodes;
 

@@ -145,7 +145,7 @@ public class Configuration {
   protected final InterceptorChain interceptorChain = new InterceptorChain();
   protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this);
   protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
-  protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
+  protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry(this);
   protected final ExtensionFactory extensionFactory = new DefaultExtensionFactory(this);
   protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>(
       "Mapped Statements collection")
@@ -1044,8 +1044,7 @@ public class Configuration {
     if (rm.hasNestedResultMaps()) {
       final String resultMapId = rm.getId();
       for (Object resultMapObject : resultMaps.values()) {
-        if (resultMapObject instanceof ResultMap) {
-          ResultMap entryResultMap = (ResultMap) resultMapObject;
+        if (resultMapObject instanceof ResultMap entryResultMap) {
           if (!entryResultMap.hasNestedResultMaps() && entryResultMap.getDiscriminator() != null) {
             Collection<String> discriminatedResultMapNames = entryResultMap.getDiscriminator().getDiscriminatorMap()
                 .values();

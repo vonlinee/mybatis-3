@@ -17,11 +17,11 @@ package org.apache.ibatis.scripting.xmltags;
 
 import java.util.List;
 
-import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.scripting.SqlNode;
 
-public class AndSqlNode extends ConditionSqlNode {
-  public AndSqlNode(Configuration configuration, String test, List<SqlNode> contents) {
-    super(configuration, contents);
+class AndSqlNode extends ConditionSqlNode {
+  public AndSqlNode(String test, List<SqlNode> contents) {
+    super(contents);
     this.testExpression = test;
   }
 

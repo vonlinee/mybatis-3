@@ -21,12 +21,13 @@ import java.util.Map;
 
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
  */
-public class ForEachSqlNode implements SqlNode {
+public class ForEachSqlNode extends XmlSqlNode {
 
   private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
   private final String collectionExpression;
@@ -37,23 +38,22 @@ public class ForEachSqlNode implements SqlNode {
   private final String separator;
   private final String item;
   private final String index;
-  private final Configuration configuration;
 
   /**
    * @deprecated Since 3.5.9, use the
-   *             {@link #ForEachSqlNode(Configuration, SqlNode, String, Boolean, String, String, String, String, String)}.
+   *             {@link #ForEachSqlNode(SqlNode, String, Boolean, String, String, String, String, String)}.
    */
   @Deprecated
-  public ForEachSqlNode(Configuration configuration, SqlNode contents, String collectionExpression, String index,
-      String item, String open, String close, String separator) {
-    this(configuration, contents, collectionExpression, null, index, item, open, close, separator);
+  public ForEachSqlNode(SqlNode contents, String collectionExpression, String index, String item, String open,
+      String close, String separator) {
+    this(contents, collectionExpression, null, index, item, open, close, separator);
   }
 
   /**
    * @since 3.5.9
    */
-  public ForEachSqlNode(Configuration configuration, SqlNode contents, String collectionExpression, Boolean nullable,
-      String index, String item, String open, String close, String separator) {
+  public ForEachSqlNode(SqlNode contents, String collectionExpression, Boolean nullable, String index, String item,
+      String open, String close, String separator) {
     this.collectionExpression = collectionExpression;
     this.nullable = nullable;
     this.contents = contents;
@@ -62,10 +62,10 @@ public class ForEachSqlNode implements SqlNode {
     this.separator = separator;
     this.index = index;
     this.item = item;
-    this.configuration = configuration;
   }
 
   public Iterable<?> getIterable(SqlBuildContext context) {
+    Configuration configuration = context.getConfiguration();
     boolean nullable = this.nullable == null ? configuration.isNullableOnForEach() : this.nullable;
     return evaluator.evaluateIterable(collectionExpression, context.getBindings(), nullable);
   }
@@ -136,14 +136,14 @@ public class ForEachSqlNode implements SqlNode {
     }
   }
 
-  private class PrefixedContext extends DynamicContext {
+  private static class PrefixedContext extends DynamicContext {
     private final SqlBuildContext delegate;
     private String prefix;
     private boolean prefixApplied;
 
     public PrefixedContext(SqlBuildContext delegate, String prefix) {
-      super(configuration, delegate.getParameterObject(), delegate.getParameterType(), delegate.getParamNameResolver(),
-          delegate.isParamExists());
+      super(delegate.getConfiguration(), delegate.getParameterObject(), delegate.getParameterType(),
+          delegate.getParamNameResolver(), delegate.isParamExists());
       this.delegate = delegate;
       this.bindings.putAll(delegate.getBindings());
       resetPrefix(prefix);

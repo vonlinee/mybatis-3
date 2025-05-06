@@ -19,7 +19,9 @@ package org.apache.ibatis.scripting.xmltags;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.ibatis.mapping.SqlSource;
+import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
+import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Test;
 
@@ -36,8 +38,16 @@ class XMLScriptBuilderTest {
         </where>
         </script>
         """;
-    SqlSource sqlSource = new XMLScriptBuilder(new Configuration(), new XPathParser(xml).evalNode("/script"))
-        .parseScriptNode();
+
+    XNode node = new XPathParser(xml).evalNode("/script");
+
+    Configuration configuration = new Configuration();
+
+    XMLLanguageDriver driver = new XMLLanguageDriver();
+    driver.setConfiguration(configuration);
+    SqlNode sqlNode = driver.parseRootSqlNode(node);
+
+    SqlSource sqlSource = driver.createSqlSource(sqlNode, configuration, null, null);
     assertThat(sqlSource.getBoundSql(1).getSql())
         .containsPattern("(?m)^\\s*select \\* from user\\s+WHERE\\s+id = 1\\s+and id > 0\\s*$");
   }

@@ -22,6 +22,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
+import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.defaults.RawLanguageDriver;
 import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ import org.junit.jupiter.api.Test;
  */
 class LanguageDriverRegistryTest {
 
-  private final LanguageDriverRegistry registry = new LanguageDriverRegistry();
+  private final LanguageDriverRegistry registry = new LanguageDriverRegistry(new Configuration());
 
   @Test
   void registerByType() {
@@ -102,6 +103,12 @@ class LanguageDriverRegistryTest {
     @Override
     public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) {
       return null;
+    }
+
+    @Override
+    public SqlSource createSqlSource(SqlNode rootSqlNode, Configuration configuration, Class<?> parameterType,
+        ParamNameResolver paramNameResolver) {
+      throw new UnsupportedOperationException();
     }
 
     @Override

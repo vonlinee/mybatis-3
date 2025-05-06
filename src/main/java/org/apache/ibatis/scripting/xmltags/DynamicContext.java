@@ -45,7 +45,7 @@ public class DynamicContext implements SqlBuildContext {
   protected final ContextMap bindings;
   private final StringJoiner sqlBuilder = new StringJoiner(" ");
 
-  private final Configuration configuration;
+  protected final Configuration configuration;
   private final Object parameterObject;
   private final Class<?> parameterType;
   private final ParamNameResolver paramNameResolver;
@@ -80,6 +80,11 @@ public class DynamicContext implements SqlBuildContext {
     bindings.put(PARAMETER_OBJECT_KEY, parameterObject);
     bindings.put(DATABASE_ID_KEY, configuration.getDatabaseId());
     return bindings;
+  }
+
+  @Override
+  public Configuration getConfiguration() {
+    return configuration;
   }
 
   @Override

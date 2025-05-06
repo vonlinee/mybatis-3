@@ -13,9 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
-
-import org.apache.ibatis.scripting.SqlBuildContext;
+package org.apache.ibatis.scripting;
 
 /**
  * @author Clinton Begin

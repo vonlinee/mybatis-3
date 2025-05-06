@@ -20,7 +20,7 @@ import org.apache.ibatis.scripting.SqlBuildContext;
 /**
  * @author Frank D. Martinez [mnesarco]
  */
-public class VarDeclSqlNode implements SqlNode {
+class VarDeclSqlNode extends XmlSqlNode {
 
   private final String name;
   private final String expression;

@@ -15,20 +15,43 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.PropertyParser;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.reflection.ParamNameResolver;
+import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.apache.ibatis.scripting.LanguageDriver;
+import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.SqlNode;
+import org.apache.ibatis.scripting.StaticTextSqlNode;
+import org.apache.ibatis.scripting.TextSqlNode;
 import org.apache.ibatis.scripting.defaults.RawSqlSource;
 import org.apache.ibatis.session.Configuration;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * @author Eduardo Macarron
  */
 public class XMLLanguageDriver implements LanguageDriver {
+
+  private Configuration configuration;
+  private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
+  private static final Map<String, SqlNode> emptyNodeCache = new ConcurrentHashMap<>();
+
+  public XMLLanguageDriver() {
+    this.nodeHandlerMap.putAll(initNodeHandlerMap());
+  }
 
   @Override
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) {
@@ -38,8 +61,20 @@ public class XMLLanguageDriver implements LanguageDriver {
   @Override
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType,
       ParamNameResolver paramNameResolver) {
-    XMLScriptBuilder builder = new XMLScriptBuilder(configuration, script, parameterType, paramNameResolver);
-    return builder.parseScriptNode();
+    SqlNode rootSqlNode = this.parseRootSqlNode(script);
+    return createSqlSource(rootSqlNode, configuration, parameterType, paramNameResolver);
+  }
+
+  @Override
+  public SqlSource createSqlSource(SqlNode rootSqlNode, Configuration configuration, Class<?> parameterType,
+      ParamNameResolver paramNameResolver) {
+    SqlSource sqlSource;
+    if (rootSqlNode.isDynamic()) {
+      sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
+    } else {
+      sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType, paramNameResolver);
+    }
+    return sqlSource;
   }
 
   @Override
@@ -65,4 +100,303 @@ public class XMLLanguageDriver implements LanguageDriver {
     }
   }
 
+  private Map<String, NodeHandler> initNodeHandlerMap() {
+    HashMap<String, NodeHandler> nodeHandlerMap = new HashMap<>();
+    nodeHandlerMap.put("trim", new TrimHandler());
+    nodeHandlerMap.put("where", new WhereHandler());
+    nodeHandlerMap.put("set", new SetHandler());
+    nodeHandlerMap.put("foreach", new ForEachHandler());
+    nodeHandlerMap.put("if", new IfHandler());
+    nodeHandlerMap.put("choose", new ChooseHandler());
+    ConditionSqlNodeHandler handler = new ConditionSqlNodeHandler();
+    nodeHandlerMap.put("and", handler);
+    nodeHandlerMap.put("or", handler);
+    nodeHandlerMap.put("when", new IfHandler());
+    nodeHandlerMap.put("otherwise", new OtherwiseHandler());
+    nodeHandlerMap.put("bind", new BindHandler());
+    nodeHandlerMap.put("in", new InHandler());
+    return nodeHandlerMap;
+  }
+
+  public SqlNode parseRootSqlNode(XNode node) {
+    return parseDynamicTags(node);
+  }
+
+  private MixedSqlNode parseDynamicTags(XNode node) {
+    List<SqlNode> contents = new ArrayList<>();
+    NodeList children = node.getNode().getChildNodes();
+    for (int i = 0; i < children.getLength(); i++) {
+      XNode child = node.newXNode(children.item(i));
+      if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
+        String data = child.getStringBody("");
+        if (data.trim().isEmpty()) {
+          contents.add(emptyNodeCache.computeIfAbsent(data, EmptySqlNode::new));
+          continue;
+        }
+        if (DynamicCheckerTokenParser.isDynamic(data)) {
+          TextSqlNode textSqlNode = new TextSqlNode(data);
+          contents.add(textSqlNode);
+        } else {
+          contents.add(new StaticTextSqlNode(data));
+        }
+      } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
+        String nodeName = child.getNode().getNodeName();
+        NodeHandler handler = nodeHandlerMap.get(nodeName);
+        if (handler == null) {
+          throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
+        }
+        handler.handleNode(child, contents);
+      }
+    }
+    return new MixedSqlNode(contents);
+  }
+
+  @Override
+  public final void setConfiguration(Configuration configuration) {
+    this.configuration = configuration;
+  }
+
+  private interface NodeHandler {
+    void handleNode(XNode nodeToHandle, List<SqlNode> targetContents);
+  }
+
+  private static class BindHandler implements NodeHandler {
+    public BindHandler() {
+      // Prevent Synthetic Access
+    }
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      final String name = nodeToHandle.getStringAttribute("name");
+      final String expression = nodeToHandle.getStringAttribute("value");
+      final VarDeclSqlNode node = new VarDeclSqlNode(name, expression);
+      targetContents.add(node);
+    }
+  }
+
+  private class TrimHandler implements NodeHandler {
+    public TrimHandler() {
+      // Prevent Synthetic Access
+    }
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+      String prefix = nodeToHandle.getStringAttribute("prefix");
+      String prefixOverrides = nodeToHandle.getStringAttribute("prefixOverrides");
+      String suffix = nodeToHandle.getStringAttribute("suffix");
+      String suffixOverrides = nodeToHandle.getStringAttribute("suffixOverrides");
+      TrimSqlNode trim = new TrimSqlNode(mixedSqlNode, prefix, prefixOverrides, suffix, suffixOverrides);
+      targetContents.add(trim);
+    }
+  }
+
+  private class WhereHandler implements NodeHandler {
+    public WhereHandler() {
+      // Prevent Synthetic Access
+    }
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+      WhereSqlNode where = new WhereSqlNode(mixedSqlNode);
+      targetContents.add(where);
+    }
+  }
+
+  private class SetHandler implements NodeHandler {
+    public SetHandler() {
+      // Prevent Synthetic Access
+    }
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+      SetSqlNode set = new SetSqlNode(mixedSqlNode);
+      targetContents.add(set);
+    }
+  }
+
+  private class ForEachHandler implements NodeHandler {
+    public ForEachHandler() {
+      // Prevent Synthetic Access
+    }
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+      String collection = nodeToHandle.getStringAttribute("collection");
+      Boolean nullable = nodeToHandle.getBooleanAttribute("nullable");
+      String item = nodeToHandle.getStringAttribute("item");
+      String index = nodeToHandle.getStringAttribute("index");
+      String open = nodeToHandle.getStringAttribute("open");
+      String close = nodeToHandle.getStringAttribute("close");
+      String separator = nodeToHandle.getStringAttribute("separator");
+      ForEachSqlNode forEachSqlNode = new ForEachSqlNode(mixedSqlNode, collection, nullable, index, item, open, close,
+          separator);
+      targetContents.add(forEachSqlNode);
+    }
+  }
+
+  private class IfHandler implements NodeHandler {
+    public IfHandler() {
+      // Prevent Synthetic Access
+    }
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+      String test = nodeToHandle.getStringAttribute("test");
+      IfSqlNode ifSqlNode = new IfSqlNode(mixedSqlNode, test);
+      targetContents.add(ifSqlNode);
+    }
+  }
+
+  private class OtherwiseHandler implements NodeHandler {
+    public OtherwiseHandler() {
+      // Prevent Synthetic Access
+    }
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+      targetContents.add(mixedSqlNode);
+    }
+  }
+
+  private class ChooseHandler implements NodeHandler {
+    public ChooseHandler() {
+      // Prevent Synthetic Access
+    }
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      List<SqlNode> whenSqlNodes = new ArrayList<>();
+      List<SqlNode> otherwiseSqlNodes = new ArrayList<>();
+      handleWhenOtherwiseNodes(nodeToHandle, whenSqlNodes, otherwiseSqlNodes);
+      SqlNode defaultSqlNode = getDefaultSqlNode(otherwiseSqlNodes);
+      ChooseSqlNode chooseSqlNode = new ChooseSqlNode(whenSqlNodes, defaultSqlNode);
+      targetContents.add(chooseSqlNode);
+    }
+
+    private void handleWhenOtherwiseNodes(XNode chooseSqlNode, List<SqlNode> ifSqlNodes,
+        List<SqlNode> defaultSqlNodes) {
+      List<XNode> children = chooseSqlNode.getChildren();
+      for (XNode child : children) {
+        String nodeName = child.getNode().getNodeName();
+        NodeHandler handler = nodeHandlerMap.get(nodeName);
+        if (handler instanceof IfHandler) {
+          handler.handleNode(child, ifSqlNodes);
+        } else if (handler instanceof OtherwiseHandler) {
+          handler.handleNode(child, defaultSqlNodes);
+        }
+      }
+    }
+
+    private SqlNode getDefaultSqlNode(List<SqlNode> defaultSqlNodes) {
+      SqlNode defaultSqlNode = null;
+      if (defaultSqlNodes.size() == 1) {
+        defaultSqlNode = defaultSqlNodes.get(0);
+      } else if (defaultSqlNodes.size() > 1) {
+        throw new BuilderException("Too many default (otherwise) elements in choose statement.");
+      }
+      return defaultSqlNode;
+    }
+  }
+
+  private static class EmptySqlNode implements SqlNode {
+    private final String whitespaces;
+
+    public EmptySqlNode(String whitespaces) {
+      super();
+      this.whitespaces = whitespaces;
+    }
+
+    @Override
+    public boolean isDynamic() {
+      return false;
+    }
+
+    @Override
+    public boolean apply(SqlBuildContext context) {
+      context.appendSql(whitespaces);
+      return true;
+    }
+  }
+
+  /**
+   * handle <and></and>, <or></or> in xml mapping file
+   *
+   * @see AndSqlNode
+   * @see OrSqlNode
+   * @see ConditionSqlNode
+   */
+  private class ConditionSqlNodeHandler implements NodeHandler {
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      final String nodeName = nodeToHandle.getName();
+      final MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+      final List<SqlNode> contents = mixedSqlNode.getContents();
+
+      final String test = nodeToHandle.getStringAttribute("test");
+
+      if (contents.size() == 1) {
+        if (nodeName.equalsIgnoreCase("and")) {
+          targetContents.add(new AndSqlNode(test, contents));
+        } else if (nodeName.equalsIgnoreCase("or")) {
+          targetContents.add(new OrSqlNode(test, contents));
+        }
+      } else if (contents.isEmpty()) {
+        throw new BuilderException("syntax error about <" + nodeName + ">, empty <" + nodeName + "> is meaningless.");
+      } else {
+        if (nodeName.equalsIgnoreCase("and")) {
+          targetContents.add(new AndSqlNode(test, contents));
+        } else if (nodeName.equalsIgnoreCase("or")) {
+          targetContents.add(new OrSqlNode(test, contents));
+        }
+      }
+    }
+  }
+
+  /**
+   * @see ForEachHandler
+   */
+  private class InHandler implements NodeHandler {
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      String collection = nodeToHandle.getStringAttribute("collection");
+      String item = nodeToHandle.getStringAttribute("item");
+      String test = nodeToHandle.getStringAttribute("test");
+      Boolean nullable = nodeToHandle.getBooleanAttribute("nullable");
+
+      if (StringUtils.isEmpty(item)) {
+        item = "item";
+      }
+
+      StaticTextSqlNode contents = new StaticTextSqlNode("#{" + item + "}");
+      item = parseItemExpression(item);
+      targetContents.add(new InSqlNode(contents, collection, test, item, nullable));
+    }
+
+    /**
+     * item.id -> item
+     *
+     * @param itemExpression
+     *          item expression
+     *
+     * @return item expression value
+     */
+    private String parseItemExpression(String itemExpression) {
+      if (itemExpression == null) {
+        return null;
+      }
+      PropertyTokenizer tokenizer = new PropertyTokenizer(itemExpression);
+      if (tokenizer.hasNext()) {
+        return tokenizer.getName();
+      }
+      return itemExpression;
+    }
+  }
 }

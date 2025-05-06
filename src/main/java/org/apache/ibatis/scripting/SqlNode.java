@@ -13,14 +13,25 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting;
 
-import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.xmltags.DynamicCheckerTokenParser;
 
 /**
  * @author Clinton Begin
  */
 public interface SqlNode {
+
+  /**
+   * 'dynamic' means:
+   * <li>1. a xml tag element, like {@code <if/>, <where/>, <choose/>}</li>
+   * <li>2. a text node contains parameter like ${xxx}</li>
+   *
+   * @return whether this sql node is dynamic
+   *
+   * @see DynamicCheckerTokenParser#isDynamic(String)
+   */
+  boolean isDynamic();
 
   /**
    * apply the sql build process.
@@ -29,4 +40,16 @@ public interface SqlNode {
    *          context
    */
   boolean apply(SqlBuildContext context);
+
+  SqlNode EMPTY = new SqlNode() {
+    @Override
+    public boolean isDynamic() {
+      return false;
+    }
+
+    @Override
+    public boolean apply(SqlBuildContext context) {
+      return false;
+    }
+  };
 }

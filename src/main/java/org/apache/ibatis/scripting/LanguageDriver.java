@@ -19,17 +19,27 @@ import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.Nullable;
 
 public interface LanguageDriver {
 
   /**
+   * @param configuration
+   *          configuration
+   *
+   * @see LanguageDriverRegistry
+   */
+  default void setConfiguration(Configuration configuration) {
+  }
+
+  /**
    * Creates an {@link SqlSource} that will hold the statement read from a mapper xml file. It is called during startup,
-   * when the mapped statement is read from a class or an xml file.
+   * when the mapped statement is read from a class or a xml file.
    *
    * @param configuration
    *          The MyBatis configuration
    * @param script
-   *          XNode parsed from a XML file
+   *          XNode parsed from XML file
    * @param parameterType
    *          input parameter type got from a mapper method or specified in the parameterType xml attribute. Can be
    *          null.
@@ -43,9 +53,12 @@ public interface LanguageDriver {
     return createSqlSource(configuration, script, parameterType);
   }
 
+  SqlSource createSqlSource(SqlNode rootSqlNode, Configuration configuration, @Nullable Class<?> parameterType,
+      @Nullable ParamNameResolver paramNameResolver);
+
   /**
    * Creates an {@link SqlSource} that will hold the statement read from an annotation. It is called during startup,
-   * when the mapped statement is read from a class or an xml file.
+   * when the mapped statement is read from a class or a xml file.
    *
    * @param configuration
    *          The MyBatis configuration

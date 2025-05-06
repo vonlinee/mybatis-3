@@ -16,11 +16,12 @@
 package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.SqlNode;
 
 /**
  * @author Clinton Begin
  */
-public class IfSqlNode implements SqlNode {
+class IfSqlNode extends XmlSqlNode {
   private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
   private final String test;
   private final SqlNode contents;

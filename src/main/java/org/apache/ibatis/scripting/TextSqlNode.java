@@ -13,11 +13,12 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting;
 
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.TokenHandler;
-import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.xmltags.DynamicCheckerTokenParser;
+import org.apache.ibatis.scripting.xmltags.OgnlCache;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**
@@ -34,6 +35,7 @@ public class TextSqlNode implements SqlNode {
     this.text = text;
   }
 
+  @Override
   public boolean isDynamic() {
     return DynamicCheckerTokenParser.isDynamic(text);
   }

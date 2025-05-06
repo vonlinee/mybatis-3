@@ -17,7 +17,9 @@ package org.apache.ibatis.submitted.language;
 
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
+import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.LanguageDriver;
+import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.session.Configuration;
 
 /**
@@ -28,6 +30,12 @@ public class VelocityLanguageDriver implements LanguageDriver {
   @Override
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) {
     return new VelocitySqlSource(configuration, script.getStringBody(""));
+  }
+
+  @Override
+  public SqlSource createSqlSource(SqlNode rootSqlNode, Configuration configuration, Class<?> parameterType,
+      ParamNameResolver paramNameResolver) {
+    throw new UnsupportedOperationException();
   }
 
   @Override

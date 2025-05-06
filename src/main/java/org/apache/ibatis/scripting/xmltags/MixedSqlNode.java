@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.SqlNode;
 
 /**
  * @author Clinton Begin
@@ -28,6 +29,16 @@ public class MixedSqlNode implements SqlNode {
 
   public MixedSqlNode(List<SqlNode> contents) {
     this.contents = contents;
+  }
+
+  @Override
+  public final boolean isDynamic() {
+    for (SqlNode content : contents) {
+      if (content.isDynamic()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
