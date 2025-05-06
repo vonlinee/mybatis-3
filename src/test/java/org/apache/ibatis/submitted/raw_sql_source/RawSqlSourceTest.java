@@ -25,8 +25,8 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.scripting.StaticTextSqlNode;
-import org.apache.ibatis.scripting.defaults.RawSqlSource;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
+import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -42,6 +42,8 @@ class RawSqlSourceTest {
 
   private static SqlSessionFactory sqlSessionFactory;
 
+  XMLLanguageDriver languageDriver = new XMLLanguageDriver();
+
   @BeforeAll
   static void setUp() throws Exception {
     // create an SqlSessionFactory
@@ -56,23 +58,18 @@ class RawSqlSourceTest {
   }
 
   @Test
-  void shouldUseRawSqlSourceForAnStaticStatement() {
-    test("getUser1", RawSqlSource.class);
-  }
-
-  @Test
   void shouldUseDynamicSqlSourceForAnStatementWithInlineArguments() {
-    test("getUser2", DynamicSqlSource.class);
+    test("getUser2");
   }
 
   @Test
   void shouldUseDynamicSqlSourceForAnStatementWithXmlTags() {
-    test("getUser3", DynamicSqlSource.class);
+    test("getUser3");
   }
 
-  private void test(String statement, Class<? extends SqlSource> sqlSource) {
+  private void test(String statement) {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Assertions.assertEquals(sqlSource,
+      Assertions.assertEquals(DynamicSqlSource.class,
           sqlSession.getConfiguration().getMappedStatement(statement).getSqlSource().getClass());
       String sql = sqlSession.getConfiguration().getMappedStatement(statement).getSqlSource().getBoundSql('?').getSql();
       Assertions.assertEquals("select * from users where id = ?", sql);
@@ -86,7 +83,9 @@ class RawSqlSourceTest {
   void testShrinkWhitespacesInSql(String input, boolean shrinkWhitespaces, String expected) {
     Configuration config = new Configuration();
     config.setShrinkWhitespacesInSql(shrinkWhitespaces);
-    String actual = new RawSqlSource(config, input, null).getBoundSql(null).getSql();
+    languageDriver.setConfiguration(config);
+    SqlSource sqlSource = languageDriver.createSqlSource(config, input, null, null);
+    String actual = sqlSource.getBoundSql(null).getSql();
     assertEquals(expected, actual);
   }
 
@@ -103,7 +102,9 @@ class RawSqlSourceTest {
   void testShrinkWhitespacesInSql_SqlNode(SqlNode input, boolean shrinkWhitespaces, String expected) {
     Configuration config = new Configuration();
     config.setShrinkWhitespacesInSql(shrinkWhitespaces);
-    String actual = new RawSqlSource(config, input, null).getBoundSql(null).getSql();
+    languageDriver.setConfiguration(config);
+    SqlSource sqlSource = languageDriver.createSqlSource(input, config, null, null);
+    String actual = sqlSource.getBoundSql(null).getSql();
     assertEquals(expected, actual);
   }
 

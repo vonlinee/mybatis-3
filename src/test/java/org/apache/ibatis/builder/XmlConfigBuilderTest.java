@@ -19,11 +19,7 @@ import static com.googlecode.catchexception.apis.BDDCatchException.caughtExcepti
 import static com.googlecode.catchexception.apis.BDDCatchException.when;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,7 +49,6 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.logging.slf4j.Slf4jImpl;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.mapping.ResultSetType;
-import org.apache.ibatis.scripting.defaults.RawLanguageDriver;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 import org.apache.ibatis.session.AutoMappingBehavior;
 import org.apache.ibatis.session.AutoMappingUnknownColumnBehavior;
@@ -172,7 +167,7 @@ class XmlConfigBuilderTest {
     TypeHandlerRegistry typeHandlerRegistry = builder.getConfiguration().getTypeHandlerRegistry();
     TypeHandler<?> typeHandler = typeHandlerRegistry.getTypeHandler(MyEnum.class);
 
-    assertTrue(typeHandler instanceof EnumOrderTypeHandler);
+    assertInstanceOf(EnumOrderTypeHandler.class, typeHandler);
     assertArrayEquals(MyEnum.values(), ((EnumOrderTypeHandler<MyEnum>) typeHandler).constants);
   }
 
@@ -205,7 +200,6 @@ class XmlConfigBuilderTest {
       assertThat(config.getLazyLoadTriggerMethods())
           .isEqualTo(new HashSet<>(Arrays.asList("equals", "clone", "hashCode", "toString", "xxx")));
       assertThat(config.isSafeResultHandlerEnabled()).isFalse();
-      assertThat(config.getDefaultScriptingLanuageInstance()).isInstanceOf(RawLanguageDriver.class);
       assertThat(config.isCallSettersOnNulls()).isTrue();
       assertThat(config.getLogPrefix()).isEqualTo("mybatis_");
       assertThat(config.getLogImpl().getName()).isEqualTo(Slf4jImpl.class.getName());

@@ -19,12 +19,10 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Lang;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.scripting.defaults.RawLanguageDriver;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 
 public interface Mapper {
 
-  @Lang(RawLanguageDriver.class)
   @Select("SELECT firstName, lastName FROM names WHERE lastName LIKE #{name}")
   List<Name> selectRawWithMapper(Parameter p);
 

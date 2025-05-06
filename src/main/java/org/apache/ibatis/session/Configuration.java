@@ -79,7 +79,6 @@ import org.apache.ibatis.scripting.ExtensionFactory;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.LanguageDriverRegistry;
 import org.apache.ibatis.scripting.defaults.DefaultExtensionFactory;
-import org.apache.ibatis.scripting.defaults.RawLanguageDriver;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
@@ -196,7 +195,6 @@ public class Configuration {
     typeAliasRegistry.registerAlias("DB_VENDOR", VendorDatabaseIdProvider.class);
 
     typeAliasRegistry.registerAlias("XML", XMLLanguageDriver.class);
-    typeAliasRegistry.registerAlias("RAW", RawLanguageDriver.class);
 
     typeAliasRegistry.registerAlias("SLF4J", Slf4jImpl.class);
     typeAliasRegistry.registerAlias("COMMONS_LOGGING", JakartaCommonsLoggingImpl.class);
@@ -210,7 +208,6 @@ public class Configuration {
     typeAliasRegistry.registerAlias("JAVASSIST", JavassistProxyFactory.class);
 
     languageRegistry.setDefaultDriverClass(XMLLanguageDriver.class);
-    languageRegistry.register(RawLanguageDriver.class);
   }
 
   public String getLogPrefix() {

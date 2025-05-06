@@ -23,7 +23,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.ParamNameResolver;
-import org.apache.ibatis.scripting.defaults.RawLanguageDriver;
+import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Test;
 
@@ -36,20 +36,20 @@ class LanguageDriverRegistryTest {
 
   @Test
   void registerByType() {
-    registry.register(RawLanguageDriver.class);
-    LanguageDriver driver = registry.getDriver(RawLanguageDriver.class);
+    registry.register(XMLLanguageDriver.class);
+    LanguageDriver driver = registry.getDriver(XMLLanguageDriver.class);
 
-    assertThat(driver).isInstanceOf(RawLanguageDriver.class);
+    assertThat(driver).isInstanceOf(XMLLanguageDriver.class);
   }
 
   @Test
   void registerByTypeSameType() {
-    registry.register(RawLanguageDriver.class);
-    LanguageDriver driver = registry.getDriver(RawLanguageDriver.class);
+    registry.register(XMLLanguageDriver.class);
+    LanguageDriver driver = registry.getDriver(XMLLanguageDriver.class);
 
-    registry.register(RawLanguageDriver.class);
+    registry.register(XMLLanguageDriver.class);
 
-    assertThat(driver).isSameAs(registry.getDriver(RawLanguageDriver.class));
+    assertThat(driver).isSameAs(registry.getDriver(XMLLanguageDriver.class));
   }
 
   @Test
@@ -93,9 +93,9 @@ class LanguageDriverRegistryTest {
 
   @Test
   void setDefaultDriverClass() {
-    registry.setDefaultDriverClass(RawLanguageDriver.class);
-    assertThat(registry.getDefaultDriverClass() == RawLanguageDriver.class).isTrue();
-    assertThat(registry.getDefaultDriver()).isInstanceOf(RawLanguageDriver.class);
+    registry.setDefaultDriverClass(XMLLanguageDriver.class);
+    assertThat(registry.getDefaultDriverClass() == XMLLanguageDriver.class).isTrue();
+    assertThat(registry.getDefaultDriver()).isInstanceOf(XMLLanguageDriver.class);
   }
 
   private static class PrivateLanguageDriver implements LanguageDriver {

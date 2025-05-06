@@ -22,9 +22,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.builder.ParameterMappingTokenHandler;
+import org.apache.ibatis.builder.SqlSourceBuilder;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.internal.util.StringUtils;
+import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
+import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.PropertyParser;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
@@ -35,7 +39,6 @@ import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.scripting.StaticTextSqlNode;
 import org.apache.ibatis.scripting.TextSqlNode;
-import org.apache.ibatis.scripting.defaults.RawSqlSource;
 import org.apache.ibatis.session.Configuration;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -72,7 +75,7 @@ public class XMLLanguageDriver implements LanguageDriver {
     if (rootSqlNode.isDynamic()) {
       sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
     } else {
-      sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType, paramNameResolver);
+      sqlSource = createForRawSqlSource(configuration, rootSqlNode, parameterType, paramNameResolver);
     }
     return sqlSource;
   }
@@ -96,8 +99,26 @@ public class XMLLanguageDriver implements LanguageDriver {
       TextSqlNode textSqlNode = new TextSqlNode(script);
       return new DynamicSqlSource(configuration, textSqlNode);
     } else {
-      return new RawSqlSource(configuration, script, parameterType, paramNameResolver);
+      return createForRawSqlSource(configuration, script, parameterType, paramNameResolver);
     }
+  }
+
+  public SqlSource createForRawSqlSource(Configuration configuration, SqlNode rootSqlNode, Class<?> parameterType,
+      ParamNameResolver paramNameResolver) {
+    DynamicContext context = new DynamicContext(configuration, parameterType, paramNameResolver);
+    rootSqlNode.apply(context);
+    String sql = context.getSql();
+    return SqlSourceBuilder.buildSqlSource(configuration, sql, context.getParameterMappings());
+  }
+
+  public SqlSource createForRawSqlSource(Configuration configuration, String sql, Class<?> parameterType,
+      ParamNameResolver paramNameResolver) {
+    Class<?> clazz = parameterType == null ? Object.class : parameterType;
+    List<ParameterMapping> parameterMappings = new ArrayList<>();
+    ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration,
+        clazz, new HashMap<>(), paramNameResolver);
+    GenericTokenParser parser = new GenericTokenParser("#{", "}", tokenHandler);
+    return SqlSourceBuilder.buildSqlSource(configuration, parser.parse(sql), parameterMappings);
   }
 
   private Map<String, NodeHandler> initNodeHandlerMap() {

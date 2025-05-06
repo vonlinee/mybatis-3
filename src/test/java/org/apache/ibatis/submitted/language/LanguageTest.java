@@ -117,7 +117,8 @@ class LanguageTest {
     }
   }
 
-  @Test
+  // @Test
+  @Deprecated // raw language is removed
   void langRaw() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Parameter p = new Parameter(true, "Fli%");
@@ -129,7 +130,8 @@ class LanguageTest {
     }
   }
 
-  @Test
+  // @Test
+  @Deprecated // raw language is removed
   void langRawWithInclude() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Parameter p = new Parameter(true, "Fli%");
@@ -141,7 +143,8 @@ class LanguageTest {
     }
   }
 
-  @Test
+  // @Test
+  @Deprecated // raw language is removed
   void langRawWithIncludeAndCData() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Parameter p = new Parameter(true, "Fli%");
@@ -165,7 +168,8 @@ class LanguageTest {
     }
   }
 
-  @Test
+  // @Test
+  @Deprecated // raw language is removed
   void langRawWithMapper() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Parameter p = new Parameter(true, "Fli%");

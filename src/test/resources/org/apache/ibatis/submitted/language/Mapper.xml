@@ -47,13 +47,13 @@
     )
   </select>
 
-  <select id="selectRaw" resultType="Name" lang="raw">
+  <select id="selectRaw" resultType="Name">
     SELECT firstName, lastName
     FROM names
     WHERE lastName LIKE #{name}
   </select>
 
-  <select id="selectRawWithInclude" resultType="Name" lang="raw">
+  <select id="selectRawWithInclude" resultType="Name">
     SELECT firstName, lastName
     <include refid="include"/>
     WHERE lastName LIKE #{name}
@@ -63,7 +63,7 @@
       FROM names
   </sql>
 
-  <select id="selectRawWithIncludeAndCData" resultType="Name" lang="raw">
+  <select id="selectRawWithIncludeAndCData" resultType="Name">
       <![CDATA[
     SELECT firstName, lastName
       ]]>
