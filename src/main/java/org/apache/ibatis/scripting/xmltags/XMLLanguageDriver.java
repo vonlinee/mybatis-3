@@ -39,6 +39,7 @@ import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.scripting.StaticTextSqlNode;
 import org.apache.ibatis.scripting.TextSqlNode;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.session.Configuration;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -51,6 +52,7 @@ public class XMLLanguageDriver implements LanguageDriver {
   private Configuration configuration;
   private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
   private static final Map<String, SqlNode> emptyNodeCache = new ConcurrentHashMap<>();
+  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
 
   public XMLLanguageDriver() {
     this.nodeHandlerMap.putAll(initNodeHandlerMap());
@@ -65,12 +67,14 @@ public class XMLLanguageDriver implements LanguageDriver {
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType,
       ParamNameResolver paramNameResolver) {
     SqlNode rootSqlNode = this.parseRootSqlNode(script);
+    rootSqlNode.setExpressionEvaluator(this.evaluator);
     return createSqlSource(rootSqlNode, configuration, parameterType, paramNameResolver);
   }
 
   @Override
   public SqlSource createSqlSource(SqlNode rootSqlNode, Configuration configuration, Class<?> parameterType,
       ParamNameResolver paramNameResolver) {
+    rootSqlNode.setExpressionEvaluator(this.evaluator);
     SqlSource sqlSource;
     if (rootSqlNode.isDynamic()) {
       sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
@@ -97,6 +101,7 @@ public class XMLLanguageDriver implements LanguageDriver {
     script = PropertyParser.parse(script, configuration.getVariables());
     if (DynamicCheckerTokenParser.isDynamic(script)) {
       TextSqlNode textSqlNode = new TextSqlNode(script);
+      textSqlNode.setExpressionEvaluator(this.evaluator);
       return new DynamicSqlSource(configuration, textSqlNode);
     } else {
       return createForRawSqlSource(configuration, script, parameterType, paramNameResolver);

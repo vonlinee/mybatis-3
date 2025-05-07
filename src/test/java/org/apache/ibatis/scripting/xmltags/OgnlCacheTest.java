@@ -28,9 +28,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.junit.jupiter.api.Test;
 
 class OgnlCacheTest {
+
+  ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
+
   @Test
   void concurrentAccess() throws Exception {
     class DataClass {
@@ -42,7 +46,7 @@ class OgnlCacheTest {
     List<Future<Object>> futures = new ArrayList<>();
     context.put("data", new DataClass());
     ExecutorService executor = Executors.newCachedThreadPool();
-    IntStream.range(0, run).forEach(i -> futures.add(executor.submit(() -> OgnlCache.getValue("data.id", context))));
+    IntStream.range(0, run).forEach(i -> futures.add(executor.submit(() -> evaluator.getValue("data.id", context))));
     for (int i = 0; i < run; i++) {
       assertNotNull(futures.get(i).get());
     }
@@ -54,6 +58,6 @@ class OgnlCacheTest {
     Map<String, Object> context = new HashMap<>();
     context.put("d1", Date.valueOf("2022-01-01"));
     context.put("d2", Date.valueOf("2022-01-02"));
-    assertEquals(-1, OgnlCache.getValue("d1.compareTo(d2)", context));
+    assertEquals(-1, evaluator.getValue("d1.compareTo(d2)", context));
   }
 }

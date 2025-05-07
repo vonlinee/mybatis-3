@@ -17,6 +17,7 @@ package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlNode;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 
 /**
  * used when write sql with syntax like t.column in (1, 2, 3).

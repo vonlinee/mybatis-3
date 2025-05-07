@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting.expression.ognl;
 
 import ognl.DefaultClassResolver;
 
@@ -27,7 +27,7 @@ import org.apache.ibatis.io.Resources;
  *
  * @see <a href='https://github.com/mybatis/mybatis-3/issues/161'>Issue 161</a>
  */
-public class OgnlClassResolver extends DefaultClassResolver {
+class OgnlClassResolver extends DefaultClassResolver {
 
   @Override
   protected Class<?> toClassForName(String className) throws ClassNotFoundException {

@@ -20,10 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import ognl.OgnlContext;
-import ognl.OgnlRuntime;
-import ognl.PropertyAccessor;
-
 import org.apache.ibatis.builder.ParameterMappingTokenHandler;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.parsing.GenericTokenParser;
@@ -37,10 +33,6 @@ import org.apache.ibatis.session.Configuration;
  * @author Clinton Begin
  */
 public class DynamicContext implements SqlBuildContext {
-
-  static {
-    OgnlRuntime.setPropertyAccessor(ContextMap.class, new ContextAccessor());
-  }
 
   protected final ContextMap bindings;
   private final StringJoiner sqlBuilder = new StringJoiner(" ");
@@ -145,42 +137,5 @@ public class DynamicContext implements SqlBuildContext {
   @Override
   public boolean isParamExists() {
     return paramExists;
-  }
-
-  static class ContextAccessor implements PropertyAccessor {
-
-    @Override
-    public Object getProperty(OgnlContext context, Object target, Object name) {
-      Map<?, ?> map = (Map<?, ?>) target;
-
-      Object result = map.get(name);
-      if (map.containsKey(name) || result != null) {
-        return result;
-      }
-
-      Object parameterObject = map.get(PARAMETER_OBJECT_KEY);
-      if (parameterObject instanceof Map) {
-        return ((Map<?, ?>) parameterObject).get(name);
-      }
-
-      return null;
-    }
-
-    @Override
-    public void setProperty(OgnlContext context, Object target, Object name, Object value) {
-      @SuppressWarnings("unchecked")
-      Map<Object, Object> map = (Map<Object, Object>) target;
-      map.put(name, value);
-    }
-
-    @Override
-    public String getSourceAccessor(OgnlContext arg0, Object arg1, Object arg2) {
-      return null;
-    }
-
-    @Override
-    public String getSourceSetter(OgnlContext arg0, Object arg1, Object arg2) {
-      return null;
-    }
   }
 }

@@ -32,7 +32,7 @@ class VarDeclSqlNode extends XmlSqlNode {
 
   @Override
   public boolean apply(SqlBuildContext context) {
-    final Object value = OgnlCache.getValue(expression, context.getBindings());
+    final Object value = evaluator.getValue(expression, context.getBindings());
     context.bind(name, value);
     return true;
   }

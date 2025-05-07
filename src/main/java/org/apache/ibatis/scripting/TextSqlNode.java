@@ -17,8 +17,8 @@ package org.apache.ibatis.scripting;
 
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.TokenHandler;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.scripting.xmltags.DynamicCheckerTokenParser;
-import org.apache.ibatis.scripting.xmltags.OgnlCache;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**
@@ -30,6 +30,13 @@ public class TextSqlNode implements SqlNode {
    * the text
    */
   private final String text;
+
+  protected ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
+
+  @Override
+  public void setExpressionEvaluator(ExpressionEvaluator evaluator) {
+    this.evaluator = evaluator;
+  }
 
   public TextSqlNode(String text) {
     this.text = text;
@@ -46,30 +53,21 @@ public class TextSqlNode implements SqlNode {
 
   @Override
   public boolean apply(SqlBuildContext context) {
-    GenericTokenParser parser = new GenericTokenParser("${", "}", new BindingTokenParser(context));
+    GenericTokenParser parser = new GenericTokenParser("${", "}", new TokenHandler() {
+      @Override
+      public String handleToken(String content) {
+        Object parameter = context.getBindings().get(SqlBuildContext.PARAMETER_OBJECT_KEY);
+        if (parameter == null) {
+          context.getBindings().put("value", null);
+        } else if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
+          context.getBindings().put("value", parameter);
+        }
+        Object value = evaluator.getValue(content, context.getBindings());
+        // issue #274 return "" instead of "null"
+        return value == null ? "" : String.valueOf(value);
+      }
+    });
     context.appendSql(context.parseParam(parser.parse(text)));
     return true;
-  }
-
-  private static class BindingTokenParser implements TokenHandler {
-
-    private final SqlBuildContext context;
-
-    public BindingTokenParser(SqlBuildContext context) {
-      this.context = context;
-    }
-
-    @Override
-    public String handleToken(String content) {
-      Object parameter = context.getBindings().get("_parameter");
-      if (parameter == null) {
-        context.getBindings().put("value", null);
-      } else if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
-        context.getBindings().put("value", parameter);
-      }
-      Object value = OgnlCache.getValue(content, context.getBindings());
-      // issue #274 return "" instead of "null"
-      return value == null ? "" : String.valueOf(value);
-    }
   }
 }

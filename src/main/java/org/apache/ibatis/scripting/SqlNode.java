@@ -15,12 +15,16 @@
  */
 package org.apache.ibatis.scripting;
 
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.scripting.xmltags.DynamicCheckerTokenParser;
 
 /**
  * @author Clinton Begin
  */
 public interface SqlNode {
+
+  default void setExpressionEvaluator(ExpressionEvaluator evaluator) {
+  }
 
   /**
    * 'dynamic' means:

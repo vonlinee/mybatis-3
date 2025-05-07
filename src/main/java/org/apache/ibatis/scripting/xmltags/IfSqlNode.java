@@ -17,6 +17,7 @@ package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlNode;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 
 /**
  * @author Clinton Begin
