@@ -175,8 +175,7 @@ public class BeanWrapper extends BaseWrapper {
     return false;
   }
 
-  @Override
-  public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
+  private MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
     MetaObject metaValue;
     Class<?> type = getSetterType(prop.getName());
     try {
@@ -208,7 +207,7 @@ public class BeanWrapper extends BaseWrapper {
       throw e;
     } catch (Throwable t) {
       throw new ReflectionException(
-          "Could not get property '" + prop.getName() + "' from " + object.getClass() + ".  Cause: " + t.toString(), t);
+          "Could not get property '" + prop.getName() + "' from " + object.getClass() + ".  Cause: " + t, t);
     }
   }
 
@@ -223,7 +222,7 @@ public class BeanWrapper extends BaseWrapper {
       }
     } catch (Throwable t) {
       throw new ReflectionException("Could not set property '" + prop.getName() + "' of '" + object.getClass()
-          + "' with value '" + value + "' Cause: " + t.toString(), t);
+          + "' with value '" + value + "' Cause: " + t, t);
     }
   }
 

@@ -198,12 +198,12 @@ public class XPathParser {
   }
 
   public List<XNode> evalNodes(Object root, String expression) {
-    List<XNode> xnodes = new ArrayList<>();
+    List<XNode> xNodes = new ArrayList<>();
     NodeList nodes = (NodeList) evaluate(expression, root, XPathConstants.NODESET);
     for (int i = 0; i < nodes.getLength(); i++) {
-      xnodes.add(new XNode(this, nodes.item(i), variables));
+      xNodes.add(new XNode(this, nodes.item(i), variables));
     }
-    return xnodes;
+    return xNodes;
   }
 
   public XNode evalNode(String expression) {

@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -118,7 +117,7 @@ public class ParamNameResolver {
         } else if (soleParamType instanceof Class) {
           soleParamClass = (Class<?>) soleParamType;
         }
-        if (Collection.class.isAssignableFrom(soleParamClass)) {
+        if (soleParamClass != null && Collection.class.isAssignableFrom(soleParamClass)) {
           typeMap.put("collection", soleParamType);
           if (List.class.isAssignableFrom(soleParamClass)) {
             typeMap.put("list", soleParamType);
@@ -226,13 +225,17 @@ public class ParamNameResolver {
       if (object instanceof List) {
         map.put("list", object);
       }
-      Optional.ofNullable(actualParamName).ifPresent(name -> map.put(name, object));
+      if (actualParamName != null) {
+        map.put(actualParamName, object);
+      }
       return map;
     }
     if (object != null && object.getClass().isArray()) {
       ParamMap map = new ParamMap();
       map.put("array", object);
-      Optional.ofNullable(actualParamName).ifPresent(name -> map.put(name, object));
+      if (actualParamName != null) {
+        map.put(actualParamName, object);
+      }
       return map;
     }
     return object;
