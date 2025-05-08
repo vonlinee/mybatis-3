@@ -89,7 +89,7 @@ public class VelocitySqlSourceBuilder extends BaseBuilder {
       } else {
         propertyType = Object.class;
       }
-      ParameterMapping.Builder builder = new ParameterMapping.Builder(configuration, property, propertyType);
+      ParameterMapping.Builder builder = new ParameterMapping.Builder(property, propertyType);
       if (jdbcType != null) {
         builder.jdbcType(jdbcType);
       }

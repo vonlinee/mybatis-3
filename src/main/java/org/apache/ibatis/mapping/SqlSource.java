@@ -15,6 +15,9 @@
  */
 package org.apache.ibatis.mapping;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Represents the content of a mapped statement read from an XML file or an annotation. It creates the SQL that will be
  * passed to the database out of the input parameter received from the user.
@@ -23,6 +26,18 @@ package org.apache.ibatis.mapping;
  */
 public interface SqlSource {
 
+  /**
+   * @param parameterObject
+   *          parameter object
+   *
+   * @return sql
+   */
   BoundSql getBoundSql(Object parameterObject);
 
+  /**
+   * @return the parameter metadata of this SqlSource, maybe empty
+   */
+  default List<ParameterMapping> getParameterMappings() {
+    return Collections.emptyList();
+  }
 }

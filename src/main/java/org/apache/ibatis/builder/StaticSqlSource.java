@@ -44,4 +44,9 @@ public class StaticSqlSource implements SqlSource {
     return new BoundSql(sql, parameterMappings, parameterObject);
   }
 
+  @Override
+  public List<ParameterMapping> getParameterMappings() {
+    return parameterMappings;
+  }
+
 }

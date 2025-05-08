@@ -17,7 +17,6 @@ package org.apache.ibatis.mapping;
 
 import java.sql.ResultSet;
 
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
@@ -27,7 +26,6 @@ import org.apache.ibatis.type.TypeHandler;
 public class ParameterMapping {
 
   private static final Object UNSET = new Object();
-  private Configuration configuration;
 
   private String property;
   private ParameterMode mode;
@@ -46,15 +44,13 @@ public class ParameterMapping {
   public static class Builder {
     private final ParameterMapping parameterMapping = new ParameterMapping();
 
-    public Builder(Configuration configuration, String property, TypeHandler<?> typeHandler) {
-      parameterMapping.configuration = configuration;
+    public Builder(String property, TypeHandler<?> typeHandler) {
       parameterMapping.property = property;
       parameterMapping.typeHandler = typeHandler;
       parameterMapping.mode = ParameterMode.IN;
     }
 
-    public Builder(Configuration configuration, String property, Class<?> javaType) {
-      parameterMapping.configuration = configuration;
+    public Builder(String property, Class<?> javaType) {
       parameterMapping.property = property;
       parameterMapping.javaType = javaType;
       parameterMapping.mode = ParameterMode.IN;
@@ -204,19 +200,12 @@ public class ParameterMapping {
 
   @Override
   public String toString() {
-    final StringBuilder sb = new StringBuilder("ParameterMapping{");
     // sb.append("configuration=").append(configuration); // configuration doesn't have a useful .toString()
-    sb.append("property='").append(property).append('\'');
-    sb.append(", mode=").append(mode);
-    sb.append(", javaType=").append(javaType);
-    sb.append(", jdbcType=").append(jdbcType);
-    sb.append(", numericScale=").append(numericScale);
-    // sb.append(", typeHandler=").append(typeHandler); // typeHandler also doesn't have a useful .toString()
-    sb.append(", resultMapId='").append(resultMapId).append('\'');
-    sb.append(", jdbcTypeName='").append(jdbcTypeName).append('\'');
-    sb.append(", expression='").append(expression).append('\'');
-    sb.append(", value='").append(value).append('\'');
-    sb.append('}');
-    return sb.toString();
+    String sb = "ParameterMapping{" + "property='" + property + '\'' + ", mode=" + mode + ", javaType=" + javaType
+        + ", jdbcType=" + jdbcType + ", numericScale=" + numericScale +
+        // sb.append(", typeHandler=").append(typeHandler); // typeHandler also doesn't have a useful .toString()
+        ", resultMapId='" + resultMapId + '\'' + ", jdbcTypeName='" + jdbcTypeName + '\'' + ", expression='"
+        + expression + '\'' + ", value='" + value + '\'' + '}';
+    return sb;
   }
 }
