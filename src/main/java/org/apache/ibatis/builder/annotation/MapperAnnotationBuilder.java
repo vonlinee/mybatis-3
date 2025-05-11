@@ -15,7 +15,6 @@
  */
 package org.apache.ibatis.builder.annotation;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -120,7 +119,7 @@ public class MapperAnnotationBuilder {
   public void parse() {
     String resource = type.toString();
     if (!configuration.isResourceLoaded(resource)) {
-      loadXmlResource();
+      loadXmlResource(type);
       configuration.addLoadedResource(resource);
       assistant.setCurrentNamespace(type.getName());
       parseCache();
@@ -148,21 +147,22 @@ public class MapperAnnotationBuilder {
     return !method.isBridge() && !method.isDefault();
   }
 
-  private void loadXmlResource() {
+  public String getResourceName(Class<?> type) {
+    return type.getName().replace('.', '/') + ".xml";
+  }
+
+  private void loadXmlResource(Class<?> type) {
     // Spring may not know the real resource name so we check a flag
     // to prevent loading again a resource twice
     // this flag is set at XMLMapperBuilder#bindMapperForNamespace
     if (!configuration.isResourceLoaded("namespace:" + type.getName())) {
-      String xmlResource = type.getName().replace('.', '/') + ".xml";
+      String xmlResource = getResourceName(type);
       // #1347
-      InputStream inputStream = type.getResourceAsStream("/" + xmlResource);
+      InputStream inputStream = Resources.getResourceAsStreamOrNull(type, xmlResource);
       if (inputStream == null) {
         // Search XML mapper that is not in the module but in the classpath.
-        try {
-          inputStream = Resources.getResourceAsStream(type.getClassLoader(), xmlResource);
-        } catch (IOException e2) {
-          // ignore, resource is not required
-        }
+        // ignore exception, resource is not required
+        inputStream = Resources.getResourceAsStreamOrNull(type.getClassLoader(), xmlResource);
       }
       if (inputStream != null) {
         XMLMapperBuilder xmlParser = new XMLMapperBuilder(inputStream, assistant.getConfiguration(), xmlResource,
@@ -414,8 +414,7 @@ public class MapperAnnotationBuilder {
           returnType = rt.value();
         }
       }
-    } else if (resolvedReturnType instanceof ParameterizedType) {
-      ParameterizedType parameterizedType = (ParameterizedType) resolvedReturnType;
+    } else if (resolvedReturnType instanceof ParameterizedType parameterizedType) {
       Class<?> rawType = (Class<?>) parameterizedType.getRawType();
       if (Collection.class.isAssignableFrom(rawType) || Cursor.class.isAssignableFrom(rawType)) {
         Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
@@ -653,15 +652,15 @@ public class MapperAnnotationBuilder {
     if (mapperFqn == null || localStatementId == null) {
       return null;
     }
-    try {
-      Class<?> mapperClass = Resources.classForName(mapperFqn);
-      for (Method method : mapperClass.getMethods()) {
-        if (method.getName().equals(localStatementId) && canHaveStatement(method)) {
-          return getReturnType(method, mapperClass);
-        }
+    // No corresponding mapper interface which is OK
+    Class<?> mapperClass = Resources.classForNameOrNull(mapperFqn);
+    if (mapperClass == null) {
+      return null;
+    }
+    for (Method method : mapperClass.getMethods()) {
+      if (method.getName().equals(localStatementId) && canHaveStatement(method)) {
+        return getReturnType(method, mapperClass);
       }
-    } catch (ClassNotFoundException e) {
-      // No corresponding mapper interface which is OK
     }
     return null;
   }

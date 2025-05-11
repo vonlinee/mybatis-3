@@ -31,14 +31,7 @@ public class Jdk {
   public static final boolean parameterExists;
 
   static {
-    boolean available = false;
-    try {
-      Resources.classForName("java.lang.reflect.Parameter");
-      available = true;
-    } catch (ClassNotFoundException e) {
-      // ignore
-    }
-    parameterExists = available;
+    parameterExists = Resources.classForNameOrNull("java.lang.reflect.Parameter") != null;
   }
 
   /**
@@ -65,14 +58,7 @@ public class Jdk {
   public static final boolean optionalExists;
 
   static {
-    boolean available = false;
-    try {
-      Resources.classForName("java.util.Optional");
-      available = true;
-    } catch (ClassNotFoundException e) {
-      // ignore
-    }
-    optionalExists = available;
+    optionalExists = Resources.classForNameOrNull("java.util.Optional") != null;
   }
 
   private Jdk() {
