@@ -28,7 +28,7 @@
   </parent>
 
   <groupId>org.mybatis</groupId>
-  <artifactId>mybatis</artifactId>
+  <artifactId>mybatis3-embed-plugin-support</artifactId>
   <version>3.6.0-SNAPSHOT</version>
 
   <name>mybatis</name>
@@ -429,10 +429,12 @@
               <maxJdkVersion>${java.version}</maxJdkVersion>
               <ignoredScopes>provided,test</ignoredScopes>
             </enforceBytecodeVersion>
+            <requireMavenVersion>
+              <version>[3.9.6,)</version>
+            </requireMavenVersion>
           </rules>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>com.rudikershaw.gitbuildhook</groupId>
         <artifactId>git-build-hook-maven-plugin</artifactId>
