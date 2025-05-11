@@ -15,7 +15,14 @@
  */
 package org.apache.ibatis.internal.util;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Simple utility class for working with the reflection API and handling reflection exceptions.
@@ -48,5 +55,17 @@ public final class ReflectionUtils {
   public static <T> T createInstance(Class<?> clazz) throws ReflectiveOperationException {
     Objects.requireNonNull(clazz, "class must not be null");
     return (T) clazz.getDeclaredConstructor().newInstance();
+  }
+
+  public static List<String> getParamNames(Method method) {
+    return getParameterNames(method);
+  }
+
+  public static List<String> getParamNames(Constructor<?> constructor) {
+    return getParameterNames(constructor);
+  }
+
+  private static List<String> getParameterNames(Executable executable) {
+    return Arrays.stream(executable.getParameters()).map(Parameter::getName).collect(Collectors.toList());
   }
 }

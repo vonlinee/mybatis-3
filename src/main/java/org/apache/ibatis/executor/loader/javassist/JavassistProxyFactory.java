@@ -35,8 +35,7 @@ import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.reflection.property.PropertyCopier;
-import org.apache.ibatis.reflection.property.PropertyNamer;
+import org.apache.ibatis.reflection.property.BeanUtils;
 import org.apache.ibatis.session.Configuration;
 
 /**
@@ -88,8 +87,8 @@ public class JavassistProxyFactory implements org.apache.ibatis.executor.loader.
     }
 
     Object enhanced;
-    Class<?>[] typesArray = constructorArgTypes.toArray(new Class[constructorArgTypes.size()]);
-    Object[] valuesArray = constructorArgs.toArray(new Object[constructorArgs.size()]);
+    Class<?>[] typesArray = constructorArgTypes.toArray(new Class[0]);
+    Object[] valuesArray = constructorArgs.toArray(new Object[0]);
     try {
       enhanced = enhancer.create(typesArray, valuesArray);
     } catch (Exception e) {
@@ -126,7 +125,7 @@ public class JavassistProxyFactory implements org.apache.ibatis.executor.loader.
       EnhancedResultObjectProxyImpl callback = new EnhancedResultObjectProxyImpl(type, lazyLoader, configuration,
           objectFactory, constructorArgTypes, constructorArgs);
       Object enhanced = createStaticProxy(type, callback, constructorArgTypes, constructorArgs);
-      PropertyCopier.copyBeanProperties(type, target, enhanced);
+      BeanUtils.copyProperties(type, target, enhanced);
       return enhanced;
     }
 
@@ -142,7 +141,7 @@ public class JavassistProxyFactory implements org.apache.ibatis.executor.loader.
           } else {
             original = objectFactory.create(type, constructorArgTypes, constructorArgs);
           }
-          PropertyCopier.copyBeanProperties(type, enhanced, original);
+          BeanUtils.copyProperties(type, enhanced, original);
           if (!lazyLoader.isEmpty()) {
             return new JavassistSerialStateHolder(original, lazyLoader.getProperties(), objectFactory,
                 constructorArgTypes, constructorArgs);
@@ -153,11 +152,11 @@ public class JavassistProxyFactory implements org.apache.ibatis.executor.loader.
         if (!lazyLoader.isEmpty() && !FINALIZE_METHOD.equals(methodName)) {
           if (aggressive || lazyLoadTriggerMethods.contains(methodName)) {
             lazyLoader.loadAll();
-          } else if (PropertyNamer.isSetter(methodName)) {
-            final String property = PropertyNamer.methodToProperty(methodName);
+          } else if (BeanUtils.isSetter(methodName)) {
+            final String property = BeanUtils.methodToProperty(methodName);
             lazyLoader.remove(property);
-          } else if (PropertyNamer.isGetter(methodName)) {
-            final String property = PropertyNamer.methodToProperty(methodName);
+          } else if (BeanUtils.isGetter(methodName)) {
+            final String property = BeanUtils.methodToProperty(methodName);
             if (lazyLoader.hasLoader(property)) {
               lazyLoader.load(property);
             }
@@ -186,7 +185,7 @@ public class JavassistProxyFactory implements org.apache.ibatis.executor.loader.
       EnhancedDeserializationProxyImpl callback = new EnhancedDeserializationProxyImpl(type, unloadedProperties,
           objectFactory, constructorArgTypes, constructorArgs);
       Object enhanced = createStaticProxy(type, callback, constructorArgTypes, constructorArgs);
-      PropertyCopier.copyBeanProperties(type, target, enhanced);
+      BeanUtils.copyProperties(type, target, enhanced);
       return enhanced;
     }
 

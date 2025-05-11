@@ -20,6 +20,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Utility class for common I/O operations.
  */
@@ -34,7 +36,7 @@ public final class IOUtils {
    * @param closeable
    *          the Closeable resource to be closed
    */
-  public static void closeSilently(Closeable closeable) {
+  public static void closeSilently(@Nullable Closeable closeable) {
     if (closeable != null) {
       try {
         closeable.close();

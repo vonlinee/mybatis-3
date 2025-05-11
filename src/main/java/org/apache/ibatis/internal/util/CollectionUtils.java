@@ -19,17 +19,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.Nullable;
+
 public final class CollectionUtils {
 
-  public static boolean isEmpty(Collection<?> collection) {
+  private CollectionUtils() {
+  }
+
+  public static boolean isEmpty(@Nullable Collection<?> collection) {
     return collection == null || collection.isEmpty();
   }
 
-  public static boolean isEmpty(Map<?, ?> map) {
+  public static boolean isEmpty(@Nullable Map<?, ?> map) {
     return map == null || map.isEmpty();
   }
 
-  public static <T> T getFirst(List<T> list) {
+  @Nullable
+  public static <T> T getFirst(@Nullable List<T> list) {
     return isEmpty(list) ? null : list.get(0);
   }
 }

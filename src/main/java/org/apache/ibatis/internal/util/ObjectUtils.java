@@ -15,16 +15,24 @@
  */
 package org.apache.ibatis.internal.util;
 
-public class ObjectUtils {
+import org.jetbrains.annotations.Nullable;
 
-  public static int parseInt(Object obj, int defaultValue) {
+public final class ObjectUtils {
+
+  private ObjectUtils() {
+  }
+
+  public static int parseInt(@Nullable Object obj, int defaultValue) {
     if (obj == null) {
       return defaultValue;
     }
     return parseInt(obj.toString(), defaultValue);
   }
 
-  public static int parseInt(String str, int defaultValue) {
+  public static int parseInt(@Nullable String str, int defaultValue) {
+    if (StringUtils.isBlank(str)) {
+      return defaultValue;
+    }
     try {
       return Integer.parseInt(str);
     } catch (NumberFormatException ignored) {

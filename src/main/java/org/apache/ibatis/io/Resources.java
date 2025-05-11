@@ -25,12 +25,14 @@ import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.Properties;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * A class to simplify access to resources through the classloader.
  *
  * @author Clinton Begin
  */
-public class Resources {
+public final class Resources {
 
   private static final ClassLoaderWrapper classLoaderWrapper = new ClassLoaderWrapper();
 
@@ -110,7 +112,7 @@ public class Resources {
    *           If the resource cannot be found or read
    */
   public static InputStream getResourceAsStream(String resource) throws IOException {
-    return getResourceAsStream(null, resource);
+    return getResourceAsStream((ClassLoader) null, resource);
   }
 
   /**
@@ -132,6 +134,36 @@ public class Resources {
       throw new IOException("Could not find resource " + resource);
     }
     return in;
+  }
+
+  @Nullable
+  public static InputStream getResourceAsStreamOrNull(ClassLoader loader, String resource) {
+    if (loader == null || resource == null || resource.isEmpty()) {
+      return null;
+    }
+    try {
+      return getResourceAsStream(loader, resource);
+    } catch (Throwable throwable) {
+      return null;
+    }
+  }
+
+  public static InputStream getResourceAsStreamOrNull(Class<?> contextClass, String resource) {
+    try {
+      return getResourceAsStream(contextClass, resource);
+    } catch (Throwable e) {
+      return null;
+    }
+  }
+
+  public static InputStream getResourceAsStream(Class<?> contextClass, String resource) {
+    if (contextClass == null || resource == null || resource.isEmpty()) {
+      return null;
+    }
+    if (!resource.startsWith("/")) {
+      resource = "/" + resource;
+    }
+    return contextClass.getResourceAsStream(resource);
   }
 
   /**
@@ -320,6 +352,18 @@ public class Resources {
    */
   public static Class<?> classForName(String className) throws ClassNotFoundException {
     return classLoaderWrapper.classForName(className);
+  }
+
+  @Nullable
+  public static Class<?> classForNameOrNull(@Nullable String className) {
+    if (className == null || className.isBlank()) {
+      return null;
+    }
+    try {
+      return classForName(className);
+    } catch (ClassNotFoundException e) {
+      return null;
+    }
   }
 
   public static Charset getCharset() {

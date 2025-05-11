@@ -68,7 +68,7 @@ class ReflectorTest {
     Assertions.assertEquals(List.class, reflector.getGetterType("id"));
     Entry<Type, Class<?>> entry = reflector.getGenericGetterType("id");
     Assertions.assertEquals(List.class, entry.getValue());
-    Assertions.assertTrue(entry.getKey() instanceof ParameterizedType);
+    Assertions.assertInstanceOf(ParameterizedType.class, entry.getKey());
     ParameterizedType parameterizedType = (ParameterizedType) entry.getKey();
     Assertions.assertEquals(List.class, parameterizedType.getRawType());
     Assertions.assertEquals(String.class, parameterizedType.getActualTypeArguments()[0]);
@@ -233,7 +233,7 @@ class ReflectorTest {
     ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
     Reflector reflector = reflectorFactory.findForClass(BeanClass.class);
 
-    List<String> setableProps = Arrays.asList(reflector.getSetablePropertyNames());
+    List<String> setableProps = Arrays.asList(reflector.getSettablePropertyNames());
     assertTrue(setableProps.contains("prop1"));
     assertTrue(setableProps.contains("prop2"));
     assertEquals("prop1", reflector.findPropertyName("PROP1"));
@@ -273,7 +273,7 @@ class ReflectorTest {
     ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
     Reflector reflector = reflectorFactory.findForClass(BeanClass.class);
 
-    List<String> getableProps = Arrays.asList(reflector.getGetablePropertyNames());
+    List<String> getableProps = Arrays.asList(reflector.getGettablePropertyNames());
     assertTrue(getableProps.contains("prop1"));
     assertTrue(getableProps.contains("prop2"));
     assertEquals("prop1", reflector.findPropertyName("PROP1"));
@@ -313,7 +313,7 @@ class ReflectorTest {
     ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
     Reflector reflector = reflectorFactory.findForClass(BeanClass.class);
 
-    List<String> getableProps = Arrays.asList(reflector.getGetablePropertyNames());
+    List<String> getableProps = Arrays.asList(reflector.getGettablePropertyNames());
     assertTrue(getableProps.contains("prop1"));
     assertTrue(getableProps.contains("prop2"));
     assertEquals("prop1", reflector.findPropertyName("PROP1"));

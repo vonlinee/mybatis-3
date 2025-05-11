@@ -48,11 +48,11 @@ public abstract class BaseWrapper implements ObjectWrapper {
           + prop.getName() + "' is null.");
     }
     if (collection instanceof Map) {
-      return ((Map) collection).get(prop.getIndex());
+      return ((Map<?, ?>) collection).get(prop.getIndex());
     }
     int i = Integer.parseInt(prop.getIndex());
     if (collection instanceof List) {
-      return ((List) collection).get(i);
+      return ((List<?>) collection).get(i);
     } else if (collection instanceof Object[]) {
       return ((Object[]) collection)[i];
     } else if (collection instanceof char[]) {
@@ -77,17 +77,18 @@ public abstract class BaseWrapper implements ObjectWrapper {
     }
   }
 
+  @SuppressWarnings("unchecked")
   protected void setCollectionValue(PropertyTokenizer prop, Object collection, Object value) {
     if (collection == null) {
       throw new ReflectionException("Cannot set the value '" + prop.getIndexedName() + "' because the property '"
           + prop.getName() + "' is null.");
     }
     if (collection instanceof Map) {
-      ((Map) collection).put(prop.getIndex(), value);
+      ((Map<String, Object>) collection).put(prop.getIndex(), value);
     } else {
       int i = Integer.parseInt(prop.getIndex());
       if (collection instanceof List) {
-        ((List) collection).set(i, value);
+        ((List<Object>) collection).set(i, value);
       } else if (collection instanceof Object[]) {
         ((Object[]) collection)[i] = value;
       } else if (collection instanceof char[]) {

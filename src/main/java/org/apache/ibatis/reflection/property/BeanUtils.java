@@ -16,19 +16,50 @@
 package org.apache.ibatis.reflection.property;
 
 import java.lang.reflect.Field;
+import java.util.Locale;
 
+import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.Reflector;
 
 /**
  * @author Clinton Begin
  */
-public final class PropertyCopier {
+public final class BeanUtils {
 
-  private PropertyCopier() {
+  private BeanUtils() {
     // Prevent Instantiation of Static Class
   }
 
-  public static void copyBeanProperties(Class<?> type, Object sourceBean, Object destinationBean) {
+  public static String methodToProperty(String name) {
+    if (name.startsWith("is")) {
+      name = name.substring(2);
+    } else if (name.startsWith("get") || name.startsWith("set")) {
+      name = name.substring(3);
+    } else {
+      throw new ReflectionException(
+          "Error parsing property name '" + name + "'.  Didn't start with 'is', 'get' or 'set'.");
+    }
+
+    if (name.length() == 1 || name.length() > 1 && !Character.isUpperCase(name.charAt(1))) {
+      name = name.substring(0, 1).toLowerCase(Locale.ENGLISH) + name.substring(1);
+    }
+
+    return name;
+  }
+
+  public static boolean isProperty(String name) {
+    return isGetter(name) || isSetter(name);
+  }
+
+  public static boolean isGetter(String name) {
+    return name.startsWith("get") && name.length() > 3 || name.startsWith("is") && name.length() > 2;
+  }
+
+  public static boolean isSetter(String name) {
+    return name.startsWith("set") && name.length() > 3;
+  }
+
+  public static void copyProperties(Class<?> type, Object sourceBean, Object destinationBean) {
     Class<?> parent = type;
     while (parent != null) {
       final Field[] fields = parent.getDeclaredFields();
@@ -50,5 +81,4 @@ public final class PropertyCopier {
       parent = parent.getSuperclass();
     }
   }
-
 }

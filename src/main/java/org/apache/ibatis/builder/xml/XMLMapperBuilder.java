@@ -16,7 +16,6 @@
 package org.apache.ibatis.builder.xml;
 
 import java.io.InputStream;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -60,20 +59,6 @@ public class XMLMapperBuilder extends BaseBuilder {
   private final String resource;
   private Class<?> mapperClass;
 
-  @Deprecated(since = "3.6.0", forRemoval = true)
-  public XMLMapperBuilder(Reader reader, Configuration configuration, String resource, Map<String, XNode> sqlFragments,
-      String namespace) {
-    this(reader, configuration, resource, sqlFragments);
-    this.builderAssistant.setCurrentNamespace(namespace);
-  }
-
-  @Deprecated
-  public XMLMapperBuilder(Reader reader, Configuration configuration, String resource,
-      Map<String, XNode> sqlFragments) {
-    this(new XPathParser(reader, true, configuration.getVariables(), new XMLMapperEntityResolver()), configuration,
-        resource, sqlFragments);
-  }
-
   public XMLMapperBuilder(InputStream inputStream, Configuration configuration, String resource,
       Map<String, XNode> sqlFragments, Class<?> mapperClass) {
     this(inputStream, configuration, resource, sqlFragments, mapperClass.getName());
@@ -112,8 +97,8 @@ public class XMLMapperBuilder extends BaseBuilder {
     configuration.parsePendingStatements(false);
   }
 
-  public XNode getSqlFragment(String refid) {
-    return sqlFragments.get(refid);
+  public XNode getSqlFragment(String refId) {
+    return sqlFragments.get(refId);
   }
 
   private void configurationElement(XNode context) {
@@ -402,14 +387,10 @@ public class XMLMapperBuilder extends BaseBuilder {
   private void bindMapperForNamespace() {
     String namespace = builderAssistant.getCurrentNamespace();
     if (namespace != null) {
-      Class<?> boundType = null;
-      try {
-        boundType = Resources.classForName(namespace);
-      } catch (ClassNotFoundException e) {
-        // ignore, bound type is not required
-      }
+      // ignore, bound type is not required
+      Class<?> boundType = Resources.classForNameOrNull(namespace);
       if (boundType != null && !configuration.hasMapper(boundType)) {
-        // Spring may not know the real resource name so we set a flag
+        // Spring may not know the real resource name, so we set a flag
         // to prevent loading again this resource from the mapper interface
         // look at MapperAnnotationBuilder#loadXmlResource
         configuration.addLoadedResource("namespace:" + namespace);

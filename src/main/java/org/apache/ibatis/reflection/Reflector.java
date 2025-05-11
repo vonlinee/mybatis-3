@@ -43,7 +43,7 @@ import org.apache.ibatis.reflection.invoker.GetFieldInvoker;
 import org.apache.ibatis.reflection.invoker.Invoker;
 import org.apache.ibatis.reflection.invoker.MethodInvoker;
 import org.apache.ibatis.reflection.invoker.SetFieldInvoker;
-import org.apache.ibatis.reflection.property.PropertyNamer;
+import org.apache.ibatis.reflection.property.BeanUtils;
 
 /**
  * This class represents a cached set of class definition information that allows for easy mapping between property
@@ -107,8 +107,8 @@ public class Reflector {
 
   private void addGetMethods(Method[] methods) {
     Map<String, List<Method>> conflictingGetters = new HashMap<>();
-    Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && PropertyNamer.isGetter(m.getName()))
-        .forEach(m -> addMethodConflict(conflictingGetters, PropertyNamer.methodToProperty(m.getName()), m));
+    Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && BeanUtils.isGetter(m.getName()))
+        .forEach(m -> addMethodConflict(conflictingGetters, BeanUtils.methodToProperty(m.getName()), m));
     resolveGetterConflicts(conflictingGetters);
   }
 
@@ -156,8 +156,8 @@ public class Reflector {
 
   private void addSetMethods(Method[] methods) {
     Map<String, List<Method>> conflictingSetters = new HashMap<>();
-    Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 1 && PropertyNamer.isSetter(m.getName()))
-        .forEach(m -> addMethodConflict(conflictingSetters, PropertyNamer.methodToProperty(m.getName()), m));
+    Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 1 && BeanUtils.isSetter(m.getName()))
+        .forEach(m -> addMethodConflict(conflictingSetters, BeanUtils.methodToProperty(m.getName()), m));
     resolveSetterConflicts(conflictingSetters);
   }
 
@@ -337,9 +337,9 @@ public class Reflector {
   }
 
   /**
-   * Checks whether can control member accessible.
+   * Checks whether you can control member accessible.
    *
-   * @return If can control member accessible, it return {@literal true}
+   * @return If you can control member accessible, it return {@literal true}
    *
    * @since 3.5.0
    */
@@ -402,7 +402,7 @@ public class Reflector {
   public Class<?> getSetterType(String propertyName) {
     Class<?> clazz = setTypes.get(propertyName).getValue();
     if (clazz == null) {
-      throw new ReflectionException("There is no setter for property named '" + propertyName + "' in '" + clazz + "'");
+      throw new ReflectionException("There is no setter for property named '" + propertyName + "' in '" + null + "'");
     }
     return clazz;
   }
@@ -424,7 +424,7 @@ public class Reflector {
   public Class<?> getGetterType(String propertyName) {
     Class<?> clazz = getTypes.getOrDefault(propertyName, nullEntry).getValue();
     if (clazz == null) {
-      throw new ReflectionException("There is no getter for property named '" + propertyName + "' in '" + clazz + "'");
+      throw new ReflectionException("There is no getter for property named '" + propertyName + "' in '" + null + "'");
     }
     return clazz;
   }
@@ -440,7 +440,7 @@ public class Reflector {
    *
    * @return The array
    */
-  public String[] getGetablePropertyNames() {
+  public String[] getGettablePropertyNames() {
     return readablePropertyNames;
   }
 
@@ -449,7 +449,7 @@ public class Reflector {
    *
    * @return The array
    */
-  public String[] getSetablePropertyNames() {
+  public String[] getSettablePropertyNames() {
     return writablePropertyNames;
   }
 

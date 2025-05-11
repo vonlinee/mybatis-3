@@ -26,7 +26,7 @@ public class ArrayUtil {
    * Returns a hash code for {@code obj}.
    *
    * @param obj
-   *          The object to get a hash code for. May be an array or <code>null</code>.
+   *          The object to get a hash code for. Maybe an array or <code>null</code>.
    *
    * @return A hash code of {@code obj} or 0 if {@code obj} is <code>null</code>
    */
@@ -73,9 +73,9 @@ public class ArrayUtil {
    * </ul>
    *
    * @param thisObj
-   *          The left hand object to compare. May be an array or <code>null</code>
+   *          The left hand object to compare. Maybe an array or <code>null</code>
    * @param thatObj
-   *          The right hand object to compare. May be an array or <code>null</code>
+   *          The right hand object to compare. Maybe an array or <code>null</code>
    *
    * @return <code>true</code> if two objects are equal; <code>false</code> otherwise.
    */
@@ -121,7 +121,7 @@ public class ArrayUtil {
    * is called. Returns "null" if {@code obj} is <code>null</code>.
    *
    * @param obj
-   *          An object. May be an array or <code>null</code>.
+   *          An object. Maybe an array or <code>null</code>.
    *
    * @return String representation of the {@code obj}.
    */
