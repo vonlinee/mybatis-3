@@ -23,6 +23,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.cursor.Cursor;
@@ -37,7 +38,6 @@ import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
-import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.scripting.ExtensionFactory;
 import org.apache.ibatis.scripting.defaults.DefaultExtensionFactory;
 import org.apache.ibatis.session.Configuration;
@@ -58,8 +58,8 @@ public abstract class BaseExecutor implements Executor {
   protected Executor wrapper;
 
   protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
-  protected PerpetualCache localCache;
-  protected PerpetualCache localOutputParameterCache;
+  protected Cache localCache;
+  protected Cache localOutputParameterCache;
   protected Configuration configuration;
   protected ExtensionFactory extensionFactory;
   protected int queryStack;
@@ -296,13 +296,7 @@ public abstract class BaseExecutor implements Executor {
       BoundSql boundSql) throws SQLException;
 
   protected void closeStatement(Statement statement) {
-    if (statement != null) {
-      try {
-        statement.close();
-      } catch (SQLException e) {
-        // ignore
-      }
-    }
+    JdbcUtils.closeSilently(statement);
   }
 
   /**
@@ -375,19 +369,17 @@ public abstract class BaseExecutor implements Executor {
     private final String property;
     private final Class<?> targetType;
     private final CacheKey key;
-    private final PerpetualCache localCache;
-    private final ObjectFactory objectFactory;
+    private final Cache localCache;
     private final ResultExtractor resultExtractor;
 
     // issue #781
-    public DeferredLoad(MetaObject resultObject, String property, CacheKey key, PerpetualCache localCache,
+    public DeferredLoad(MetaObject resultObject, String property, CacheKey key, Cache localCache,
         Configuration configuration, Class<?> targetType) {
       this.resultObject = resultObject;
       this.property = property;
       this.key = key;
       this.localCache = localCache;
-      this.objectFactory = configuration.getObjectFactory();
-      this.resultExtractor = new ResultExtractor(configuration, objectFactory);
+      this.resultExtractor = new ResultExtractor(configuration, configuration.getObjectFactory());
       this.targetType = targetType;
     }
 
