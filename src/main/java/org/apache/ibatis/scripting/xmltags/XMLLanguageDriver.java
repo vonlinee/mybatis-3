@@ -35,8 +35,10 @@ import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.apache.ibatis.scripting.LanguageDriver;
+import org.apache.ibatis.scripting.MixedSqlNode;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlNode;
+import org.apache.ibatis.scripting.SqlNodeWrapper;
 import org.apache.ibatis.scripting.StaticTextSqlNode;
 import org.apache.ibatis.scripting.TextSqlNode;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
@@ -144,11 +146,20 @@ public class XMLLanguageDriver implements LanguageDriver {
     return nodeHandlerMap;
   }
 
+  public SqlNode minimum(SqlNode sqlNode) {
+    if (sqlNode instanceof SqlNodeWrapper) {
+      return sqlNode.getRoot();
+    } else if (sqlNode.getChildCount() == 1) {
+      return sqlNode.getChild(0);
+    }
+    return sqlNode;
+  }
+
   public SqlNode parseRootSqlNode(XNode node) {
     return parseDynamicTags(node);
   }
 
-  private MixedSqlNode parseDynamicTags(XNode node) {
+  private SqlNode parseDynamicTags(XNode node) {
     List<SqlNode> contents = new ArrayList<>();
     NodeList children = node.getNode().getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
@@ -183,6 +194,7 @@ public class XMLLanguageDriver implements LanguageDriver {
   }
 
   public interface NodeHandler {
+
     void handleNode(XNode nodeToHandle, List<SqlNode> targetContents);
   }
 
@@ -207,12 +219,15 @@ public class XMLLanguageDriver implements LanguageDriver {
 
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
       String prefix = nodeToHandle.getStringAttribute("prefix");
       String prefixOverrides = nodeToHandle.getStringAttribute("prefixOverrides");
       String suffix = nodeToHandle.getStringAttribute("suffix");
       String suffixOverrides = nodeToHandle.getStringAttribute("suffixOverrides");
-      TrimSqlNode trim = new TrimSqlNode(mixedSqlNode, prefix, prefixOverrides, suffix, suffixOverrides);
+
+      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+
+      sqlNode = minimum(sqlNode);
+      TrimSqlNode trim = new TrimSqlNode(sqlNode, prefix, prefixOverrides, suffix, suffixOverrides);
       targetContents.add(trim);
     }
   }
@@ -224,8 +239,11 @@ public class XMLLanguageDriver implements LanguageDriver {
 
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
-      WhereSqlNode where = new WhereSqlNode(mixedSqlNode);
+      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+
+      sqlNode = minimum(sqlNode);
+
+      WhereSqlNode where = new WhereSqlNode(sqlNode);
       targetContents.add(where);
     }
   }
@@ -237,8 +255,9 @@ public class XMLLanguageDriver implements LanguageDriver {
 
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
-      SetSqlNode set = new SetSqlNode(mixedSqlNode);
+      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+      sqlNode = minimum(sqlNode);
+      SetSqlNode set = new SetSqlNode(sqlNode);
       targetContents.add(set);
     }
   }
@@ -250,7 +269,6 @@ public class XMLLanguageDriver implements LanguageDriver {
 
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
       String collection = nodeToHandle.getStringAttribute("collection");
       Boolean nullable = nodeToHandle.getBooleanAttribute("nullable");
       String item = nodeToHandle.getStringAttribute("item");
@@ -258,7 +276,10 @@ public class XMLLanguageDriver implements LanguageDriver {
       String open = nodeToHandle.getStringAttribute("open");
       String close = nodeToHandle.getStringAttribute("close");
       String separator = nodeToHandle.getStringAttribute("separator");
-      ForEachSqlNode forEachSqlNode = new ForEachSqlNode(mixedSqlNode, collection, nullable, index, item, open, close,
+
+      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+      sqlNode = minimum(sqlNode);
+      ForEachSqlNode forEachSqlNode = new ForEachSqlNode(sqlNode, collection, nullable, index, item, open, close,
           separator);
       targetContents.add(forEachSqlNode);
     }
@@ -271,9 +292,11 @@ public class XMLLanguageDriver implements LanguageDriver {
 
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
       String test = nodeToHandle.getStringAttribute("test");
-      IfSqlNode ifSqlNode = new IfSqlNode(mixedSqlNode, test);
+
+      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+      sqlNode = minimum(sqlNode);
+      IfSqlNode ifSqlNode = new IfSqlNode(sqlNode, test);
       targetContents.add(ifSqlNode);
     }
   }
@@ -285,8 +308,9 @@ public class XMLLanguageDriver implements LanguageDriver {
 
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
-      targetContents.add(mixedSqlNode);
+      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+      sqlNode = minimum(sqlNode);
+      targetContents.add(sqlNode);
     }
   }
 
@@ -362,25 +386,36 @@ public class XMLLanguageDriver implements LanguageDriver {
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
       final String nodeName = nodeToHandle.getName();
-      final MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
-      final List<SqlNode> contents = mixedSqlNode.getContents();
+      final SqlNode sqlNode = parseDynamicTags(nodeToHandle);
 
-      final String test = nodeToHandle.getStringAttribute("test");
+      handleNode(nodeName, sqlNode, nodeToHandle, targetContents);
+    }
 
-      if (contents.size() == 1) {
-        if (nodeName.equalsIgnoreCase("and")) {
-          targetContents.add(new AndSqlNode(test, contents));
-        } else if (nodeName.equalsIgnoreCase("or")) {
-          targetContents.add(new OrSqlNode(test, contents));
+    private void handleNode(String nodeName, SqlNode sqlNode, XNode nodeToHandle, List<SqlNode> targetContents) {
+      if (sqlNode instanceof MixedSqlNode) {
+        final List<SqlNode> contents = sqlNode.getChildren();
+
+        final String test = nodeToHandle.getStringAttribute("test");
+
+        if (contents.size() == 1) {
+          if (nodeName.equalsIgnoreCase("and")) {
+            targetContents.add(new AndSqlNode(test, contents));
+          } else if (nodeName.equalsIgnoreCase("or")) {
+            targetContents.add(new OrSqlNode(test, contents));
+          }
+        } else if (contents.isEmpty()) {
+          throw new BuilderException("syntax error about <" + nodeName + ">, empty <" + nodeName + "> is meaningless.");
+        } else {
+          if (nodeName.equalsIgnoreCase("and")) {
+            targetContents.add(new AndSqlNode(test, contents));
+          } else if (nodeName.equalsIgnoreCase("or")) {
+            targetContents.add(new OrSqlNode(test, contents));
+          }
         }
-      } else if (contents.isEmpty()) {
-        throw new BuilderException("syntax error about <" + nodeName + ">, empty <" + nodeName + "> is meaningless.");
+      } else if (sqlNode instanceof SqlNodeWrapper) {
+        handleNode(nodeName, sqlNode.getRoot(), nodeToHandle, targetContents);
       } else {
-        if (nodeName.equalsIgnoreCase("and")) {
-          targetContents.add(new AndSqlNode(test, contents));
-        } else if (nodeName.equalsIgnoreCase("or")) {
-          targetContents.add(new OrSqlNode(test, contents));
-        }
+        targetContents.add(sqlNode);
       }
     }
   }

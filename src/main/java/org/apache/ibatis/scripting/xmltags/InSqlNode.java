@@ -24,7 +24,7 @@ import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
  *
  * @author vonlinee
  */
-class InSqlNode extends ForEachSqlNode {
+public class InSqlNode extends ForEachSqlNode {
 
   protected final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
 

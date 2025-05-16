@@ -15,8 +15,12 @@
  */
 package org.apache.ibatis.scripting;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.scripting.xmltags.DynamicCheckerTokenParser;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
@@ -44,6 +48,27 @@ public interface SqlNode {
    *          context
    */
   boolean apply(SqlBuildContext context);
+
+  default List<SqlNode> getChildren() {
+    return Collections.emptyList();
+  }
+
+  default boolean hasChildren() {
+    return getChildCount() != 0;
+  }
+
+  default int getChildCount() {
+    return 0;
+  }
+
+  default SqlNode getChild(int index) {
+    return null;
+  }
+
+  @NotNull
+  default SqlNode getRoot() {
+    return this;
+  }
 
   SqlNode EMPTY = new SqlNode() {
     @Override

@@ -23,7 +23,7 @@ import org.apache.ibatis.scripting.SqlNode;
 /**
  * @author Clinton Begin
  */
-class ChooseSqlNode extends XmlSqlNode {
+public class ChooseSqlNode extends XmlSqlNode {
   private final SqlNode defaultSqlNode;
   private final List<SqlNode> ifSqlNodes;
 

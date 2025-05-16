@@ -22,7 +22,7 @@ import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 /**
  * @author Clinton Begin
  */
-class IfSqlNode extends XmlSqlNode {
+public class IfSqlNode extends XmlSqlNode {
   private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
   private final String test;
   private final SqlNode contents;

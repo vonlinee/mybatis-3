@@ -13,13 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting;
 
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.ibatis.scripting.SqlBuildContext;
-import org.apache.ibatis.scripting.SqlNode;
 
 /**
  * @author Clinton Begin
@@ -49,7 +46,18 @@ public class MixedSqlNode implements SqlNode {
     return true;
   }
 
-  public final List<SqlNode> getContents() {
+  @Override
+  public int getChildCount() {
+    return contents.size();
+  }
+
+  @Override
+  public SqlNode getChild(int index) {
+    return this.contents.get(index);
+  }
+
+  @Override
+  public List<SqlNode> getChildren() {
     return Collections.unmodifiableList(this.contents);
   }
 }

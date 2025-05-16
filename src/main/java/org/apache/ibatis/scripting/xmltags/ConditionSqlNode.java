@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.scripting.MixedSqlNode;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
@@ -68,7 +69,7 @@ abstract class ConditionSqlNode extends MixedSqlNode {
     }
     Configuration configuration = context.getConfiguration();
     boolean res;
-    if (getContents().size() > 1) {
+    if (getChildCount() > 1) {
       DynamicContextWrapper wrapper = new DynamicContextWrapper(configuration, context);
       res = super.apply(wrapper);
       // remove leading and / or

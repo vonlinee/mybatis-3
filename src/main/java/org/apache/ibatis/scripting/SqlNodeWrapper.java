@@ -13,26 +13,38 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.expression;
+package org.apache.ibatis.scripting;
 
-import org.apache.ibatis.scripting.expression.ognl.OgnlExpressionEvaluator;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * @author Clinton Begin
+ * single node
+ *
+ * @see org.apache.ibatis.scripting.MixedSqlNode
  */
-public interface ExpressionEvaluator {
-
-  ExpressionEvaluator INSTANCE = new OgnlExpressionEvaluator();
-
-  Object getValue(String expression, Object parameterObject);
-
-  boolean evaluateBoolean(String expression, Object parameterObject);
-
-  Iterable<?> evaluateIterable(String expression, Object parameterObject);
+public final class SqlNodeWrapper implements SqlNode {
 
   /**
-   * @since 3.5.9
+   * wrapped sql node
    */
-  Iterable<?> evaluateIterable(String expression, Object parameterObject, boolean nullable);
+  private final SqlNode sqlNode;
 
+  public SqlNodeWrapper(SqlNode sqlNode) {
+    this.sqlNode = sqlNode;
+  }
+
+  @Override
+  public boolean isDynamic() {
+    return sqlNode.isDynamic();
+  }
+
+  @Override
+  public boolean apply(SqlBuildContext context) {
+    return sqlNode.apply(context);
+  }
+
+  @Override
+  public @NotNull SqlNode getRoot() {
+    return sqlNode;
+  }
 }

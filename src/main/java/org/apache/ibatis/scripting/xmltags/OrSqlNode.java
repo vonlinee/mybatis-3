@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.apache.ibatis.scripting.SqlNode;
 
-class OrSqlNode extends ConditionSqlNode {
+public class OrSqlNode extends ConditionSqlNode {
   public OrSqlNode(String test, List<SqlNode> contents) {
     super(contents);
     this.testExpression = test;
