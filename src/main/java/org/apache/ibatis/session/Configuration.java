@@ -101,6 +101,12 @@ public class Configuration {
   protected boolean aggressiveLazyLoading;
   protected boolean useGeneratedKeys;
   protected boolean useColumnLabel = true;
+
+  /**
+   * tow-level cache, across all sql session
+   *
+   * @see org.apache.ibatis.executor.CachingExecutor
+   */
   protected boolean cacheEnabled = true;
   protected boolean callSettersOnNulls;
   protected boolean useActualParamName = true;

@@ -97,16 +97,16 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   // pending creations property tracker
   private final Map<Object, PendingRelation> pendingPccRelations = new IdentityHashMap<>();
 
-  // nested resultmaps
+  // nested result maps
   private final Map<CacheKey, Object> nestedResultObjects = new HashMap<>();
   private final Map<String, Object> ancestorObjects = new HashMap<>();
   private Object previousRowValue;
 
-  // multiple resultsets
+  // multiple result sets
   private final Map<String, ResultMapping> nextResultMaps = new HashMap<>();
   private final Map<CacheKey, List<PendingRelation>> pendingRelations = new HashMap<>();
 
-  // Cached Automappings
+  // Cached Auto mappings
   private final Map<String, List<UnMappedColumnAutoMapping>> autoMappingsCache = new HashMap<>();
   private final Map<String, List<String>> constructorAutoMappingColumns = new HashMap<>();
 
@@ -200,7 +200,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         handleRowValues(rsw, resultMap, resultHandler, new RowBounds(), null);
       }
     } finally {
-      // issue #228 (close resultsets)
+      // issue #228 (close result sets)
       closeResultSet(rs);
     }
   }
@@ -209,7 +209,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   // HANDLE RESULT SETS
   //
   @Override
-  public List<Object> handleResultSets(Statement stmt) throws SQLException {
+  @SuppressWarnings("unchecked")
+  public <T> List<T> handleResultSets(Statement stmt) throws SQLException {
     ErrorContext.instance().activity("handling results").object(mappedStatement.getId());
 
     final List<Object> multipleResults = new ArrayList<>();
@@ -243,7 +244,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       }
     }
 
-    return collapseSingleResultList(multipleResults);
+    return (List<T>) collapseSingleResultList(multipleResults);
   }
 
   @Override
@@ -277,12 +278,12 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     try {
       while (rs == null) {
-        // move forward to get the first resultset in case the driver
-        // doesn't return the resultset as the first result (HSQLDB)
+        // move forward to get the first result set in case the driver
+        // doesn't return the result set as the first result (HSQLDB)
         if (stmt.getMoreResults()) {
           rs = stmt.getResultSet();
         } else if (stmt.getUpdateCount() == -1) {
-          // no more results. Must be no resultset
+          // no more results. Must be no result set
           break;
         }
       }
@@ -345,7 +346,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         handleRowValues(rsw, resultMap, resultHandler, rowBounds, null);
       }
     } finally {
-      // issue #228 (close resultsets)
+      // issue #228 (close result sets)
       closeResultSet(rsw.getResultSet());
     }
   }
@@ -356,7 +357,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   //
-  // HANDLE ROWS FOR SIMPLE RESULTMAP
+  // HANDLE ROWS FOR SIMPLE RESULT MAP
   //
 
   public void handleRowValues(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler,
@@ -464,7 +465,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         foundValues = applyAutomaticMappings(rsw, resultMap, metaObject, columnPrefix) || foundValues;
       }
       foundValues = applyPropertyMappings(rsw, resultMap, metaObject, lazyLoader, columnPrefix) || foundValues;
-      foundValues = lazyLoader.size() > 0 || foundValues;
+      foundValues = !lazyLoader.isEmpty() || foundValues;
       rowValue = foundValues || configuration.isReturnInstanceForEmptyRow() ? rowValue : null;
     }
 
@@ -508,7 +509,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         foundValues = applyNestedResultMappings(rsw, resultMap, metaObject, columnPrefix, combinedKey, true)
             || foundValues;
         ancestorObjects.remove(resultMapId);
-        foundValues = lazyLoader.size() > 0 || foundValues;
+        foundValues = !lazyLoader.isEmpty() || foundValues;
         rowValue = foundValues || configuration.isReturnInstanceForEmptyRow() ? rowValue : null;
       }
       if (combinedKey != CacheKey.NULL_CACHE_KEY) {
@@ -1128,7 +1129,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private String prependPrefix(String columnName, String prefix) {
-    if (columnName == null || columnName.length() == 0 || prefix == null || prefix.length() == 0) {
+    if (columnName == null || columnName.isEmpty() || prefix == null || prefix.isEmpty()) {
       return columnName;
     }
     return prefix + columnName;
@@ -1362,8 +1363,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
       // create the pending objects
       for (Object pendingCreation : pendingCreations) {
-        if (pendingCreation instanceof PendingConstructorCreation) {
-          final PendingConstructorCreation pendingConstructorCreation = (PendingConstructorCreation) pendingCreation;
+        if (pendingCreation instanceof PendingConstructorCreation pendingConstructorCreation) {
           targetMetaObject.add(pendingConstructorCreation.create(objectFactory));
         }
       }
@@ -1449,7 +1449,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     if (resultMapping.getColumnPrefix() != null) {
       columnPrefixBuilder.append(resultMapping.getColumnPrefix());
     }
-    return columnPrefixBuilder.length() == 0 ? null : columnPrefixBuilder.toString().toUpperCase(Locale.ENGLISH);
+    return columnPrefixBuilder.isEmpty() ? null : columnPrefixBuilder.toString().toUpperCase(Locale.ENGLISH);
   }
 
   private boolean anyNotNullColumnHasValue(ResultMapping resultMapping, String columnPrefix, ResultSetWrapper rsw)
