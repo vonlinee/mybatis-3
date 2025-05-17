@@ -108,13 +108,12 @@ public class ProviderSqlSource implements SqlSource {
       this.providerType = getProviderType(configuration, provider, mapperMethod);
       candidateProviderMethodName = (String) provider.annotationType().getMethod("method").invoke(provider);
 
-      if (candidateProviderMethodName.length() == 0
-          && ProviderMethodResolver.class.isAssignableFrom(this.providerType)) {
+      if (candidateProviderMethodName.isEmpty() && ProviderMethodResolver.class.isAssignableFrom(this.providerType)) {
         candidateProviderMethod = ((ProviderMethodResolver) this.providerType.getDeclaredConstructor().newInstance())
             .resolveMethod(new ProviderContext(mapperType, mapperMethod, configuration.getDatabaseId()));
       }
       if (candidateProviderMethod == null) {
-        candidateProviderMethodName = candidateProviderMethodName.length() == 0 ? "provideSql"
+        candidateProviderMethodName = candidateProviderMethodName.isEmpty() ? "provideSql"
             : candidateProviderMethodName;
         for (Method m : this.providerType.getMethods()) {
           if (candidateProviderMethodName.equals(m.getName())

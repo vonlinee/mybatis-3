@@ -16,18 +16,8 @@
 package org.apache.ibatis.binding;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Map;
-import java.util.Optional;
 
-import org.apache.ibatis.annotations.MapKey;
-import org.apache.ibatis.cursor.Cursor;
-import org.apache.ibatis.reflection.ParamNameResolver;
-import org.apache.ibatis.reflection.TypeParameterResolver;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.session.SqlSession;
 
 /**
  * @author Clinton Begin
@@ -35,128 +25,25 @@ import org.apache.ibatis.session.RowBounds;
  * @author Lasse Voss
  * @author Kazuki Shimizu
  */
-public class MapperMethod {
+public abstract class MapperMethod {
 
-  private final SqlCommand command;
-  private final MethodSignature signature;
-  private final ParamNameResolver paramNameResolver;
-
-  public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
-    this.command = new SqlCommand(config, mapperInterface, method);
-    this.signature = parseSignature(config, mapperInterface, method);
-    this.paramNameResolver = new ParamNameResolver(config, method, mapperInterface);
-  }
-
-  public Object convertArgsToSqlCommandParam(Object[] args) {
-    return paramNameResolver.getNamedParams(args);
-  }
-
-  private String getMapKey(Method method) {
-    String mapKey = null;
-    if (Map.class.isAssignableFrom(method.getReturnType())) {
-      final MapKey mapKeyAnnotation = method.getAnnotation(MapKey.class);
-      if (mapKeyAnnotation != null) {
-        mapKey = mapKeyAnnotation.value();
-      }
-    }
-    return mapKey;
-  }
-
-  private Integer getUniqueParamIndex(Method method, Class<?> paramType) {
-    Integer index = null;
-    final Class<?>[] argTypes = method.getParameterTypes();
-    for (int i = 0; i < argTypes.length; i++) {
-      if (paramType.isAssignableFrom(argTypes[i])) {
-        if (index != null) {
-          throw new BindingException(
-              method.getName() + " cannot have multiple " + paramType.getSimpleName() + " parameters");
-        }
-        index = i;
-      }
-    }
-    return index;
-  }
-
-  public Class<?> resolveReturnType(Class<?> mapperInterface, Method method) {
-    Type resolvedReturnType = TypeParameterResolver.resolveReturnType(method, mapperInterface);
-    Class<?> returnType;
-    if (resolvedReturnType instanceof Class<?>) {
-      returnType = (Class<?>) resolvedReturnType;
-    } else if (resolvedReturnType instanceof ParameterizedType) {
-      returnType = (Class<?>) ((ParameterizedType) resolvedReturnType).getRawType();
-    } else {
-      returnType = method.getReturnType();
-    }
-    return returnType;
-  }
-
-  public MethodSignature parseSignature(Configuration configuration, Class<?> mapperInterface, Method method) {
-    MethodSignature signature = new MethodSignature();
-    signature.setReturnType(resolveReturnType(mapperInterface, method));
-    signature.setReturnsVoid(void.class.equals(signature.getReturnType()));
-    signature.setReturnsMany(configuration.getObjectFactory().isCollection(signature.getReturnType())
-        || signature.getReturnType().isArray());
-    signature.setReturnsCursor(Cursor.class.equals(signature.getReturnType()));
-    signature.setReturnsOptional(Optional.class.equals(signature.getReturnType()));
-    signature.setMapKey(getMapKey(method));
-    signature.setReturnsMap(signature.getMapKey() != null);
-    signature.setRowBoundsIndex(getUniqueParamIndex(method, RowBounds.class));
-    signature.setResultHandlerIndex(getUniqueParamIndex(method, ResultHandler.class));
-    return signature;
-  }
+  protected SqlCommand command;
 
   public SqlCommand getCommand() {
     return command;
   }
 
-  public boolean hasRowBounds() {
-    return signature.hasRowBounds();
-  }
-
-  public RowBounds extractRowBounds(Object[] args) {
-    return hasRowBounds() ? (RowBounds) args[signature.getRowBoundsIndex()] : null;
-  }
-
-  public boolean hasResultHandler() {
-    return signature.hasResultHandler();
-  }
-
-  public ResultHandler<?> extractResultHandler(Object[] args) {
-    return signature.extractResultHandler(args);
-  }
-
-  public Class<?> getReturnType() {
-    return signature.getReturnType();
-  }
-
-  public boolean returnsMany() {
-    return signature.returnsMany();
-  }
-
-  public boolean returnsMap() {
-    return signature.returnsMap();
-  }
-
-  public boolean returnsVoid() {
-    return signature.returnsVoid();
-  }
-
-  public boolean returnsCursor() {
-    return signature.returnsCursor();
-  }
-
   /**
-   * return whether return type is {@code java.util.Optional}.
+   * @param proxy
+   *          mapper proxy
+   * @param method
+   *          mapper method
+   * @param args
+   *          args
+   * @param sqlSession
+   *          sql session
    *
-   * @return return {@code true}, if return type is {@code java.util.Optional}
-   *
-   * @since 3.5.0
+   * @return result
    */
-  public boolean returnsOptional() {
-    return signature.returnsOptional();
-  }
-
-  public String getMapKey() {
-    return signature.getMapKey();
-  }
+  public abstract Object invoke(Object proxy, Method method, Object[] args, SqlSession sqlSession) throws Throwable;
 }

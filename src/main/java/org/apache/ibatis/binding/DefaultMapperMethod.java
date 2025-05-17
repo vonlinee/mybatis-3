@@ -23,7 +23,7 @@ import java.lang.reflect.Method;
 
 import org.apache.ibatis.session.SqlSession;
 
-class DefaultMethodInvoker implements MapperMethodInvoker {
+class DefaultMapperMethod extends MapperMethod {
   private final MethodHandle methodHandle;
 
   private static final Method privateLookupInMethod;
@@ -37,7 +37,7 @@ class DefaultMethodInvoker implements MapperMethodInvoker {
     }
   }
 
-  public DefaultMethodInvoker(Method method) {
+  public DefaultMapperMethod(Method method) {
     try {
       methodHandle = getMethodHandleJava9(method);
     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {

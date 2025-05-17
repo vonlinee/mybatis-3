@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -477,7 +477,7 @@ public abstract class AbstractSQL<T> {
    * Set the offset rows variable string(e.g. {@code "#{offset}"}).
    *
    * @param variable
-   *          a offset rows variable string
+   *          offset rows variable string
    *
    * @return a self instance
    *
@@ -610,7 +610,7 @@ public abstract class AbstractSQL<T> {
 
     public SafeAppendable append(CharSequence s) {
       try {
-        if (empty && s.length() > 0) {
+        if (empty && !s.isEmpty()) {
           empty = false;
         }
         appendable.append(s);

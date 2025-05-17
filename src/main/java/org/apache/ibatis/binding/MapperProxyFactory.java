@@ -28,7 +28,7 @@ import org.apache.ibatis.session.SqlSession;
 public class MapperProxyFactory<T> {
 
   private final Class<T> mapperInterface;
-  private final Map<Method, MapperMethodInvoker> methodCache = new ConcurrentHashMap<>();
+  private final Map<Method, MapperMethod> methodCache = new ConcurrentHashMap<>();
 
   public MapperProxyFactory(Class<T> mapperInterface) {
     this.mapperInterface = mapperInterface;
@@ -38,7 +38,7 @@ public class MapperProxyFactory<T> {
     return mapperInterface;
   }
 
-  public Map<Method, MapperMethodInvoker> getMethodCache() {
+  public Map<Method, MapperMethod> getMethodCache() {
     return methodCache;
   }
 

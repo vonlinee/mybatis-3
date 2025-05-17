@@ -188,22 +188,6 @@ public final class MappedStatement {
       return this;
     }
 
-    /**
-     * Resul sets.
-     *
-     * @param resultSet
-     *          the result set
-     *
-     * @return the builder
-     *
-     * @deprecated Use {@link #resultSets}
-     */
-    @Deprecated
-    public Builder resulSets(String resultSet) {
-      mappedStatement.resultSets = delimitedStringToArray(resultSet);
-      return this;
-    }
-
     public MappedStatement build() {
       assert mappedStatement.configuration != null;
       assert mappedStatement.id != null;
@@ -314,18 +298,6 @@ public final class MappedStatement {
     return paramNameResolver;
   }
 
-  /**
-   * Gets the resul sets.
-   *
-   * @return the resul sets
-   *
-   * @deprecated Use {@link #getResultSets()}
-   */
-  @Deprecated
-  public String[] getResulSets() {
-    return resultSets;
-  }
-
   public BoundSql getBoundSql(Object parameterObject) {
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
@@ -348,7 +320,7 @@ public final class MappedStatement {
   }
 
   private static String[] delimitedStringToArray(String in) {
-    if (in == null || in.trim().length() == 0) {
+    if (in == null || in.trim().isEmpty()) {
       return null;
     }
     return in.split(",");

@@ -34,9 +34,9 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   private static final long serialVersionUID = -4724728412955527868L;
   private final SqlSession sqlSession;
   private final Class<T> mapperInterface;
-  private final Map<Method, MapperMethodInvoker> methodCache;
+  private final Map<Method, MapperMethod> methodCache;
 
-  public MapperProxy(SqlSession sqlSession, Class<T> mapperInterface, Map<Method, MapperMethodInvoker> methodCache) {
+  public MapperProxy(SqlSession sqlSession, Class<T> mapperInterface, Map<Method, MapperMethod> methodCache) {
     this.sqlSession = sqlSession;
     this.mapperInterface = mapperInterface;
     this.methodCache = methodCache;
@@ -48,19 +48,19 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, args);
       }
-      return cachedInvoker(method).invoke(proxy, method, args, sqlSession);
+      return findMapperMethod(method).invoke(proxy, method, args, sqlSession);
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);
     }
   }
 
-  private MapperMethodInvoker cachedInvoker(Method method) throws Throwable {
+  public MapperMethod findMapperMethod(Method method) throws Throwable {
     try {
       return methodCache.computeIfAbsent(method, m -> {
         if (m.isDefault()) {
-          return new DefaultMethodInvoker(method);
+          return new DefaultMapperMethod(method);
         }
-        return new PlainMethodInvoker(mapperInterface, method, sqlSession.getConfiguration());
+        return new PlainMapperMethod(mapperInterface, method, sqlSession.getConfiguration());
       });
     } catch (RuntimeException re) {
       Throwable cause = re.getCause();
