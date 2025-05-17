@@ -18,11 +18,9 @@ package org.apache.ibatis.session.defaults;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.exceptions.ExceptionFactory;
 import org.apache.ibatis.exceptions.TooManyResultsException;
@@ -143,10 +141,10 @@ public class DefaultSqlSession implements SqlSession {
 
   @Override
   public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
-    return selectList(statement, parameter, rowBounds, Executor.NO_RESULT_HANDLER);
+    return selectList(statement, parameter, rowBounds, null);
   }
 
-  private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
+  private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler<E> handler) {
     try {
       MappedStatement ms = configuration.getMappedStatement(statement);
       dirty |= ms.isDirtySelect();
@@ -159,17 +157,17 @@ public class DefaultSqlSession implements SqlSession {
   }
 
   @Override
-  public void select(String statement, Object parameter, ResultHandler handler) {
+  public <E> void select(String statement, Object parameter, ResultHandler<E> handler) {
     select(statement, parameter, RowBounds.DEFAULT, handler);
   }
 
   @Override
-  public void select(String statement, ResultHandler handler) {
+  public <E> void select(String statement, ResultHandler<E> handler) {
     select(statement, null, RowBounds.DEFAULT, handler);
   }
 
   @Override
-  public void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
+  public <E> void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler<E> handler) {
     selectList(statement, parameter, rowBounds, handler);
   }
 
@@ -314,23 +312,4 @@ public class DefaultSqlSession implements SqlSession {
   private Object wrapCollection(final Object object) {
     return ParamNameResolver.wrapToMapIfCollection(object, null);
   }
-
-  /**
-   * @deprecated Since 3.5.5
-   */
-  @Deprecated
-  public static class StrictMap<V> extends HashMap<String, V> {
-
-    private static final long serialVersionUID = -5741767162221585340L;
-
-    @Override
-    public V get(Object key) {
-      if (!super.containsKey(key)) {
-        throw new BindingException("Parameter '" + key + "' not found. Available parameters are " + this.keySet());
-      }
-      return super.get(key);
-    }
-
-  }
-
 }

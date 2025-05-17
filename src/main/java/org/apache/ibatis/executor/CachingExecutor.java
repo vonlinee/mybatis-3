@@ -89,16 +89,26 @@ public class CachingExecutor implements Executor {
   }
 
   @Override
-  public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler)
-      throws SQLException {
+  public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds,
+      ResultHandler<E> resultHandler) throws SQLException {
     BoundSql boundSql = ms.getBoundSql(parameterObject);
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 
   @Override
-  public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler,
-      CacheKey key, BoundSql boundSql) throws SQLException {
+  public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException {
+    return query(ms, parameter, rowBounds, null);
+  }
+
+  @Override
+  public <E> List<E> query(MappedStatement ms, Object parameter) throws SQLException {
+    return query(ms, parameter, RowBounds.DEFAULT, null);
+  }
+
+  @Override
+  public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds,
+      ResultHandler<E> resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     Cache cache = ms.getCache();
     if (cache != null) {
       flushCacheIfRequired(ms);
@@ -107,13 +117,19 @@ public class CachingExecutor implements Executor {
         @SuppressWarnings("unchecked")
         List<E> list = (List<E>) tcm.getObject(cache, key);
         if (list == null) {
-          list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+          list = delegate.query(ms, parameterObject, rowBounds, null, key, boundSql);
           tcm.putObject(cache, key, list); // issue #578 and #116
         }
         return list;
       }
     }
     return delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+  }
+
+  @Override
+  public <E> List<E> query(MappedStatement ms, Object parameter, CacheKey cacheKey, BoundSql boundSql)
+      throws SQLException {
+    return query(ms, parameter, RowBounds.DEFAULT, null, cacheKey, boundSql);
   }
 
   @Override

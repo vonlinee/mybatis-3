@@ -94,7 +94,7 @@ public class ResultLoaderMap {
 
   public void loadAll() throws SQLException {
     final Set<String> methodNameSet = loaderMap.keySet();
-    String[] methodNames = methodNameSet.toArray(new String[methodNameSet.size()]);
+    String[] methodNames = methodNameSet.toArray(new String[0]);
     for (String methodName : methodNames) {
       load(methodName);
     }
@@ -267,7 +267,7 @@ public class ResultLoaderMap {
             + (configurationObject == null ? "null" : configurationObject.getClass()) + "].");
       }
 
-      return Configuration.class.cast(configurationObject);
+      return (Configuration) configurationObject;
     }
 
     private Log getLogger() {
@@ -301,7 +301,7 @@ public class ResultLoaderMap {
 
     @Override
     protected <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds,
-        ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
+        ResultHandler<E> resultHandler, BoundSql boundSql) throws SQLException {
       throw new UnsupportedOperationException("Not supported.");
     }
 

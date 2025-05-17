@@ -33,17 +33,21 @@ import org.apache.ibatis.transaction.Transaction;
  */
 public interface Executor {
 
-  ResultHandler NO_RESULT_HANDLER = null;
-
   void setExtensionFactory(ExtensionFactory extensionFactory);
 
   int update(MappedStatement ms, Object parameter) throws SQLException;
 
-  <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler,
+  <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler<E> resultHandler,
       CacheKey cacheKey, BoundSql boundSql) throws SQLException;
 
-  <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler)
+  <E> List<E> query(MappedStatement ms, Object parameter, CacheKey cacheKey, BoundSql boundSql) throws SQLException;
+
+  <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler<E> resultHandler)
       throws SQLException;
+
+  <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException;
+
+  <E> List<E> query(MappedStatement ms, Object parameter) throws SQLException;
 
   <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException;
 

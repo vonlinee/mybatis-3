@@ -52,7 +52,7 @@ public class ReuseExecutor extends BaseExecutor {
   }
 
   @Override
-  public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler,
+  public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler<E> resultHandler,
       BoundSql boundSql) throws SQLException {
     StatementHandler handler = extensionFactory.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler,
         boundSql);
