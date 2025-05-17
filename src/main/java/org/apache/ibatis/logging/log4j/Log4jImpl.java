@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -61,13 +61,28 @@ public class Log4jImpl implements Log {
   }
 
   @Override
+  public void debug(String s, Throwable e) {
+    log.log(FQCN, Level.DEBUG, s, e);
+  }
+
+  @Override
   public void trace(String s) {
     log.log(FQCN, Level.TRACE, s, null);
   }
 
   @Override
+  public void trace(String s, Throwable e) {
+    log.log(FQCN, Level.TRACE, s, e);
+  }
+
+  @Override
   public void warn(String s) {
     log.log(FQCN, Level.WARN, s, null);
+  }
+
+  @Override
+  public void warn(String s, Throwable e) {
+    log.log(FQCN, Level.WARN, s, e);
   }
 
 }

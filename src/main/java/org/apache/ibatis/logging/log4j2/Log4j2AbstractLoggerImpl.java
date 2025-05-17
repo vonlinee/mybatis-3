@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2022 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -66,13 +66,28 @@ public class Log4j2AbstractLoggerImpl implements Log {
   }
 
   @Override
+  public void debug(String s, Throwable e) {
+    log.logIfEnabled(FQCN, Level.DEBUG, MARKER, (Message) new SimpleMessage(s), e);
+  }
+
+  @Override
   public void trace(String s) {
     log.logIfEnabled(FQCN, Level.TRACE, MARKER, (Message) new SimpleMessage(s), null);
   }
 
   @Override
+  public void trace(String s, Throwable e) {
+    log.logIfEnabled(FQCN, Level.TRACE, MARKER, (Message) new SimpleMessage(s), e);
+  }
+
+  @Override
   public void warn(String s) {
     log.logIfEnabled(FQCN, Level.WARN, MARKER, (Message) new SimpleMessage(s), null);
+  }
+
+  @Override
+  public void warn(String s, Throwable e) {
+    log.logIfEnabled(FQCN, Level.WARN, MARKER, (Message) new SimpleMessage(s), e);
   }
 
 }

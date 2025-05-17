@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -74,13 +74,28 @@ public class Slf4jImpl implements Log {
   }
 
   @Override
+  public void debug(String s, Throwable e) {
+    log.debug(s, e);
+  }
+
+  @Override
   public void trace(String s) {
     log.trace(s);
   }
 
   @Override
+  public void trace(String s, Throwable e) {
+    log.trace(s, e);
+  }
+
+  @Override
   public void warn(String s) {
     log.warn(s);
+  }
+
+  @Override
+  public void warn(String s, Throwable e) {
+    log.warn(s, e);
   }
 
 }

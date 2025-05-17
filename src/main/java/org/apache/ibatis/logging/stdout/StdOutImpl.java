@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2022 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -53,12 +53,30 @@ public class StdOutImpl implements Log {
   }
 
   @Override
+  public void debug(String s, Throwable e) {
+    System.out.println(s);
+    e.printStackTrace(System.out);
+  }
+
+  @Override
   public void trace(String s) {
     System.out.println(s);
   }
 
   @Override
+  public void trace(String s, Throwable e) {
+    System.out.println(s);
+    e.printStackTrace(System.out);
+  }
+
+  @Override
   public void warn(String s) {
     System.out.println(s);
+  }
+
+  @Override
+  public void warn(String s, Throwable e) {
+    System.out.println(s);
+    e.printStackTrace(System.out);
   }
 }

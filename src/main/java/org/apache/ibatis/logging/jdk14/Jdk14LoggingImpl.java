@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2022 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -57,13 +57,28 @@ public class Jdk14LoggingImpl implements Log {
   }
 
   @Override
+  public void debug(String s, Throwable e) {
+    log.log(Level.FINE, s, e);
+  }
+
+  @Override
   public void trace(String s) {
     log.log(Level.FINER, s);
   }
 
   @Override
+  public void trace(String s, Throwable e) {
+    log.log(Level.INFO, s, e);
+  }
+
+  @Override
   public void warn(String s) {
     log.log(Level.WARNING, s);
+  }
+
+  @Override
+  public void warn(String s, Throwable e) {
+    log.log(Level.WARNING, s, e);
   }
 
 }
