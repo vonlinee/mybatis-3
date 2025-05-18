@@ -15,13 +15,30 @@
  */
 package org.apache.ibatis.executor;
 
+import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.reflection.ParamNameResolver;
+import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class MapperStatement {
 
-  protected MappedStatement mappedStatement;
+  @NotNull
+  protected final MappedStatement mappedStatement;
+  @NotNull
+  protected final Configuration configuration;
+
+  protected BoundSql boundSql;
+  @Nullable
+  protected Object parameterObject;
 
   public MapperStatement(MappedStatement mappedStatement) {
     this.mappedStatement = mappedStatement;
+    this.configuration = mappedStatement.getConfiguration();
+  }
+
+  public void setParameterObject(@Nullable Object parameterObject) {
+    this.parameterObject = ParamNameResolver.wrapToMapIfCollection(parameterObject, null);
   }
 }

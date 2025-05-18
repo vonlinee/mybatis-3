@@ -18,7 +18,13 @@ package org.apache.ibatis.executor;
 import org.apache.ibatis.mapping.MappedStatement;
 
 public class MapperUpdate extends MapperStatement {
+
   public MapperUpdate(MappedStatement mappedStatement) {
     super(mappedStatement);
+  }
+
+  public MapperUpdate parameter(Object parameter) {
+    setParameterObject(parameter);
+    return this;
   }
 }
