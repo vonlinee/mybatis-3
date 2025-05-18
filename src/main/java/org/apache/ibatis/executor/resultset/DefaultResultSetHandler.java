@@ -18,7 +18,6 @@ package org.apache.ibatis.executor.resultset;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -50,12 +49,9 @@ import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.result.DefaultResultContext;
 import org.apache.ibatis.executor.result.DefaultResultHandler;
 import org.apache.ibatis.executor.result.ResultMapException;
-import org.apache.ibatis.executor.statement.JdbcUtils;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.reflection.MetaClass;
@@ -87,9 +83,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   private final Configuration configuration;
   private final MappedStatement mappedStatement;
   private final RowBounds rowBounds;
-  private final ParameterHandler parameterHandler;
   private final ResultHandler<?> resultHandler;
-  private final BoundSql boundSql;
   private final TypeHandlerRegistry typeHandlerRegistry;
   private final ObjectFactory objectFactory;
   private final ReflectorFactory reflectorFactory;
@@ -138,71 +132,10 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     this.configuration = mappedStatement.getConfiguration();
     this.mappedStatement = mappedStatement;
     this.rowBounds = rowBounds;
-    this.parameterHandler = parameterHandler;
-    this.boundSql = boundSql;
     this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
     this.objectFactory = configuration.getObjectFactory();
     this.reflectorFactory = configuration.getReflectorFactory();
     this.resultHandler = resultHandler;
-  }
-
-  //
-  // HANDLE OUTPUT PARAMETER
-  //
-
-  @Override
-  public void handleOutputParameters(CallableStatement cs) throws SQLException {
-    final Object parameterObject = parameterHandler.getParameterObject();
-    final MetaObject metaParam = configuration.newMetaObject(parameterObject);
-    final List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
-    for (int i = 0; i < parameterMappings.size(); i++) {
-      final ParameterMapping parameterMapping = parameterMappings.get(i);
-      if (parameterMapping.getMode() == ParameterMode.OUT || parameterMapping.getMode() == ParameterMode.INOUT) {
-        if (ResultSet.class.equals(parameterMapping.getJavaType())) {
-          handleRefCursorOutputParameter((ResultSet) cs.getObject(i + 1), parameterMapping, metaParam);
-        } else {
-          final String property = parameterMapping.getProperty();
-          TypeHandler<?> typeHandler = parameterMapping.getTypeHandler();
-          if (typeHandler == null) {
-            Type javaType = parameterMapping.getJavaType();
-            if (javaType == null || javaType == Object.class) {
-              javaType = metaParam.getGenericSetterType(property).getKey();
-            }
-            JdbcType jdbcType = parameterMapping.getJdbcType();
-            typeHandler = typeHandlerRegistry.getTypeHandler(javaType, jdbcType, null);
-            if (typeHandler == null) {
-              typeHandler = typeHandlerRegistry.getTypeHandler(jdbcType);
-              if (typeHandler == null) {
-                typeHandler = ObjectTypeHandler.INSTANCE;
-              }
-            }
-          }
-          metaParam.setValue(property, typeHandler.getResult(cs, i + 1));
-        }
-      }
-    }
-  }
-
-  private void handleRefCursorOutputParameter(ResultSet rs, ParameterMapping parameterMapping, MetaObject metaParam)
-      throws SQLException {
-    if (rs == null) {
-      return;
-    }
-    try {
-      final String resultMapId = parameterMapping.getResultMapId();
-      final ResultMap resultMap = configuration.getResultMap(resultMapId);
-      final ResultSetWrapper rsw = new ResultSetWrapper(rs, configuration);
-      if (this.resultHandler == null) {
-        final DefaultResultHandler resultHandler = new DefaultResultHandler(objectFactory);
-        handleRowValues(rsw, resultMap, resultHandler, new RowBounds(), null);
-        metaParam.setValue(parameterMapping.getProperty(), resultHandler.getResultList());
-      } else {
-        handleRowValues(rsw, resultMap, resultHandler, new RowBounds(), null);
-      }
-    } finally {
-      // issue #228 (close result sets)
-      closeResultSet(rs);
-    }
   }
 
   //
@@ -317,10 +250,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     return null;
   }
 
-  private void closeResultSet(ResultSet rs) {
-    JdbcUtils.closeSilently(rs);
-  }
-
   private void cleanUpAfterHandlingResultSet() {
     nestedResultObjects.clear();
   }
@@ -360,6 +289,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   // HANDLE ROWS FOR SIMPLE RESULT MAP
   //
 
+  @Override
   public void handleRowValues(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler,
       RowBounds rowBounds, ResultMapping parentMapping) throws SQLException {
     if (resultMap.hasNestedResultMaps()) {
@@ -1124,6 +1054,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     TypeHandler<?> typeHandler = resultMapping.getTypeHandler();
     if (typeHandler == null) {
       typeHandler = typeHandlerRegistry.getTypeHandler(resultMapping.getJavaType(), rsw.getJdbcType(column));
+    }
+    if (typeHandler == null) {
+      return null;
     }
     return typeHandler.getResult(rsw.getResultSet(), column);
   }

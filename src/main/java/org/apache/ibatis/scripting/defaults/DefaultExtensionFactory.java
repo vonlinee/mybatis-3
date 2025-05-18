@@ -73,7 +73,8 @@ public class DefaultExtensionFactory implements ExtensionFactory {
       boundSql = mappedStatement.getBoundSql(parameterObject);
     }
 
-    StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, rowBounds, boundSql);
+    StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, rowBounds, boundSql,
+        resultHandler);
 
     // set ParameterHandler
     statementHandler.setParameterHandler(createParameterHandler(mappedStatement, parameterObject, boundSql));

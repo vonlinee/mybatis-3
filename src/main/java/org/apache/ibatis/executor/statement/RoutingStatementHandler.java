@@ -37,7 +37,8 @@ public class RoutingStatementHandler implements StatementHandler {
 
   private final StatementHandler delegate;
 
-  public RoutingStatementHandler(Executor executor, MappedStatement ms, RowBounds rowBounds, BoundSql boundSql) {
+  public RoutingStatementHandler(Executor executor, MappedStatement ms, RowBounds rowBounds, BoundSql boundSql,
+      ResultHandler<?> resultHandler) {
 
     switch (ms.getStatementType()) {
       case STATEMENT:
@@ -47,7 +48,7 @@ public class RoutingStatementHandler implements StatementHandler {
         delegate = new PreparedStatementHandler(executor, ms, rowBounds, boundSql);
         break;
       case CALLABLE:
-        delegate = new CallableStatementHandler(executor, ms, rowBounds, boundSql);
+        delegate = new DefaultCallableStatementHandler(executor, ms, rowBounds, boundSql, resultHandler);
         break;
       default:
         throw new ExecutorException("Unknown statement type: " + ms.getStatementType());
@@ -86,7 +87,7 @@ public class RoutingStatementHandler implements StatementHandler {
   }
 
   @Override
-  public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
+  public <E> List<E> query(Statement statement, ResultHandler<E> resultHandler) throws SQLException {
     return delegate.query(statement, resultHandler);
   }
 

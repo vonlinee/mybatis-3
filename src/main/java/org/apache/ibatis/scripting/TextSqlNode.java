@@ -15,11 +15,11 @@
  */
 package org.apache.ibatis.scripting;
 
+import org.apache.ibatis.internal.util.TypeUtils;
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.TokenHandler;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.scripting.xmltags.DynamicCheckerTokenParser;
-import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**
  * @author Clinton Begin
@@ -59,7 +59,7 @@ public class TextSqlNode implements SqlNode {
         Object parameter = context.getBindings().get(SqlBuildContext.PARAMETER_OBJECT_KEY);
         if (parameter == null) {
           context.getBindings().put("value", null);
-        } else if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
+        } else if (TypeUtils.isSimpleType(parameter.getClass())) {
           context.getBindings().put("value", parameter);
         }
         Object value = evaluator.getValue(content, context.getBindings());

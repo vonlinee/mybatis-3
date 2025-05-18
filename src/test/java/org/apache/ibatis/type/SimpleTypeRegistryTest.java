@@ -21,23 +21,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.HashMap;
 
 import org.apache.ibatis.domain.misc.RichType;
+import org.apache.ibatis.internal.util.TypeUtils;
 import org.junit.jupiter.api.Test;
 
 class SimpleTypeRegistryTest {
 
   @Test
   void shouldTestIfClassIsSimpleTypeAndReturnTrue() {
-    assertTrue(SimpleTypeRegistry.isSimpleType(String.class));
+    assertTrue(TypeUtils.isSimpleType(String.class));
   }
 
   @Test
   void shouldTestIfClassIsSimpleTypeAndReturnFalse() {
-    assertFalse(SimpleTypeRegistry.isSimpleType(RichType.class));
+    assertFalse(TypeUtils.isSimpleType(RichType.class));
   }
 
   @Test
   void shouldTestIfMapIsSimpleTypeAndReturnFalse() {
-    assertFalse(SimpleTypeRegistry.isSimpleType(HashMap.class)); // see issue #165, a Map is not a simple type
+    assertFalse(TypeUtils.isSimpleType(HashMap.class)); // see issue #165, a Map is not a simple type
   }
 
 }

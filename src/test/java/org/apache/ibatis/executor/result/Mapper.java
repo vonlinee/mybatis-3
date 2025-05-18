@@ -13,12 +13,21 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.executor.statement;
+package org.apache.ibatis.executor.result;
 
-import java.sql.CallableStatement;
-import java.sql.SQLException;
+import java.util.Map;
 
-public interface CallableStatementHandler extends StatementHandler {
+import org.apache.ibatis.annotations.Param;
 
-  void handleOutputParameters(CallableStatement cs) throws SQLException;
+public interface Mapper {
+
+  int countUserWithNullableIsTrue(User user);
+
+  int countUserWithNullableIsFalse(User user);
+
+  int countUserWithConditionalIn(User user);
+
+  int countUserWithImplicitItem(Map<String, Object> map);
+
+  int countUserWithImplicitItem1(@Param("param") Map<String, Object> map);
 }

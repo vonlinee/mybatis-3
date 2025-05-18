@@ -35,6 +35,7 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.ObjectTypeHandler;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Iwao AVE!
@@ -67,7 +68,7 @@ public class ResultSetWrapper {
   }
 
   public List<String> getColumnNames() {
-    return this.columnNames;
+    return Collections.unmodifiableList(columnNames);
   }
 
   public List<String> getClassNames() {
@@ -75,9 +76,10 @@ public class ResultSetWrapper {
   }
 
   public List<JdbcType> getJdbcTypes() {
-    return jdbcTypes;
+    return Collections.unmodifiableList(jdbcTypes);
   }
 
+  @Nullable
   public JdbcType getJdbcType(String columnName) {
     int columnIndex = getColumnIndex(columnName);
     return columnIndex == -1 ? null : jdbcTypes.get(columnIndex);
@@ -101,13 +103,16 @@ public class ResultSetWrapper {
         return ObjectTypeHandler.INSTANCE;
       }
 
-      JdbcType jdbcType = jdbcTypes.get(index);
+      JdbcType jdbcType = getJdbcType(index);
       TypeHandler<?> handler = typeHandlerRegistry.getTypeHandler(k, jdbcType, null);
       if (handler != null) {
         return handler;
       }
 
-      Class<?> javaType = resolveClass(classNames.get(index));
+      Class<?> javaType = getColumnClass(index);
+      if (javaType == null) {
+        return null;
+      }
       if (!(k instanceof Class && ((Class<?>) k).isAssignableFrom(javaType))) {
         // Clearly incompatible
         return null;
@@ -121,25 +126,24 @@ public class ResultSetWrapper {
     });
   }
 
-  static Class<?> resolveClass(String className) {
-    try {
-      // #699 className could be null
-      if (className != null) {
-        return Resources.classForName(className);
-      }
-    } catch (ClassNotFoundException e) {
-      // ignore
-    }
-    return null;
-  }
-
-  private int getColumnIndex(String columnName) {
+  public int getColumnIndex(String columnName) {
     for (int i = 0; i < columnNames.size(); i++) {
       if (columnNames.get(i).equalsIgnoreCase(columnName)) {
         return i;
       }
     }
     return -1;
+  }
+
+  @Nullable
+  public JdbcType getJdbcType(int columnIndex) {
+    return jdbcTypes.get(columnIndex);
+  }
+
+  @Nullable
+  public Class<?> getColumnClass(int columnIndex) {
+    // #699 className could be null
+    return Resources.classForNameOrNull(classNames.get(columnIndex));
   }
 
   private void loadMappedAndUnmappedColumnNames(ResultMap resultMap, String columnPrefix) throws SQLException {
@@ -182,7 +186,7 @@ public class ResultSetWrapper {
   }
 
   private Set<String> prependPrefixes(Set<String> columnNames, String prefix) {
-    if (columnNames == null || columnNames.isEmpty() || prefix == null || prefix.length() == 0) {
+    if (columnNames == null || columnNames.isEmpty() || prefix == null || prefix.isEmpty()) {
       return columnNames;
     }
     final Set<String> prefixed = new HashSet<>();

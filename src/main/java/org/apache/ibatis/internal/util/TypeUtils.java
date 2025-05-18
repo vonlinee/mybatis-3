@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.type;
+package org.apache.ibatis.internal.util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * @author Clinton Begin
  */
-public class SimpleTypeRegistry {
+public final class TypeUtils {
 
   private static final Set<Class<?>> SIMPLE_TYPE_SET = new HashSet<>();
 
@@ -44,7 +44,7 @@ public class SimpleTypeRegistry {
     SIMPLE_TYPE_SET.add(BigDecimal.class);
   }
 
-  private SimpleTypeRegistry() {
+  private TypeUtils() {
     // Prevent Instantiation
   }
 
@@ -56,5 +56,4 @@ public class SimpleTypeRegistry {
   public static boolean isSimpleType(Class<?> clazz) {
     return SIMPLE_TYPE_SET.contains(clazz);
   }
-
 }

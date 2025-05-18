@@ -122,8 +122,8 @@ class DefaultResultSetHandlerTest {
           /* useCollectionConstructorInjection */ null/* parentRowKey */);
       Assertions.fail("Should have thrown ExecutorException");
     } catch (Exception e) {
-      Assertions.assertTrue(e instanceof ExecutorException, "Expected ExecutorException");
-      Assertions.assertTrue(e.getMessage().contains("mapping: " + resultMapping.toString()));
+      Assertions.assertInstanceOf(ExecutorException.class, e, "Expected ExecutorException");
+      Assertions.assertTrue(e.getMessage().contains("mapping: " + resultMapping));
     }
   }
 
@@ -131,11 +131,9 @@ class DefaultResultSetHandlerTest {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource("some select statement"),
-        SqlCommandType.SELECT).resultMaps(new ArrayList<ResultMap>() {
-          private static final long serialVersionUID = 1L;
+        SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
           {
-            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<ResultMapping>() {
-              private static final long serialVersionUID = 1L;
+            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<>() {
               {
                 add(new ResultMapping.Builder(config, "cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class))
                     .build());

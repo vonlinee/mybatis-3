@@ -17,12 +17,17 @@ package org.apache.ibatis.internal.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Simple utility class for working with the reflection API and handling reflection exceptions.
@@ -31,30 +36,10 @@ import java.util.stream.Collectors;
  */
 public final class ReflectionUtils {
 
-  private ReflectionUtils() {
-  }
+  private static final Map<Class<?>, Object> DEFAULT_TYPE_VALUES = Map.of(boolean.class, false, byte.class, (byte) 0,
+      short.class, (short) 0, int.class, 0, long.class, 0L, float.class, 0F, double.class, 0D, char.class, '\0');
 
-  /**
-   * Creates an instance of the specified class using its default constructor.
-   *
-   * @param clazz
-   *          the Class object representing the class to instantiate
-   * @param <T>
-   *          the type of the class to be instantiated
-   *
-   * @return a new instance of the specified class, or null if instantiation fails
-   *
-   * @throws IllegalAccessException
-   *           if the default constructor is not accessible
-   * @throws InstantiationException
-   *           if the class that declares the underlying constructor represents an abstract class
-   * @throws ExceptionInInitializerError
-   *           if the initialization of the class fails
-   */
-  @SuppressWarnings("unchecked")
-  public static <T> T createInstance(Class<?> clazz) throws ReflectiveOperationException {
-    Objects.requireNonNull(clazz, "class must not be null");
-    return (T) clazz.getDeclaredConstructor().newInstance();
+  private ReflectionUtils() {
   }
 
   public static List<String> getParamNames(Method method) {
@@ -67,5 +52,110 @@ public final class ReflectionUtils {
 
   private static List<String> getParameterNames(Executable executable) {
     return Arrays.stream(executable.getParameters()).map(Parameter::getName).collect(Collectors.toList());
+  }
+
+  /**
+   * Instantiate a class using its 'primary' constructor (for Kotlin classes, potentially having default arguments
+   * declared) or its default constructor (for regular Java classes, expecting a standard no-arg setup).
+   * <p>
+   * Note that this method tries to set the constructor accessible if given a non-accessible (that is, non-public)
+   * constructor.
+   *
+   * @param clazz
+   *          the class to instantiate
+   *
+   * @return the new instance
+   *
+   * @throws ReflectiveOperationException
+   *           if the bean cannot be instantiated. The cause may notably indicate a {@link NoSuchMethodException} if no
+   *           primary/default constructor was found, a {@link NoClassDefFoundError} or other {@link LinkageError} in
+   *           case of an unresolvable class definition (e.g. due to a missing dependency at runtime), or an exception
+   *           thrown from the constructor invocation itself.
+   *
+   * @see Constructor#newInstance
+   */
+  public static <T> T instantiateClass(Class<T> clazz) throws ReflectiveOperationException {
+    Objects.requireNonNull(clazz, "Class must not be null");
+    if (clazz.isInterface()) {
+      throw new ReflectiveOperationException("Specified class " + clazz + "  is an interface");
+    }
+    Constructor<T> constructor;
+    try {
+      constructor = clazz.getDeclaredConstructor();
+    } catch (NoSuchMethodException ex) {
+      throw new ReflectiveOperationException("No default constructor found in " + clazz, ex);
+    } catch (LinkageError err) {
+      throw new ReflectiveOperationException("Unresolvable class definition of " + clazz, err);
+    }
+    return instantiateClass(constructor);
+  }
+
+  /**
+   * Convenience method to instantiate a class using the given constructor.
+   * <p>
+   * Note that this method tries to set the constructor accessible if given a non-accessible (that is, non-public)
+   * constructor, and supports Kotlin classes with optional parameters and default values.
+   *
+   * @param constructor
+   *          the constructor to instantiate
+   * @param args
+   *          the constructor arguments to apply (use {@code null} for an unspecified parameter, Kotlin optional
+   *          parameters and Java primitive types are supported)
+   *
+   * @return the new instance
+   *
+   * @throws ReflectiveOperationException
+   *           if the bean cannot be instantiated
+   *
+   * @see Constructor#newInstance
+   */
+  public static <T> T instantiateClass(Constructor<T> constructor, Object... args) throws ReflectiveOperationException {
+    Objects.requireNonNull(constructor, "Constructor must not be null");
+    try {
+      ReflectionUtils.makeAccessible(constructor);
+      int parameterCount = constructor.getParameterCount();
+      if (parameterCount == 0) {
+        return constructor.newInstance();
+      }
+      if (args.length >= parameterCount) {
+        throw new ReflectiveOperationException("Can't specify more arguments than constructor parameters");
+      }
+      Class<?>[] parameterTypes = constructor.getParameterTypes();
+      Object[] argsWithDefaultValues = new Object[args.length];
+      for (int i = 0; i < args.length; i++) {
+        if (args[i] == null) {
+          Class<?> parameterType = parameterTypes[i];
+          argsWithDefaultValues[i] = (parameterType.isPrimitive() ? DEFAULT_TYPE_VALUES.get(parameterType) : null);
+        } else {
+          argsWithDefaultValues[i] = args[i];
+        }
+      }
+      return constructor.newInstance(argsWithDefaultValues);
+    } catch (InstantiationException ex) {
+      throw new ReflectiveOperationException("Is it an abstract class?", ex);
+    } catch (IllegalAccessException ex) {
+      throw new ReflectiveOperationException("Is the constructor accessible?", ex);
+    } catch (IllegalArgumentException ex) {
+      throw new ReflectiveOperationException("Illegal arguments for constructor", ex);
+    } catch (InvocationTargetException ex) {
+      throw new ReflectiveOperationException("Constructor threw exception", ex.getTargetException());
+    }
+  }
+
+  /**
+   * Make the given constructor accessible, explicitly setting it accessible if necessary. The
+   * {@code setAccessible(true)} method is only called when actually necessary, to avoid unnecessary conflicts.
+   *
+   * @param constructor
+   *          the constructor to make accessible
+   *
+   * @see java.lang.reflect.Constructor#setAccessible
+   */
+  @SuppressWarnings("deprecation")
+  public static void makeAccessible(@NotNull Constructor<?> constructor) {
+    if ((!Modifier.isPublic(constructor.getModifiers())
+        || !Modifier.isPublic(constructor.getDeclaringClass().getModifiers())) && !constructor.isAccessible()) {
+      constructor.setAccessible(true);
+    }
   }
 }

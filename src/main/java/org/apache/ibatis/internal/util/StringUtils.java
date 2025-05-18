@@ -15,10 +15,31 @@
  */
 package org.apache.ibatis.internal.util;
 
+import java.util.Collection;
+import java.util.StringJoiner;
+
+import org.jetbrains.annotations.Nullable;
+
 public final class StringUtils {
 
+  private static final String[] EMPTY_STRING_ARRAY = {};
+
+  private static final String FOLDER_SEPARATOR = "/";
+
+  private static final char FOLDER_SEPARATOR_CHAR = '/';
+
+  private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
+
+  private static final String TOP_PATH = "..";
+
+  private static final String CURRENT_PATH = ".";
+
+  private static final char EXTENSION_SEPARATOR = '.';
+
+  private static final int DEFAULT_TRUNCATION_THRESHOLD = 100;
+
+  private static final String TRUNCATION_SUFFIX = " (truncated)...";
   public static final String EMPTY = "";
-  public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
   private StringUtils() {
     throw new UnsupportedOperationException("utility class cannot be instantiated.");
@@ -185,5 +206,396 @@ public final class StringUtils {
           String.format("invalid range [%s, %s] to delete given string (%s)", start, end, start));
     }
     return str.substring(0, start) + str.substring(end, str.length() - 1);
+  }
+
+  public static boolean isNotEmpty(String str) {
+    return !isEmpty(str);
+  }
+
+  /**
+   * Check that the given {@code String} is neither {@code null} nor of length 0.
+   * <p>
+   * Note: this method returns {@code true} for a {@code String} that purely consists of whitespace.
+   *
+   * @param str
+   *          the {@code String} to check (maybe {@code null})
+   *
+   * @return {@code true} if the {@code String} is not {@code null} and has length
+   *
+   * @see #hasLength(CharSequence)
+   * @see #hasText(String)
+   */
+  public static boolean hasLength(@Nullable String str) {
+    return (str != null && !str.isEmpty());
+  }
+
+  /**
+   * Check that the given {@code CharSequence} is neither {@code null} nor of length 0.
+   * <p>
+   * Note: this method returns {@code true} for a {@code CharSequence} that purely consists of whitespace.
+   * <p>
+   *
+   * <pre class="code">
+   * StringUtils.hasLength(null) = false
+   * StringUtils.hasLength("") = false
+   * StringUtils.hasLength(" ") = true
+   * StringUtils.hasLength("Hello") = true
+   * </pre>
+   *
+   * @param str
+   *          the {@code CharSequence} to check (maybe {@code null})
+   *
+   * @return {@code true} if the {@code CharSequence} is not {@code null} and has length
+   *
+   * @see #hasLength(String)
+   * @see #hasText(CharSequence)
+   */
+  public static boolean hasLength(@Nullable CharSequence str) {
+    return (str != null && !str.isEmpty());
+  }
+
+  /**
+   * Check whether the given {@code CharSequence} contains actual <em>text</em>.
+   * <p>
+   * More specifically, this method returns {@code true} if the {@code CharSequence} is not {@code null}, its length is
+   * greater than 0, and it contains at least one non-whitespace character.
+   * <p>
+   *
+   * <pre class="code">
+   * StringUtils.hasText(null) = false
+   * StringUtils.hasText("") = false
+   * StringUtils.hasText(" ") = false
+   * StringUtils.hasText("12345") = true
+   * StringUtils.hasText(" 12345 ") = true
+   * </pre>
+   *
+   * @param str
+   *          the {@code CharSequence} to check (maybe {@code null})
+   *
+   * @return {@code true} if the {@code CharSequence} is not {@code null}, its length is greater than 0, and it does not
+   *         contain whitespace only
+   *
+   * @see #hasText(String)
+   * @see #hasLength(CharSequence)
+   * @see Character#isWhitespace
+   */
+  public static boolean hasText(@Nullable CharSequence str) {
+    if (str == null) {
+      return false;
+    }
+
+    int strLen = str.length();
+    if (strLen == 0) {
+      return false;
+    }
+
+    for (int i = 0; i < strLen; i++) {
+      if (!Character.isWhitespace(str.charAt(i))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Convert a property name using "camelCase" to a corresponding column name with underscores. A name like
+   * "customerNumber" would match a "customer_number" column name.
+   *
+   * @param name
+   *          the property name to be converted
+   *
+   * @return the column name using underscores
+   *
+   * @see #underscoreToCamel
+   */
+  public static String camelToUnderscore(@Nullable String name) {
+    if (!StringUtils.hasLength(name)) {
+      return "";
+    }
+    StringBuilder result = new StringBuilder();
+    result.append(Character.toLowerCase(name.charAt(0)));
+    for (int i = 1; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if (Character.isUpperCase(c)) {
+        result.append('_').append(Character.toLowerCase(c));
+      } else {
+        result.append(c);
+      }
+    }
+    return result.toString();
+  }
+
+  /**
+   * Convert a column name with underscores to the corresponding property name using "camelCase". A name like
+   * "customer_number" would match a "customerNumber" property name.
+   *
+   * @param name
+   *          the potentially underscores-based column name to be converted
+   *
+   * @return the name using "camelCase"
+   *
+   * @see #camelToUnderscore
+   */
+  public static String underscoreToCamel(@Nullable String name) {
+    if (!StringUtils.hasLength(name)) {
+      return "";
+    }
+
+    StringBuilder result = new StringBuilder();
+    boolean nextIsUpper = false;
+    if (name.length() > 1 && name.charAt(1) == '_') {
+      result.append(Character.toUpperCase(name.charAt(0)));
+    } else {
+      result.append(Character.toLowerCase(name.charAt(0)));
+    }
+    for (int i = 1; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if (c == '_') {
+        nextIsUpper = true;
+      } else {
+        if (nextIsUpper) {
+          result.append(Character.toUpperCase(c));
+          nextIsUpper = false;
+        } else {
+          result.append(Character.toLowerCase(c));
+        }
+      }
+    }
+    return result.toString();
+  }
+
+  /**
+   * Convert a {@code String} array into a delimited {@code String} (e.g. CSV).
+   * <p>
+   * Useful for {@code toString()} implementations.
+   *
+   * @param arr
+   *          the array to display (potentially {@code null} or empty)
+   * @param delim
+   *          the delimiter to use (typically a ",")
+   *
+   * @return the delimited {@code String}
+   */
+  public static String arrayToDelimitedString(@Nullable Object[] arr, String delim) {
+    if (ObjectUtils.isEmpty(arr)) {
+      return "";
+    }
+    if (arr.length == 1) {
+      return ObjectUtils.nullSafeToString(arr[0]);
+    }
+
+    StringJoiner sj = new StringJoiner(delim);
+    for (Object elem : arr) {
+      sj.add(String.valueOf(elem));
+    }
+    return sj.toString();
+  }
+
+  /**
+   * Convert a {@code String} array into a comma delimited {@code String} (i.e., CSV).
+   * <p>
+   * Useful for {@code toString()} implementations.
+   *
+   * @param arr
+   *          the array to display (potentially {@code null} or empty)
+   *
+   * @return the delimited {@code String}
+   */
+  public static String arrayToCommaDelimitedString(@Nullable Object[] arr) {
+    return arrayToDelimitedString(arr, ",");
+  }
+
+  /**
+   * Truncate the supplied {@link CharSequence}.
+   * <p>
+   * Delegates to {@link #truncate(CharSequence, int)}, supplying {@code 100} as the threshold.
+   *
+   * @param charSequence
+   *          the {@code CharSequence} to truncate
+   *
+   * @return a truncated string, or a string representation of the original {@code CharSequence} if its length does not
+   *         exceed the threshold
+   *
+   * @since 5.3.27
+   */
+  public static String truncate(CharSequence charSequence) {
+    return truncate(charSequence, DEFAULT_TRUNCATION_THRESHOLD);
+  }
+
+  /**
+   * Truncate the supplied {@link CharSequence}.
+   * <p>
+   * If the length of the {@code CharSequence} is greater than the threshold, this method returns a
+   * {@linkplain CharSequence#subSequence(int, int) subsequence} of the {@code CharSequence} (up to the threshold)
+   * appended with the suffix {@code " (truncated)..."}. Otherwise, this method returns {@code charSequence.toString()}.
+   *
+   * @param charSequence
+   *          the {@code CharSequence} to truncate
+   * @param threshold
+   *          the maximum length after which to truncate; must be a positive number
+   *
+   * @return a truncated string, or a string representation of the original {@code CharSequence} if its length does not
+   *         exceed the threshold
+   *
+   * @since 5.3.27
+   */
+  public static String truncate(CharSequence charSequence, int threshold) {
+    if (threshold <= 0) {
+      throw new IllegalArgumentException("Truncation threshold must be a positive number: " + threshold);
+    }
+    if (charSequence.length() > threshold) {
+      return charSequence.subSequence(0, threshold) + TRUNCATION_SUFFIX;
+    }
+    return charSequence.toString();
+  }
+
+  /**
+   * Copy the given {@link Collection} into a {@code String} array.
+   * <p>
+   * The {@code Collection} must contain {@code String} elements only.
+   *
+   * @param collection
+   *          the {@code Collection} to copy (potentially {@code null} or empty)
+   *
+   * @return the resulting {@code String} array
+   */
+  public static String[] toStringArray(@Nullable Collection<String> collection) {
+    return (!CollectionUtils.isEmpty(collection) ? collection.toArray(EMPTY_STRING_ARRAY) : EMPTY_STRING_ARRAY);
+  }
+
+  /**
+   * Trim <em>all</em> whitespace from the given {@code String}: leading, trailing, and in between characters.
+   *
+   * @param str
+   *          the {@code String} to check
+   *
+   * @return the trimmed {@code String}
+   *
+   * @see #trimAllWhitespace(CharSequence)
+   * @see java.lang.Character#isWhitespace
+   */
+  public static String trimAllWhitespace(String str) {
+    if (!hasLength(str)) {
+      return str;
+    }
+
+    return trimAllWhitespace((CharSequence) str).toString();
+  }
+
+  /**
+   * Trim <em>all</em> whitespace from the given {@code CharSequence}: leading, trailing, and in between characters.
+   *
+   * @param str
+   *          the {@code CharSequence} to check
+   *
+   * @return the trimmed {@code CharSequence}
+   *
+   * @see #trimAllWhitespace(String)
+   * @see java.lang.Character#isWhitespace
+   *
+   * @since 5.3.22
+   */
+  public static CharSequence trimAllWhitespace(CharSequence str) {
+    if (!hasLength(str)) {
+      return str;
+    }
+    int len = str.length();
+    StringBuilder sb = new StringBuilder(str.length());
+    for (int i = 0; i < len; i++) {
+      char c = str.charAt(i);
+      if (!Character.isWhitespace(c)) {
+        sb.append(c);
+      }
+    }
+    return sb;
+  }
+
+  /**
+   * Capitalize a {@code String}, changing the first letter to upper case as per {@link Character#toUpperCase(char)}. No
+   * other letters are changed.
+   *
+   * @param str
+   *          the {@code String} to capitalize
+   *
+   * @return the capitalized {@code String}
+   */
+  public static String upperCaseFirst(String str) {
+    return changeFirstCharacterCase(str, true);
+  }
+
+  /**
+   * Uncapitalize a {@code String}, changing the first letter to lower case as per {@link Character#toLowerCase(char)}.
+   * No other letters are changed.
+   *
+   * @param str
+   *          the {@code String} to uncapitalize
+   *
+   * @return the uncapitalized {@code String}
+   */
+  public static String lowerCaseFirst(String str) {
+    return changeFirstCharacterCase(str, false);
+  }
+
+  public static String changeFirstCharacterCase(String str, boolean capitalize) {
+    if (!hasLength(str)) {
+      return str;
+    }
+
+    char baseChar = str.charAt(0);
+    char updatedChar;
+    if (capitalize) {
+      updatedChar = Character.toUpperCase(baseChar);
+    } else {
+      updatedChar = Character.toLowerCase(baseChar);
+    }
+    if (baseChar == updatedChar) {
+      return str;
+    }
+
+    char[] chars = str.toCharArray();
+    chars[0] = updatedChar;
+    return new String(chars);
+  }
+
+  /**
+   * Replace all occurrences of a substring within a string with another string.
+   *
+   * @param inString
+   *          {@code String} to examine
+   * @param oldPattern
+   *          {@code String} to replace
+   * @param newPattern
+   *          {@code String} to insert
+   *
+   * @return a {@code String} with the replacements
+   */
+  public static String replace(String inString, String oldPattern, @Nullable String newPattern) {
+    if (!hasLength(inString) || !hasLength(oldPattern) || newPattern == null) {
+      return inString;
+    }
+    int index = inString.indexOf(oldPattern);
+    if (index == -1) {
+      // no occurrence -> can return input as-is
+      return inString;
+    }
+
+    int capacity = inString.length();
+    if (newPattern.length() > oldPattern.length()) {
+      capacity += 16;
+    }
+    StringBuilder sb = new StringBuilder(capacity);
+
+    int pos = 0; // our position in the old string
+    int patLen = oldPattern.length();
+    while (index >= 0) {
+      sb.append(inString, pos, index);
+      sb.append(newPattern);
+      pos = index + patLen;
+      index = inString.indexOf(oldPattern, pos);
+    }
+
+    // append any characters to the right of a match
+    sb.append(inString, pos, inString.length());
+    return sb.toString();
   }
 }
