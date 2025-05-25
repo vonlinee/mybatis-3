@@ -37,4 +37,11 @@ public class VarDeclSqlNode extends XmlSqlNode {
     return true;
   }
 
+  public String getExpression() {
+    return expression;
+  }
+
+  public String getName() {
+    return name;
+  }
 }

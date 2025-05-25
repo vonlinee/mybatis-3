@@ -146,4 +146,15 @@ public class TrimSqlNode extends XmlSqlNode {
 
   }
 
+  public SqlNode getContents() {
+    return contents;
+  }
+
+  public String getSuffix() {
+    return suffix;
+  }
+
+  public String getPrefix() {
+    return prefix;
+  }
 }

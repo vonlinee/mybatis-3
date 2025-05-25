@@ -41,4 +41,11 @@ public class IfSqlNode extends XmlSqlNode {
     return false;
   }
 
+  public SqlNode getContents() {
+    return contents;
+  }
+
+  public String getTest() {
+    return test;
+  }
 }

@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
@@ -44,5 +45,13 @@ public class ChooseSqlNode extends XmlSqlNode {
       return true;
     }
     return false;
+  }
+
+  public SqlNode getDefaultSqlNode() {
+    return defaultSqlNode;
+  }
+
+  public List<SqlNode> getIfSqlNodes() {
+    return Collections.unmodifiableList(ifSqlNodes);
   }
 }

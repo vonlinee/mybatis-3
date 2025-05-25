@@ -31,6 +31,10 @@ import org.apache.ibatis.session.Configuration;
 public class ForEachSqlNode extends XmlSqlNode {
 
   private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
+
+  /**
+   * property expression that evaluate to a value of collection type
+   */
   private final String collectionExpression;
   private final Boolean nullable;
   private final SqlNode contents;
@@ -179,4 +183,35 @@ public class ForEachSqlNode extends XmlSqlNode {
     }
   }
 
+  public String getClose() {
+    return close;
+  }
+
+  public String getCollectionExpression() {
+    return collectionExpression;
+  }
+
+  public SqlNode getContents() {
+    return contents;
+  }
+
+  public String getIndex() {
+    return index;
+  }
+
+  public String getItem() {
+    return item;
+  }
+
+  public Boolean getNullable() {
+    return nullable;
+  }
+
+  public String getOpen() {
+    return open;
+  }
+
+  public String getSeparator() {
+    return separator;
+  }
 }

@@ -52,4 +52,7 @@ public class DynamicSqlSource implements SqlSource {
     return boundSql;
   }
 
+  public SqlNode getRootSqlNode() {
+    return rootSqlNode;
+  }
 }
