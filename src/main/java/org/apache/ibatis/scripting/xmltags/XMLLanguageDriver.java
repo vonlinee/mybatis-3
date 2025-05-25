@@ -16,14 +16,17 @@
 package org.apache.ibatis.scripting.xmltags;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.builder.ParameterMappingCollector;
 import org.apache.ibatis.builder.ParameterMappingTokenHandler;
 import org.apache.ibatis.builder.SqlSourceBuilder;
+import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.ParameterMapping;
@@ -42,7 +45,9 @@ import org.apache.ibatis.scripting.SqlNodeWrapper;
 import org.apache.ibatis.scripting.StaticTextSqlNode;
 import org.apache.ibatis.scripting.TextSqlNode;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.apache.ibatis.scripting.expression.ExpressionException;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -126,6 +131,81 @@ public class XMLLanguageDriver implements LanguageDriver {
         clazz, new HashMap<>(), paramNameResolver);
     GenericTokenParser parser = new GenericTokenParser("#{", "}", tokenHandler);
     return SqlSourceBuilder.buildSqlSource(configuration, parser.parse(sql), parameterMappings);
+  }
+
+  /**
+   * may contains duplicate property name
+   *
+   * @param sqlSource
+   *          sql source
+   *
+   * @return parameter mappings
+   */
+  @Override
+  public List<ParameterMapping> collectParameters(SqlSource sqlSource) {
+    if (sqlSource instanceof StaticSqlSource) {
+      return sqlSource.getParameterMappings();
+    } else if (sqlSource instanceof DynamicSqlSource) {
+      return collectParameters(((DynamicSqlSource) sqlSource).getRootSqlNode());
+    }
+    throw new UnsupportedOperationException("unsupported sql source " + sqlSource.getClass());
+  }
+
+  @Override
+  public List<ParameterMapping> collectParameters(@NotNull SqlNode sqlNode) {
+    List<ParameterMapping> parameterMappings = new ArrayList<>();
+    collectParameterMappingsFromSqlNode(sqlNode, parameterMappings);
+    return parameterMappings;
+  }
+
+  private void collectParameterMappingsFromSqlNode(SqlNode sqlNode, List<ParameterMapping> parameterMappings) {
+    if (sqlNode instanceof MixedSqlNode) {
+      List<SqlNode> contents = sqlNode.getChildren();
+      for (SqlNode content : contents) {
+        collectParameterMappingsFromSqlNode(content, parameterMappings);
+      }
+    } else if (sqlNode instanceof ForEachSqlNode) {
+      // foreach
+      ParameterMapping pm = new ParameterMapping();
+      pm.setProperty(((ForEachSqlNode) sqlNode).getCollectionExpression());
+      pm.setJavaType(Collection.class);
+      parameterMappings.add(pm);
+
+      collectParameterMappingsFromSqlNode(((ForEachSqlNode) sqlNode).getContents(), parameterMappings);
+    } else if (sqlNode instanceof TrimSqlNode) {
+      collectParameterMappingsFromSqlNode(((TrimSqlNode) sqlNode).getContents(), parameterMappings);
+    } else if (sqlNode instanceof IfSqlNode) {
+      // <if test='xxx'></if>
+      List<ParameterMapping> mappings = parseParamMappingsFromExpression(((IfSqlNode) sqlNode).getTest());
+      parameterMappings.addAll(mappings);
+      collectParameterMappingsFromSqlNode(((IfSqlNode) sqlNode).getContents(), parameterMappings);
+    } else if (sqlNode instanceof ChooseSqlNode) {
+      collectParameterMappingsFromSqlNode(((ChooseSqlNode) sqlNode).getDefaultSqlNode(), parameterMappings);
+      for (SqlNode ifSqlNode : ((ChooseSqlNode) sqlNode).getIfSqlNodes()) {
+        collectParameterMappingsFromSqlNode(ifSqlNode, parameterMappings);
+      }
+    } else if (sqlNode instanceof VarDeclSqlNode) {
+      ParameterMapping pm = new ParameterMapping();
+      pm.setProperty(((VarDeclSqlNode) sqlNode).getExpression());
+      pm.setJavaType(Object.class);
+      parameterMappings.add(pm);
+    } else if (sqlNode instanceof TextSqlNode) {
+      collectParameterMappingsFromSql(((TextSqlNode) sqlNode).getText(), parameterMappings);
+    }
+  }
+
+  private List<ParameterMapping> parseParamMappingsFromExpression(String expression) {
+    List<ParameterMapping> mappings = new ArrayList<>();
+    try {
+      mappings.addAll(evaluator.collectParameters(expression));
+    } catch (ExpressionException ignore) {
+    }
+    return mappings;
+  }
+
+  private void collectParameterMappingsFromSql(String text, List<ParameterMapping> mappings) {
+    List<ParameterMapping> parameters = ParameterMappingCollector.collectParameterMappings(text);
+    mappings.addAll(parameters);
   }
 
   private Map<String, NodeHandler> initNodeHandlerMap() {

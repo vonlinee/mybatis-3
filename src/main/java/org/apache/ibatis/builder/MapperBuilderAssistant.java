@@ -69,6 +69,10 @@ public class MapperBuilderAssistant extends BaseBuilder {
     this.resource = resource;
   }
 
+  public static String getStatementId(Class<?> mapperClass, String methodName) {
+    return mapperClass.getName() + "." + methodName;
+  }
+
   public String getCurrentNamespace() {
     return currentNamespace;
   }
@@ -522,5 +526,13 @@ public class MapperBuilderAssistant extends BaseBuilder {
       }
     }
     return null;
+  }
+
+  public LanguageDriver resolveLanguageDriver(String lang) {
+    Class<? extends LanguageDriver> langClass = null;
+    if (lang != null) {
+      langClass = resolveClass(lang);
+    }
+    return configuration.getLanguageDriver(langClass);
   }
 }

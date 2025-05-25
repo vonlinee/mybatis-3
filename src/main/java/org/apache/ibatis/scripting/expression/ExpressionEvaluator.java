@@ -15,24 +15,67 @@
  */
 package org.apache.ibatis.scripting.expression;
 
+import java.util.List;
+
+import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.expression.ognl.OgnlExpressionEvaluator;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
+ *
+ * @see ExpressionException
  */
 public interface ExpressionEvaluator {
 
   ExpressionEvaluator INSTANCE = new OgnlExpressionEvaluator();
 
+  /**
+   * evaluate as any value
+   *
+   * @param expression
+   *          expression that should evaluate a boolean value
+   * @param parameterObject
+   *          parameter object
+   */
   Object getValue(String expression, Object parameterObject);
 
+  /**
+   * @param expression
+   *          expression that should evaluate a boolean value
+   * @param parameterObject
+   *          parameter object
+   */
   boolean evaluateBoolean(String expression, Object parameterObject);
 
+  /**
+   * @param expression
+   *          expression that should evaluate a {@link Iterable}
+   * @param parameterObject
+   *          parameter object
+   */
   Iterable<?> evaluateIterable(String expression, Object parameterObject);
 
   /**
+   * @param expression
+   *          expression that should evaluate a {@link Iterable}
+   * @param parameterObject
+   *          parameter object
+   * @param nullable
+   *          whether contains null value in {@link Iterable}
+   *
    * @since 3.5.9
    */
   Iterable<?> evaluateIterable(String expression, Object parameterObject, boolean nullable);
 
+  /**
+   * @param expression
+   *          expression
+   *
+   * @return parameters metadata
+   *
+   * @throws ExpressionException
+   *           error when parse expression
+   */
+  List<ParameterMapping> collectParameters(@NotNull String expression);
 }

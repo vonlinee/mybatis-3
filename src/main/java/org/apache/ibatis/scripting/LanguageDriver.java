@@ -15,10 +15,15 @@
  */
 package org.apache.ibatis.scripting;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface LanguageDriver {
@@ -77,4 +82,19 @@ public interface LanguageDriver {
     return createSqlSource(configuration, script, parameterType);
   }
 
+  default List<ParameterMapping> collectParameters(SqlSource sqlSource) {
+    return Collections.emptyList();
+  }
+
+  /**
+   * collect all parameters from sql node tree
+   *
+   * @param sqlNode
+   *          root node of the tree
+   *
+   * @return parameters
+   */
+  default List<ParameterMapping> collectParameters(@NotNull SqlNode sqlNode) {
+    return Collections.emptyList();
+  }
 }

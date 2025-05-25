@@ -18,17 +18,56 @@ package org.apache.ibatis.scripting.expression.ognl;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
+import ognl.ASTAnd;
+import ognl.ASTAssign;
+import ognl.ASTChain;
+import ognl.ASTConst;
+import ognl.ASTEval;
+import ognl.ASTGreater;
+import ognl.ASTGreaterEq;
+import ognl.ASTIn;
+import ognl.ASTInstanceof;
+import ognl.ASTKeyValue;
+import ognl.ASTLess;
+import ognl.ASTLessEq;
+import ognl.ASTList;
+import ognl.ASTMap;
+import ognl.ASTNot;
+import ognl.ASTNotEq;
+import ognl.ASTNotIn;
+import ognl.ASTOr;
+import ognl.ASTProperty;
+import ognl.ASTSelect;
+import ognl.ASTSelectFirst;
+import ognl.ASTSelectLast;
+import ognl.ASTSequence;
+import ognl.ASTStaticField;
+import ognl.ASTTest;
+import ognl.ASTVarRef;
+import ognl.BooleanExpression;
+import ognl.ComparisonExpression;
+import ognl.ExpressionNode;
+import ognl.Node;
+import ognl.NumericExpression;
+import ognl.Ognl;
 import ognl.OgnlContext;
+import ognl.OgnlException;
 import ognl.OgnlRuntime;
 import ognl.PropertyAccessor;
+import ognl.SimpleNode;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.executor.ExecutorException;
+import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.ContextMap;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
@@ -95,6 +134,158 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
     }
     throw new BuilderException(
         "Error evaluating expression '" + expression + "'.  Return value (" + value + ") was not iterable.");
+  }
+
+  @Override
+  public List<ParameterMapping> collectParameters(@NotNull String expression) {
+    try {
+      Node node = (Node) Ognl.parseExpression(expression);
+      if (!(node instanceof SimpleNode rootNode)) {
+        return Collections.emptyList();
+      }
+      List<ParameterMapping> parameterMappings = new ArrayList<>();
+      collectParameterMappings(rootNode, parameterMappings);
+      return parameterMappings;
+    } catch (OgnlException e) {
+      throw new ExecutorException(e);
+    }
+  }
+
+  private void collectParameterMappings(Node node, List<ParameterMapping> parameterMappings) {
+    if (!(node instanceof SimpleNode simpleNode)) {
+      return;
+    }
+    if (simpleNode instanceof ExpressionNode) {
+      if (simpleNode instanceof BooleanExpression) {
+        collectParametersFromBooleanExpression((BooleanExpression) simpleNode, parameterMappings);
+      } else if (simpleNode instanceof ASTTest) {
+        // TODO
+      } else if (simpleNode instanceof NumericExpression) {
+        collectParametersFromNumericExpression((NumericExpression) simpleNode, parameterMappings);
+      }
+    } else if (simpleNode instanceof ASTVarRef) {
+      // TODO ASTVarRef
+
+    } else {
+      // simple node
+      collectParametersFromSimpleNode(simpleNode, parameterMappings);
+    }
+  }
+
+  private void collectParametersFromBooleanExpression(BooleanExpression booleanExpression,
+      List<ParameterMapping> parameterMappings) {
+    if (booleanExpression instanceof ComparisonExpression) {
+      collectParametersFromComparisonExpression((ComparisonExpression) booleanExpression, parameterMappings);
+    } else if (booleanExpression instanceof ASTOr) {
+      collectParametersFromChildren(booleanExpression, parameterMappings);
+    } else if (booleanExpression instanceof ASTAnd) {
+      collectParametersFromChildren(booleanExpression, parameterMappings);
+    } else if (booleanExpression instanceof ASTNot) {
+      collectParametersFromChildren(booleanExpression, parameterMappings);
+    }
+  }
+
+  private void collectParametersFromComparisonExpression(ComparisonExpression expression,
+      List<ParameterMapping> parameterMappings) {
+    if (expression instanceof ASTNotEq) {
+      collectParametersFromChildren(expression, parameterMappings);
+    } else if (expression instanceof ASTLessEq) {
+      collectParametersFromChildren(expression, parameterMappings);
+    } else if (expression instanceof ASTLess) {
+      collectParametersFromChildren(expression, parameterMappings);
+    } else if (expression instanceof ASTGreater) {
+      collectParametersFromChildren(expression, parameterMappings);
+    } else if (expression instanceof ASTGreaterEq) {
+      collectParametersFromChildren(expression, parameterMappings);
+    }
+  }
+
+  private void collectParametersFromSimpleNode(SimpleNode simpleNode, List<ParameterMapping> parameterMappings) {
+    if (simpleNode instanceof ASTChain astChain) {
+      // does not cover all case
+      StringJoiner sb = new StringJoiner(".");
+      for (int i = 0; i < astChain.jjtGetNumChildren(); i++) {
+        if (astChain.jjtGetChild(i) instanceof ASTProperty node) {
+          String property = getProperty(node);
+          sb.add(property);
+        } else {
+          break;
+        }
+      }
+      if (!(sb.length() == 0)) {
+        ParameterMapping pm = new ParameterMapping();
+        pm.setProperty(sb.toString());
+        parameterMappings.add(pm);
+      }
+    } else if (simpleNode instanceof ASTMap) {
+      // TODO
+    } else if (simpleNode instanceof ASTIn) {
+      collectParametersFromChildren(simpleNode, parameterMappings);
+    } else if (simpleNode instanceof ASTNotIn) {
+      collectParametersFromChildren(simpleNode, parameterMappings);
+    } else if (simpleNode instanceof ASTProperty astProperty) {
+      if (astProperty.jjtGetNumChildren() > 0) {
+        Node node = astProperty.jjtGetChild(0);
+        if (node instanceof ASTConst astConst) {
+          ParameterMapping pm = new ParameterMapping();
+          pm.setProperty(String.valueOf(astConst.getValue()));
+          parameterMappings.add(pm);
+        }
+      }
+    } else if (simpleNode instanceof ASTConst) {
+      // TODO
+    } else if (simpleNode instanceof ASTAssign) {
+      collectParametersFromChildren(simpleNode, parameterMappings);
+    } else if (simpleNode instanceof ASTSelect) {
+      collectParametersFromChildren(simpleNode, parameterMappings);
+    } else if (simpleNode instanceof ASTSelectFirst) {
+      // TODO
+      collectParametersFromChildren(simpleNode, parameterMappings);
+    } else if (simpleNode instanceof ASTList) {
+      // TODO
+      collectParametersFromChildren(simpleNode, parameterMappings);
+    } else if (simpleNode instanceof ASTEval) {
+      // TODO
+      collectParametersFromChildren(simpleNode, parameterMappings);
+    } else if (simpleNode instanceof ASTStaticField) {
+      // TODO
+      collectParametersFromChildren(simpleNode, parameterMappings);
+    } else if (simpleNode instanceof ASTSequence) {
+      // TODO
+      collectParametersFromChildren(simpleNode, parameterMappings);
+    } else if (simpleNode instanceof ASTSelectLast) {
+      // TODO
+      collectParametersFromChildren(simpleNode, parameterMappings);
+    } else if (simpleNode instanceof ASTKeyValue) {
+      // TODO
+      collectParametersFromChildren(simpleNode, parameterMappings);
+    } else if (simpleNode instanceof ASTInstanceof) {
+      // TODO
+      collectParametersFromChildren(simpleNode, parameterMappings);
+    }
+  }
+
+  private void collectParametersFromNumericExpression(NumericExpression numericExpression,
+      List<ParameterMapping> parameterMappings) {
+    // TODO
+  }
+
+  private String getProperty(ASTProperty astProperty) {
+    int i = astProperty.jjtGetNumChildren();
+    if (i > 0) {
+      Node node = astProperty.jjtGetChild(0);
+      if (node instanceof ASTConst) {
+        return String.valueOf(((ASTConst) node).getValue());
+      }
+      return "";
+    }
+    return "";
+  }
+
+  private void collectParametersFromChildren(Node node, List<ParameterMapping> parameterMappings) {
+    for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+      collectParameterMappings(node.jjtGetChild(i), parameterMappings);
+    }
   }
 
   static class ContextAccessor implements PropertyAccessor {

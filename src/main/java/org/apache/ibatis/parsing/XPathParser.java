@@ -210,6 +210,10 @@ public class XPathParser {
     return evalNode(document, expression);
   }
 
+  public XNode evalRootNode() {
+    return evalNode("/*");
+  }
+
   public XNode evalNode(Object root, String expression) {
     Node node = (Node) evaluate(expression, root, XPathConstants.NODE);
     if (node == null) {

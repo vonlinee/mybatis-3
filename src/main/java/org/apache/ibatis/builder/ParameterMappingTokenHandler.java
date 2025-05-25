@@ -35,7 +35,7 @@ import org.apache.ibatis.type.TypeHandler;
 
 public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHandler {
 
-  private static final String PARAMETER_PROPERTIES = "javaType,jdbcType,mode,numericScale,resultMap,typeHandler,jdbcTypeName";
+  static final String PARAMETER_PROPERTIES = "javaType,jdbcType,mode,numericScale,resultMap,typeHandler,jdbcTypeName";
   private final List<ParameterMapping> parameterMappings;
   private final Class<?> parameterType;
   private final MetaObject metaParameters;

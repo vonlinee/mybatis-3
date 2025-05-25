@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
@@ -31,14 +32,26 @@ public class ParameterMapping {
   private ParameterMode mode;
   private Class<?> javaType = Object.class;
   private JdbcType jdbcType;
+
+  @Nullable
   private Integer numericScale;
   private TypeHandler<?> typeHandler;
+
+  /**
+   * name of type handler type
+   */
+  private String javaTypeName;
+
+  /**
+   * name of type handler type
+   */
+  private String typeHandlerName;
   private String resultMapId;
   private String jdbcTypeName;
   private String expression;
   private Object value = UNSET;
 
-  private ParameterMapping() {
+  public ParameterMapping() {
   }
 
   public static class Builder {
@@ -66,6 +79,11 @@ public class ParameterMapping {
       return this;
     }
 
+    public Builder javaType(String javaType) {
+      parameterMapping.javaTypeName = javaType;
+      return this;
+    }
+
     public Builder jdbcType(JdbcType jdbcType) {
       parameterMapping.jdbcType = jdbcType;
       return this;
@@ -83,6 +101,11 @@ public class ParameterMapping {
 
     public Builder typeHandler(TypeHandler<?> typeHandler) {
       parameterMapping.typeHandler = typeHandler;
+      return this;
+    }
+
+    public Builder typeHandler(String typeHandler) {
+      parameterMapping.typeHandlerName = typeHandler;
       return this;
     }
 
@@ -108,8 +131,8 @@ public class ParameterMapping {
 
     private void validate() {
       if (ResultSet.class.equals(parameterMapping.javaType) && parameterMapping.resultMapId == null) {
-        throw new IllegalStateException("Missing resultmap in property '" + parameterMapping.property + "'.  "
-            + "Parameters of type java.sql.ResultSet require a resultmap.");
+        throw new IllegalStateException("Missing result map in property '" + parameterMapping.property + "'.  "
+            + "Parameters of type java.sql.ResultSet require a result map.");
       }
     }
   }
@@ -207,5 +230,45 @@ public class ParameterMapping {
         ", resultMapId='" + resultMapId + '\'' + ", jdbcTypeName='" + jdbcTypeName + '\'' + ", expression='"
         + expression + '\'' + ", value='" + value + '\'' + '}';
     return sb;
+  }
+
+  public void setTypeHandler(TypeHandler<?> typeHandler) {
+    this.typeHandler = typeHandler;
+  }
+
+  public void setValue(Object value) {
+    this.value = value;
+  }
+
+  public void setProperty(String property) {
+    this.property = property;
+  }
+
+  public void setNumericScale(@Nullable Integer numericScale) {
+    this.numericScale = numericScale;
+  }
+
+  public void setMode(ParameterMode mode) {
+    this.mode = mode;
+  }
+
+  public void setJdbcTypeName(String jdbcTypeName) {
+    this.jdbcTypeName = jdbcTypeName;
+  }
+
+  public void setJdbcType(JdbcType jdbcType) {
+    this.jdbcType = jdbcType;
+  }
+
+  public void setJavaType(Class<?> javaType) {
+    this.javaType = javaType;
+  }
+
+  public String getJavaTypeName() {
+    return javaTypeName;
+  }
+
+  public String getTypeHandlerName() {
+    return typeHandlerName;
   }
 }
