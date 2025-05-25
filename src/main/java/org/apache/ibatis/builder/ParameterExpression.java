@@ -28,6 +28,85 @@ import java.util.HashMap;
  * attributes = (',' attribute)*
  * attribute = name '=' value
  * </pre>
+ * <p>
+ * syntax: (propertyName | expression) jdbcType option
+ * </p>
+ * <p>
+ * For Example:
+ * </p>
+ * <blockquote>
+ *
+ * <pre>
+ * (id.toString()):VARCHAR, attr1=val1, attr2=val2, attr3=val3
+ * </pre>
+ *
+ * </blockquote>
+ * <li>expression: id.toString()</li>
+ * <li>jdbcType: VARCHAR</li>
+ * <li>attr2:val2</li>
+ * <li>attr1:val1</li>
+ * <li>attr3:val3</li> <br/>
+ * <blockquote>
+ *
+ * <pre>
+ * id:VARCHAR, attr1=val1, attr2=val2, attr3=val3
+ * </pre>
+ *
+ * </blockquote>
+ * <li>property: id</li>
+ * <li>jdbcType: VARCHAR</li>
+ * <li>attr2:val2</li>
+ * <li>attr1:val1</li>
+ * <li>attr3:val3</li>
+ * <p>
+ * First, like other parts of MyBatis, parameters can specify a more specific data type. <blockquote>
+ *
+ * <pre>
+ * #{property,javaType=int,jdbcType=NUMERIC}
+ * </pre>
+ *
+ * </blockquote> Like the rest of MyBatis, the javaType can almost always be determined from the parameter object,
+ * unless that object is a HashMap. Then the javaType should be specified to ensure the correct TypeHandler is used.
+ * <p>
+ * </p>
+ * To further customize type handling, you can also specify a specific TypeHandler class (or alias), for example:
+ * <blockquote>
+ *
+ * <pre>
+ * #{age,javaType=int,jdbcType=NUMERIC,typeHandler=MyTypeHandler}
+ * </pre>
+ *
+ * </blockquote>
+ * <p>
+ * For numeric types there's also a numericScale for determining how many decimal places are relevant. <blockquote>
+ *
+ * <pre>
+ * #{height,javaType=double,jdbcType=NUMERIC,numericScale=2}
+ * </pre>
+ *
+ * </blockquote>
+ * <p>
+ * Finally, the mode attribute allows you to specify IN, OUT or INOUT parameters. If a parameter is OUT or INOUT, the
+ * actual value of the parameter object property will be changed, just as you would expect if you were calling for an
+ * output parameter. If the mode=OUT (or INOUT) and the jdbcType=CURSOR (i.e. Oracle REFCURSOR), you must specify a
+ * resultMap to map the ResultSet to the type of the parameter. Note that the javaType attribute is optional here, it
+ * will be automatically set to ResultSet if left blank with a CURSOR as the jdbcType. <blockquote>
+ *
+ * <pre>
+ * #{department, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=departmentResultMap}
+ * </pre>
+ *
+ * </blockquote> MyBatis also supports more advanced data types such as structs, but you must tell the statement the
+ * type name when registering the out parameter. For example (again, don't break lines like this in practice):
+ * <blockquote>
+ *
+ * <pre>
+ * #{middleInitial, mode=OUT, jdbcType=STRUCT, jdbcTypeName=MY_TYPE, resultMap=departmentResultMap}
+ * </pre>
+ *
+ * </blockquote>
+ * <p>
+ * See more details, refer to <a href="https://mybatis.org/mybatis-3/sqlmap-xml.html#Parameters">Parameters</a>
  *
  * @author Frank D. Martinez [mnesarco]
  */
