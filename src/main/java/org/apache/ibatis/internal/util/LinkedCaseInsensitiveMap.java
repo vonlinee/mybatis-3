@@ -122,7 +122,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
    * @see #convertKey(String)
    */
   public LinkedCaseInsensitiveMap(int expectedSize, @Nullable Locale locale) {
-    this.targetMap = new LinkedHashMap<>((int) (expectedSize / CollectionUtils.DEFAULT_LOAD_FACTOR),
+    this.targetMap = new LinkedHashMap<String, V>((int) (expectedSize / CollectionUtils.DEFAULT_LOAD_FACTOR),
         CollectionUtils.DEFAULT_LOAD_FACTOR) {
       @Override
       public boolean containsKey(Object key) {
@@ -164,7 +164,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
   @Override
   public boolean containsKey(Object key) {
-    return (key instanceof String string && this.caseInsensitiveKeys.containsKey(convertKey(string)));
+    return (key instanceof String && this.caseInsensitiveKeys.containsKey(convertKey((String) key)));
   }
 
   @Override
@@ -175,7 +175,8 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
   @Override
   @Nullable
   public V get(Object key) {
-    if (key instanceof String string) {
+    if (key instanceof String) {
+      String string = (String) key;
       String caseInsensitiveKey = this.caseInsensitiveKeys.get(convertKey(string));
       if (caseInsensitiveKey != null) {
         return this.targetMap.get(caseInsensitiveKey);
@@ -187,7 +188,8 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
   @Override
   @Nullable
   public V getOrDefault(Object key, V defaultValue) {
-    if (key instanceof String string) {
+    if (key instanceof String) {
+      String string = (String) key;
       String caseInsensitiveKey = this.caseInsensitiveKeys.get(convertKey(string));
       if (caseInsensitiveKey != null) {
         return this.targetMap.get(caseInsensitiveKey);
@@ -249,7 +251,8 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
   @Override
   @Nullable
   public V remove(Object key) {
-    if (key instanceof String string) {
+    if (key instanceof String) {
+      String string = (String) key;
       String caseInsensitiveKey = removeCaseInsensitiveKey(string);
       if (caseInsensitiveKey != null) {
         return this.targetMap.remove(caseInsensitiveKey);

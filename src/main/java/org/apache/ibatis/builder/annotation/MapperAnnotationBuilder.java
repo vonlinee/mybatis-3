@@ -414,7 +414,8 @@ public class MapperAnnotationBuilder {
           returnType = rt.value();
         }
       }
-    } else if (resolvedReturnType instanceof ParameterizedType parameterizedType) {
+    } else if (resolvedReturnType instanceof ParameterizedType) {
+      ParameterizedType parameterizedType = (ParameterizedType) resolvedReturnType;
       Class<?> rawType = (Class<?>) parameterizedType.getRawType();
       if (Collection.class.isAssignableFrom(rawType) || Cursor.class.isAssignableFrom(rawType)) {
         Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();

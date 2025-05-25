@@ -140,9 +140,10 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
   public List<ParameterMapping> collectParameters(@NotNull String expression) {
     try {
       Node node = (Node) Ognl.parseExpression(expression);
-      if (!(node instanceof SimpleNode rootNode)) {
+      if (!(node instanceof SimpleNode)) {
         return Collections.emptyList();
       }
+      SimpleNode rootNode = (SimpleNode) node;
       List<ParameterMapping> parameterMappings = new ArrayList<>();
       collectParameterMappings(rootNode, parameterMappings);
       return parameterMappings;
@@ -152,9 +153,10 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
   }
 
   private void collectParameterMappings(Node node, List<ParameterMapping> parameterMappings) {
-    if (!(node instanceof SimpleNode simpleNode)) {
+    if (!(node instanceof SimpleNode)) {
       return;
     }
+    SimpleNode simpleNode = (SimpleNode) node;
     if (simpleNode instanceof ExpressionNode) {
       if (simpleNode instanceof BooleanExpression) {
         collectParametersFromBooleanExpression((BooleanExpression) simpleNode, parameterMappings);
@@ -201,11 +203,13 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
   }
 
   private void collectParametersFromSimpleNode(SimpleNode simpleNode, List<ParameterMapping> parameterMappings) {
-    if (simpleNode instanceof ASTChain astChain) {
+    if (simpleNode instanceof ASTChain) {
+      ASTChain astChain = (ASTChain) simpleNode;
       // does not cover all case
       StringJoiner sb = new StringJoiner(".");
       for (int i = 0; i < astChain.jjtGetNumChildren(); i++) {
-        if (astChain.jjtGetChild(i) instanceof ASTProperty node) {
+        if (astChain.jjtGetChild(i) instanceof ASTProperty) {
+          ASTProperty node = (ASTProperty) astChain.jjtGetChild(i);
           String property = getProperty(node);
           sb.add(property);
         } else {
@@ -223,10 +227,12 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
       collectParametersFromChildren(simpleNode, parameterMappings);
     } else if (simpleNode instanceof ASTNotIn) {
       collectParametersFromChildren(simpleNode, parameterMappings);
-    } else if (simpleNode instanceof ASTProperty astProperty) {
+    } else if (simpleNode instanceof ASTProperty) {
+      ASTProperty astProperty = (ASTProperty) simpleNode;
       if (astProperty.jjtGetNumChildren() > 0) {
         Node node = astProperty.jjtGetChild(0);
-        if (node instanceof ASTConst astConst) {
+        if (node instanceof ASTConst) {
+          ASTConst astConst = (ASTConst) node;
           ParameterMapping pm = new ParameterMapping();
           pm.setProperty(String.valueOf(astConst.getValue()));
           parameterMappings.add(pm);

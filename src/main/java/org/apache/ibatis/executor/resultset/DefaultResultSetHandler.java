@@ -1296,7 +1296,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
       // create the pending objects
       for (Object pendingCreation : pendingCreations) {
-        if (pendingCreation instanceof PendingConstructorCreation pendingConstructorCreation) {
+        if (pendingCreation instanceof PendingConstructorCreation) {
+          PendingConstructorCreation pendingConstructorCreation = (PendingConstructorCreation) pendingCreation;
           targetMetaObject.add(pendingConstructorCreation.create(objectFactory));
         }
       }
@@ -1382,7 +1383,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     if (resultMapping.getColumnPrefix() != null) {
       columnPrefixBuilder.append(resultMapping.getColumnPrefix());
     }
-    return columnPrefixBuilder.isEmpty() ? null : columnPrefixBuilder.toString().toUpperCase(Locale.ENGLISH);
+    return columnPrefixBuilder.length() == 0 ? null : columnPrefixBuilder.toString().toUpperCase(Locale.ENGLISH);
   }
 
   private boolean anyNotNullColumnHasValue(ResultMapping resultMapping, String columnPrefix, ResultSetWrapper rsw)

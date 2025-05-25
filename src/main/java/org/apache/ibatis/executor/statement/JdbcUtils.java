@@ -224,9 +224,11 @@ public final class JdbcUtils {
     if (obj != null) {
       className = obj.getClass().getName();
     }
-    if (obj instanceof Blob blob) {
+    if (obj instanceof Blob) {
+      Blob blob = (Blob) obj;
       obj = blob.getBytes(1, (int) blob.length());
-    } else if (obj instanceof Clob clob) {
+    } else if (obj instanceof Clob) {
+      Clob clob = (Clob) obj;
       obj = clob.getSubString(1, (int) clob.length());
     } else if ("oracle.sql.TIMESTAMP".equals(className) || "oracle.sql.TIMESTAMPTZ".equals(className)) {
       obj = rs.getTimestamp(index);
@@ -312,7 +314,8 @@ public final class JdbcUtils {
       Object obj = rs.getObject(index);
       if (obj instanceof String) {
         return obj;
-      } else if (obj instanceof Number number) {
+      } else if (obj instanceof Number) {
+        Number number = (Number) obj;
         // Defensively convert any Number to an Integer (as needed by our
         // ConversionService's IntegerToEnumConverterFactory) for use as index
         return NumberUtils.convertNumberToTargetClass(number, Integer.class);
@@ -333,14 +336,18 @@ public final class JdbcUtils {
       }
 
       String typeName = requiredType.getSimpleName();
-      return switch (typeName) {
-        case "LocalDate" -> rs.getDate(index);
-        case "LocalTime" -> rs.getTime(index);
-        case "LocalDateTime" -> rs.getTimestamp(index);
+      switch (typeName) {
+        case "LocalDate":
+          return rs.getDate(index);
+        case "LocalTime":
+          return rs.getTime(index);
+        case "LocalDateTime":
+          return rs.getTimestamp(index);
         // Fall back to getObject without type specification, again
         // left up to the caller to convert the value if necessary.
-        default -> getResultSetValue(rs, index);
-      };
+        default:
+          return getResultSetValue(rs, index);
+      }
     }
 
     // Perform was-null check if necessary (for results that the JDBC driver returns as primitives).

@@ -30,7 +30,8 @@ import org.apache.ibatis.session.Configuration;
 /**
  * @author Clinton Begin
  */
-@Deprecated(since = "3.6.0", forRemoval = true)
+// @Deprecated(since = "3.6.0", forRemoval = true)
+@Deprecated
 public class UnknownTypeHandler extends BaseTypeHandler<Object> {
 
   // TODO Rename to 'configuration' after removing the 'configuration' property(deprecated property) on parent class

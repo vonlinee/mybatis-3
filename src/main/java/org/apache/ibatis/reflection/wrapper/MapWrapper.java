@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
@@ -113,7 +114,7 @@ public class MapWrapper extends BaseWrapper {
   @Override
   public Entry<Type, Class<?>> getGenericSetterType(String name) {
     Class<?> setterType = getSetterType(name);
-    return Map.entry(setterType, setterType);
+    return CollectionUtils.entry(setterType, setterType);
   }
 
   @Override
@@ -137,7 +138,7 @@ public class MapWrapper extends BaseWrapper {
   @Override
   public Entry<Type, Class<?>> getGenericGetterType(String name) {
     Class<?> getterType = getGetterType(name);
-    return Map.entry(getterType, getterType);
+    return CollectionUtils.entry(getterType, getterType);
   }
 
   @Override

@@ -189,12 +189,14 @@ public final class TypeHandlerRegistry {
     return javaType != null && getTypeHandler(javaType, jdbcType) != null;
   }
 
-  @Deprecated(since = "3.6.0", forRemoval = true)
+  // @Deprecated(since = "3.6.0", forRemoval = true)
+  @Deprecated
   public boolean hasTypeHandler(TypeReference<?> javaTypeReference, JdbcType jdbcType) {
     return javaTypeReference != null && getTypeHandler(javaTypeReference, jdbcType) != null;
   }
 
-  @Deprecated(since = "3.6.0", forRemoval = true)
+  // @Deprecated(since = "3.6.0", forRemoval = true)
+  @Deprecated
   public TypeHandler<?> getMappingTypeHandler(Class<? extends TypeHandler<?>> handlerType) {
     return allTypeHandlersMap.get(handlerType);
   }
@@ -203,7 +205,8 @@ public final class TypeHandlerRegistry {
     return getTypeHandler(type, null);
   }
 
-  @Deprecated(since = "3.6.0", forRemoval = true)
+  // @Deprecated(since = "3.6.0", forRemoval = true)
+  @Deprecated
   public <T> TypeHandler<T> getTypeHandler(TypeReference<T> javaTypeReference) {
     return getTypeHandler(javaTypeReference, null);
   }
@@ -213,7 +216,8 @@ public final class TypeHandlerRegistry {
   }
 
   @SuppressWarnings("unchecked")
-  @Deprecated(since = "3.6.0", forRemoval = true)
+  // @Deprecated(since = "3.6.0", forRemoval = true)
+  @Deprecated
   public <T> TypeHandler<T> getTypeHandler(TypeReference<T> javaTypeReference, JdbcType jdbcType) {
     return (TypeHandler<T>) getTypeHandler(javaTypeReference.getRawType(), jdbcType);
   }
@@ -295,7 +299,8 @@ public final class TypeHandlerRegistry {
     }
 
     if (candidate == null) {
-      if (type instanceof Class<?> clazz) {
+      if (type instanceof Class<?>) {
+        Class<?> clazz = (Class<?>) type;
         if (Enum.class.isAssignableFrom(clazz)) {
           Class<?> enumClass = clazz.isAnonymousClass() ? clazz.getSuperclass() : clazz;
           TypeHandler<?> enumHandler = getInstance(enumClass, defaultEnumTypeHandler);
@@ -320,7 +325,8 @@ public final class TypeHandlerRegistry {
     if (jdbcHandlerMap != null) {
       return NULL_TYPE_HANDLER_MAP.equals(jdbcHandlerMap) ? null : jdbcHandlerMap;
     }
-    if (type instanceof Class<?> clazz) {
+    if (type instanceof Class<?>) {
+      Class<?> clazz = (Class<?>) type;
       if (!Enum.class.isAssignableFrom(clazz)) {
         jdbcHandlerMap = getJdbcHandlerMapForSuperclass(clazz);
       }
@@ -378,7 +384,8 @@ public final class TypeHandlerRegistry {
     register(new Type[] { mappedJavaType }, mappedJdbcTypes(handler.getClass()), handler);
   }
 
-  @Deprecated(since = "3.6.0", forRemoval = true)
+  // @Deprecated(since = "3.6.0", forRemoval = true)
+  @Deprecated
   public <T> void register(TypeReference<T> javaTypeReference, TypeHandler<? extends T> handler) {
     register(javaTypeReference.getRawType(), handler);
   }

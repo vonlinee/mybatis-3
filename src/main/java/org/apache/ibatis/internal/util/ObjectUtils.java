@@ -120,19 +120,23 @@ public final class ObjectUtils {
       return true;
     }
 
-    if (obj instanceof Optional<?> optional) {
-      return optional.isEmpty();
+    if (obj instanceof Optional<?>) {
+      Optional<?> optional = (Optional<?>) obj;
+      return !optional.isPresent();
     }
-    if (obj instanceof CharSequence charSequence) {
-      return charSequence.isEmpty();
+    if (obj instanceof CharSequence) {
+      CharSequence charSequence = (CharSequence) obj;
+      return charSequence.length() == 0;
     }
     if (obj.getClass().isArray()) {
       return Array.getLength(obj) == 0;
     }
-    if (obj instanceof Collection<?> collection) {
+    if (obj instanceof Collection<?>) {
+      Collection<?> collection = (Collection<?>) obj;
       return collection.isEmpty();
     }
-    if (obj instanceof Map<?, ?> map) {
+    if (obj instanceof Map<?, ?>) {
+      Map<?, ?> map = (Map<?, ?>) obj;
       return map.isEmpty();
     }
     // else
@@ -154,7 +158,8 @@ public final class ObjectUtils {
    *           if the parameter is not an array
    */
   public static Object[] toObjectArray(@Nullable Object source) {
-    if (source instanceof Object[] objects) {
+    if (source instanceof Object[]) {
+      Object[] objects = (Object[]) source;
       return objects;
     }
     if (source == null) {
@@ -223,31 +228,49 @@ public final class ObjectUtils {
    * @see java.util.Arrays#equals
    */
   private static boolean arrayEquals(Object o1, Object o2) {
-    if (o1 instanceof Object[] objects1 && o2 instanceof Object[] objects2) {
+    if (o1 instanceof Object[] && o2 instanceof Object[]) {
+      Object[] objects1 = (Object[]) o1;
+      Object[] objects2 = (Object[]) o2;
       return Arrays.equals(objects1, objects2);
     }
-    if (o1 instanceof boolean[] booleans1 && o2 instanceof boolean[] booleans2) {
+    if (o1 instanceof boolean[] && o2 instanceof boolean[]) {
+      boolean[] booleans1 = (boolean[]) o1;
+      boolean[] booleans2 = (boolean[]) o2;
       return Arrays.equals(booleans1, booleans2);
     }
-    if (o1 instanceof byte[] bytes1 && o2 instanceof byte[] bytes2) {
+    if (o1 instanceof byte[] && o2 instanceof byte[]) {
+      byte[] bytes1 = (byte[]) o1;
+      byte[] bytes2 = (byte[]) o2;
       return Arrays.equals(bytes1, bytes2);
     }
-    if (o1 instanceof char[] chars1 && o2 instanceof char[] chars2) {
+    if (o1 instanceof char[] && o2 instanceof char[]) {
+      char[] chars1 = (char[]) o1;
+      char[] chars2 = (char[]) o2;
       return Arrays.equals(chars1, chars2);
     }
-    if (o1 instanceof double[] doubles1 && o2 instanceof double[] doubles2) {
+    if (o1 instanceof double[] && o2 instanceof double[]) {
+      double[] doubles1 = (double[]) o1;
+      double[] doubles2 = (double[]) o2;
       return Arrays.equals(doubles1, doubles2);
     }
-    if (o1 instanceof float[] floats1 && o2 instanceof float[] floats2) {
+    if (o1 instanceof float[] && o2 instanceof float[]) {
+      float[] floats1 = (float[]) o1;
+      float[] floats2 = (float[]) o2;
       return Arrays.equals(floats1, floats2);
     }
-    if (o1 instanceof int[] ints1 && o2 instanceof int[] ints2) {
+    if (o1 instanceof int[] && o2 instanceof int[]) {
+      int[] ints1 = (int[]) o1;
+      int[] ints2 = (int[]) o2;
       return Arrays.equals(ints1, ints2);
     }
-    if (o1 instanceof long[] longs1 && o2 instanceof long[] longs2) {
+    if (o1 instanceof long[] && o2 instanceof long[]) {
+      long[] longs1 = (long[]) o1;
+      long[] longs2 = (long[]) o2;
       return Arrays.equals(longs1, longs2);
     }
-    if (o1 instanceof short[] shorts1 && o2 instanceof short[] shorts2) {
+    if (o1 instanceof short[] && o2 instanceof short[]) {
+      short[] shorts1 = (short[]) o1;
+      short[] shorts2 = (short[]) o2;
       return Arrays.equals(shorts1, shorts2);
     }
     return false;
@@ -270,9 +293,11 @@ public final class ObjectUtils {
    */
   private static long checkedLongValue(Number number, Class<? extends Number> targetClass) {
     BigInteger bigInt = null;
-    if (number instanceof BigInteger bigInteger) {
+    if (number instanceof BigInteger) {
+      BigInteger bigInteger = (BigInteger) number;
       bigInt = bigInteger;
-    } else if (number instanceof BigDecimal bigDecimal) {
+    } else if (number instanceof BigDecimal) {
+      BigDecimal bigDecimal = (BigDecimal) number;
       bigInt = bigDecimal.toBigInteger();
     }
     // Effectively analogous to JDK 8's BigInteger.longValueExact()
@@ -346,8 +371,9 @@ public final class ObjectUtils {
     if (obj == null) {
       return "null";
     }
-    if (obj instanceof Optional<?> optional) {
-      return (optional.map(object -> "Optional[%s]".formatted(nullSafeConciseToString(object)))
+    if (obj instanceof Optional<?>) {
+      Optional<?> optional = (Optional<?>) obj;
+      return (optional.map(object -> String.format("Optional[%s]", (nullSafeConciseToString(object))))
           .orElse("Optional.empty"));
     }
     if (obj.getClass().isArray()) {
@@ -359,19 +385,24 @@ public final class ObjectUtils {
     if (obj instanceof Map) {
       return MAP;
     }
-    if (obj instanceof Class<?> clazz) {
+    if (obj instanceof Class<?>) {
+      Class<?> clazz = (Class<?>) obj;
       return clazz.getName();
     }
-    if (obj instanceof Charset charset) {
+    if (obj instanceof Charset) {
+      Charset charset = (Charset) obj;
       return charset.name();
     }
-    if (obj instanceof TimeZone timeZone) {
+    if (obj instanceof TimeZone) {
+      TimeZone timeZone = (TimeZone) obj;
       return timeZone.getID();
     }
-    if (obj instanceof ZoneId zoneId) {
+    if (obj instanceof ZoneId) {
+      ZoneId zoneId = (ZoneId) obj;
       return zoneId.getId();
     }
-    if (obj instanceof CharSequence charSequence) {
+    if (obj instanceof CharSequence) {
+      CharSequence charSequence = (CharSequence) obj;
       return StringUtils.truncate(charSequence);
     }
     Class<?> type = obj.getClass();
@@ -413,34 +444,44 @@ public final class ObjectUtils {
     if (obj == null) {
       return NULL_STRING;
     }
-    if (obj instanceof String string) {
+    if (obj instanceof String) {
+      String string = (String) obj;
       return string;
     }
-    if (obj instanceof Object[] objects) {
+    if (obj instanceof Object[]) {
+      Object[] objects = (Object[]) obj;
       return nullSafeToString(objects);
     }
-    if (obj instanceof boolean[] booleans) {
+    if (obj instanceof boolean[]) {
+      boolean[] booleans = (boolean[]) obj;
       return nullSafeToString(booleans);
     }
-    if (obj instanceof byte[] bytes) {
+    if (obj instanceof byte[]) {
+      byte[] bytes = (byte[]) obj;
       return nullSafeToString(bytes);
     }
-    if (obj instanceof char[] chars) {
+    if (obj instanceof char[]) {
+      char[] chars = (char[]) obj;
       return nullSafeToString(chars);
     }
-    if (obj instanceof double[] doubles) {
+    if (obj instanceof double[]) {
+      double[] doubles = (double[]) obj;
       return nullSafeToString(doubles);
     }
-    if (obj instanceof float[] floats) {
+    if (obj instanceof float[]) {
+      float[] floats = (float[]) obj;
       return nullSafeToString(floats);
     }
-    if (obj instanceof int[] ints) {
+    if (obj instanceof int[]) {
+      int[] ints = (int[]) obj;
       return nullSafeToString(ints);
     }
-    if (obj instanceof long[] longs) {
+    if (obj instanceof long[]) {
+      long[] longs = (long[]) obj;
       return nullSafeToString(longs);
     }
-    if (obj instanceof short[] shorts) {
+    if (obj instanceof short[]) {
+      short[] shorts = (short[]) obj;
       return nullSafeToString(shorts);
     }
     String str = obj.toString();

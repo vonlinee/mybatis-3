@@ -33,6 +33,7 @@ import org.apache.ibatis.cache.decorators.LruCache;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
+import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.mapping.CacheBuilder;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -477,7 +478,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
   private Entry<Type, Class<?>> resolveSetterType(Class<?> resultType, String property, Class<?> javaType) {
     if (javaType != null) {
-      return Map.entry(javaType, javaType);
+      return CollectionUtils.entry(javaType, javaType);
     }
     if (property != null) {
       MetaClass metaResultType = MetaClass.forClass(resultType, configuration.getReflectorFactory());
@@ -487,7 +488,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         // Not all property types are resolvable.
       }
     }
-    return Map.entry(Object.class, Object.class);
+    return CollectionUtils.entry(Object.class, Object.class);
   }
 
   private Class<?> resolveParameterJavaType(Class<?> resultType, String property, Class<?> javaType,

@@ -175,7 +175,8 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
     if (String.class == requiredType) {
       return value.toString();
     } else if (Number.class.isAssignableFrom(requiredType)) {
-      if (value instanceof Number number) {
+      if (value instanceof Number) {
+        Number number = (Number) value;
         // Convert original Number to target Number class.
         return NumberUtils.convertNumberToTargetClass(number, (Class<Number>) requiredType);
       } else {

@@ -16,6 +16,7 @@
 package org.apache.ibatis.internal.util;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -234,21 +235,21 @@ public final class ClassUtils {
     if (name.endsWith(ARRAY_SUFFIX)) {
       String elementClassName = name.substring(0, name.length() - ARRAY_SUFFIX.length());
       Class<?> elementClass = forName(elementClassName, classLoader);
-      return elementClass.arrayType();
+      return arrayType(elementClass);
     }
 
     // "[Ljava.lang.String;" style arrays
     if (name.startsWith(NON_PRIMITIVE_ARRAY_PREFIX) && name.endsWith(";")) {
       String elementName = name.substring(NON_PRIMITIVE_ARRAY_PREFIX.length(), name.length() - 1);
       Class<?> elementClass = forName(elementName, classLoader);
-      return elementClass.arrayType();
+      return arrayType(elementClass);
     }
 
     // "[[I" or "[[Ljava.lang.String;" style arrays
     if (name.startsWith(INTERNAL_ARRAY_PREFIX)) {
       String elementName = name.substring(INTERNAL_ARRAY_PREFIX.length());
       Class<?> elementClass = forName(elementName, classLoader);
-      return elementClass.arrayType();
+      return arrayType(elementClass);
     }
 
     ClassLoader clToUse = classLoader;
@@ -271,6 +272,10 @@ public final class ClassUtils {
       }
       throw ex;
     }
+  }
+
+  private static Class<?> arrayType(Class<?> elementClass) {
+    return Array.newInstance(elementClass.getComponentType(), 0).getClass();
   }
 
   /**
@@ -495,7 +500,7 @@ public final class ClassUtils {
    */
   public static boolean isPrimitiveArray(Class<?> clazz) {
     Objects.requireNonNull(clazz, "Class must not be null");
-    return (clazz.isArray() && clazz.componentType().isPrimitive());
+    return (clazz.isArray() && clazz.getComponentType().isPrimitive());
   }
 
   /**
@@ -509,7 +514,7 @@ public final class ClassUtils {
    */
   public static boolean isPrimitiveWrapperArray(Class<?> clazz) {
     Objects.requireNonNull(clazz, "Class must not be null");
-    return (clazz.isArray() && isPrimitiveWrapper(clazz.componentType()));
+    return (clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType()));
   }
 
   /**

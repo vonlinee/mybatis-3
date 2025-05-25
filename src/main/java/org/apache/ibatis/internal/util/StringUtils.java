@@ -68,7 +68,7 @@ public final class StringUtils {
    * @since 3.0 Changed signature from isBlank(String) to isBlank(CharSequence)
    */
   public static boolean isBlank(final CharSequence cs) {
-    if (cs == null || cs.isEmpty()) {
+    if (cs == null || cs.length() == 0) {
       return true;
     }
     final int strLen = cs.length();
@@ -107,7 +107,7 @@ public final class StringUtils {
    * @since 3.0 Changed signature from isEmpty(String) to isEmpty(CharSequence)
    */
   public static boolean isEmpty(final CharSequence cs) {
-    return cs == null || cs.isEmpty();
+    return cs == null || cs.length() == 0;
   }
 
   public static String prepend(String str, String prefix) {
@@ -251,7 +251,7 @@ public final class StringUtils {
    * @see #hasText(CharSequence)
    */
   public static boolean hasLength(@Nullable CharSequence str) {
-    return (str != null && !str.isEmpty());
+    return (str != null && str.length() == 0);
   }
 
   /**

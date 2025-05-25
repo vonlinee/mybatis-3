@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.internal.util;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -257,5 +258,9 @@ public final class CollectionUtils {
       return Collections.emptyMap();
     }
     return collection.stream().collect(Collectors.toMap(keyMapper, valueMapper, (k1, k2) -> k1));
+  }
+
+  public static <K, V> Map.Entry<K, V> entry(K key, V value) {
+    return new AbstractMap.SimpleEntry<>(key, value);
   }
 }

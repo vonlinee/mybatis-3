@@ -610,7 +610,7 @@ public abstract class AbstractSQL<T> {
 
     public SafeAppendable append(CharSequence s) {
       try {
-        if (empty && !s.isEmpty()) {
+        if (empty && s.length() != 0) {
           empty = false;
         }
         appendable.append(s);

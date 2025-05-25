@@ -78,7 +78,8 @@ public final class NumberUtils {
       long value = checkedLongValue(number, targetClass);
       return (T) Long.valueOf(value);
     } else if (BigInteger.class == targetClass) {
-      if (number instanceof BigDecimal bigDecimal) {
+      if (number instanceof BigDecimal) {
+        BigDecimal bigDecimal = (BigDecimal) number;
         // do not lose precision - use BigDecimal's own conversion
         return (T) bigDecimal.toBigInteger();
       } else {
@@ -116,9 +117,11 @@ public final class NumberUtils {
    */
   private static long checkedLongValue(Number number, Class<? extends Number> targetClass) {
     BigInteger bigInt = null;
-    if (number instanceof BigInteger bigInteger) {
+    if (number instanceof BigInteger) {
+      BigInteger bigInteger = (BigInteger) number;
       bigInt = bigInteger;
-    } else if (number instanceof BigDecimal bigDecimal) {
+    } else if (number instanceof BigDecimal) {
+      BigDecimal bigDecimal = (BigDecimal) number;
       bigInt = bigDecimal.toBigInteger();
     }
     if (bigInt != null && (bigInt.compareTo(LONG_MIN) < 0 || bigInt.compareTo(LONG_MAX) > 0)) {
