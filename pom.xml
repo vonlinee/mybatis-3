@@ -64,8 +64,8 @@
 
   <properties>
     <!-- Java Usage -->
-<!--    <java.version>11</java.version>-->
-<!--    <java.release.version>11</java.release.version>-->
+    <!--    <java.version>11</java.version>-->
+    <!--    <java.release.version>11</java.release.version>-->
 
     <!-- Override impsort comliance to 17 (remove after parent 49 release) -->
     <impsort.compliance>17</impsort.compliance>
