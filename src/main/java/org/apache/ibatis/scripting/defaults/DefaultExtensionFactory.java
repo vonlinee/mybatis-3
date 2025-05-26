@@ -59,8 +59,8 @@ public class DefaultExtensionFactory implements ExtensionFactory {
   @Override
   public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds,
       ParameterHandler parameterHandler, ResultHandler<?> resultHandler, BoundSql boundSql) {
-    ResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, mappedStatement, parameterHandler,
-        resultHandler, boundSql, rowBounds);
+    ResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, mappedStatement, resultHandler,
+        rowBounds);
     return (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
   }
 

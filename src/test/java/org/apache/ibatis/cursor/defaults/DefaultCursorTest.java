@@ -32,17 +32,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.builder.StaticSqlSource;
-import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
 import org.apache.ibatis.executor.resultset.ResultSetWrapper;
-import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.junit.jupiter.api.Test;
@@ -64,14 +60,9 @@ class DefaultCursorTest {
     final MappedStatement ms = getNestedAndOrderedMappedStatement();
     final ResultMap rm = ms.getResultMaps().get(0);
 
-    final Executor executor = null;
-    final ParameterHandler parameterHandler = null;
-    final ResultHandler<?> resultHandler = null;
-    final BoundSql boundSql = null;
     final RowBounds rowBounds = RowBounds.DEFAULT;
 
-    final DefaultResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, ms, parameterHandler,
-        resultHandler, boundSql, rowBounds);
+    final DefaultResultSetHandler resultSetHandler = new DefaultResultSetHandler(null, ms, null, rowBounds);
 
     when(rsmd.getColumnCount()).thenReturn(2);
     doReturn("id").when(rsmd).getColumnLabel(1);

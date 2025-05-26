@@ -45,7 +45,6 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.loader.ResultLoader;
 import org.apache.ibatis.executor.loader.ResultLoaderMap;
-import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.result.DefaultResultContext;
 import org.apache.ibatis.executor.result.DefaultResultHandler;
 import org.apache.ibatis.executor.result.ResultMapException;
@@ -107,27 +106,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   // temporary marking flag that indicate using constructor mapping (use field to reduce memory usage)
   private boolean useConstructorMappings;
 
-  private static class PendingRelation {
-    public MetaObject metaObject;
-    public ResultMapping propertyMapping;
-  }
-
-  private static class UnMappedColumnAutoMapping {
-    private final String column;
-    private final String property;
-    private final TypeHandler<?> typeHandler;
-    private final boolean primitive;
-
-    public UnMappedColumnAutoMapping(String column, String property, TypeHandler<?> typeHandler, boolean primitive) {
-      this.column = column;
-      this.property = property;
-      this.typeHandler = typeHandler;
-      this.primitive = primitive;
-    }
-  }
-
-  public DefaultResultSetHandler(Executor executor, MappedStatement mappedStatement, ParameterHandler parameterHandler,
-      ResultHandler<?> resultHandler, BoundSql boundSql, RowBounds rowBounds) {
+  public DefaultResultSetHandler(Executor executor, MappedStatement mappedStatement, ResultHandler<?> resultHandler,
+      RowBounds rowBounds) {
     this.executor = executor;
     this.configuration = mappedStatement.getConfiguration();
     this.mappedStatement = mappedStatement;
@@ -600,13 +580,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     boolean foundValues = false;
     if (!autoMapping.isEmpty()) {
       for (UnMappedColumnAutoMapping mapping : autoMapping) {
-        final Object value = mapping.typeHandler.getResult(rsw.getResultSet(), mapping.column);
+        final Object value = mapping.getResult(rsw.getResultSet());
         if (value != null) {
           foundValues = true;
         }
-        if (value != null || configuration.isCallSettersOnNulls() && !mapping.primitive) {
+        if (value != null || configuration.isCallSettersOnNulls() && !mapping.isPrimitive()) {
           // gcode issue #377, call setter on nulls (value is not 'found')
-          metaObject.setValue(mapping.property, value);
+          metaObject.setValue(mapping.getProperty(), value);
         }
       }
     }
@@ -632,11 +612,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       throws SQLException {
     CacheKey cacheKey = createKeyForMultipleResults(rs, parentMapping, parentMapping.getColumn(),
         parentMapping.getColumn());
-    PendingRelation deferLoad = new PendingRelation();
-    deferLoad.metaObject = metaResultObject;
-    deferLoad.propertyMapping = parentMapping;
     List<PendingRelation> relations = pendingRelations.computeIfAbsent(cacheKey, k -> new ArrayList<>());
     // issue #255
+    PendingRelation deferLoad = new PendingRelation(metaResultObject, parentMapping);
     relations.add(deferLoad);
     ResultMapping previous = nextResultMaps.get(parentMapping.getResultSet());
     if (previous == null) {
@@ -1539,11 +1517,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       // keep track of these, so we can rebuild them.
       final Object originalObject = metaObject.getOriginalObject();
       if (rowValue instanceof PendingConstructorCreation && !pendingPccRelations.containsKey(originalObject)) {
-        PendingRelation pendingRelation = new PendingRelation();
-        pendingRelation.propertyMapping = resultMapping;
-        pendingRelation.metaObject = metaObject;
-
-        pendingPccRelations.put(originalObject, pendingRelation);
+        pendingPccRelations.put(originalObject, new PendingRelation(metaObject, resultMapping));
       }
     } else {
       metaObject.setValue(resultMapping.getProperty(),

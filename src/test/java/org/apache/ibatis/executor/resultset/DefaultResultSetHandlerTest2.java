@@ -78,7 +78,7 @@ class DefaultResultSetHandlerTest2 {
         }).build();
 
     final RowBounds rowBounds = new RowBounds(5, 1);
-    final DefaultResultSetHandler resultSetHandler = new DefaultResultSetHandler(null, ms, null, null, null, rowBounds);
+    final DefaultResultSetHandler resultSetHandler = new DefaultResultSetHandler(null, ms, null, rowBounds);
 
     when(stmt.getResultSet()).thenReturn(rs);
     when(rsmd.getColumnCount()).thenReturn(1);
@@ -117,8 +117,8 @@ class DefaultResultSetHandlerTest2 {
     final ResultHandler<?> resultHandler = null;
     final BoundSql boundSql = null;
     final RowBounds rowBounds = new RowBounds(5, 1);
-    final DefaultResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, ms, parameterHandler,
-        resultHandler, boundSql, rowBounds);
+    final DefaultResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, ms, resultHandler,
+        rowBounds);
 
     when(stmt.getResultSet()).thenReturn(rs);
     when(rsmd.getColumnCount()).thenReturn(2);
