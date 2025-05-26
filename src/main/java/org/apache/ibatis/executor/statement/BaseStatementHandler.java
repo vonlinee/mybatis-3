@@ -23,11 +23,12 @@ import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
+import org.apache.ibatis.scripting.ExtensionFactory;
 import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
@@ -39,17 +40,18 @@ public abstract class BaseStatementHandler implements StatementHandler {
   protected final Configuration configuration;
   protected final ObjectFactory objectFactory;
   protected final TypeHandlerRegistry typeHandlerRegistry;
-  protected ResultSetHandler resultSetHandler;
   protected ParameterHandler parameterHandler;
 
   protected final Executor executor;
   protected final MappedStatement mappedStatement;
   protected final RowBounds rowBounds;
-
+  protected ExtensionFactory extensionFactory;
   protected BoundSql boundSql;
 
+  protected final ResultHandler<?> resultHandler;
+
   protected BaseStatementHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds,
-      BoundSql boundSql) {
+      BoundSql boundSql, ResultHandler<?> resultHandler) {
     this.configuration = mappedStatement.getConfiguration();
     this.executor = executor;
     this.mappedStatement = mappedStatement;
@@ -58,6 +60,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
     this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
     this.objectFactory = configuration.getObjectFactory();
     this.boundSql = boundSql;
+    this.resultHandler = resultHandler;
   }
 
   @Override
@@ -71,13 +74,13 @@ public abstract class BaseStatementHandler implements StatementHandler {
   }
 
   @Override
-  public void setResultSetHandler(ResultSetHandler resultSetHandler) {
-    this.resultSetHandler = resultSetHandler;
+  public ParameterHandler getParameterHandler() {
+    return parameterHandler;
   }
 
   @Override
-  public ParameterHandler getParameterHandler() {
-    return parameterHandler;
+  public void setExtensionFactory(ExtensionFactory extensionFactory) {
+    this.extensionFactory = extensionFactory;
   }
 
   @Override
@@ -124,15 +127,4 @@ public abstract class BaseStatementHandler implements StatementHandler {
       stmt.setFetchSize(defaultFetchSize);
     }
   }
-
-  protected void closeStatement(Statement statement) {
-    try {
-      if (statement != null) {
-        statement.close();
-      }
-    } catch (SQLException e) {
-      // ignore
-    }
-  }
-
 }

@@ -28,6 +28,7 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.result.DefaultResultHandler;
+import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.executor.resultset.ResultSetWrapper;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -47,13 +48,9 @@ import org.apache.ibatis.type.TypeHandler;
  */
 public class DefaultCallableStatementHandler extends BaseStatementHandler implements CallableStatementHandler {
 
-  private final ResultHandler<?> resultHandler;
-
   public DefaultCallableStatementHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds,
       BoundSql boundSql, ResultHandler<?> resultHandler) {
-    super(executor, mappedStatement, rowBounds, boundSql);
-
-    this.resultHandler = resultHandler;
+    super(executor, mappedStatement, rowBounds, boundSql, resultHandler);
   }
 
   @Override
@@ -78,6 +75,10 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
   public <E> List<E> query(Statement statement, ResultHandler<E> resultHandler) throws SQLException {
     CallableStatement cs = (CallableStatement) statement;
     cs.execute();
+
+    ResultSetHandler resultSetHandler = extensionFactory.newResultSetHandler(executor, mappedStatement, rowBounds,
+        this.getParameterHandler(), resultHandler, boundSql);
+
     List<E> resultList = resultSetHandler.handleResultSets(cs);
     handleOutputParameters(cs);
     return resultList;
@@ -87,6 +88,9 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
   public <E> Cursor<E> queryCursor(Statement statement) throws SQLException {
     CallableStatement cs = (CallableStatement) statement;
     cs.execute();
+
+    ResultSetHandler resultSetHandler = extensionFactory.newResultSetHandler(executor, mappedStatement, rowBounds,
+        this.getParameterHandler(), resultHandler, boundSql);
     Cursor<E> resultList = resultSetHandler.handleCursorResultSets(cs);
     handleOutputParameters(cs);
     return resultList;
@@ -169,6 +173,10 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
     if (rs == null) {
       return;
     }
+
+    ResultSetHandler resultSetHandler = extensionFactory.newResultSetHandler(executor, mappedStatement, rowBounds,
+        this.getParameterHandler(), resultHandler, boundSql);
+
     try {
       final String resultMapId = parameterMapping.getResultMapId();
       final ResultMap resultMap = configuration.getResultMap(resultMapId);

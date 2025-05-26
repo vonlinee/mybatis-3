@@ -26,6 +26,7 @@ import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
+import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultSetType;
@@ -38,8 +39,8 @@ import org.apache.ibatis.session.RowBounds;
 public class PreparedStatementHandler extends BaseStatementHandler {
 
   public PreparedStatementHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds,
-      BoundSql boundSql) {
-    super(executor, mappedStatement, rowBounds, boundSql);
+      BoundSql boundSql, ResultHandler<?> resultHandler) {
+    super(executor, mappedStatement, rowBounds, boundSql, resultHandler);
   }
 
   @Override
@@ -63,6 +64,9 @@ public class PreparedStatementHandler extends BaseStatementHandler {
   public <E> List<E> query(Statement statement, ResultHandler<E> resultHandler) throws SQLException {
     PreparedStatement ps = (PreparedStatement) statement;
     ps.execute();
+
+    ResultSetHandler resultSetHandler = extensionFactory.newResultSetHandler(executor, mappedStatement, rowBounds,
+        this.getParameterHandler(), resultHandler, boundSql);
     return resultSetHandler.handleResultSets(ps);
   }
 
@@ -70,6 +74,9 @@ public class PreparedStatementHandler extends BaseStatementHandler {
   public <E> Cursor<E> queryCursor(Statement statement) throws SQLException {
     PreparedStatement ps = (PreparedStatement) statement;
     ps.execute();
+
+    ResultSetHandler resultSetHandler = extensionFactory.newResultSetHandler(executor, mappedStatement, rowBounds,
+        this.getParameterHandler(), resultHandler, boundSql);
     return resultSetHandler.handleCursorResultSets(ps);
   }
 

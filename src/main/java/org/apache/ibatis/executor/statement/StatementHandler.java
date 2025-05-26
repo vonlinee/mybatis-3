@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
+import org.apache.ibatis.scripting.ExtensionFactory;
 import org.apache.ibatis.session.ResultHandler;
 
 /**
@@ -33,7 +33,7 @@ public interface StatementHandler {
 
   void setParameterHandler(ParameterHandler parameterHandler);
 
-  void setResultSetHandler(ResultSetHandler resultSetHandler);
+  void setExtensionFactory(ExtensionFactory extensionFactory);
 
   Statement prepare(Connection connection, Integer transactionTimeout) throws SQLException;
 
@@ -51,4 +51,7 @@ public interface StatementHandler {
 
   ParameterHandler getParameterHandler();
 
+  default void closeStatement(Statement statement) {
+    JdbcUtils.closeSilently(statement);
+  }
 }

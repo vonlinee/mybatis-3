@@ -79,10 +79,10 @@ public class DefaultExtensionFactory implements ExtensionFactory {
     StatementHandler statementHandler;
     switch (mappedStatement.getStatementType()) {
       case STATEMENT:
-        statementHandler = new SimpleStatementHandler(executor, mappedStatement, rowBounds, boundSql);
+        statementHandler = new SimpleStatementHandler(executor, mappedStatement, rowBounds, boundSql, resultHandler);
         break;
       case PREPARED:
-        statementHandler = new PreparedStatementHandler(executor, mappedStatement, rowBounds, boundSql);
+        statementHandler = new PreparedStatementHandler(executor, mappedStatement, rowBounds, boundSql, resultHandler);
         break;
       case CALLABLE:
         statementHandler = new DefaultCallableStatementHandler(executor, mappedStatement, rowBounds, boundSql,
@@ -95,10 +95,7 @@ public class DefaultExtensionFactory implements ExtensionFactory {
     // set ParameterHandler
     statementHandler.setParameterHandler(createParameterHandler(mappedStatement, parameterObject, boundSql));
 
-    // set ResultSetHandler
-    ResultSetHandler resultSetHandler = newResultSetHandler(executor, mappedStatement, rowBounds,
-        statementHandler.getParameterHandler(), resultHandler, boundSql);
-    statementHandler.setResultSetHandler(resultSetHandler);
+    statementHandler.setExtensionFactory(this);
 
     return (StatementHandler) interceptorChain.pluginAll(statementHandler);
   }
