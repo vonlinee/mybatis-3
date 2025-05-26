@@ -46,24 +46,24 @@ import org.jetbrains.annotations.Nullable;
  */
 public class XMLStatementBuilder extends BaseBuilder {
 
-  private final MapperBuilderAssistant builderAssistant;
+  private final MapperBuilderAssistant assistant;
   private final XNode context;
   private final String requiredDatabaseId;
   private final Class<?> mapperClass;
 
-  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context) {
-    this(configuration, builderAssistant, context, null);
+  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant assistant, XNode context) {
+    this(configuration, assistant, context, null);
   }
 
-  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context,
+  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant assistant, XNode context,
       String databaseId) {
-    this(configuration, builderAssistant, context, null, null);
+    this(configuration, assistant, context, null, null);
   }
 
-  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context,
+  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant assistant, XNode context,
       String databaseId, Class<?> mapperClass) {
     super(configuration);
-    this.builderAssistant = builderAssistant;
+    this.assistant = assistant;
     this.context = context;
     this.requiredDatabaseId = databaseId;
     this.mapperClass = mapperClass;
@@ -133,7 +133,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     Class<?> resultTypeClass = resolveClass(resultType);
     String resultMap = context.getStringAttribute("resultMap");
     if (resultTypeClass == null && resultMap == null) {
-      resultTypeClass = MapperAnnotationBuilder.getMethodReturnType(builderAssistant.getCurrentNamespace(), id);
+      resultTypeClass = MapperAnnotationBuilder.getMethodReturnType(assistant.getCurrentNamespace(), id);
     }
     String resultSetType = context.getStringAttribute("resultSetType");
     ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);
@@ -142,15 +142,14 @@ public class XMLStatementBuilder extends BaseBuilder {
     String resultSets = context.getStringAttribute("resultSets");
     boolean dirtySelect = context.getBooleanAttribute("affectData", Boolean.FALSE);
 
-    return builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout,
-        parameterMap, parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache,
-        resultOrdered, keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect,
-        paramNameResolver);
+    return assistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
+        parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, resultOrdered,
+        keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect, paramNameResolver);
   }
 
   public KeyGenerator processKeyGenerator(String statementId, SqlCommandType sqlCommandType) {
     String keyStatementId = statementId + SelectKeyGenerator.SELECT_KEY_SUFFIX;
-    keyStatementId = builderAssistant.applyCurrentNamespace(keyStatementId, true);
+    keyStatementId = assistant.applyCurrentNamespace(keyStatementId, true);
 
     final KeyGenerator keyGenerator;
     if (configuration.hasKeyGenerator(keyStatementId)) {
@@ -173,7 +172,7 @@ public class XMLStatementBuilder extends BaseBuilder {
   }
 
   public void processInclude(XNode context) {
-    XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
+    XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, assistant);
     includeParser.applyIncludes(context.getNode());
   }
 
@@ -221,11 +220,11 @@ public class XMLStatementBuilder extends BaseBuilder {
     SqlSource sqlSource = langDriver.createSqlSource(configuration, nodeToHandle, parameterTypeClass);
     SqlCommandType sqlCommandType = SqlCommandType.SELECT;
 
-    builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
+    assistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
         parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, resultOrdered,
         keyGenerator, keyProperty, keyColumn, databaseId, langDriver, null, false, null);
 
-    id = builderAssistant.applyCurrentNamespace(id, false);
+    id = assistant.applyCurrentNamespace(id, false);
 
     MappedStatement keyStatement = configuration.getMappedStatement(id, false);
     configuration.addKeyGenerator(id, new SelectKeyGenerator(keyStatement, executeBefore));
@@ -244,7 +243,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     if (databaseId != null) {
       return false;
     }
-    id = builderAssistant.applyCurrentNamespace(id, false);
+    id = assistant.applyCurrentNamespace(id, false);
     if (!this.configuration.hasStatement(id, false)) {
       return true;
     }

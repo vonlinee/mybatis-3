@@ -148,6 +148,7 @@ public final class Resources {
     }
   }
 
+  @Nullable
   public static InputStream getResourceAsStreamOrNull(Class<?> contextClass, String resource) {
     try {
       return getResourceAsStream(contextClass, resource);

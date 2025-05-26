@@ -146,14 +146,19 @@ final class ExecutorTestHelper {
   static MappedStatement prepareSelectOneAuthorMappedStatement(final Configuration config) {
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
+    boolean lazyLoadingEnabled = config.isLazyLoadingEnabled();
+
     final ResultMap rm = new ResultMap.Builder(config, "defaultResultMap", Author.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).build());
-        add(new ResultMapping.Builder(config, "username", "username", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "password", "password", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "email", "email", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "bio", "bio", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "favouriteSection", "favourite_section",
+        add(new ResultMapping.Builder("id", lazyLoadingEnabled, "id", registry.getTypeHandler(int.class)).build());
+        add(new ResultMapping.Builder("username", lazyLoadingEnabled, "username", registry.getTypeHandler(String.class))
+            .build());
+        add(new ResultMapping.Builder("password", lazyLoadingEnabled, "password", registry.getTypeHandler(String.class))
+            .build());
+        add(new ResultMapping.Builder("email", lazyLoadingEnabled, "email", registry.getTypeHandler(String.class))
+            .build());
+        add(new ResultMapping.Builder("bio", lazyLoadingEnabled, "bio", registry.getTypeHandler(String.class)).build());
+        add(new ResultMapping.Builder("favouriteSection", lazyLoadingEnabled, "favourite_section",
             registry.getTypeHandler(Section.class)).build());
       }
     }).build();
@@ -173,14 +178,15 @@ final class ExecutorTestHelper {
 
   static MappedStatement prepareSelectAllAuthorsAutoMappedStatement(final Configuration config) {
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
+    final boolean lazyLoadingEnabled = config.isLazyLoadingEnabled();
     return new MappedStatement.Builder(config, "selectAuthorAutoMap",
         new StaticSqlSource("SELECT * FROM author ORDER BY id"), SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
           {
             add(new ResultMap.Builder(config, "defaultResultMap", Author.class, new ArrayList<>() {
               {
-                add(new ResultMapping.Builder(config, "favouriteSection", "favourite_section",
+                add(new ResultMapping.Builder("favouriteSection", lazyLoadingEnabled, "favourite_section",
                     registry.getTypeHandler(Section.class)).build());
-                add(new ResultMapping.Builder(config, null, "not_exists", Object.class).build());
+                add(new ResultMapping.Builder(null, lazyLoadingEnabled, "not_exists", Object.class).build());
               }
             }).build());
           }
@@ -189,6 +195,9 @@ final class ExecutorTestHelper {
 
   static MappedStatement prepareSelectOneAuthorMappedStatementWithConstructorResults(final Configuration config) {
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
+
+    final boolean lazyLoadingEnabled = config.isLazyLoadingEnabled();
+
     return new MappedStatement.Builder(config, "selectAuthor", new StaticSqlSource("SELECT * FROM author WHERE id = ?"),
         SqlCommandType.SELECT)
             .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
@@ -199,20 +208,21 @@ final class ExecutorTestHelper {
               {
                 add(new ResultMap.Builder(config, "defaultResultMap", Author.class, new ArrayList<>() {
                   {
-                    add(new ResultMapping.Builder(config, null, "id", registry.getTypeHandler(Integer.class))
-                        .javaType(int.class).flags(new ArrayList<>() {
+                    add(new ResultMapping.Builder(null, lazyLoadingEnabled, "id",
+                        registry.getTypeHandler(Integer.class)).javaType(int.class).flags(new ArrayList<>() {
                           {
                             add(ResultFlag.CONSTRUCTOR);
                           }
                         }).build());
-                    add(new ResultMapping.Builder(config, "username", "username", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "password", "password", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "email", "email", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "bio", "bio", registry.getTypeHandler(String.class)).build());
-                    add(new ResultMapping.Builder(config, "favouriteSection", "favourite_section",
+                    add(new ResultMapping.Builder("username", lazyLoadingEnabled, "username",
+                        registry.getTypeHandler(String.class)).build());
+                    add(new ResultMapping.Builder("password", lazyLoadingEnabled, "password",
+                        registry.getTypeHandler(String.class)).build());
+                    add(new ResultMapping.Builder("email", lazyLoadingEnabled, "email",
+                        registry.getTypeHandler(String.class)).build());
+                    add(new ResultMapping.Builder("bio", lazyLoadingEnabled, "bio",
+                        registry.getTypeHandler(String.class)).build());
+                    add(new ResultMapping.Builder("favouriteSection", lazyLoadingEnabled, "favourite_section",
                         registry.getTypeHandler(Section.class)).build());
                   }
                 }).build());
@@ -222,6 +232,7 @@ final class ExecutorTestHelper {
 
   static MappedStatement prepareSelectTwoSetsOfAuthorsProc(final Configuration config) {
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
+    final boolean lazyLoadingEnabled = config.isLazyLoadingEnabled();
     return new MappedStatement.Builder(config, "selectTwoSetsOfAuthors",
         new StaticSqlSource("{call selectTwoSetsOfAuthors(?,?)}"), SqlCommandType.SELECT)
             .statementType(StatementType.CALLABLE)
@@ -234,14 +245,16 @@ final class ExecutorTestHelper {
               {
                 ResultMap map = new ResultMap.Builder(config, "defaultResultMap", Author.class, new ArrayList<>() {
                   {
-                    add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).build());
-                    add(new ResultMapping.Builder(config, "username", "username", registry.getTypeHandler(String.class))
+                    add(new ResultMapping.Builder("id", lazyLoadingEnabled, "id", registry.getTypeHandler(int.class))
                         .build());
-                    add(new ResultMapping.Builder(config, "password", "password", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "email", "email", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "bio", "bio", registry.getTypeHandler(String.class)).build());
+                    add(new ResultMapping.Builder("username", lazyLoadingEnabled, "username",
+                        registry.getTypeHandler(String.class)).build());
+                    add(new ResultMapping.Builder("password", lazyLoadingEnabled, "password",
+                        registry.getTypeHandler(String.class)).build());
+                    add(new ResultMapping.Builder("email", lazyLoadingEnabled, "email",
+                        registry.getTypeHandler(String.class)).build());
+                    add(new ResultMapping.Builder("bio", lazyLoadingEnabled, "bio",
+                        registry.getTypeHandler(String.class)).build());
                   }
                 }).build();
                 add(map);
@@ -275,8 +288,10 @@ final class ExecutorTestHelper {
     final ResultMap discriminatorResultMap = new ResultMap.Builder(config, "postResultMap", HashMap.class,
         new ArrayList<>() {
           {
-            add(new ResultMapping.Builder(config, "subject", "subject", registry.getTypeHandler(String.class)).build());
-            add(new ResultMapping.Builder(config, "body", "body", registry.getTypeHandler(String.class)).build());
+            add(new ResultMapping.Builder("subject", config.isLazyLoadingEnabled(), "subject",
+                registry.getTypeHandler(String.class)).build());
+            add(new ResultMapping.Builder("body", config.isLazyLoadingEnabled(), "body",
+                registry.getTypeHandler(String.class)).build());
           }
         }).build();
     config.addResultMap(discriminatorResultMap);
@@ -285,11 +300,12 @@ final class ExecutorTestHelper {
           {
             add(new ResultMap.Builder(config, "defaultResultMap", HashMap.class, new ArrayList<>() {
               {
-                add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).build());
-                add(new ResultMapping.Builder(config, "blog_id", "blog_id", registry.getTypeHandler(int.class))
-                    .build());
+                add(new ResultMapping.Builder("id", config.isLazyLoadingEnabled(), "id",
+                    registry.getTypeHandler(int.class)).build());
+                add(new ResultMapping.Builder("blog_id", config.isLazyLoadingEnabled(), "blog_id",
+                    registry.getTypeHandler(int.class)).build());
               }
-            }).discriminator(new Discriminator.Builder(config,
+            }).discriminator(new Discriminator.Builder(
                 new ResultMapping.Builder(config, "section", "section", registry.getTypeHandler(String.class)).build(),
                 new HashMap<>() {
                   {

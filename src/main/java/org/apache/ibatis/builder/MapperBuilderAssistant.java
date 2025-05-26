@@ -78,6 +78,10 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return currentNamespace;
   }
 
+  public boolean hasUnresolvedCacheRef() {
+    return unresolvedCacheRef;
+  }
+
   public void setCurrentNamespace(String currentNamespace) {
     if (currentNamespace == null) {
       throw new BuilderException("The mapper element requires a namespace attribute to be specified.");
@@ -214,7 +218,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
       resultMap = applyCurrentNamespace(resultMap, true);
       namespaceDiscriminatorMap.put(e.getKey(), resultMap);
     }
-    return new Discriminator.Builder(configuration, resultMapping, namespaceDiscriminatorMap).build();
+    return new Discriminator.Builder(resultMapping, namespaceDiscriminatorMap).build();
   }
 
   public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType,
@@ -223,7 +227,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
       boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId,
       LanguageDriver lang, String resultSets, boolean dirtySelect, ParamNameResolver paramNameResolver) {
 
-    if (unresolvedCacheRef) {
+    if (hasUnresolvedCacheRef()) {
       throw new IncompleteElementException("Cache-ref not yet resolved");
     }
 

@@ -51,24 +51,46 @@ public class ResultMapping {
   public static class Builder {
     private final ResultMapping resultMapping = new ResultMapping();
 
+    @Deprecated
     public Builder(Configuration configuration, String property, String column, TypeHandler<?> typeHandler) {
       this(configuration, property);
       resultMapping.column = column;
       resultMapping.typeHandler = typeHandler;
     }
 
+    public Builder(String property, boolean lazyLoadingEnabled, String column, TypeHandler<?> typeHandler) {
+      this(property, lazyLoadingEnabled);
+      resultMapping.column = column;
+      resultMapping.typeHandler = typeHandler;
+    }
+
+    @Deprecated
     public Builder(Configuration configuration, String property, String column, Class<?> javaType) {
       this(configuration, property);
       resultMapping.column = column;
       resultMapping.javaType = javaType;
     }
 
+    public Builder(String property, boolean lazyLoadingEnabled, String column, Class<?> javaType) {
+      this(property, lazyLoadingEnabled);
+      resultMapping.column = column;
+      resultMapping.javaType = javaType;
+    }
+
+    @Deprecated
     public Builder(Configuration configuration, String property) {
       resultMapping.configuration = configuration;
       resultMapping.property = property;
       resultMapping.flags = new ArrayList<>();
       resultMapping.composites = new ArrayList<>();
       resultMapping.lazy = configuration.isLazyLoadingEnabled();
+    }
+
+    public Builder(String property, boolean lazyLoadingEnabled) {
+      resultMapping.property = property;
+      resultMapping.flags = new ArrayList<>();
+      resultMapping.composites = new ArrayList<>();
+      resultMapping.lazy = lazyLoadingEnabled;
     }
 
     public Builder(ResultMapping otherMapping) {

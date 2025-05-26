@@ -117,25 +117,29 @@ public class MapperAnnotationBuilder {
   }
 
   public void parse() {
+    parse(type);
+  }
+
+  public void parse(Class<?> type) {
     String resource = type.toString();
     if (!configuration.isResourceLoaded(resource)) {
       loadXmlResource(type);
       configuration.addLoadedResource(resource);
       assistant.setCurrentNamespace(type.getName());
-      parseCache();
-      parseCacheRef();
+      parseCache(type);
+      parseCacheRef(type);
       for (Method method : type.getMethods()) {
         if (!canHaveStatement(method)) {
           continue;
         }
         if (getAnnotationWrapper(method, false, Select.class, SelectProvider.class).isPresent()
             && method.getAnnotation(ResultMap.class) == null) {
-          parseResultMap(method);
+          parseResultMap(type, method);
         }
         try {
-          parseStatement(method);
+          parseStatement(type, method);
         } catch (IncompleteElementException e) {
-          configuration.addIncompleteMethod(new MethodResolver(this, method));
+          configuration.addIncompleteMethod(new MethodResolver(this, type, method));
         }
       }
     }
@@ -151,7 +155,7 @@ public class MapperAnnotationBuilder {
     return type.getName().replace('.', '/') + ".xml";
   }
 
-  private void loadXmlResource(Class<?> type) {
+  protected void loadXmlResource(Class<?> type) {
     // Spring may not know the real resource name so we check a flag
     // to prevent loading again a resource twice
     // this flag is set at XMLMapperBuilder#bindMapperForNamespace
@@ -172,7 +176,7 @@ public class MapperAnnotationBuilder {
     }
   }
 
-  private void parseCache() {
+  protected void parseCache(Class<?> type) {
     CacheNamespace cacheDomain = type.getAnnotation(CacheNamespace.class);
     if (cacheDomain != null) {
       Integer size = cacheDomain.size() == 0 ? null : cacheDomain.size();
@@ -183,7 +187,7 @@ public class MapperAnnotationBuilder {
     }
   }
 
-  private Properties convertToProperties(Property[] properties) {
+  protected Properties convertToProperties(Property[] properties) {
     if (properties.length == 0) {
       return null;
     }
@@ -194,7 +198,7 @@ public class MapperAnnotationBuilder {
     return props;
   }
 
-  private void parseCacheRef() {
+  protected void parseCacheRef(Class<?> type) {
     CacheNamespaceRef cacheDomainRef = type.getAnnotation(CacheNamespaceRef.class);
     if (cacheDomainRef != null) {
       Class<?> refType = cacheDomainRef.value();
@@ -214,17 +218,17 @@ public class MapperAnnotationBuilder {
     }
   }
 
-  private String parseResultMap(Method method) {
+  protected String parseResultMap(Class<?> type, Method method) {
     Class<?> returnType = getReturnType(method, type);
     Arg[] args = method.getAnnotationsByType(Arg.class);
     Result[] results = method.getAnnotationsByType(Result.class);
     TypeDiscriminator typeDiscriminator = method.getAnnotation(TypeDiscriminator.class);
-    String resultMapId = generateResultMapName(method);
+    String resultMapId = generateResultMapName(type, method);
     applyResultMap(resultMapId, returnType, args, results, typeDiscriminator);
     return resultMapId;
   }
 
-  private String generateResultMapName(Method method) {
+  protected String generateResultMapName(Class<?> type, Method method) {
     Results results = method.getAnnotation(Results.class);
     if (results != null && !results.id().isEmpty()) {
       return type.getName() + "." + results.id();
@@ -240,7 +244,7 @@ public class MapperAnnotationBuilder {
     return type.getName() + "." + method.getName() + suffix;
   }
 
-  private void applyResultMap(String resultMapId, Class<?> returnType, Arg[] args, Result[] results,
+  protected void applyResultMap(String resultMapId, Class<?> returnType, Arg[] args, Result[] results,
       TypeDiscriminator discriminator) {
     List<ResultMapping> resultMappings = new ArrayList<>();
     applyConstructorArgs(args, returnType, resultMappings, resultMapId);
@@ -251,7 +255,8 @@ public class MapperAnnotationBuilder {
     createDiscriminatorResultMaps(resultMapId, returnType, discriminator);
   }
 
-  private void createDiscriminatorResultMaps(String resultMapId, Class<?> resultType, TypeDiscriminator discriminator) {
+  protected void createDiscriminatorResultMaps(String resultMapId, Class<?> resultType,
+      TypeDiscriminator discriminator) {
     if (discriminator != null) {
       for (Case c : discriminator.cases()) {
         String caseResultMapId = resultMapId + "-" + c.value();
@@ -265,7 +270,7 @@ public class MapperAnnotationBuilder {
     }
   }
 
-  private Discriminator applyDiscriminator(String resultMapId, Class<?> resultType, TypeDiscriminator discriminator) {
+  protected Discriminator applyDiscriminator(String resultMapId, Class<?> resultType, TypeDiscriminator discriminator) {
     if (discriminator != null) {
       String column = discriminator.column();
       Class<?> javaType = discriminator.javaType() == void.class ? String.class : discriminator.javaType();
@@ -285,14 +290,14 @@ public class MapperAnnotationBuilder {
     return null;
   }
 
-  void parseStatement(Method method) {
+  protected void parseStatement(Class<?> type, Method method) {
     final Class<?> parameterTypeClass = getParameterType(method);
     final ParamNameResolver paramNameResolver = new ParamNameResolver(configuration, method, type);
     final LanguageDriver languageDriver = getLanguageDriver(method);
 
     getAnnotationWrapper(method, true, statementAnnotationTypes).ifPresent(statementAnnotation -> {
       final SqlSource sqlSource = buildSqlSource(statementAnnotation.getAnnotation(), parameterTypeClass,
-          paramNameResolver, languageDriver, method);
+          paramNameResolver, languageDriver, type, method);
       final SqlCommandType sqlCommandType = statementAnnotation.getSqlCommandType();
       final Options options = getAnnotationWrapper(method, false, Options.class).map(x -> (Options) x.getAnnotation())
           .orElse(null);
@@ -358,7 +363,7 @@ public class MapperAnnotationBuilder {
         if (resultMapAnnotation != null) {
           resultMapId = String.join(",", resultMapAnnotation.value());
         } else {
-          resultMapId = generateResultMapName(method);
+          resultMapId = generateResultMapName(type, method);
         }
       }
 
@@ -373,7 +378,7 @@ public class MapperAnnotationBuilder {
     });
   }
 
-  private LanguageDriver getLanguageDriver(Method method) {
+  protected LanguageDriver getLanguageDriver(Method method) {
     Lang lang = method.getAnnotation(Lang.class);
     Class<? extends LanguageDriver> langClass = null;
     if (lang != null) {
@@ -382,7 +387,7 @@ public class MapperAnnotationBuilder {
     return configuration.getLanguageDriver(langClass);
   }
 
-  private Class<?> getParameterType(Method method) {
+  protected Class<?> getParameterType(Method method) {
     Class<?> parameterType = null;
     Parameter[] parameters = method.getParameters();
     for (Parameter param : parameters) {
@@ -595,7 +600,7 @@ public class MapperAnnotationBuilder {
   }
 
   private SqlSource buildSqlSource(Annotation annotation, Class<?> parameterType, ParamNameResolver paramNameResolver,
-      LanguageDriver languageDriver, Method method) {
+      LanguageDriver languageDriver, Class<?> type, Method method) {
     if (annotation instanceof Select) {
       return buildSqlSourceFromStrings(((Select) annotation).value(), parameterType, paramNameResolver, languageDriver);
     } else if (annotation instanceof Update) {

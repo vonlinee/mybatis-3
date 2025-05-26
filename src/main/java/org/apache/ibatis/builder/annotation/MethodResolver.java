@@ -23,14 +23,16 @@ import java.lang.reflect.Method;
 public class MethodResolver {
   private final MapperAnnotationBuilder annotationBuilder;
   private final Method method;
+  private final Class<?> type;
 
-  public MethodResolver(MapperAnnotationBuilder annotationBuilder, Method method) {
+  public MethodResolver(MapperAnnotationBuilder annotationBuilder, Class<?> type, Method method) {
     this.annotationBuilder = annotationBuilder;
+    this.type = type;
     this.method = method;
   }
 
   public void resolve() {
-    annotationBuilder.parseStatement(method);
+    annotationBuilder.parseStatement(type, method);
   }
 
 }

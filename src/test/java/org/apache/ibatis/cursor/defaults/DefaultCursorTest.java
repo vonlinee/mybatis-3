@@ -103,6 +103,8 @@ class DefaultCursorTest {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
+    final boolean lazyLoadingEnabled = config.isLazyLoadingEnabled();
+
     ResultMap nestedResultMap = new ResultMap.Builder(config, "roleMap", HashMap.class, new ArrayList<>() {
       {
         add(new ResultMapping.Builder(config, "role", "role", registry.getTypeHandler(String.class)).build());
@@ -116,7 +118,7 @@ class DefaultCursorTest {
             add(new ResultMap.Builder(config, "personMap", HashMap.class, new ArrayList<>() {
               {
                 add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(Integer.class)).build());
-                add(new ResultMapping.Builder(config, "roles").nestedResultMapId("roleMap").build());
+                add(new ResultMapping.Builder("roles", lazyLoadingEnabled).nestedResultMapId("roleMap").build());
               }
             }).build());
           }
