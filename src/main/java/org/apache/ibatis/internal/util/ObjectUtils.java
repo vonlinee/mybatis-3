@@ -23,9 +23,11 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.TimeZone;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class ObjectUtils {
@@ -159,8 +161,7 @@ public final class ObjectUtils {
    */
   public static Object[] toObjectArray(@Nullable Object source) {
     if (source instanceof Object[]) {
-      Object[] objects = (Object[]) source;
-      return objects;
+      return (Object[]) source;
     }
     if (source == null) {
       return EMPTY_OBJECT_ARRAY;
@@ -294,8 +295,7 @@ public final class ObjectUtils {
   private static long checkedLongValue(Number number, Class<? extends Number> targetClass) {
     BigInteger bigInt = null;
     if (number instanceof BigInteger) {
-      BigInteger bigInteger = (BigInteger) number;
-      bigInt = bigInteger;
+      bigInt = (BigInteger) number;
     } else if (number instanceof BigDecimal) {
       BigDecimal bigDecimal = (BigDecimal) number;
       bigInt = bigDecimal.toBigInteger();
@@ -445,8 +445,7 @@ public final class ObjectUtils {
       return NULL_STRING;
     }
     if (obj instanceof String) {
-      String string = (String) obj;
-      return string;
+      return (String) obj;
     }
     if (obj instanceof Object[]) {
       Object[] objects = (Object[]) obj;
@@ -486,5 +485,26 @@ public final class ObjectUtils {
     }
     String str = obj.toString();
     return (str != null ? str : EMPTY_STRING);
+  }
+
+  @NotNull
+  public static <T, D extends T> T nonNullOrElse(@Nullable T obj, @NotNull D defaultValue) {
+    return Objects.requireNonNullElse(obj, defaultValue);
+  }
+
+  @Nullable
+  public static <T extends CharSequence, R extends T> T nonEmptyOrElse(@Nullable T charSequence, R defaultValue) {
+    if (StringUtils.isEmpty(charSequence)) {
+      return defaultValue;
+    }
+    return charSequence;
+  }
+
+  @Nullable
+  public static <T extends CharSequence, R extends T> T nonBlankOrElse(@Nullable T charSequence, R defaultValue) {
+    if (StringUtils.isBlank(charSequence)) {
+      return defaultValue;
+    }
+    return charSequence;
   }
 }

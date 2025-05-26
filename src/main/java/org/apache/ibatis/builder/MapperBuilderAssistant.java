@@ -34,6 +34,7 @@ import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.internal.util.CollectionUtils;
+import org.apache.ibatis.internal.util.ObjectUtils;
 import org.apache.ibatis.mapping.CacheBuilder;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -138,8 +139,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
       Integer size, boolean readWrite, boolean blocking, Properties props) {
     // @formatter:off
     Cache cache = new CacheBuilder(currentNamespace)
-      .implementation(valueOrDefault(typeClass, PerpetualCache.class))
-      .addDecorator(valueOrDefault(evictionClass, LruCache.class))
+      .implementation(ObjectUtils.nonNullOrElse(typeClass, PerpetualCache.class))
+      .addDecorator(ObjectUtils.nonNullOrElse(evictionClass, LruCache.class))
       .clearInterval(flushInterval).size(size)
       .readWrite(readWrite)
       .blocking(blocking)
@@ -327,10 +328,6 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
         parameterType, resultMap, resultType, resultSetType, flushCache, useCache, resultOrdered, keyGenerator,
         keyProperty, keyColumn, databaseId, lang, null);
-  }
-
-  private <T> T valueOrDefault(T value, T defaultValue) {
-    return value == null ? defaultValue : value;
   }
 
   private ParameterMap getStatementParameterMap(String parameterMapName, Class<?> parameterTypeClass,

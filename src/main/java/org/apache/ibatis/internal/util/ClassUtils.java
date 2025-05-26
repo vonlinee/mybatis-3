@@ -15,7 +15,10 @@
  */
 package org.apache.ibatis.internal.util;
 
+import java.io.Closeable;
+import java.io.Externalizable;
 import java.io.File;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -33,13 +36,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TimeZone;
@@ -134,12 +141,73 @@ public final class ClassUtils {
   private static final Map<String, Class<?>> commonClassCache = new HashMap<>(64);
 
   /**
+   * Common Java language interfaces which are supposed to be ignored when searching for 'primary' user-level
+   * interfaces.
+   */
+  private static final Set<Class<?>> javaLanguageInterfaces;
+
+  static {
+    primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
+    primitiveWrapperTypeMap.put(Byte.class, byte.class);
+    primitiveWrapperTypeMap.put(Character.class, char.class);
+    primitiveWrapperTypeMap.put(Double.class, double.class);
+    primitiveWrapperTypeMap.put(Float.class, float.class);
+    primitiveWrapperTypeMap.put(Integer.class, int.class);
+    primitiveWrapperTypeMap.put(Long.class, long.class);
+    primitiveWrapperTypeMap.put(Short.class, short.class);
+    primitiveWrapperTypeMap.put(Void.class, void.class);
+
+    // Map entry iteration is less expensive to initialize than forEach with lambdas
+    for (Map.Entry<Class<?>, Class<?>> entry : primitiveWrapperTypeMap.entrySet()) {
+      primitiveTypeToWrapperMap.put(entry.getValue(), entry.getKey());
+      registerCommonClasses(entry.getKey());
+    }
+
+    Set<Class<?>> primitiveTypes = new HashSet<>(32);
+    primitiveTypes.addAll(primitiveWrapperTypeMap.values());
+    Collections.addAll(primitiveTypes, boolean[].class, byte[].class, char[].class, double[].class, float[].class,
+        int[].class, long[].class, short[].class);
+    for (Class<?> primitiveType : primitiveTypes) {
+      primitiveTypeNameMap.put(primitiveType.getName(), primitiveType);
+    }
+
+    registerCommonClasses(Boolean[].class, Byte[].class, Character[].class, Double[].class, Float[].class,
+        Integer[].class, Long[].class, Short[].class);
+    registerCommonClasses(Number.class, Number[].class, String.class, String[].class, Class.class, Class[].class,
+        Object.class, Object[].class);
+    registerCommonClasses(Throwable.class, Exception.class, RuntimeException.class, Error.class,
+        StackTraceElement.class, StackTraceElement[].class);
+    registerCommonClasses(Enum.class, Iterable.class, Iterator.class, Enumeration.class, Collection.class, List.class,
+        Set.class, Map.class, Map.Entry.class, Optional.class);
+
+    Class<?>[] javaLanguageInterfaceArray = { Serializable.class, Externalizable.class, Closeable.class,
+        AutoCloseable.class, Cloneable.class, Comparable.class };
+    registerCommonClasses(javaLanguageInterfaceArray);
+    javaLanguageInterfaces = new HashSet<>(Arrays.asList(javaLanguageInterfaceArray));
+  }
+
+  /**
    * Register the given common classes with the ClassUtils cache.
    */
   private static void registerCommonClasses(Class<?>... commonClasses) {
     for (Class<?> clazz : commonClasses) {
       commonClassCache.put(clazz.getName(), clazz);
     }
+  }
+
+  /**
+   * Determine whether the given interface is a common Java language interface: {@link Serializable},
+   * {@link Externalizable}, {@link Closeable}, {@link AutoCloseable}, {@link Cloneable}, {@link Comparable} - all of
+   * which can be ignored when looking for 'primary' user-level interfaces. Common characteristics: no service-level
+   * operations, no bean property methods, no default methods.
+   *
+   * @param ifc
+   *          the interface to check
+   *
+   * @since 5.0.3
+   */
+  public static boolean isJavaLanguageInterface(Class<?> ifc) {
+    return javaLanguageInterfaces.contains(ifc);
   }
 
   /**
