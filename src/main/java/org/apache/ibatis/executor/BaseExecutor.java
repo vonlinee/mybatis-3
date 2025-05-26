@@ -151,9 +151,7 @@ public abstract class BaseExecutor implements Executor {
   public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler<E> resultHandler,
       CacheKey key, BoundSql boundSql) throws SQLException {
     ErrorContext.instance().resource(ms.getResource()).activity("executing a query").object(ms.getId());
-    if (closed) {
-      throw new ExecutorException("Executor was closed.");
-    }
+    checkIfClosed();
     if (queryStack == 0 && ms.isFlushCacheRequired()) {
       clearLocalCache();
     }
@@ -378,39 +376,4 @@ public abstract class BaseExecutor implements Executor {
   public void setExecutorWrapper(Executor wrapper) {
     this.wrapper = wrapper;
   }
-
-  private static class DeferredLoad {
-
-    private final MetaObject resultObject;
-    private final String property;
-    private final Class<?> targetType;
-    private final CacheKey key;
-    private final Cache localCache;
-    private final ResultExtractor resultExtractor;
-
-    // issue #781
-    public DeferredLoad(MetaObject resultObject, String property, CacheKey key, Cache localCache,
-        Configuration configuration, Class<?> targetType) {
-      this.resultObject = resultObject;
-      this.property = property;
-      this.key = key;
-      this.localCache = localCache;
-      this.resultExtractor = new ResultExtractor(configuration, configuration.getObjectFactory());
-      this.targetType = targetType;
-    }
-
-    public boolean canLoad() {
-      return localCache.getObject(key) != null && localCache.getObject(key) != EXECUTION_PLACEHOLDER;
-    }
-
-    public void load() {
-      @SuppressWarnings("unchecked")
-      // we suppose we get back a List
-      List<Object> list = (List<Object>) localCache.getObject(key);
-      Object value = resultExtractor.extractObjectFromList(list, targetType);
-      resultObject.setValue(property, value);
-    }
-
-  }
-
 }
