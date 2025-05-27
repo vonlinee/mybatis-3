@@ -210,17 +210,17 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
   }
 
   @Override
-  public void select(String statement, ResultHandler handler) {
+  public <E> void select(String statement, ResultHandler<E> handler) {
     sqlSessionProxy.select(statement, handler);
   }
 
   @Override
-  public void select(String statement, Object parameter, ResultHandler handler) {
+  public <E> void select(String statement, Object parameter, ResultHandler<E> handler) {
     sqlSessionProxy.select(statement, parameter, handler);
   }
 
   @Override
-  public void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
+  public <E> void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler<E> handler) {
     sqlSessionProxy.select(statement, parameter, rowBounds, handler);
   }
 

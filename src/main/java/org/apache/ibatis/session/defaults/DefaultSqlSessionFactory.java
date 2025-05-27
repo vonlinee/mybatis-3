@@ -114,7 +114,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
       try {
         autoCommit = connection.getAutoCommit();
       } catch (SQLException e) {
-        // Failover to true, as most poor drivers
+        // Fail over to true, as most poor drivers
         // or databases won't support transactions
         autoCommit = true;
       }

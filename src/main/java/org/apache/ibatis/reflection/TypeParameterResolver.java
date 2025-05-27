@@ -380,7 +380,7 @@ public class TypeParameterResolver {
 
     @Override
     public String toString() {
-      return new StringBuilder().append(genericComponentType.toString()).append("[]").toString();
+      return genericComponentType.toString() + "[]";
     }
   }
 }

@@ -450,22 +450,6 @@ public class Configuration {
     this.aggressiveLazyLoading = aggressiveLazyLoading;
   }
 
-  /**
-   * @deprecated You can safely remove the call to this method as this option had no effect.
-   */
-  @Deprecated
-  public boolean isMultipleResultSetsEnabled() {
-    return true;
-  }
-
-  /**
-   * @deprecated You can safely remove the call to this method as this option had no effect.
-   */
-  @Deprecated
-  public void setMultipleResultSetsEnabled(boolean multipleResultSetsEnabled) {
-    // nop
-  }
-
   public Set<String> getLazyLoadTriggerMethods() {
     return lazyLoadTriggerMethods;
   }
@@ -668,6 +652,11 @@ public class Configuration {
     getLanguageRegistry().setDefaultDriverClass(driver);
   }
 
+  /**
+   * Gets the default scripting language instance.
+   *
+   * @return the default scripting language instance
+   */
   public LanguageDriver getDefaultScriptingLanguageInstance() {
     return languageRegistry.getDefaultDriver();
   }
@@ -688,18 +677,6 @@ public class Configuration {
     }
     languageRegistry.register(langClass);
     return languageRegistry.getDriver(langClass);
-  }
-
-  /**
-   * Gets the default scripting language instance.
-   *
-   * @return the default scripting language instance
-   *
-   * @deprecated Use {@link #getDefaultScriptingLanguageInstance()}
-   */
-  @Deprecated
-  public LanguageDriver getDefaultScriptingLanuageInstance() {
-    return getDefaultScriptingLanguageInstance();
   }
 
   public MetaObject newMetaObject(Object object) {
@@ -829,14 +806,6 @@ public class Configuration {
     }
   }
 
-  /**
-   * @deprecated call {@link #parsePendingCacheRefs(boolean)}
-   */
-  @Deprecated
-  public Collection<CacheRefResolver> getIncompleteCacheRefs() {
-    return incompleteCacheRefs;
-  }
-
   public void addIncompleteCacheRef(CacheRefResolver incompleteCacheRef) {
     incompleteCacheRefsLock.lock();
     try {
@@ -844,14 +813,6 @@ public class Configuration {
     } finally {
       incompleteCacheRefsLock.unlock();
     }
-  }
-
-  /**
-   * @deprecated call {@link #parsePendingResultMaps(boolean)}
-   */
-  @Deprecated
-  public Collection<ResultMapResolver> getIncompleteResultMaps() {
-    return incompleteResultMaps;
   }
 
   public void addIncompleteResultMap(ResultMapResolver resultMapResolver) {
@@ -870,14 +831,6 @@ public class Configuration {
     } finally {
       incompleteMethodsLock.unlock();
     }
-  }
-
-  /**
-   * @deprecated call {@link #parsePendingMethods(boolean)}
-   */
-  @Deprecated
-  public Collection<MethodResolver> getIncompleteMethods() {
-    return incompleteMethods;
   }
 
   public MappedStatement getMappedStatement(String id) {
