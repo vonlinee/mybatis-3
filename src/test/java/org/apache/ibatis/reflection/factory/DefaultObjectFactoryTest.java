@@ -54,7 +54,7 @@ class DefaultObjectFactoryTest {
       defaultObjectFactory.create(TestClass.class, List.of(String.class), List.of("foo"));
       Assertions.fail("Should have thrown ReflectionException");
     } catch (Exception e) {
-      Assertions.assertTrue(e instanceof ReflectionException, "Should be ReflectionException");
+      Assertions.assertInstanceOf(ReflectionException.class, e, "Should be ReflectionException");
       Assertions.assertTrue(e.getMessage().contains("(String)"), "Should not have trailing commas in types list");
       Assertions.assertTrue(e.getMessage().contains("(foo)"), "Should not have trailing commas in values list");
     }
@@ -63,34 +63,34 @@ class DefaultObjectFactoryTest {
   @Test
   void createHashMap() {
     DefaultObjectFactory defaultObjectFactory = new DefaultObjectFactory();
-    Map map = defaultObjectFactory.create(Map.class, null, null);
-    Assertions.assertTrue(map instanceof HashMap, "Should be HashMap");
+    Map<?, ?> map = defaultObjectFactory.create(Map.class, null, null);
+    Assertions.assertInstanceOf(HashMap.class, map, "Should be HashMap");
   }
 
   @Test
   void createArrayList() {
     DefaultObjectFactory defaultObjectFactory = new DefaultObjectFactory();
-    List list = defaultObjectFactory.create(List.class);
-    Assertions.assertTrue(list instanceof ArrayList, " list should be ArrayList");
+    List<?> list = defaultObjectFactory.create(List.class);
+    Assertions.assertInstanceOf(ArrayList.class, list, " list should be ArrayList");
 
-    Collection collection = defaultObjectFactory.create(Collection.class);
-    Assertions.assertTrue(collection instanceof ArrayList, " collection should be ArrayList");
+    Collection<?> collection = defaultObjectFactory.create(Collection.class);
+    Assertions.assertInstanceOf(ArrayList.class, collection, " collection should be ArrayList");
 
-    Iterable iterable = defaultObjectFactory.create(Iterable.class);
-    Assertions.assertTrue(iterable instanceof ArrayList, " iterable should be ArrayList");
+    Iterable<?> iterable = defaultObjectFactory.create(Iterable.class);
+    Assertions.assertInstanceOf(ArrayList.class, iterable, " iterable should be ArrayList");
   }
 
   @Test
   void createTreeSet() {
     DefaultObjectFactory defaultObjectFactory = new DefaultObjectFactory();
-    SortedSet sortedSet = defaultObjectFactory.create(SortedSet.class);
-    Assertions.assertTrue(sortedSet instanceof TreeSet, " sortedSet should be TreeSet");
+    SortedSet<?> sortedSet = defaultObjectFactory.create(SortedSet.class);
+    Assertions.assertInstanceOf(TreeSet.class, sortedSet, " sortedSet should be TreeSet");
   }
 
   @Test
   void createHashSet() {
     DefaultObjectFactory defaultObjectFactory = new DefaultObjectFactory();
-    Set set = defaultObjectFactory.create(Set.class);
-    Assertions.assertTrue(set instanceof HashSet, " set should be HashSet");
+    Set<?> set = defaultObjectFactory.create(Set.class);
+    Assertions.assertInstanceOf(HashSet.class, set, " set should be HashSet");
   }
 }

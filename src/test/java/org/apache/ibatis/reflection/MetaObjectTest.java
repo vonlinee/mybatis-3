@@ -121,9 +121,9 @@ class MetaObjectTest {
   void shouldGetReadablePropertyNames() {
     RichType rich = new RichType();
     MetaObject meta = SystemMetaObject.forObject(rich);
-    String[] readables = meta.getGetterNames();
-    assertEquals(5, readables.length);
-    for (String readable : readables) {
+    String[] readableNames = meta.getGetterNames();
+    assertEquals(5, readableNames.length);
+    for (String readable : readableNames) {
       assertTrue(meta.hasGetter(readable));
       assertTrue(meta.hasGetter("richType." + readable));
     }
@@ -134,9 +134,9 @@ class MetaObjectTest {
   void shouldGetWriteablePropertyNames() {
     RichType rich = new RichType();
     MetaObject meta = SystemMetaObject.forObject(rich);
-    String[] writeables = meta.getSetterNames();
-    assertEquals(5, writeables.length);
-    for (String writeable : writeables) {
+    String[] writeableNames = meta.getSetterNames();
+    assertEquals(5, writeableNames.length);
+    for (String writeable : writeableNames) {
       assertTrue(meta.hasSetter(writeable));
       assertTrue(meta.hasSetter("richType." + writeable));
     }

@@ -45,14 +45,13 @@ class MetaClassTest {
       meta.getGetterType("aString");
       fail("should have thrown ReflectionException");
     } catch (ReflectionException expected) {
-      assertEquals(
-          "There is no getter for property named \'aString\' in \'class org.apache.ibatis.domain.misc.RichType\'",
+      assertEquals("There is no getter for property named 'aString' in 'class org.apache.ibatis.domain.misc.RichType'",
           expected.getMessage());
     }
   }
 
   @Test
-  void shouldCheckGetterExistance() {
+  void shouldCheckGetterExistence() {
     ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
     MetaClass meta = MetaClass.forClass(RichType.class, reflectorFactory);
     assertTrue(meta.hasGetter("richField"));
@@ -74,7 +73,7 @@ class MetaClassTest {
   }
 
   @Test
-  void shouldCheckSetterExistance() {
+  void shouldCheckSetterExistence() {
     ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
     MetaClass meta = MetaClass.forClass(RichType.class, reflectorFactory);
     assertTrue(meta.hasSetter("richField"));

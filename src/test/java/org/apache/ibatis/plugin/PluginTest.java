@@ -61,7 +61,7 @@ class PluginTest {
   }
 
   static final class SchemaHolder {
-    private static ThreadLocal<String> value = ThreadLocal.withInitial(() -> "PUBLIC");
+    private static final ThreadLocal<String> value = ThreadLocal.withInitial(() -> "PUBLIC");
 
     public static void set(String tenantName) {
       value.set(tenantName);

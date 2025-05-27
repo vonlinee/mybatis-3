@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 class ParamNameResolverTest {
 
   // @formatter:off
-  class A {
+  static class A {
     void m1(@Param("p") Integer p) {}
     void m2(List<String> p) {}
     void m3(Integer[] p) {}

@@ -273,15 +273,15 @@ class ReflectorTest {
     ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
     Reflector reflector = reflectorFactory.findForClass(BeanClass.class);
 
-    List<String> getableProps = Arrays.asList(reflector.getGettablePropertyNames());
-    assertTrue(getableProps.contains("prop1"));
-    assertTrue(getableProps.contains("prop2"));
+    List<String> gettableProps = Arrays.asList(reflector.getGettablePropertyNames());
+    assertTrue(gettableProps.contains("prop1"));
+    assertTrue(gettableProps.contains("prop2"));
     assertEquals("prop1", reflector.findPropertyName("PROP1"));
     assertEquals("prop2", reflector.findPropertyName("PROP2"));
 
     assertEquals(Integer.class, reflector.getGetterType("prop1"));
     Invoker getInvoker = reflector.getGetInvoker("prop1");
-    assertEquals(Integer.valueOf(1), getInvoker.invoke(new BeanClass(), null));
+    assertEquals(1, getInvoker.invoke(new BeanClass(), null));
 
     Class<?> paramType = reflector.getGetterType("prop2");
     assertEquals(int.class, paramType);
@@ -321,7 +321,7 @@ class ReflectorTest {
 
     assertEquals(Integer.class, reflector.getGetterType("prop1"));
     Invoker getInvoker = reflector.getGetInvoker("prop1");
-    assertEquals(Integer.valueOf(1), getInvoker.invoke(new BeanClass(), null));
+    assertEquals(1, getInvoker.invoke(new BeanClass(), null));
 
     Class<?> returnType = reflector.getGetterType("prop2");
     assertTrue(Integer.class.equals(returnType) || boolean.class.equals(returnType));
@@ -360,11 +360,11 @@ class ReflectorTest {
     @SuppressWarnings("unused")
     class Bean {
       public Integer isBool() {
-        return Integer.valueOf(1);
+        return 1;
       }
 
       public Integer getBool() {
-        return Integer.valueOf(2);
+        return 2;
       }
 
       public void setBool(boolean bool) {

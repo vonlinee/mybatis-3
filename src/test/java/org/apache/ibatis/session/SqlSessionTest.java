@@ -346,7 +346,7 @@ class SqlSessionTest extends BaseDataTest {
     try (SqlSession session = sqlMapper.openSession()) {
       Blog blog = session
           .selectOne("org.apache.ibatis.domain.blog.mappers.BlogMapper.selectBlogWithPostsUsingSubSelectLazily", 1);
-      Assertions.assertTrue(blog instanceof Proxy);
+      Assertions.assertInstanceOf(Proxy.class, blog);
       assertEquals("Jim Business", blog.getTitle());
       assertEquals(2, blog.getPosts().size());
       assertEquals("Corn nuts", blog.getPosts().get(0).getSubject());
@@ -588,7 +588,7 @@ class SqlSessionTest extends BaseDataTest {
     Configuration configuration = new Configuration(sqlMapper.getConfiguration().getEnvironment());
     configuration.addMapper(AuthorMapperWithMultipleHandlers.class);
     SqlSessionFactory sqlMapperWithMultipleHandlers = new DefaultSqlSessionFactory(configuration);
-    try (SqlSession sqlSession = sqlMapperWithMultipleHandlers.openSession();) {
+    try (SqlSession sqlSession = sqlMapperWithMultipleHandlers.openSession()) {
       DefaultResultHandler handler1 = new DefaultResultHandler();
       DefaultResultHandler handler2 = new DefaultResultHandler();
       AuthorMapperWithMultipleHandlers mapper = sqlSession.getMapper(AuthorMapperWithMultipleHandlers.class);
@@ -601,7 +601,7 @@ class SqlSessionTest extends BaseDataTest {
     Configuration configuration = new Configuration(sqlMapper.getConfiguration().getEnvironment());
     configuration.addMapper(AuthorMapperWithRowBounds.class);
     SqlSessionFactory sqlMapperWithMultipleHandlers = new DefaultSqlSessionFactory(configuration);
-    try (SqlSession sqlSession = sqlMapperWithMultipleHandlers.openSession();) {
+    try (SqlSession sqlSession = sqlMapperWithMultipleHandlers.openSession()) {
       RowBounds bounds1 = new RowBounds(0, 1);
       RowBounds bounds2 = new RowBounds(0, 1);
       AuthorMapperWithRowBounds mapper = sqlSession.getMapper(AuthorMapperWithRowBounds.class);
@@ -652,7 +652,7 @@ class SqlSessionTest extends BaseDataTest {
   void shouldSelectAllPostsUsingMapperClass() {
     try (SqlSession session = sqlMapper.openSession()) {
       BlogMapper mapper = session.getMapper(BlogMapper.class);
-      List<Map> posts = mapper.selectAllPosts();
+      List<Map<?, ?>> posts = mapper.selectAllPosts();
       assertEquals(5, posts.size());
     }
   }
@@ -661,14 +661,14 @@ class SqlSessionTest extends BaseDataTest {
   void shouldLimitResultsUsingMapperClass() {
     try (SqlSession session = sqlMapper.openSession()) {
       BlogMapper mapper = session.getMapper(BlogMapper.class);
-      List<Map> posts = mapper.selectAllPosts(new RowBounds(0, 2), null);
+      List<Map<?, ?>> posts = mapper.selectAllPosts(new RowBounds(0, 2), null);
       assertEquals(2, posts.size());
       assertEquals(1, posts.get(0).get("ID"));
       assertEquals(2, posts.get(1).get("ID"));
     }
   }
 
-  private static class TestResultHandler implements ResultHandler {
+  private static class TestResultHandler implements ResultHandler<Object> {
     int count;
 
     @Override
@@ -686,7 +686,7 @@ class SqlSessionTest extends BaseDataTest {
     }
   }
 
-  private static class TestResultStopHandler implements ResultHandler {
+  private static class TestResultStopHandler implements ResultHandler<Object> {
     int count;
 
     @Override
@@ -711,7 +711,7 @@ class SqlSessionTest extends BaseDataTest {
   void shouldOffsetAndLimitResultsUsingMapperClass() {
     try (SqlSession session = sqlMapper.openSession()) {
       BlogMapper mapper = session.getMapper(BlogMapper.class);
-      List<Map> posts = mapper.selectAllPosts(new RowBounds(2, 3));
+      List<Map<?, ?>> posts = mapper.selectAllPosts(new RowBounds(2, 3));
       assertEquals(3, posts.size());
       assertEquals(3, posts.get(0).get("ID"));
       assertEquals(4, posts.get(1).get("ID"));
@@ -732,7 +732,6 @@ class SqlSessionTest extends BaseDataTest {
     try (SqlSession session = sqlMapper.openSession()) {
       List<Post> posts = session.selectList("org.apache.ibatis.domain.blog.mappers.PostMapper.findPost",
           new HashMap<String, Integer>() {
-            private static final long serialVersionUID = 1L;
             {
               put("id", 1);
             }
@@ -746,10 +745,8 @@ class SqlSessionTest extends BaseDataTest {
     try (SqlSession session = sqlMapper.openSession()) {
       List<Post> posts = session.selectList("org.apache.ibatis.domain.blog.mappers.PostMapper.findPost",
           new HashMap<String, List<Integer>>() {
-            private static final long serialVersionUID = 1L;
             {
-              put("ids", new ArrayList<Integer>() {
-                private static final long serialVersionUID = 1L;
+              put("ids", new ArrayList<>() {
                 {
                   add(1);
                   add(2);
@@ -767,7 +764,6 @@ class SqlSessionTest extends BaseDataTest {
     try (SqlSession session = sqlMapper.openSession()) {
       List<Post> posts = session.selectList("org.apache.ibatis.domain.blog.mappers.PostMapper.findPost",
           new HashMap<String, Integer>() {
-            private static final long serialVersionUID = 1L;
             {
               put("blog_id", 1);
             }
@@ -781,7 +777,6 @@ class SqlSessionTest extends BaseDataTest {
     try (SqlSession session = sqlMapper.openSession()) {
       List<Post> posts = session.selectList("org.apache.ibatis.domain.blog.mappers.PostMapper.findPost",
           new HashMap<String, Integer>() {
-            private static final long serialVersionUID = 1L;
             {
               put("author_id", 101);
             }
@@ -795,10 +790,8 @@ class SqlSessionTest extends BaseDataTest {
     try (SqlSession session = sqlMapper.openSession()) {
       List<Post> posts = session.selectList("org.apache.ibatis.domain.blog.mappers.PostMapper.findPost",
           new HashMap<String, Object>() {
-            private static final long serialVersionUID = 1L;
             {
               put("ids", new ArrayList<Integer>() {
-                private static final long serialVersionUID = 1L;
                 {
                   add(1);
                   add(2);
@@ -817,7 +810,6 @@ class SqlSessionTest extends BaseDataTest {
     try (SqlSession session = sqlMapper.openSession()) {
       List<Post> posts = session.selectList("org.apache.ibatis.domain.blog.mappers.PostMapper.selectPostIn",
           new ArrayList<Integer>() {
-            private static final long serialVersionUID = 1L;
             {
               add(1);
               add(3);
@@ -833,7 +825,6 @@ class SqlSessionTest extends BaseDataTest {
     try (SqlSession session = sqlMapper.openSession()) {
       List<Post> posts = session.selectList("org.apache.ibatis.domain.blog.mappers.PostMapper.selectOddPostsIn",
           new ArrayList<Integer>() {
-            private static final long serialVersionUID = 1L;
             {
               add(0);
               add(1);
@@ -854,10 +845,8 @@ class SqlSessionTest extends BaseDataTest {
     try (SqlSession session = sqlMapper.openSession()) {
       List<Post> posts = session.selectList("org.apache.ibatis.domain.blog.mappers.PostMapper.selectOddPostsInKeysList",
           new HashMap<String, List<Integer>>() {
-            private static final long serialVersionUID = 1L;
             {
-              put("keys", new ArrayList<Integer>() {
-                private static final long serialVersionUID = 1L;
+              put("keys", new ArrayList<>() {
                 {
                   add(0);
                   add(1);
