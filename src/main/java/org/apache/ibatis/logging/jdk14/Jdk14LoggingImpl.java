@@ -32,6 +32,21 @@ public class Jdk14LoggingImpl implements Log {
   }
 
   @Override
+  public boolean isInfoEnabled() {
+    return log.isLoggable(Level.INFO);
+  }
+
+  @Override
+  public boolean isErrorEnabled() {
+    return log.isLoggable(Level.SEVERE);
+  }
+
+  @Override
+  public boolean isWarnEnabled() {
+    return log.isLoggable(Level.WARNING);
+  }
+
+  @Override
   public boolean isDebugEnabled() {
     return log.isLoggable(Level.FINE);
   }
@@ -39,6 +54,16 @@ public class Jdk14LoggingImpl implements Log {
   @Override
   public boolean isTraceEnabled() {
     return log.isLoggable(Level.FINER);
+  }
+
+  @Override
+  public void info(String s) {
+    log.info(s);
+  }
+
+  @Override
+  public void info(String s, Throwable e) {
+    log.log(Level.INFO, s, e);
   }
 
   @Override

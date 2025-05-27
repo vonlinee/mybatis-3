@@ -27,6 +27,21 @@ public class StdOutImpl implements Log {
   }
 
   @Override
+  public boolean isInfoEnabled() {
+    return true;
+  }
+
+  @Override
+  public boolean isErrorEnabled() {
+    return true;
+  }
+
+  @Override
+  public boolean isWarnEnabled() {
+    return true;
+  }
+
+  @Override
   public boolean isDebugEnabled() {
     return true;
   }
@@ -34,6 +49,17 @@ public class StdOutImpl implements Log {
   @Override
   public boolean isTraceEnabled() {
     return true;
+  }
+
+  @Override
+  public void info(String s) {
+    System.out.println(s);
+  }
+
+  @Override
+  public void info(String s, Throwable e) {
+    System.out.println(s);
+    e.printStackTrace(System.out);
   }
 
   @Override

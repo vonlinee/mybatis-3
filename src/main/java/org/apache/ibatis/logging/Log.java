@@ -20,9 +20,19 @@ package org.apache.ibatis.logging;
  */
 public interface Log {
 
+  boolean isInfoEnabled();
+
+  boolean isErrorEnabled();
+
+  boolean isWarnEnabled();
+
   boolean isDebugEnabled();
 
   boolean isTraceEnabled();
+
+  void info(String s);
+
+  void info(String s, Throwable e);
 
   void error(String s, Throwable e);
 
@@ -39,4 +49,64 @@ public interface Log {
   void warn(String s);
 
   void warn(String s, Throwable e);
+
+  default void debugIfEnabled(String s) {
+    if (isDebugEnabled()) {
+      debug(s);
+    }
+  }
+
+  default void debugIfEnabled(String s, Throwable e) {
+    if (isDebugEnabled()) {
+      debug(s, e);
+    }
+  }
+
+  default void infoIfEnabled(String s) {
+    if (isInfoEnabled()) {
+      info(s);
+    }
+  }
+
+  default void infoIfEnabled(String s, Throwable e) {
+    if (isInfoEnabled()) {
+      info(s, e);
+    }
+  }
+
+  default void errorIfEnabled(String s) {
+    if (isErrorEnabled()) {
+      error(s);
+    }
+  }
+
+  default void errorIfEnabled(String s, Throwable e) {
+    if (isErrorEnabled()) {
+      error(s, e);
+    }
+  }
+
+  default void traceIfEnabled(String s) {
+    if (isTraceEnabled()) {
+      trace(s);
+    }
+  }
+
+  default void traceIfEnabled(String s, Throwable e) {
+    if (isTraceEnabled()) {
+      trace(s, e);
+    }
+  }
+
+  default void warnIfEnabled(String s) {
+    if (isWarnEnabled()) {
+      warn(s);
+    }
+  }
+
+  default void warnIfEnabled(String s, Throwable e) {
+    if (isWarnEnabled()) {
+      warn(s, e);
+    }
+  }
 }

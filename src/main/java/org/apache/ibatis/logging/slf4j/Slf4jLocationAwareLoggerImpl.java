@@ -37,6 +37,21 @@ class Slf4jLocationAwareLoggerImpl implements Log {
   }
 
   @Override
+  public boolean isInfoEnabled() {
+    return logger.isInfoEnabled();
+  }
+
+  @Override
+  public boolean isErrorEnabled() {
+    return logger.isErrorEnabled();
+  }
+
+  @Override
+  public boolean isWarnEnabled() {
+    return logger.isWarnEnabled();
+  }
+
+  @Override
   public boolean isDebugEnabled() {
     return logger.isDebugEnabled();
   }
@@ -44,6 +59,16 @@ class Slf4jLocationAwareLoggerImpl implements Log {
   @Override
   public boolean isTraceEnabled() {
     return logger.isTraceEnabled();
+  }
+
+  @Override
+  public void info(String s) {
+    logger.info(s);
+  }
+
+  @Override
+  public void info(String s, Throwable e) {
+    logger.info(s, e);
   }
 
   @Override

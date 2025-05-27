@@ -35,6 +35,21 @@ public class Log4j2LoggerImpl implements Log {
   }
 
   @Override
+  public boolean isInfoEnabled() {
+    return log.isInfoEnabled();
+  }
+
+  @Override
+  public boolean isErrorEnabled() {
+    return log.isErrorEnabled();
+  }
+
+  @Override
+  public boolean isWarnEnabled() {
+    return log.isWarnEnabled();
+  }
+
+  @Override
   public boolean isDebugEnabled() {
     return log.isDebugEnabled();
   }
@@ -42,6 +57,16 @@ public class Log4j2LoggerImpl implements Log {
   @Override
   public boolean isTraceEnabled() {
     return log.isTraceEnabled();
+  }
+
+  @Override
+  public void info(String s) {
+    log.info(s);
+  }
+
+  @Override
+  public void info(String s, Throwable e) {
+    log.info(s, e);
   }
 
   @Override
