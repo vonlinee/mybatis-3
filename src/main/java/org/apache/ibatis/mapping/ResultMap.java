@@ -29,23 +29,23 @@ import org.apache.ibatis.type.JdbcType;
  * @author Clinton Begin
  */
 public class ResultMap {
-  private Configuration configuration;
+  protected Configuration configuration;
 
-  private String id;
-  private Class<?> type;
-  private List<ResultMapping> resultMappings;
-  private List<ResultMapping> idResultMappings;
-  private List<ResultMapping> constructorResultMappings;
-  private List<ResultMapping> propertyResultMappings;
-  private Set<String> mappedColumns;
-  private Set<String> mappedProperties;
-  private Discriminator discriminator;
-  private boolean hasResultMapsUsingConstructorCollection;
-  private boolean hasNestedResultMaps;
-  private boolean hasNestedQueries;
-  private Boolean autoMapping;
+  protected String id;
+  protected Class<?> type;
+  protected List<ResultMapping> resultMappings;
+  protected List<ResultMapping> idResultMappings;
+  protected List<ResultMapping> constructorResultMappings;
+  protected List<ResultMapping> propertyResultMappings;
+  protected Set<String> mappedColumns;
+  protected Set<String> mappedProperties;
+  protected Discriminator discriminator;
+  protected boolean hasResultMapsUsingConstructorCollection;
+  protected boolean hasNestedResultMaps;
+  protected boolean hasNestedQueries;
+  protected Boolean autoMapping;
 
-  private ResultMap() {
+  ResultMap() {
   }
 
   public static class Builder {

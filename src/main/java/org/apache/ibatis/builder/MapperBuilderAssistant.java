@@ -37,6 +37,8 @@ import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.internal.util.ObjectUtils;
 import org.apache.ibatis.mapping.CacheBuilder;
 import org.apache.ibatis.mapping.Discriminator;
+import org.apache.ibatis.mapping.InlineParameterMap;
+import org.apache.ibatis.mapping.InlineResultMap;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ParameterMap;
 import org.apache.ibatis.mapping.ParameterMapping;
@@ -341,8 +343,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         throw new IncompleteElementException("Could not find parameter map " + parameterMapName, e);
       }
     } else if (parameterTypeClass != null) {
-      List<ParameterMapping> parameterMappings = new ArrayList<>();
-      parameterMap = new ParameterMap.Builder(statementId + "-Inline", parameterTypeClass, parameterMappings).build();
+      parameterMap = new InlineParameterMap(statementId, parameterTypeClass);
     }
     return parameterMap;
   }
@@ -362,9 +363,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         }
       }
     } else if (resultType != null) {
-      ResultMap inlineResultMap = new ResultMap.Builder(configuration, statementId + "-Inline", resultType,
-          new ArrayList<>(), null).build();
-      resultMaps.add(inlineResultMap);
+      resultMaps.add(new InlineResultMap(statementId, resultType));
     }
     return resultMaps;
   }

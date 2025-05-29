@@ -23,11 +23,11 @@ import java.util.List;
  */
 public class ParameterMap {
 
-  private String id;
-  private Class<?> type;
-  private List<ParameterMapping> parameterMappings;
+  protected String id;
+  protected Class<?> type;
+  protected List<ParameterMapping> parameterMappings;
 
-  private ParameterMap() {
+  ParameterMap() {
   }
 
   public static class Builder {
