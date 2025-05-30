@@ -17,21 +17,104 @@ package org.apache.ibatis.internal.util;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class CollectionUtils {
+
+  private static final EmptyMultiValueMap<?, ?> EMPTY_MULTI_VALUE_MAP = new EmptyMultiValueMap<>();
+
+  /**
+   * @see Collection
+   */
+  private static final Collection<?> EMPTY_COLLECTION = new Collection<>() {
+    @Override
+    public int size() {
+      return 0;
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return true;
+    }
+
+    @Override
+    public boolean contains(Object o) {
+      return false;
+    }
+
+    @NotNull
+    @Override
+    public Iterator<Object> iterator() {
+      return Collections.emptyIterator();
+    }
+
+    @NotNull
+    @Override
+    public Object @NotNull [] toArray() {
+      return new Object[0];
+    }
+
+    @NotNull
+    @Override
+    public <T> T @NotNull [] toArray(@NotNull T @NotNull [] a) {
+      return a;
+    }
+
+    @Override
+    public boolean add(Object object) {
+      return false;
+    }
+
+    @Override
+    public boolean remove(Object o) {
+      return false;
+    }
+
+    @Override
+    public boolean containsAll(@NotNull Collection<?> c) {
+      return false;
+    }
+
+    @Override
+    public boolean addAll(@NotNull Collection<?> c) {
+      return false;
+    }
+
+    @Override
+    public boolean removeAll(@NotNull Collection<?> c) {
+      return false;
+    }
+
+    @Override
+    public boolean retainAll(@NotNull Collection<?> c) {
+      return false;
+    }
+
+    @Override
+    public void clear() {
+    }
+  };
+
+  @SuppressWarnings("unchecked")
+  public static <E> Collection<E> emptyCollection() {
+    return (Collection<E>) EMPTY_COLLECTION;
+  }
 
   private CollectionUtils() {
   }
@@ -69,6 +152,18 @@ public final class CollectionUtils {
   }
 
   /**
+   * Return {@code true} if the supplied array is {@code null} or empty. Otherwise, return {@code false}.
+   *
+   * @param arr
+   *          the arr to check
+   *
+   * @return whether the given array is empty
+   */
+  public static <T> boolean isEmpty(@Nullable T[] arr) {
+    return arr == null || arr.length == 0;
+  }
+
+  /**
    * Retrieve the first element of the given List, accessing the zero index.
    *
    * @param list
@@ -93,8 +188,6 @@ public final class CollectionUtils {
    *          operations are needed)
    *
    * @see #newLinkedHashMap(int)
-   *
-   * @since 5.3
    */
   public static <K, V> HashMap<K, V> newHashMap(int expectedSize) {
     return new HashMap<>(computeMapInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
@@ -262,5 +355,258 @@ public final class CollectionUtils {
 
   public static <K, V> Map.Entry<K, V> entry(K key, V value) {
     return new AbstractMap.SimpleEntry<>(key, value);
+  }
+
+  @NotNull
+  public static <E> List<E> toList(@Nullable Collection<E> collection) {
+    if (collection == null) {
+      return Collections.emptyList();
+    }
+    if (collection instanceof List) {
+      return (List<E>) collection;
+    }
+    return new ArrayList<>(collection);
+  }
+
+  @NotNull
+  public static <E, V> List<V> toList(@Nullable Collection<E> collection, Function<E, V> mapper) {
+    if (collection == null) {
+      return Collections.emptyList();
+    }
+    List<V> list = new ArrayList<>(collection.size());
+    for (E element : collection) {
+      list.add(mapper.apply(element));
+    }
+    return list;
+  }
+
+  @NotNull
+  public static <E, V> Set<V> toSet(@Nullable Collection<E> collection, Function<E, V> mapper) {
+    if (collection == null) {
+      return Collections.emptySet();
+    }
+    Set<V> set = new HashSet<>(collection.size());
+    for (E element : collection) {
+      set.add(mapper.apply(element));
+    }
+    return set;
+  }
+
+  @NotNull
+  public static <K, E> Map<K, E> toMap(@Nullable Collection<E> collection, Function<E, K> keyMapper) {
+    if (collection == null || keyMapper == null) {
+      return emptyMap();
+    }
+    Map<K, E> map = new HashMap<>(collection.size());
+    for (E element : collection) {
+      map.put(keyMapper.apply(element), element);
+    }
+    return map;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <K, E> MultiValueMap<K, E> emptyMultiValueMap() {
+    return (MultiValueMap<K, E>) EMPTY_MULTI_VALUE_MAP;
+  }
+
+  @NotNull
+  public static <K, E> MultiValueMap<K, E> toMultiValueMap(@Nullable Collection<E> collection,
+      Function<E, K> keyMapper) {
+    if (collection == null || keyMapper == null) {
+      return emptyMultiValueMap();
+    }
+    MultiValueMap<K, E> map = new LinkedMultiValueMap<>(collection.size());
+    for (E element : collection) {
+      map.add(keyMapper.apply(element), element);
+    }
+    return map;
+  }
+
+  public static <K, E> Map<K, List<E>> groupingBy(@Nullable Collection<E> collection,
+      Function<? super E, ? extends K> keyMapper) {
+    if (isEmpty(collection)) {
+      return emptyMap();
+    }
+    return collection.stream().collect(Collectors.groupingBy(keyMapper));
+  }
+
+  public static <K, V, E, C extends Collection<E>> Map<K, C> groupingBy(@Nullable Collection<E> collection,
+      Function<? super E, ? extends K> keyMapper, Collector<? super E, V, C> downstream) {
+    if (isEmpty(collection)) {
+      return emptyMap();
+    }
+    return collection.stream().collect(Collectors.groupingBy(keyMapper, downstream));
+  }
+
+  @SafeVarargs
+  @NotNull
+  public static <E> List<E> asList(E... elements) {
+    if (elements == null || elements.length == 0) {
+      return Collections.emptyList();
+    }
+    if (elements.length == 1) {
+      return Collections.singletonList(elements[0]);
+    }
+    return Arrays.asList(elements);
+  }
+
+  @SafeVarargs
+  @NotNull
+  public static <E> List<E> asArrayList(E... elements) {
+    if (elements == null || elements.length == 0) {
+      return new ArrayList<>();
+    }
+    return new ArrayList<>(Arrays.asList(elements));
+  }
+
+  private static <E> List<E> emptyList() {
+    return new ArrayList<>();
+  }
+
+  private static <K, V> Map<K, V> emptyMap() {
+    return new HashMap<>();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <C extends Collection<V>, V> C addAll(C primaryCollection, Collection<? extends V>... collections) {
+    if (isEmpty(primaryCollection)) {
+      return (C) CollectionUtils.emptyCollection();
+    }
+    if (isEmpty(collections)) {
+      return primaryCollection;
+    }
+    for (Collection<? extends V> collection : collections) {
+      if (collection == null) {
+        continue;
+      }
+      primaryCollection.addAll(collection);
+    }
+    return primaryCollection;
+  }
+
+  /**
+   * @param <K>
+   * @param <V>
+   *
+   * @see MultiValueMap
+   */
+  private static class EmptyMultiValueMap<K, V> implements MultiValueMap<K, V> {
+
+    @Override
+    public int count(K key) {
+      return 0;
+    }
+
+    @Override
+    public @Nullable V getFirst(K key) {
+      return null;
+    }
+
+    @Override
+    public @Nullable V get(K key, int index) {
+      return null;
+    }
+
+    @Override
+    public boolean add(K key, @Nullable V value) {
+      return false;
+    }
+
+    @Override
+    public boolean addAll(K key, List<? extends V> values) {
+      return false;
+    }
+
+    @Override
+    public void addAll(MultiValueMap<K, V> values) {
+
+    }
+
+    @Override
+    public List<V> set(K key, @Nullable V value) {
+      return null;
+    }
+
+    @Override
+    public List<V> setValues(K key, Collection<V> values) {
+      return null;
+    }
+
+    @Override
+    public V set(K key, int index, @Nullable V value) {
+      return null;
+    }
+
+    @Override
+    public void setAll(Map<K, V> values) {
+
+    }
+
+    @Override
+    public Map<K, V> toSingleValueMap() {
+      return Collections.emptyMap();
+    }
+
+    @Override
+    public int size() {
+      return 0;
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return true;
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+      return false;
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+      return false;
+    }
+
+    @Override
+    public List<V> get(Object key) {
+      return null;
+    }
+
+    @Nullable
+    @Override
+    public List<V> put(K key, List<V> value) {
+      return null;
+    }
+
+    @Override
+    public List<V> remove(Object key) {
+      return null;
+    }
+
+    @Override
+    public void putAll(@NotNull Map<? extends K, ? extends List<V>> m) {
+    }
+
+    @Override
+    public void clear() {
+    }
+
+    @NotNull
+    @Override
+    public Set<K> keySet() {
+      return Collections.emptySet();
+    }
+
+    @NotNull
+    @Override
+    public Collection<List<V>> values() {
+      return Collections.emptyList();
+    }
+
+    @NotNull
+    @Override
+    public Set<Entry<K, List<V>>> entrySet() {
+      return Collections.emptySet();
+    }
   }
 }

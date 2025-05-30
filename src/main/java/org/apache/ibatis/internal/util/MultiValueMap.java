@@ -15,9 +15,14 @@
  */
 package org.apache.ibatis.internal.util;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -31,6 +36,16 @@ import org.jetbrains.annotations.Nullable;
 public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 
   /**
+   * Return the count of the given key.
+   *
+   * @param key
+   *          the key
+   *
+   * @return the count of the given key.
+   */
+  int count(K key);
+
+  /**
    * Return the first value for the given key.
    *
    * @param key
@@ -42,6 +57,19 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
   V getFirst(K key);
 
   /**
+   * Return the first value for the given key.
+   *
+   * @param key
+   *          the key
+   * @param index
+   *          the index of list
+   *
+   * @return the value at the specified index in the values for the specified key, or {@code null} if none
+   */
+  @Nullable
+  V get(K key, int index);
+
+  /**
    * Add the given single value to the current list of values for the given key.
    *
    * @param key
@@ -49,7 +77,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
    * @param value
    *          the value to be added
    */
-  void add(K key, @Nullable V value);
+  boolean add(K key, @Nullable V value);
 
   /**
    * Add all the values of the given list to the current list of values for the given key.
@@ -59,7 +87,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
    * @param values
    *          the values to be added
    */
-  void addAll(K key, List<? extends V> values);
+  boolean addAll(K key, List<? extends V> values);
 
   /**
    * Add all the values of the given {@code MultiValueMap} to the current values.
@@ -92,7 +120,29 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
    * @param value
    *          the value to set
    */
-  void set(K key, @Nullable V value);
+  List<V> set(K key, @Nullable V value);
+
+  /**
+   * Set the given single value under the given key.
+   *
+   * @param key
+   *          the key
+   * @param values
+   *          the values to set
+   */
+  List<V> setValues(K key, Collection<V> values);
+
+  /**
+   * Set the given single value under the given key.
+   *
+   * @param key
+   *          the key
+   * @param index
+   *          the index
+   * @param value
+   *          the value to set
+   */
+  V set(K key, int index, @Nullable V value);
 
   /**
    * Set the given values under.
@@ -108,4 +158,33 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
    * @return a single value representation of this map
    */
   Map<K, V> toSingleValueMap();
+
+  default List<V> flattenValues() {
+    return this.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+  }
+
+  /**
+   * @param collector
+   *          the {@code Collector} describing the reduction
+   *
+   * @return the result of the reduction
+   *
+   * @param <C>
+   *          result
+   */
+  default <C extends Collection<V>> C flattenValues(@NotNull Collector<V, ?, C> collector) {
+    return this.values().stream().flatMap(Collection::stream).collect(collector);
+  }
+
+  default void flatForEach(@NotNull BiConsumer<? super K, ? super V> action) {
+    for (Entry<K, List<V>> entry : entrySet()) {
+      if (entry.getValue() == null) {
+        action.accept(entry.getKey(), null);
+      } else {
+        for (V value : entry.getValue()) {
+          action.accept(entry.getKey(), value);
+        }
+      }
+    }
+  }
 }

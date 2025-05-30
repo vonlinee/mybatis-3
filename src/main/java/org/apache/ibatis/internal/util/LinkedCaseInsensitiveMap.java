@@ -387,7 +387,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
     }
 
     @Override
-    public Iterator<String> iterator() {
+    public @NotNull Iterator<String> iterator() {
       return new KeySetIterator();
     }
 
@@ -431,7 +431,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
     }
 
     @Override
-    public Iterator<V> iterator() {
+    public @NotNull Iterator<V> iterator() {
       return new ValuesIterator();
     }
 
@@ -470,7 +470,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
     }
 
     @Override
-    public Iterator<Entry<String, V>> iterator() {
+    public @NotNull Iterator<Entry<String, V>> iterator() {
       return new EntrySetIterator();
     }
 

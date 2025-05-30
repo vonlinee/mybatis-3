@@ -53,6 +53,15 @@ class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
   // MultiValueMap implementation
 
   @Override
+  public int count(K key) {
+    List<V> values = this.targetMap.get(key);
+    if (values == null) {
+      return 0;
+    }
+    return values.size();
+  }
+
+  @Override
   @Nullable
   public V getFirst(K key) {
     List<V> values = this.targetMap.get(key);
@@ -60,15 +69,28 @@ class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
   }
 
   @Override
-  public void add(K key, @Nullable V value) {
-    List<V> values = this.targetMap.computeIfAbsent(key, k -> new ArrayList<>(1));
-    values.add(value);
+  @Nullable
+  public V get(K key, int index) {
+    List<V> values = this.targetMap.get(key);
+    if (values == null) {
+      return null;
+    }
+    if (index < 0 || index >= values.size()) {
+      return null;
+    }
+    return values.get(index);
   }
 
   @Override
-  public void addAll(K key, List<? extends V> values) {
+  public boolean add(K key, @Nullable V value) {
+    List<V> values = this.targetMap.computeIfAbsent(key, k -> new ArrayList<>(1));
+    return values.add(value);
+  }
+
+  @Override
+  public boolean addAll(K key, List<? extends V> values) {
     List<V> currentValues = this.targetMap.computeIfAbsent(key, k -> new ArrayList<>(values.size()));
-    currentValues.addAll(values);
+    return currentValues.addAll(values);
   }
 
   @Override
@@ -77,10 +99,24 @@ class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
   }
 
   @Override
-  public void set(K key, @Nullable V value) {
+  public List<V> set(K key, @Nullable V value) {
     List<V> values = new ArrayList<>(1);
     values.add(value);
-    this.targetMap.put(key, values);
+    return this.targetMap.put(key, values);
+  }
+
+  @Override
+  public List<V> setValues(K key, Collection<V> values) {
+    return this.targetMap.put(key, values != null ? new ArrayList<>(values) : null);
+  }
+
+  @Override
+  public V set(K key, int index, @Nullable V value) {
+    List<V> values = this.targetMap.get(key);
+    if (values == null) {
+      return null;
+    }
+    return values.set(index, value);
   }
 
   @Override
@@ -156,17 +192,17 @@ class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
   }
 
   @Override
-  public Set<K> keySet() {
+  public @NotNull Set<K> keySet() {
     return this.targetMap.keySet();
   }
 
   @Override
-  public Collection<List<V>> values() {
+  public @NotNull Collection<List<V>> values() {
     return this.targetMap.values();
   }
 
   @Override
-  public Set<Entry<K, List<V>>> entrySet() {
+  public @NotNull Set<Entry<K, List<V>>> entrySet() {
     return this.targetMap.entrySet();
   }
 
@@ -177,7 +213,10 @@ class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
 
   @Override
   public boolean equals(@Nullable Object other) {
-    return (this == other || this.targetMap.equals(other));
+    if (other instanceof MultiValueMap) {
+      return (this == other || this.targetMap.equals(other));
+    }
+    return false;
   }
 
   @Override

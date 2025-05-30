@@ -34,8 +34,8 @@ import java.util.Set;
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
+import org.apache.ibatis.internal.util.ObjectUtils;
 import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.reflection.ArrayUtil;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.session.Configuration;
@@ -186,7 +186,7 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
       }
       throw new ExecutorException("Could not determine which parameter to assign generated keys to. "
           + "Note that when there are multiple parameters, 'keyProperty' must include the parameter name (e.g. 'param.id'). "
-          + "Specified key properties are " + ArrayUtil.toString(keyProperties) + " and available parameters are "
+          + "Specified key properties are " + ObjectUtils.toString(keyProperties) + " and available parameters are "
           + keySet);
     }
     String paramName = keyProperty.substring(0, firstDot);
@@ -200,7 +200,7 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
     } else {
       throw new ExecutorException("Could not find parameter '" + paramName + "'. "
           + "Note that when there are multiple parameters, 'keyProperty' must include the parameter name (e.g. 'param.id'). "
-          + "Specified key properties are " + ArrayUtil.toString(keyProperties) + " and available parameters are "
+          + "Specified key properties are " + ObjectUtils.toString(keyProperties) + " and available parameters are "
           + keySet);
     }
   }
