@@ -117,7 +117,7 @@ public class XMLLanguageDriver implements LanguageDriver {
 
   public SqlSource createForRawSqlSource(Configuration configuration, SqlNode rootSqlNode, Class<?> parameterType,
       ParamNameResolver paramNameResolver) {
-    DynamicContext context = new DynamicContext(configuration, parameterType, paramNameResolver);
+    DynamicContext context = new DynamicContext(configuration, null, parameterType, paramNameResolver, false);
     rootSqlNode.apply(context);
     String sql = context.getSql();
     return SqlSourceBuilder.buildSqlSource(configuration, sql, context.getParameterMappings());

@@ -300,11 +300,10 @@ class SqlProviderTest {
   }
 
   @Test
-  @SuppressWarnings("deprecation")
   void notSqlProvider() throws NoSuchMethodException {
-    Object testAnnotation = getClass().getDeclaredMethod("notSqlProvider").getAnnotation(Test.class);
+    Test testAnnotation = getClass().getDeclaredMethod("notSqlProvider").getAnnotation(Test.class);
     try {
-      new ProviderSqlSource(new Configuration(), testAnnotation);
+      new ProviderSqlSource(new Configuration(), testAnnotation, null, null);
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
@@ -658,7 +657,7 @@ class SqlProviderTest {
     Class<?> mapperType = StaticMethodSqlProviderMapper.class;
     Method mapperMethod = mapperType.getMethod("noArgument");
     ProviderSqlSource sqlSource = new ProviderSqlSource(new Configuration(),
-        (Object) mapperMethod.getAnnotation(SelectProvider.class), mapperType, mapperMethod);
+        mapperMethod.getAnnotation(SelectProvider.class), mapperType, mapperMethod);
     assertEquals("SELECT 1 FROM INFORMATION_SCHEMA.SYSTEM_USERS", sqlSource.getBoundSql(null).getSql());
   }
 
@@ -720,9 +719,7 @@ class SqlProviderTest {
 
       private SqlProvider() {
       }
-
     }
-
   }
 
   public interface ErrorMapper {

@@ -46,10 +46,6 @@ public class DynamicContext implements SqlBuildContext {
   private GenericTokenParser tokenParser;
   private ParameterMappingTokenHandler tokenHandler;
 
-  public DynamicContext(Configuration configuration, Class<?> parameterType, ParamNameResolver paramNameResolver) {
-    this(configuration, null, parameterType, paramNameResolver, false);
-  }
-
   public DynamicContext(Configuration configuration, Object parameterObject, Class<?> parameterType,
       ParamNameResolver paramNameResolver, boolean paramExists) {
     this.bindings = createBindings(configuration, parameterObject);
