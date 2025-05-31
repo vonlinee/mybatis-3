@@ -168,7 +168,7 @@ public class Configuration {
   }
 
   public Configuration() {
-    MapperBuilderAssistant.registerDefaultAlias(this.typeAliasRegistry);
+    MapperBuilderAssistant.registerDefaultTypeAlias(this.typeAliasRegistry);
     languageRegistry.setDefaultDriverClass(XMLLanguageDriver.class);
   }
 

@@ -110,6 +110,41 @@ public final class StringUtils {
     return cs == null || cs.length() == 0;
   }
 
+  public static boolean isEmpty(final CharSequence cs1, final CharSequence cs2) {
+    return isEmpty(cs1) && isEmpty(cs2);
+  }
+
+  public static boolean isEmpty(final CharSequence cs1, final CharSequence cs2, final CharSequence cs3) {
+    return isEmpty(cs1) && isEmpty(cs2) && isEmpty(cs3);
+  }
+
+  public static boolean isEmpty(CharSequence... sequences) {
+    for (CharSequence sequence : sequences) {
+      if (isNotEmpty(sequence)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public static boolean isAnyEmpty(CharSequence... sequences) {
+    for (CharSequence sequence : sequences) {
+      if (isEmpty(sequence)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public static boolean isAnyBlank(CharSequence... sequences) {
+    for (CharSequence sequence : sequences) {
+      if (isBlank(sequence)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public static String prepend(String str, String prefix) {
     if (str == null || str.isEmpty() || prefix == null || prefix.isEmpty()) {
       return EMPTY;
@@ -208,7 +243,7 @@ public final class StringUtils {
     return str.substring(0, start) + str.substring(end, str.length() - 1);
   }
 
-  public static boolean isNotEmpty(String str) {
+  public static boolean isNotEmpty(CharSequence str) {
     return !isEmpty(str);
   }
 

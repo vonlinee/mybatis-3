@@ -143,7 +143,7 @@ public class ResolverUtil<T> {
   }
 
   /** The set of matches being accumulated. */
-  private Set<Class<? extends T>> matches = new HashSet<>();
+  private final Set<Class<? extends T>> matches = new HashSet<>();
 
   /**
    * The ClassLoader to use when looking for classes. If null then the ClassLoader returned by

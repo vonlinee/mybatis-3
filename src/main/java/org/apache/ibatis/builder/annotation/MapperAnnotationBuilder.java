@@ -61,6 +61,7 @@ import org.apache.ibatis.annotations.TypeDiscriminator;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.binding.ParamMap;
+import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.CacheRefResolver;
 import org.apache.ibatis.builder.Configuration;
@@ -68,6 +69,7 @@ import org.apache.ibatis.builder.IncompleteElementException;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.builder.ResultMappingConstructorResolver;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
+import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -98,7 +100,7 @@ import org.apache.ibatis.type.UnknownTypeHandler;
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
-public class MapperAnnotationBuilder {
+public class MapperAnnotationBuilder extends BaseBuilder {
 
   private static final Set<Class<? extends Annotation>> statementAnnotationTypes = Stream
       .of(Select.class, Update.class, Insert.class, Delete.class, SelectProvider.class, UpdateProvider.class,
@@ -110,6 +112,7 @@ public class MapperAnnotationBuilder {
   private final Class<?> type;
 
   public MapperAnnotationBuilder(Configuration configuration, Class<?> type) {
+    super(configuration);
     String resource = type.getName().replace('.', '/') + ".java (best guess)";
     this.assistant = new MapperBuilderAssistant(configuration, resource);
     this.configuration = configuration;
@@ -182,8 +185,9 @@ public class MapperAnnotationBuilder {
       Integer size = cacheDomain.size() == 0 ? null : cacheDomain.size();
       Long flushInterval = cacheDomain.flushInterval() == 0 ? null : cacheDomain.flushInterval();
       Properties props = convertToProperties(cacheDomain.properties());
-      assistant.useNewCache(cacheDomain.implementation(), cacheDomain.eviction(), flushInterval, size,
+      Cache cache = assistant.useNewCache(cacheDomain.implementation(), cacheDomain.eviction(), flushInterval, size,
           cacheDomain.readWrite(), cacheDomain.blocking(), props);
+      configuration.addCache(cache);
     }
   }
 
@@ -461,7 +465,7 @@ public class MapperAnnotationBuilder {
     return returnType;
   }
 
-  private void applyResults(Result[] results, Class<?> resultType, List<ResultMapping> resultMappings) {
+  protected void applyResults(Result[] results, Class<?> resultType, List<ResultMapping> resultMappings) {
     for (Result result : results) {
       List<ResultFlag> flags = new ArrayList<>();
       if (result.id()) {
@@ -481,7 +485,7 @@ public class MapperAnnotationBuilder {
     }
   }
 
-  private String findColumnPrefix(Result result) {
+  protected String findColumnPrefix(Result result) {
     String columnPrefix = result.one().columnPrefix();
     if (columnPrefix.isEmpty()) {
       columnPrefix = result.many().columnPrefix();
@@ -489,7 +493,7 @@ public class MapperAnnotationBuilder {
     return columnPrefix;
   }
 
-  private String nestedResultMapId(Result result) {
+  protected String nestedResultMapId(Result result) {
     String resultMapId = result.one().resultMap();
     if (resultMapId.isEmpty()) {
       resultMapId = result.many().resultMap();
@@ -500,14 +504,14 @@ public class MapperAnnotationBuilder {
     return resultMapId;
   }
 
-  private boolean hasNestedResultMap(Result result) {
+  protected boolean hasNestedResultMap(Result result) {
     if (!result.one().resultMap().isEmpty() && !result.many().resultMap().isEmpty()) {
       throw new BuilderException("Cannot use both @One and @Many annotations in the same @Result");
     }
     return !result.one().resultMap().isEmpty() || !result.many().resultMap().isEmpty();
   }
 
-  private String nestedSelectId(Result result) {
+  protected String nestedSelectId(Result result) {
     String nestedSelect = result.one().select();
     if (nestedSelect.isEmpty()) {
       nestedSelect = result.many().select();
@@ -518,7 +522,7 @@ public class MapperAnnotationBuilder {
     return nestedSelect;
   }
 
-  private boolean isLazy(Result result) {
+  protected boolean isLazy(Result result) {
     boolean isLazy = configuration.isLazyLoadingEnabled();
     if (!result.one().select().isEmpty() && FetchType.DEFAULT != result.one().fetchType()) {
       isLazy = result.one().fetchType() == FetchType.LAZY;
@@ -528,14 +532,14 @@ public class MapperAnnotationBuilder {
     return isLazy;
   }
 
-  private boolean hasNestedSelect(Result result) {
+  protected boolean hasNestedSelect(Result result) {
     if (!result.one().select().isEmpty() && !result.many().select().isEmpty()) {
       throw new BuilderException("Cannot use both @One and @Many annotations in the same @Result");
     }
     return !result.one().select().isEmpty() || !result.many().select().isEmpty();
   }
 
-  private void applyConstructorArgs(Arg[] args, Class<?> resultType, List<ResultMapping> resultMappings,
+  protected void applyConstructorArgs(Arg[] args, Class<?> resultType, List<ResultMapping> resultMappings,
       String resultMapId) {
     final List<ResultMapping> mappings = new ArrayList<>();
     for (Arg arg : args) {
@@ -563,7 +567,7 @@ public class MapperAnnotationBuilder {
     return value == null || value.trim().isEmpty() ? null : value;
   }
 
-  private KeyGenerator handleSelectKeyAnnotation(SelectKey selectKeyAnnotation, String baseStatementId,
+  protected KeyGenerator handleSelectKeyAnnotation(SelectKey selectKeyAnnotation, String baseStatementId,
       Class<?> parameterTypeClass, ParamNameResolver paramNameResolver, LanguageDriver languageDriver) {
     String id = baseStatementId + SelectKeyGenerator.SELECT_KEY_SUFFIX;
     Class<?> resultTypeClass = selectKeyAnnotation.resultType();
@@ -599,7 +603,7 @@ public class MapperAnnotationBuilder {
     return answer;
   }
 
-  private SqlSource buildSqlSource(Annotation annotation, Class<?> parameterType, ParamNameResolver paramNameResolver,
+  protected SqlSource buildSqlSource(Annotation annotation, Class<?> parameterType, ParamNameResolver paramNameResolver,
       LanguageDriver languageDriver, Class<?> type, Method method) {
     if (annotation instanceof Select) {
       return buildSqlSourceFromStrings(((Select) annotation).value(), parameterType, paramNameResolver, languageDriver);
@@ -616,19 +620,19 @@ public class MapperAnnotationBuilder {
     return new ProviderSqlSource(assistant.getConfiguration(), annotation, type, method);
   }
 
-  private SqlSource buildSqlSourceFromStrings(String[] strings, Class<?> parameterTypeClass,
+  protected SqlSource buildSqlSourceFromStrings(String[] strings, Class<?> parameterTypeClass,
       ParamNameResolver paramNameResolver, LanguageDriver languageDriver) {
     return languageDriver.createSqlSource(configuration, String.join(" ", strings).trim(), parameterTypeClass,
         paramNameResolver);
   }
 
   @SafeVarargs
-  private final Optional<AnnotationWrapper> getAnnotationWrapper(Method method, boolean errorIfNoMatch,
+  protected final Optional<AnnotationWrapper> getAnnotationWrapper(Method method, boolean errorIfNoMatch,
       Class<? extends Annotation>... targetTypes) {
     return getAnnotationWrapper(method, errorIfNoMatch, Arrays.asList(targetTypes));
   }
 
-  private Optional<AnnotationWrapper> getAnnotationWrapper(Method method, boolean errorIfNoMatch,
+  protected Optional<AnnotationWrapper> getAnnotationWrapper(Method method, boolean errorIfNoMatch,
       Collection<Class<? extends Annotation>> targetTypes) {
     String databaseId = configuration.getDatabaseId();
     Map<String, AnnotationWrapper> statementAnnotations = targetTypes.stream()

@@ -49,6 +49,14 @@ public class ResultMapping {
   ResultMapping() {
   }
 
+  public ResultMapping(String property, String column) {
+    this.column = column;
+    this.property = property;
+  }
+
+  /**
+   * the builder
+   */
   public static class Builder {
     private final ResultMapping resultMapping = new ResultMapping();
 
@@ -305,7 +313,6 @@ public class ResultMapping {
     return lazy;
   }
 
-  @Deprecated
   public void setLazy(boolean lazy) {
     this.lazy = lazy;
   }

@@ -357,6 +357,11 @@ class XmlConfigBuilderTest {
     }
   }
 
+  @Test
+  void defaultConfiguration() {
+    Configuration config = XMLConfigBuilder.withDefault();
+  }
+
   public static class MyConfiguration extends Configuration {
     // only using to check configuration was used
   }

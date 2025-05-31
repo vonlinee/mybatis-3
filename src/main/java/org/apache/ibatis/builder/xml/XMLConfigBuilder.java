@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.builder.xml;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Properties;
@@ -177,7 +178,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     for (XNode child : context.getChildren()) {
       if ("package".equals(child.getName())) {
         String typeAliasPackage = child.getStringAttribute("name");
-        configuration.getTypeAliasRegistry().registerAliases(typeAliasPackage);
+        typeAliasRegistry.registerAliases(typeAliasPackage);
       } else {
         String alias = child.getStringAttribute("alias");
         String type = child.getStringAttribute("type");
@@ -440,4 +441,28 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  // =========================== default configuration start ================================================
+
+  public static Configuration withDefault() {
+    return withDefault(null, null);
+  }
+
+  public static Configuration withDefault(String environment) {
+    return withDefault(environment, null);
+  }
+
+  public static Configuration withDefault(Properties properties) {
+    return withDefault(null, properties);
+  }
+
+  public static Configuration withDefault(String environment, Properties properties) {
+    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/builder/xml/mybatis-config-default.xml")) {
+      XMLConfigBuilder builder = new XMLConfigBuilder(reader, environment, properties);
+      return builder.parse();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  // =========================== default configuration end ================================================
 }

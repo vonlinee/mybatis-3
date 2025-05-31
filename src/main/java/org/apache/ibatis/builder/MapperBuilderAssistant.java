@@ -142,18 +142,22 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return currentNamespace + "." + base;
   }
 
+  public void setUnresolvedCacheRef(boolean unresolvedCacheRef) {
+    this.unresolvedCacheRef = unresolvedCacheRef;
+  }
+
   public Cache useCacheRef(String namespace) {
     if (namespace == null) {
       throw new BuilderException("cache-ref element requires a namespace attribute.");
     }
     try {
-      unresolvedCacheRef = true;
+      setUnresolvedCacheRef(true);
       Cache cache = configuration.getCache(namespace);
       if (cache == null) {
         throw new IncompleteElementException("No cache for namespace '" + namespace + "' could be found.");
       }
       currentCache = cache;
-      unresolvedCacheRef = false;
+      setUnresolvedCacheRef(false);
       return cache;
     } catch (IllegalArgumentException e) {
       throw new IncompleteElementException("No cache for namespace '" + namespace + "' could be found.", e);
@@ -172,9 +176,12 @@ public class MapperBuilderAssistant extends BaseBuilder {
       .properties(props)
       .build();
     // @formatter:on
-    configuration.addCache(cache);
     currentCache = cache;
     return cache;
+  }
+
+  public Cache getCurrentCache() {
+    return currentCache;
   }
 
   public ParameterMap addParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
@@ -182,6 +189,11 @@ public class MapperBuilderAssistant extends BaseBuilder {
     ParameterMap parameterMap = new ParameterMap.Builder(id, parameterClass, parameterMappings).build();
     configuration.addParameterMap(parameterMap);
     return parameterMap;
+  }
+
+  public ParameterMap buildParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
+    id = applyCurrentNamespace(id, false);
+    return new ParameterMap.Builder(id, parameterClass, parameterMappings).build();
   }
 
   public ParameterMapping buildParameterMapping(Class<?> parameterType, String property, Class<?> javaType,
@@ -228,8 +240,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
       }
       resultMappings.addAll(extendedResultMappings);
     }
-    ResultMap resultMap = new ResultMap.Builder(configuration, id, type, resultMappings, autoMapping)
-        .discriminator(discriminator).build();
+    ResultMap resultMap = new ResultMap.Builder(id, type, resultMappings, autoMapping).discriminator(discriminator)
+        .build(configuration);
     configuration.addResultMap(resultMap);
     return resultMap;
   }
@@ -237,7 +249,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
   public Discriminator buildDiscriminator(Class<?> resultType, String column, Class<?> javaType, JdbcType jdbcType,
       Class<? extends TypeHandler<?>> typeHandler, Map<String, String> discriminatorMap) {
     ResultMapping resultMapping = buildResultMapping(resultType, null, column, javaType, jdbcType, null, null, null,
-        null, typeHandler, new ArrayList<>(), null, null, false);
+        null, typeHandler, Collections.emptyList(), null, null, false);
     Map<String, String> namespaceDiscriminatorMap = new HashMap<>();
     for (Entry<String, String> e : discriminatorMap.entrySet()) {
       String resultMap = e.getValue();
@@ -369,7 +381,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         keyProperty, keyColumn, databaseId, lang, null);
   }
 
-  private ParameterMap getStatementParameterMap(String parameterMapName, Class<?> parameterTypeClass,
+  public ParameterMap getStatementParameterMap(String parameterMapName, Class<?> parameterTypeClass,
       String statementId) {
     parameterMapName = applyCurrentNamespace(parameterMapName, true);
     ParameterMap parameterMap = null;
@@ -385,7 +397,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return parameterMap;
   }
 
-  private List<ResultMap> getStatementResultMaps(String resultMapId, Class<?> resultType, String statementId) {
+  public List<ResultMap> getStatementResultMaps(String resultMapId, Class<?> resultType, String statementId) {
     resultMapId = applyCurrentNamespace(resultMapId, true);
     List<ResultMap> resultMaps = Collections.emptyList();
     if (resultMapId != null) {
@@ -413,11 +425,16 @@ public class MapperBuilderAssistant extends BaseBuilder {
     Entry<Type, Class<?>> setterType = this.resolveSetterType(resultType, property, javaType);
     TypeHandler<?> typeHandlerInstance = this.resolveTypeHandler(setterType.getKey(), jdbcType, typeHandler);
     List<ResultMapping> composites;
-    if (StringUtils.isEmpty(nestedSelect) && StringUtils.isEmpty(foreignColumn)) {
+    if (StringUtils.isEmpty(nestedSelect, foreignColumn)) {
       composites = Collections.emptyList();
     } else {
-      composites = parseCompositeColumnName(configuration, column);
+      composites = parseCompositeColumnName(column);
     }
+
+    for (ResultMapping composite : composites) {
+      composite.setLazy(configuration.isLazyLoadingEnabled());
+    }
+
     // @formatter:off
     return new ResultMapping.Builder(property, column, setterType.getValue())
       .jdbcType(jdbcType)
@@ -485,7 +502,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return configuration.getLanguageDriver(langClass);
   }
 
-  public static Set<String> parseMultipleColumnNames(String columnName) {
+  public Set<String> parseMultipleColumnNames(String columnName) {
     Set<String> columns = new HashSet<>();
     if (columnName != null) {
       if (columnName.indexOf(',') > -1) {
@@ -501,22 +518,23 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return columns;
   }
 
-  public List<ResultMapping> parseCompositeColumnName(Configuration configuration, String columnName) {
-    List<ResultMapping> composites = new ArrayList<>();
+  public List<ResultMapping> parseCompositeColumnName(String columnName) {
+    List<ResultMapping> composites = null;
     if (columnName != null && (columnName.indexOf('=') > -1 || columnName.indexOf(',') > -1)) {
       StringTokenizer parser = new StringTokenizer(columnName, "{}=, ", false);
       while (parser.hasMoreTokens()) {
         String property = parser.nextToken();
         String column = parser.nextToken();
-        ResultMapping complexResultMapping = new ResultMapping.Builder(property, column, (TypeHandler<?>) null)
-            .build(configuration);
-        composites.add(complexResultMapping);
+        if (composites == null) {
+          composites = new ArrayList<>();
+        }
+        composites.add(new ResultMapping(property, column));
       }
     }
-    return composites;
+    return composites == null ? Collections.emptyList() : composites;
   }
 
-  private Entry<Type, Class<?>> resolveSetterType(Class<?> resultType, String property, Class<?> javaType) {
+  public Entry<Type, Class<?>> resolveSetterType(Class<?> resultType, String property, Class<?> javaType) {
     if (javaType != null) {
       return CollectionUtils.entry(javaType, javaType);
     }
@@ -531,8 +549,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return CollectionUtils.entry(Object.class, Object.class);
   }
 
-  private Class<?> resolveParameterJavaType(Class<?> resultType, String property, Class<?> javaType,
-      JdbcType jdbcType) {
+  public Class<?> resolveParameterJavaType(Class<?> resultType, String property, Class<?> javaType, JdbcType jdbcType) {
     if (javaType == null) {
       if (JdbcType.CURSOR.equals(jdbcType)) {
         javaType = ResultSet.class;
@@ -577,7 +594,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return configuration.getLanguageDriver(langClass);
   }
 
-  public static void registerDefaultAlias(@NotNull TypeAliasRegistry typeAliasRegistry) {
+  public static void registerDefaultTypeAlias(@NotNull TypeAliasRegistry typeAliasRegistry) {
     typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
     typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
 

@@ -162,4 +162,8 @@ public abstract class BaseBuilder {
           + ".  Check syntax #{property|(expression), var1=value1, var2=value2, ...} ", ex);
     }
   }
+
+  protected MapperBuilderAssistant createAssistant(Configuration config, String resource) {
+    return new MapperBuilderAssistant(config, resource);
+  }
 }

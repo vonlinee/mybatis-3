@@ -116,14 +116,14 @@ class DefaultResultSetHandlerTest {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource("some select statement"),
-        SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
+        SqlCommandType.SELECT).resultMaps(new ArrayList<>(1) {
           {
-            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<>() {
+            add(new ResultMap.Builder("testMap", HashMap.class, new ArrayList<>(1) {
               {
                 add(new ResultMapping.Builder("cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class))
                     .build(config));
               }
-            }).build());
+            }).build(config));
           }
         }).build();
   }
