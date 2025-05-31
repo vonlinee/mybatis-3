@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.io.Resources;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
@@ -108,24 +109,37 @@ public class TypeAliasRegistry {
     registerAlias("ResultSet", ResultSet.class);
   }
 
+  /**
+   * resolve type with the given specified type alias.
+   *
+   * @param typeAlias
+   *          type alias
+   * @param <T>
+   *          type
+   *
+   * @return expected type of specified alias
+   *
+   * @throws TypeException
+   *           throws class cast exception as well if types cannot be assigned
+   */
   @SuppressWarnings("unchecked")
-  // throws class cast exception as well if types cannot be assigned
-  public <T> Class<T> resolveAlias(String string) {
+  @Nullable
+  public <T> Class<T> resolveAlias(@Nullable String typeAlias) {
     try {
-      if (string == null) {
+      if (typeAlias == null) {
         return null;
       }
       // issue #748
-      String key = string.toLowerCase(Locale.ENGLISH);
+      String key = typeAlias.toLowerCase(Locale.ENGLISH);
       Class<T> value;
       if (typeAliases.containsKey(key)) {
         value = (Class<T>) typeAliases.get(key);
       } else {
-        value = (Class<T>) Resources.classForName(string);
+        value = (Class<T>) Resources.classForName(typeAlias);
       }
       return value;
     } catch (ClassNotFoundException e) {
-      throw new TypeException("Could not resolve type alias '" + string + "'.  Cause: " + e, e);
+      throw new TypeException("Could not resolve type alias '" + typeAlias + "'.  Cause: " + e, e);
     }
   }
 
