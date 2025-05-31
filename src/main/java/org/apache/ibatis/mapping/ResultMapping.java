@@ -16,10 +16,10 @@
 package org.apache.ibatis.mapping;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
@@ -29,6 +29,7 @@ import org.apache.ibatis.type.TypeHandler;
  */
 public class ResultMapping {
 
+  @Deprecated
   private Configuration configuration;
   private String property;
   private String column;
@@ -58,6 +59,12 @@ public class ResultMapping {
       resultMapping.typeHandler = typeHandler;
     }
 
+    public Builder(String property, String column, TypeHandler<?> typeHandler) {
+      this(property);
+      resultMapping.column = column;
+      resultMapping.typeHandler = typeHandler;
+    }
+
     public Builder(String property, boolean lazyLoadingEnabled, String column, TypeHandler<?> typeHandler) {
       this(property, lazyLoadingEnabled);
       resultMapping.column = column;
@@ -67,6 +74,12 @@ public class ResultMapping {
     @Deprecated
     public Builder(Configuration configuration, String property, String column, Class<?> javaType) {
       this(configuration, property);
+      resultMapping.column = column;
+      resultMapping.javaType = javaType;
+    }
+
+    public Builder(String property, String column, Class<?> javaType) {
+      this(property);
       resultMapping.column = column;
       resultMapping.javaType = javaType;
     }
@@ -81,14 +94,23 @@ public class ResultMapping {
     public Builder(Configuration configuration, String property) {
       resultMapping.configuration = configuration;
       resultMapping.property = property;
-      resultMapping.flags = new ArrayList<>();
+      resultMapping.flags = new ArrayList<>(2);
       resultMapping.composites = new ArrayList<>();
-      resultMapping.lazy = configuration.isLazyLoadingEnabled();
+
+      if (configuration != null) {
+        resultMapping.lazy = configuration.isLazyLoadingEnabled();
+      }
+    }
+
+    public Builder(String property) {
+      resultMapping.property = property;
+      resultMapping.flags = new ArrayList<>(2);
+      resultMapping.composites = new ArrayList<>();
     }
 
     public Builder(String property, boolean lazyLoadingEnabled) {
       resultMapping.property = property;
-      resultMapping.flags = new ArrayList<>();
+      resultMapping.flags = new ArrayList<>(2);
       resultMapping.composites = new ArrayList<>();
       resultMapping.lazy = lazyLoadingEnabled;
     }
@@ -172,10 +194,15 @@ public class ResultMapping {
       return this;
     }
 
+    public ResultMapping build(Configuration config) {
+      lazy(config.isLazyLoadingEnabled());
+      return build();
+    }
+
     public ResultMapping build() {
       // lock down collections
-      resultMapping.flags = Collections.unmodifiableList(resultMapping.flags);
-      resultMapping.composites = Collections.unmodifiableList(resultMapping.composites);
+      resultMapping.flags = CollectionUtils.unmodifiableList(resultMapping.flags);
+      resultMapping.composites = CollectionUtils.unmodifiableList(resultMapping.composites);
       validate();
       return resultMapping;
     }
@@ -186,7 +213,7 @@ public class ResultMapping {
         throw new IllegalStateException(
             "Cannot define both nestedQueryId and nestedResultMapId in property " + resultMapping.property);
       }
-      // Issue #4 and GH #39: column is optional only in nested resultmaps but not in the rest
+      // Issue #4 and GH #39: column is optional only in nested result maps but not in the rest
       if (resultMapping.nestedResultMapId == null && resultMapping.column == null
           && resultMapping.composites.isEmpty()) {
         throw new IllegalStateException("Mapping is missing column attribute for property " + resultMapping.property);

@@ -86,7 +86,10 @@ public class XMLLanguageDriver implements LanguageDriver {
     if (rootSqlNode.isDynamic()) {
       sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
     } else {
-      sqlSource = createForRawSqlSource(configuration, rootSqlNode, parameterType, paramNameResolver);
+      DynamicContext context = new DynamicContext(configuration, null, parameterType, paramNameResolver, false);
+      rootSqlNode.apply(context);
+      String sql = context.getSql();
+      return SqlSourceBuilder.buildSqlSource(configuration, sql, context.getParameterMappings());
     }
     return sqlSource;
   }
@@ -111,26 +114,13 @@ public class XMLLanguageDriver implements LanguageDriver {
       textSqlNode.setExpressionEvaluator(this.evaluator);
       return new DynamicSqlSource(configuration, textSqlNode);
     } else {
-      return createForRawSqlSource(configuration, script, parameterType, paramNameResolver);
+      Class<?> clazz = parameterType == null ? Object.class : parameterType;
+      List<ParameterMapping> parameterMappings = new ArrayList<>();
+      ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration,
+          clazz, new HashMap<>(), paramNameResolver);
+      GenericTokenParser parser = new GenericTokenParser("#{", "}", tokenHandler);
+      return SqlSourceBuilder.buildSqlSource(configuration, parser.parse(script), parameterMappings);
     }
-  }
-
-  public SqlSource createForRawSqlSource(Configuration configuration, SqlNode rootSqlNode, Class<?> parameterType,
-      ParamNameResolver paramNameResolver) {
-    DynamicContext context = new DynamicContext(configuration, null, parameterType, paramNameResolver, false);
-    rootSqlNode.apply(context);
-    String sql = context.getSql();
-    return SqlSourceBuilder.buildSqlSource(configuration, sql, context.getParameterMappings());
-  }
-
-  public SqlSource createForRawSqlSource(Configuration configuration, String sql, Class<?> parameterType,
-      ParamNameResolver paramNameResolver) {
-    Class<?> clazz = parameterType == null ? Object.class : parameterType;
-    List<ParameterMapping> parameterMappings = new ArrayList<>();
-    ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration,
-        clazz, new HashMap<>(), paramNameResolver);
-    GenericTokenParser parser = new GenericTokenParser("#{", "}", tokenHandler);
-    return SqlSourceBuilder.buildSqlSource(configuration, parser.parse(sql), parameterMappings);
   }
 
   /**
@@ -204,7 +194,7 @@ public class XMLLanguageDriver implements LanguageDriver {
   }
 
   private void collectParameterMappingsFromSql(String text, List<ParameterMapping> mappings) {
-    List<ParameterMapping> parameters = ParameterMappingCollector.collectParameterMappings(text);
+    List<ParameterMapping> parameters = ParameterMappingCollector.collectParameterMappings(configuration, text);
     mappings.addAll(parameters);
   }
 
@@ -269,7 +259,7 @@ public class XMLLanguageDriver implements LanguageDriver {
   }
 
   @Override
-  public final void setConfiguration(Configuration configuration) {
+  public void setConfiguration(Configuration configuration) {
     this.configuration = configuration;
   }
 
@@ -455,7 +445,7 @@ public class XMLLanguageDriver implements LanguageDriver {
   }
 
   /**
-   * handle <and></and>, <or></or> in xml mapping file
+   * handle {@code <and></and>, <or></or>} in xml mapping file
    *
    * @see AndSqlNode
    * @see OrSqlNode

@@ -43,6 +43,7 @@ import org.apache.ibatis.executor.loader.cglib.CglibProxyFactory;
 import org.apache.ibatis.executor.loader.javassist.JavassistProxyFactory;
 import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.internal.util.ObjectUtils;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.logging.commons.JakartaCommonsLoggingImpl;
 import org.apache.ibatis.logging.jdk14.Jdk14LoggingImpl;
 import org.apache.ibatis.logging.log4j.Log4jImpl;
@@ -239,7 +240,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     ResultMapping resultMapping = buildResultMapping(resultType, null, column, javaType, jdbcType, null, null, null,
         null, typeHandler, new ArrayList<>(), null, null, false);
     Map<String, String> namespaceDiscriminatorMap = new HashMap<>();
-    for (Map.Entry<String, String> e : discriminatorMap.entrySet()) {
+    for (Entry<String, String> e : discriminatorMap.entrySet()) {
       String resultMap = e.getValue();
       resultMap = applyCurrentNamespace(resultMap, true);
       namespaceDiscriminatorMap.put(e.getKey(), resultMap);
@@ -249,7 +250,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
   public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType,
       SqlCommandType sqlCommandType, Integer fetchSize, Integer timeout, String parameterMap, Class<?> parameterType,
-      String resultMap, Class<?> resultType, ResultSetType resultSetType, boolean flushCache, boolean useCache,
+      String resultMapId, Class<?> resultType, ResultSetType resultSetType, boolean flushCache, boolean useCache,
       boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId,
       LanguageDriver lang, String resultSets, boolean dirtySelect, ParamNameResolver paramNameResolver) {
 
@@ -272,7 +273,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
       .lang(lang)
       .resultOrdered(resultOrdered)
       .resultSets(resultSets)
-      .resultMaps(getStatementResultMaps(resultMap, resultType, id))
+      .resultMaps(getStatementResultMaps(resultMapId, resultType, id))
       .resultSetType(resultSetType)
       .flushCacheRequired(flushCache)
       .useCache(useCache)
@@ -289,6 +290,20 @@ public class MapperBuilderAssistant extends BaseBuilder {
     MappedStatement statement = statementBuilder.build();
     configuration.addMappedStatement(statement);
     return statement;
+  }
+
+  /**
+   * {@code <selectKey></selectKey>}
+   *
+   * @return {@code <selectKey/>} statement
+   */
+  public MappedStatement addSelectKeyStatement(String id, SqlSource sqlSource, StatementType statementType,
+      SqlCommandType sqlCommandType, Class<?> parameterType, Class<?> resultType, boolean flushCache, boolean useCache,
+      boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId,
+      LanguageDriver lang, String resultSets, boolean dirtySelect, ParamNameResolver paramNameResolver) {
+    return addMappedStatement(id, sqlSource, statementType, sqlCommandType, null, null, null, parameterType, null,
+        resultType, null, flushCache, useCache, resultOrdered, keyGenerator, keyProperty, keyColumn, databaseId, lang,
+        resultSets, dirtySelect, paramNameResolver);
   }
 
   /**
@@ -371,12 +386,12 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return parameterMap;
   }
 
-  private List<ResultMap> getStatementResultMaps(String resultMap, Class<?> resultType, String statementId) {
-    resultMap = applyCurrentNamespace(resultMap, true);
-
-    List<ResultMap> resultMaps = new ArrayList<>();
-    if (resultMap != null) {
-      String[] resultMapNames = resultMap.split(",");
+  private List<ResultMap> getStatementResultMaps(String resultMapId, Class<?> resultType, String statementId) {
+    resultMapId = applyCurrentNamespace(resultMapId, true);
+    List<ResultMap> resultMaps = Collections.emptyList();
+    if (resultMapId != null) {
+      String[] resultMapNames = resultMapId.split(",");
+      resultMaps = new ArrayList<>(resultMapNames.length);
       for (String resultMapName : resultMapNames) {
         try {
           resultMaps.add(configuration.getResultMap(resultMapName.trim()));
@@ -386,6 +401,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         }
       }
     } else if (resultType != null) {
+      resultMaps = new ArrayList<>(1);
       resultMaps.add(new InlineResultMap(statementId, resultType));
     }
     return resultMaps;
@@ -395,26 +411,28 @@ public class MapperBuilderAssistant extends BaseBuilder {
       JdbcType jdbcType, String nestedSelect, String nestedResultMap, String notNullColumn, String columnPrefix,
       Class<? extends TypeHandler<?>> typeHandler, List<ResultFlag> flags, String resultSet, String foreignColumn,
       boolean lazy) {
-    Entry<Type, Class<?>> setterType = resolveSetterType(resultType, property, javaType);
-    TypeHandler<?> typeHandlerInstance = resolveTypeHandler(setterType.getKey(), jdbcType, typeHandler);
+    Entry<Type, Class<?>> setterType = this.resolveSetterType(resultType, property, javaType);
+    TypeHandler<?> typeHandlerInstance = this.resolveTypeHandler(setterType.getKey(), jdbcType, typeHandler);
     List<ResultMapping> composites;
-    if ((nestedSelect == null || nestedSelect.isEmpty()) && (foreignColumn == null || foreignColumn.isEmpty())) {
+    if (StringUtils.isEmpty(nestedSelect) && StringUtils.isEmpty(foreignColumn)) {
       composites = Collections.emptyList();
     } else {
       composites = parseCompositeColumnName(configuration, column);
     }
     // @formatter:off
-    return new ResultMapping.Builder(configuration, property, column, setterType.getValue())
+    return new ResultMapping.Builder(property, column, setterType.getValue())
       .jdbcType(jdbcType)
       .nestedQueryId(applyCurrentNamespace(nestedSelect, true))
       .nestedResultMapId(applyCurrentNamespace(nestedResultMap, true))
       .resultSet(resultSet)
-      .typeHandler(typeHandlerInstance).flags(flags == null ? new ArrayList<>() : flags)
+      .typeHandler(typeHandlerInstance)
+      .flags(flags == null ? Collections.emptyList() : flags)
       .composites(composites)
       .notNullColumns(parseMultipleColumnNames(notNullColumn))
       .columnPrefix(columnPrefix)
       .foreignColumn(foreignColumn)
-      .lazy(lazy).build();
+      .lazy(lazy)
+      .build();
     // @formatter:on
   }
 
@@ -484,15 +502,15 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return columns;
   }
 
-  public static List<ResultMapping> parseCompositeColumnName(Configuration configuration, String columnName) {
+  public List<ResultMapping> parseCompositeColumnName(Configuration configuration, String columnName) {
     List<ResultMapping> composites = new ArrayList<>();
     if (columnName != null && (columnName.indexOf('=') > -1 || columnName.indexOf(',') > -1)) {
       StringTokenizer parser = new StringTokenizer(columnName, "{}=, ", false);
       while (parser.hasMoreTokens()) {
         String property = parser.nextToken();
         String column = parser.nextToken();
-        ResultMapping complexResultMapping = new ResultMapping.Builder(configuration, property, column,
-            (TypeHandler<?>) null).build();
+        ResultMapping complexResultMapping = new ResultMapping.Builder(property, column, (TypeHandler<?>) null)
+            .build(configuration);
         composites.add(complexResultMapping);
       }
     }

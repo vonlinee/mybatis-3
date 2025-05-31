@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.ParameterMode;
+import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,8 @@ public class ParameterMappingCollectorTest {
     String expression = "select * from blog where name = "
         + "#{name:VARCHAR, mode=IN, jdbcType=VARCHAR, jdbcTypeName=MY_TYPE, resultMap=departmentResultMap}";
 
-    List<ParameterMapping> mappings = ParameterMappingCollector.collectParameterMappings(expression);
+    List<ParameterMapping> mappings = ParameterMappingCollector.collectParameterMappings(new Configuration(),
+        expression);
 
     Assertions.assertEquals(1, mappings.size());
 

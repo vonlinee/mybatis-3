@@ -81,16 +81,16 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
   }
 
   private ParameterMapping buildParameterMapping(String content) {
-    ParameterExpression propertiesMap = parseParameterMapping(content);
+    ParameterExpression expression = parseParameterMapping(content, "#{", "}");
 
-    final String property = propertiesMap.remove("property");
-    final JdbcType jdbcType = resolveJdbcType(propertiesMap.remove("jdbcType"));
-    final String typeHandlerAlias = propertiesMap.remove("typeHandler");
+    final String property = expression.remove("property");
+    final JdbcType jdbcType = resolveJdbcType(expression.remove("jdbcType"));
+    final String typeHandlerAlias = expression.remove("typeHandler");
 
     ParameterMapping.Builder builder = new ParameterMapping.Builder(property, (Class<?>) null);
     PropertyTokenizer propertyTokenizer = new PropertyTokenizer(property);
     builder.jdbcType(jdbcType);
-    final Class<?> javaType = figureOutJavaType(propertiesMap, property, propertyTokenizer, jdbcType);
+    final Class<?> javaType = figureOutJavaType(expression, property, propertyTokenizer, jdbcType);
     builder.javaType(javaType);
     if (genericType == null) {
       genericType = javaType;
@@ -101,7 +101,7 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
     builder.typeHandler(typeHandler);
 
     ParameterMode mode = null;
-    for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
+    for (Map.Entry<String, String> entry : expression.entrySet()) {
       String name = entry.getKey();
       String value = entry.getValue();
       if ("mode".equals(name)) {
@@ -135,9 +135,9 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
     return builder.build();
   }
 
-  private Class<?> figureOutJavaType(Map<String, String> propertiesMap, String property,
+  private Class<?> figureOutJavaType(ParameterExpression expression, String property,
       PropertyTokenizer propertyTokenizer, JdbcType jdbcType) {
-    Class<?> javaType = resolveClass(propertiesMap.remove("javaType"));
+    Class<?> javaType = resolveClass(expression.remove("javaType"));
     if (javaType != null) {
       return javaType;
     }
@@ -179,16 +179,5 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
       return getterType.getValue();
     }
     return Object.class;
-  }
-
-  private ParameterExpression parseParameterMapping(String content) {
-    try {
-      return new ParameterExpression(content);
-    } catch (BuilderException ex) {
-      throw ex;
-    } catch (Exception ex) {
-      throw new BuilderException("Parsing error was found in mapping #{" + content
-          + "}.  Check syntax #{property|(expression), var1=value1, var2=value2, ...} ", ex);
-    }
   }
 }

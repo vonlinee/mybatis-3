@@ -71,9 +71,9 @@ public class VelocitySqlSourceBuilder extends BaseBuilder {
     }
 
     private ParameterMapping buildParameterMapping(String content) {
-      ParameterExpression propertiesMap = parseParameterMapping(content);
-      String property = propertiesMap.get("property");
-      JdbcType jdbcType = resolveJdbcType(propertiesMap.get("jdbcType"));
+      ParameterExpression expression = parseParameterMapping(content, "@{", "}");
+      String property = expression.get("property");
+      JdbcType jdbcType = resolveJdbcType(expression.get("jdbcType"));
       Class<?> propertyType;
       if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
         propertyType = parameterType;
@@ -95,7 +95,7 @@ public class VelocitySqlSourceBuilder extends BaseBuilder {
       }
       Class<?> javaType = null;
       String typeHandlerAlias = null;
-      for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
+      for (Map.Entry<String, String> entry : expression.entrySet()) {
         String name = entry.getKey();
         String value = entry.getValue();
         if (name != null) {
@@ -129,7 +129,7 @@ public class VelocitySqlSourceBuilder extends BaseBuilder {
                   + "}.  Valid properties are " + parameterProperties);
           }
         } else {
-          throw new BuilderException("An invalid property '" + name + "' was found in mapping @{" + content
+          throw new BuilderException("An invalid property '" + null + "' was found in mapping @{" + content
               + "}.  Valid properties are " + parameterProperties);
         }
       }
@@ -137,17 +137,6 @@ public class VelocitySqlSourceBuilder extends BaseBuilder {
         builder.typeHandler(resolveTypeHandler(javaType, propertyType, jdbcType, typeHandlerAlias));
       }
       return builder.build();
-    }
-
-    private ParameterExpression parseParameterMapping(String content) {
-      try {
-        return new ParameterExpression(content);
-      } catch (BuilderException ex) {
-        throw ex;
-      } catch (Exception ex) {
-        throw new BuilderException("Parsing error was found in mapping @{" + content
-            + "}.  Check syntax #{property|(expression), var1=value1, var2=value2, ...} ", ex);
-      }
     }
   }
 

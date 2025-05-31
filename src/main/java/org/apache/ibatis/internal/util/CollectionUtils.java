@@ -450,11 +450,22 @@ public final class CollectionUtils {
     return Arrays.asList(elements);
   }
 
+  /**
+   * @see CollectionUtils#asList(Object[])
+   *
+   * @param elements
+   *          elements
+   *
+   * @return array list
+   *
+   * @param <E>
+   *          component type
+   */
   @SafeVarargs
   @NotNull
   public static <E> List<E> asArrayList(E... elements) {
     if (elements == null || elements.length == 0) {
-      return new ArrayList<>();
+      return new ArrayList<>(0);
     }
     return new ArrayList<>(Arrays.asList(elements));
   }
@@ -482,6 +493,107 @@ public final class CollectionUtils {
       primaryCollection.addAll(collection);
     }
     return primaryCollection;
+  }
+
+  /**
+   * @see Arrays#asList(Object[])
+   * @see Collections#singletonList(Object)
+   * @see Collections#unmodifiableList(List)
+   *
+   * @param list
+   *          list
+   *
+   * @return whether the give list is unmodifiable
+   */
+  public static boolean isUnmodifiable(List<?> list) {
+    if (list == null) {
+      return false;
+    }
+    final String typeName = list.getClass().getName();
+    return "java.util.Arrays$ArrayList".equals(typeName) || "java.util.Collections$SingletonList".equals(typeName)
+        || typeName.startsWith("java.util.Collections$Unmodifiable")
+        || typeName.startsWith("java.util.ImmutableCollections"); // java9+
+  }
+
+  public static boolean isModifiable(List<?> list) {
+    if (list == null) {
+      return false;
+    }
+    return !isUnmodifiable(list);
+  }
+
+  public static boolean isUnmodifiable(Map<?, ?> map) {
+    if (map == null) {
+      return false;
+    }
+    final String typeName = map.getClass().getName();
+    return "java.util.Collections.EmptyMap".equals(typeName) || "java.util.Collections$SingletonList".equals(typeName)
+        || typeName.startsWith("java.util.Collections$Unmodifiable")
+        || typeName.startsWith("java.util.ImmutableCollections"); // java9+
+  }
+
+  public static boolean isModifiable(Set<?> s) {
+    if (s == null) {
+      return false;
+    }
+    final String name = s.getClass().getName();
+    return "java.util.Collections.UnmodifiableSet".equals(name);
+  }
+
+  public static boolean isUnmodifiable(Set<?> s) {
+    if (s == null) {
+      return false;
+    }
+    return !isModifiable(s);
+  }
+
+  /**
+   * @see Collections#unmodifiableList(List)
+   *
+   * @param list
+   *          list
+   *
+   * @return unmodifiable list
+   */
+  @NotNull
+  public static <T> List<T> unmodifiableList(@Nullable List<T> list) {
+    if (list == null) {
+      return Collections.emptyList();
+    }
+    if (isUnmodifiable(list)) {
+      return list;
+    }
+    return Collections.unmodifiableList(list);
+  }
+
+  /**
+   * @see Collections#unmodifiableMap(Map)
+   *
+   * @param map
+   *          map
+   *
+   * @return unmodifiable map
+   */
+  @NotNull
+  public static <K, V> Map<K, V> unmodifiableMap(@Nullable Map<K, V> map) {
+    if (map == null) {
+      return Collections.emptyMap();
+    }
+    if (isUnmodifiable(map)) {
+      return map;
+    }
+    return Collections.unmodifiableMap(map);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Set<T> unmodifiableSet(Set<? extends T> s) {
+    if (s == null) {
+      return Collections.emptySet();
+    }
+    if (isUnmodifiable(s)) {
+      return (Set<T>) s;
+    }
+    return Collections.unmodifiableSet(s);
   }
 
   /**

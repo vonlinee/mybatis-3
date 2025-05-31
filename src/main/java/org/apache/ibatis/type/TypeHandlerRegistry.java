@@ -51,6 +51,7 @@ import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.reflection.TypeParameterResolver;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
@@ -238,7 +239,7 @@ public final class TypeHandlerRegistry {
     return typeHandler;
   }
 
-  public TypeHandler<?> getTypeHandler(Type type, JdbcType jdbcType) {
+  public TypeHandler<?> getTypeHandler(Type type, @Nullable JdbcType jdbcType) {
     if (ParamMap.class.equals(type)) {
       return null;
     } else if (type == null) {

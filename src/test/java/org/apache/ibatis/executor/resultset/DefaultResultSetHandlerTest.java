@@ -20,8 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -56,10 +54,6 @@ class DefaultResultSetHandlerTest {
   private ResultSet rs;
   @Mock
   private ResultSetMetaData rsmd;
-  @Mock
-  private Connection conn;
-  @Mock
-  private DatabaseMetaData dbmd;
 
   /**
    * Contrary to the spec, some drivers require case-sensitive column names when getting result.
@@ -86,7 +80,7 @@ class DefaultResultSetHandlerTest {
 
     final List<Object> results = fastResultSetHandler.handleResultSets(stmt);
     assertEquals(1, results.size());
-    assertEquals(100, ((HashMap) results.get(0)).get("cOlUmN1"));
+    assertEquals(100, ((HashMap<?, ?>) results.get(0)).get("cOlUmN1"));
   }
 
   @Test
@@ -126,8 +120,8 @@ class DefaultResultSetHandlerTest {
           {
             add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<>() {
               {
-                add(new ResultMapping.Builder(config, "cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class))
-                    .build());
+                add(new ResultMapping.Builder("cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class))
+                    .build(config));
               }
             }).build());
           }

@@ -16,12 +16,12 @@
 package org.apache.ibatis.mapping;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 
@@ -127,11 +127,11 @@ public class ResultMap {
       }
 
       // lock down collections
-      resultMap.resultMappings = Collections.unmodifiableList(resultMap.resultMappings);
-      resultMap.idResultMappings = Collections.unmodifiableList(resultMap.idResultMappings);
-      resultMap.constructorResultMappings = Collections.unmodifiableList(resultMap.constructorResultMappings);
-      resultMap.propertyResultMappings = Collections.unmodifiableList(resultMap.propertyResultMappings);
-      resultMap.mappedColumns = Collections.unmodifiableSet(resultMap.mappedColumns);
+      resultMap.resultMappings = CollectionUtils.unmodifiableList(resultMap.resultMappings);
+      resultMap.idResultMappings = CollectionUtils.unmodifiableList(resultMap.idResultMappings);
+      resultMap.constructorResultMappings = CollectionUtils.unmodifiableList(resultMap.constructorResultMappings);
+      resultMap.propertyResultMappings = CollectionUtils.unmodifiableList(resultMap.propertyResultMappings);
+      resultMap.mappedColumns = CollectionUtils.unmodifiableSet(resultMap.mappedColumns);
 
       return resultMap;
     }

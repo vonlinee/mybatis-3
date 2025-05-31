@@ -672,7 +672,7 @@ class SqlSessionTest extends BaseDataTest {
     int count;
 
     @Override
-    public void handleResult(ResultContext context) {
+    public void handleResult(ResultContext<?> context) {
       count++;
     }
   }
@@ -690,7 +690,7 @@ class SqlSessionTest extends BaseDataTest {
     int count;
 
     @Override
-    public void handleResult(ResultContext context) {
+    public void handleResult(ResultContext<?> context) {
       count++;
       if (count == 2) {
         context.stop();

@@ -215,4 +215,35 @@ public class ParameterExpression extends HashMap<String, String> {
     return start >= end ? "" : str.substring(start, end);
   }
 
+  public String getProperty() {
+    return get("property");
+  }
+
+  public String getJdbcType() {
+    return get("jdbcType");
+  }
+
+  public String getTypeHandler() {
+    return get("typeHandler");
+  }
+
+  public String getParameterMode() {
+    return get("mode");
+  }
+
+  public String getNumericScale() {
+    return get("numericScale");
+  }
+
+  public String getResultMapId() {
+    return get("resultMap");
+  }
+
+  public String getJdbcTypeName() {
+    return get("jdbcTypeName");
+  }
+
+  public String getExpression() {
+    return get("expression");
+  }
 }

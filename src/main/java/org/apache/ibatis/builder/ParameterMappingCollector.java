@@ -23,17 +23,19 @@ import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.TokenHandler;
+import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 
 /**
  * @see ParameterMappingTokenHandler
  * @see ParameterMapping
  */
-public class ParameterMappingCollector implements TokenHandler {
+public class ParameterMappingCollector extends BaseBuilder implements TokenHandler {
 
-  List<ParameterMapping> parameterMappings;
+  private final List<ParameterMapping> parameterMappings;
 
-  public ParameterMappingCollector() {
+  public ParameterMappingCollector(Configuration configuration) {
+    super(configuration);
     this.parameterMappings = new ArrayList<>();
   }
 
@@ -45,11 +47,11 @@ public class ParameterMappingCollector implements TokenHandler {
   }
 
   protected ParameterMapping buildParameterMapping(String content) {
-    ParameterExpression propertiesMap = parseParameterMapping(content);
+    ParameterExpression expression = parseParameterMapping(content, "#{", "}");
 
-    final String property = propertiesMap.remove("property");
-    final JdbcType jdbcType = resolveJdbcType(propertiesMap.remove("jdbcType"));
-    final String typeHandlerAlias = propertiesMap.remove("typeHandler");
+    final String property = expression.remove("property");
+    final JdbcType jdbcType = resolveJdbcType(expression.remove("jdbcType"));
+    final String typeHandlerAlias = expression.remove("typeHandler");
 
     ParameterMapping.Builder builder = new ParameterMapping.Builder(property, (Class<?>) null);
     builder.jdbcType(jdbcType);
@@ -57,7 +59,7 @@ public class ParameterMappingCollector implements TokenHandler {
     builder.typeHandler(typeHandlerAlias);
 
     ParameterMode mode;
-    for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
+    for (Map.Entry<String, String> entry : expression.entrySet()) {
       String name = entry.getKey();
       String value = entry.getValue();
       if ("mode".equals(name)) {
@@ -83,37 +85,10 @@ public class ParameterMappingCollector implements TokenHandler {
     return parameterMappings;
   }
 
-  public static List<ParameterMapping> collectParameterMappings(String text) {
-    ParameterMappingCollector handler = new ParameterMappingCollector();
+  public static List<ParameterMapping> collectParameterMappings(Configuration configuration, String text) {
+    ParameterMappingCollector handler = new ParameterMappingCollector(configuration);
     GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
-    String sql = parser.parse(text);
+    parser.parse(text);
     return handler.getParameterMappings();
-  }
-
-  private ParameterExpression parseParameterMapping(String content) {
-    try {
-      return new ParameterExpression(content);
-    } catch (BuilderException ex) {
-      throw ex;
-    } catch (Exception ex) {
-      throw new BuilderException("Parsing error was found in mapping #{" + content
-          + "}.  Check syntax #{property|(expression), var1=value1, var2=value2, ...} ", ex);
-    }
-  }
-
-  protected JdbcType resolveJdbcType(String alias) {
-    try {
-      return alias == null ? null : JdbcType.valueOf(alias);
-    } catch (IllegalArgumentException e) {
-      throw new BuilderException("Error resolving JdbcType. Cause: " + e, e);
-    }
-  }
-
-  protected ParameterMode resolveParameterMode(String alias) {
-    try {
-      return alias == null ? null : ParameterMode.valueOf(alias);
-    } catch (IllegalArgumentException e) {
-      throw new BuilderException("Error resolving ParameterMode. Cause: " + e, e);
-    }
   }
 }

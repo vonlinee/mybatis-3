@@ -28,6 +28,7 @@ import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.ContextMap;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
@@ -46,8 +47,8 @@ public class DynamicContext implements SqlBuildContext {
   private GenericTokenParser tokenParser;
   private ParameterMappingTokenHandler tokenHandler;
 
-  public DynamicContext(Configuration configuration, Object parameterObject, Class<?> parameterType,
-      ParamNameResolver paramNameResolver, boolean paramExists) {
+  public DynamicContext(Configuration configuration, Object parameterObject, @Nullable Class<?> parameterType,
+      @Nullable ParamNameResolver paramNameResolver, boolean paramExists) {
     this.bindings = createBindings(configuration, parameterObject);
     this.configuration = configuration;
     this.parameterObject = parameterObject;

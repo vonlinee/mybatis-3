@@ -306,7 +306,7 @@ final class ExecutorTestHelper {
                     registry.getTypeHandler(int.class)).build());
               }
             }).discriminator(new Discriminator.Builder(
-                new ResultMapping.Builder(config, "section", "section", registry.getTypeHandler(String.class)).build(),
+                new ResultMapping.Builder("section", "section", registry.getTypeHandler(String.class)).build(config),
                 new HashMap<>() {
                   {
                     put("NEWS", discriminatorResultMap.getId());
@@ -338,14 +338,14 @@ final class ExecutorTestHelper {
               {
                 add(new ResultMap.Builder(config, "defaultResultMap", Author.class, new ArrayList<>() {
                   {
-                    add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).build());
-                    add(new ResultMapping.Builder(config, "username", "username", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "password", "password", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "email", "email", registry.getTypeHandler(String.class))
-                        .build());
-                    add(new ResultMapping.Builder(config, "bio", "bio", registry.getTypeHandler(String.class)).build());
+                    add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class)).build(config));
+                    add(new ResultMapping.Builder("username", "username", registry.getTypeHandler(String.class))
+                        .build(config));
+                    add(new ResultMapping.Builder("password", "password", registry.getTypeHandler(String.class))
+                        .build(config));
+                    add(new ResultMapping.Builder("email", "email", registry.getTypeHandler(String.class))
+                        .build(config));
+                    add(new ResultMapping.Builder("bio", "bio", registry.getTypeHandler(String.class)).build(config));
                   }
                 }).build());
               }
@@ -373,21 +373,21 @@ final class ExecutorTestHelper {
     }).build();
     final ResultMap resultMap = new ResultMap.Builder(config, "defaultResultMap", Blog.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
+        add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
           {
             add(ResultFlag.ID);
           }
-        }).build());
-        add(new ResultMapping.Builder(config, "title", "title", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "author.id", "author_id", registry.getTypeHandler(int.class)).build());
-        add(new ResultMapping.Builder(config, "author.username", "username", registry.getTypeHandler(String.class))
-            .build());
-        add(new ResultMapping.Builder(config, "author.password", "password", registry.getTypeHandler(String.class))
-            .build());
-        add(new ResultMapping.Builder(config, "author.email", "email", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "author.bio", "bio", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "posts", "id", registry.getTypeHandler(int.class)).javaType(List.class)
-            .nestedQueryId("selectPostsForBlog").build());
+        }).build(config));
+        add(new ResultMapping.Builder("title", "title", registry.getTypeHandler(String.class)).build(config));
+        add(new ResultMapping.Builder("author.id", "author_id", registry.getTypeHandler(int.class)).build(config));
+        add(new ResultMapping.Builder("author.username", "username", registry.getTypeHandler(String.class))
+            .build(config));
+        add(new ResultMapping.Builder("author.password", "password", registry.getTypeHandler(String.class))
+            .build(config));
+        add(new ResultMapping.Builder("author.email", "email", registry.getTypeHandler(String.class)).build(config));
+        add(new ResultMapping.Builder("author.bio", "bio", registry.getTypeHandler(String.class)).build(config));
+        add(new ResultMapping.Builder("posts", "id", registry.getTypeHandler(int.class)).javaType(List.class)
+            .nestedQueryId("selectPostsForBlog").build(config));
       }
     }).build();
 
@@ -412,7 +412,7 @@ final class ExecutorTestHelper {
           FROM blog b\
          INNER JOIN author a ON b.author_id = a.id\
          WHERE b.id = ? and a.id = ?\
-         """);
+        """);
     final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", Map.class, new ArrayList<>() {
       {
         add(new ParameterMapping.Builder("blogId", registry.getTypeHandler(int.class)).build());
@@ -421,20 +421,20 @@ final class ExecutorTestHelper {
     }).build();
     final ResultMap resultMap = new ResultMap.Builder(config, "defaultResultMap", Blog.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
+        add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
           {
             add(ResultFlag.ID);
           }
-        }).build());
-        add(new ResultMapping.Builder(config, "title", "title", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "author.id", "author_id", registry.getTypeHandler(int.class)).build());
-        add(new ResultMapping.Builder(config, "author.username", "username", registry.getTypeHandler(String.class))
-            .build());
-        add(new ResultMapping.Builder(config, "author.password", "password", registry.getTypeHandler(String.class))
-            .build());
-        add(new ResultMapping.Builder(config, "author.email", "email", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "author.bio", "bio", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "posts", "id", registry.getTypeHandler(int.class)).javaType(List.class)
+        }).build(config));
+        add(new ResultMapping.Builder("title", "title", registry.getTypeHandler(String.class)).build(config));
+        add(new ResultMapping.Builder("author.id", "author_id", registry.getTypeHandler(int.class)).build(config));
+        add(new ResultMapping.Builder("author.username", "username", registry.getTypeHandler(String.class))
+            .build(config));
+        add(new ResultMapping.Builder("author.password", "password", registry.getTypeHandler(String.class))
+            .build(config));
+        add(new ResultMapping.Builder("author.email", "email", registry.getTypeHandler(String.class)).build(config));
+        add(new ResultMapping.Builder("author.bio", "bio", registry.getTypeHandler(String.class)).build(config));
+        add(new ResultMapping.Builder("posts", "id", registry.getTypeHandler(int.class)).javaType(List.class)
             .nestedQueryId("selectPostsForBlog").build());
       }
     }).build();
@@ -475,46 +475,44 @@ final class ExecutorTestHelper {
     }).build();
     final ResultMap tagResultMap = new ResultMap.Builder(config, "tagResultMap", Tag.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "tag_id", registry.getTypeHandler(int.class))
-            .flags(new ArrayList<>() {
-              {
-                add(ResultFlag.ID);
-              }
-            }).build());
-        add(new ResultMapping.Builder(config, "name", "tag_name", registry.getTypeHandler(String.class)).build());
+        add(new ResultMapping.Builder("id", "tag_id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
+          {
+            add(ResultFlag.ID);
+          }
+        }).build(config));
+        add(new ResultMapping.Builder("name", "tag_name", registry.getTypeHandler(String.class)).build(config));
       }
     }).build();
     final ResultMap commentResultMap = new ResultMap.Builder(config, "commentResultMap", Comment.class,
         new ArrayList<>() {
           {
-            add(new ResultMapping.Builder(config, "id", "comment_id", registry.getTypeHandler(int.class))
+            add(new ResultMapping.Builder("id", "comment_id", registry.getTypeHandler(int.class))
                 .flags(new ArrayList<>() {
                   {
                     add(ResultFlag.ID);
                   }
-                }).build());
-            add(new ResultMapping.Builder(config, "name", "comment_name", registry.getTypeHandler(String.class))
-                .build());
-            add(new ResultMapping.Builder(config, "comment", "comment", registry.getTypeHandler(String.class)).build());
+                }).build(config));
+            add(new ResultMapping.Builder("name", "comment_name", registry.getTypeHandler(String.class)).build(config));
+            add(new ResultMapping.Builder("comment", "comment", registry.getTypeHandler(String.class)).build(config));
           }
         }).build();
     config.addResultMap(tagResultMap);
     config.addResultMap(commentResultMap);
     final ResultMap postResultMap = new ResultMap.Builder(config, "defaultResultMap", Post.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
+        add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
           {
             add(ResultFlag.ID);
           }
-        }).build());
-        add(new ResultMapping.Builder(config, "blog", "blog_id", registry.getTypeHandler(int.class))
-            .javaType(Blog.class).nestedQueryId("selectBlogById").build());
-        add(new ResultMapping.Builder(config, "createdOn", "created_on", registry.getTypeHandler(Date.class)).build());
-        add(new ResultMapping.Builder(config, "section", "section", registry.getTypeHandler(Section.class)).build());
-        add(new ResultMapping.Builder(config, "subject", "subject", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "body", "body", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "tags").nestedResultMapId(tagResultMap.getId()).build());
-        add(new ResultMapping.Builder(config, "comments").nestedResultMapId(commentResultMap.getId()).build());
+        }).build(config));
+        add(new ResultMapping.Builder("blog", "blog_id", registry.getTypeHandler(int.class)).javaType(Blog.class)
+            .nestedQueryId("selectBlogById").build(config));
+        add(new ResultMapping.Builder("createdOn", "created_on", registry.getTypeHandler(Date.class)).build(config));
+        add(new ResultMapping.Builder("section", "section", registry.getTypeHandler(Section.class)).build(config));
+        add(new ResultMapping.Builder("subject", "subject", registry.getTypeHandler(String.class)).build(config));
+        add(new ResultMapping.Builder("body", "body", registry.getTypeHandler(String.class)).build(config));
+        add(new ResultMapping.Builder("tags").nestedResultMapId(tagResultMap.getId()).build(config));
+        add(new ResultMapping.Builder("comments").nestedResultMapId(commentResultMap.getId()).build(config));
       }
     }).build();
     return new MappedStatement.Builder(config, "selectPostsForBlog", sqlSource, SqlCommandType.SELECT)
@@ -544,7 +542,7 @@ final class ExecutorTestHelper {
           LEFT OUTER JOIN tag t ON pt.tag_id = t.id\
           LEFT OUTER JOIN comment c ON c.post_id = p.id\
          WHERE p.id = ?\
-         """);
+        """);
     final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
       {
         add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
@@ -552,46 +550,44 @@ final class ExecutorTestHelper {
     }).build();
     final ResultMap tagResultMap = new ResultMap.Builder(config, "tagResultMap", Tag.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "tag_id", registry.getTypeHandler(int.class))
-            .flags(new ArrayList<>() {
-              {
-                add(ResultFlag.ID);
-              }
-            }).build());
-        add(new ResultMapping.Builder(config, "name", "tag_name", registry.getTypeHandler(String.class)).build());
+        add(new ResultMapping.Builder("id", "tag_id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
+          {
+            add(ResultFlag.ID);
+          }
+        }).build(config));
+        add(new ResultMapping.Builder("name", "tag_name", registry.getTypeHandler(String.class)).build(config));
       }
     }).build();
     final ResultMap commentResultMap = new ResultMap.Builder(config, "commentResultMap", Comment.class,
         new ArrayList<>() {
           {
-            add(new ResultMapping.Builder(config, "id", "comment_id", registry.getTypeHandler(int.class))
+            add(new ResultMapping.Builder("id", "comment_id", registry.getTypeHandler(int.class))
                 .flags(new ArrayList<>() {
                   {
                     add(ResultFlag.ID);
                   }
-                }).build());
-            add(new ResultMapping.Builder(config, "name", "comment_name", registry.getTypeHandler(String.class))
-                .build());
-            add(new ResultMapping.Builder(config, "comment", "comment", registry.getTypeHandler(String.class)).build());
+                }).build(config));
+            add(new ResultMapping.Builder("name", "comment_name", registry.getTypeHandler(String.class)).build(config));
+            add(new ResultMapping.Builder("comment", "comment", registry.getTypeHandler(String.class)).build(config));
           }
         }).build();
     config.addResultMap(tagResultMap);
     config.addResultMap(commentResultMap);
     final ResultMap postResultMap = new ResultMap.Builder(config, "", Post.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
+        add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
           {
             add(ResultFlag.ID);
           }
-        }).build());
-        add(new ResultMapping.Builder(config, "blog", "blog_id", registry.getTypeHandler(int.class))
-            .javaType(Blog.class).nestedQueryId("selectBlogById").build());
-        add(new ResultMapping.Builder(config, "createdOn", "created_on", registry.getTypeHandler(Date.class)).build());
-        add(new ResultMapping.Builder(config, "section", "section", registry.getTypeHandler(Section.class)).build());
-        add(new ResultMapping.Builder(config, "subject", "subject", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "body", "body", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "tags").nestedResultMapId(tagResultMap.getId()).build());
-        add(new ResultMapping.Builder(config, "comments").nestedResultMapId(commentResultMap.getId()).build());
+        }).build(config));
+        add(new ResultMapping.Builder("blog", "blog_id", registry.getTypeHandler(int.class)).javaType(Blog.class)
+            .nestedQueryId("selectBlogById").build(config));
+        add(new ResultMapping.Builder("createdOn", "created_on", registry.getTypeHandler(Date.class)).build(config));
+        add(new ResultMapping.Builder("section", "section", registry.getTypeHandler(Section.class)).build(config));
+        add(new ResultMapping.Builder("subject", "subject", registry.getTypeHandler(String.class)).build(config));
+        add(new ResultMapping.Builder("body", "body", registry.getTypeHandler(String.class)).build(config));
+        add(new ResultMapping.Builder("tags").nestedResultMapId(tagResultMap.getId()).build(config));
+        add(new ResultMapping.Builder("comments").nestedResultMapId(commentResultMap.getId()).build(config));
       }
     }).build();
 
@@ -623,7 +619,7 @@ final class ExecutorTestHelper {
           LEFT OUTER JOIN tag t ON pt.tag_id = t.id\
           LEFT OUTER JOIN comment c ON c.post_id = p.id\
          WHERE p.id = ?\
-         """);
+        """);
     final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>() {
       {
         add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
@@ -631,53 +627,49 @@ final class ExecutorTestHelper {
     }).build();
     final ResultMap tagResultMap = new ResultMap.Builder(config, "tagResultMap", Tag.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "tag_id", registry.getTypeHandler(int.class))
-            .flags(new ArrayList<>() {
-              {
-                add(ResultFlag.ID);
-              }
-            }).build());
-        add(new ResultMapping.Builder(config, "name", "tag_name", registry.getTypeHandler(String.class)).build());
+        add(new ResultMapping.Builder("id", "tag_id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
+          {
+            add(ResultFlag.ID);
+          }
+        }).build(config));
+        add(new ResultMapping.Builder("name", "tag_name", registry.getTypeHandler(String.class)).build(config));
       }
     }).build();
     final ResultMap commentResultMap = new ResultMap.Builder(config, "commentResultMap", Comment.class,
         new ArrayList<>() {
           {
-            add(new ResultMapping.Builder(config, "id", "comment_id", registry.getTypeHandler(int.class))
+            add(new ResultMapping.Builder("id", "comment_id", registry.getTypeHandler(int.class))
                 .flags(new ArrayList<>() {
                   {
                     add(ResultFlag.ID);
                   }
-                }).build());
-            add(new ResultMapping.Builder(config, "name", "comment_name", registry.getTypeHandler(String.class))
-                .build());
-            add(new ResultMapping.Builder(config, "comment", "comment", registry.getTypeHandler(String.class)).build());
+                }).build(config));
+            add(new ResultMapping.Builder("name", "comment_name", registry.getTypeHandler(String.class)).build(config));
+            add(new ResultMapping.Builder("comment", "comment", registry.getTypeHandler(String.class)).build(config));
           }
         }).build();
     config.addResultMap(tagResultMap);
     config.addResultMap(commentResultMap);
     final ResultMap postResultMap = new ResultMap.Builder(config, "postResultMap", Post.class, new ArrayList<>() {
       {
-        add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
+        add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(int.class)).flags(new ArrayList<>() {
           {
             add(ResultFlag.ID);
           }
-        }).build());
+        }).build(config));
 
-        add(new ResultMapping.Builder(config, "blog").nestedQueryId("selectBlogByIdAndAuthor")
-            .composites(new ArrayList<>() {
-              {
-                add(new ResultMapping.Builder(config, "authorId", "author_id", registry.getTypeHandler(int.class))
-                    .build());
-                add(new ResultMapping.Builder(config, "blogId", "blog_id", registry.getTypeHandler(int.class)).build());
-              }
-            }).build());
-        add(new ResultMapping.Builder(config, "createdOn", "created_on", registry.getTypeHandler(Date.class)).build());
-        add(new ResultMapping.Builder(config, "section", "section", registry.getTypeHandler(Section.class)).build());
-        add(new ResultMapping.Builder(config, "subject", "subject", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "body", "body", registry.getTypeHandler(String.class)).build());
-        add(new ResultMapping.Builder(config, "tags").nestedResultMapId(tagResultMap.getId()).build());
-        add(new ResultMapping.Builder(config, "comments").nestedResultMapId(commentResultMap.getId()).build());
+        add(new ResultMapping.Builder("blog").nestedQueryId("selectBlogByIdAndAuthor").composites(new ArrayList<>() {
+          {
+            add(new ResultMapping.Builder("authorId", "author_id", registry.getTypeHandler(int.class)).build(config));
+            add(new ResultMapping.Builder("blogId", "blog_id", registry.getTypeHandler(int.class)).build(config));
+          }
+        }).build(config));
+        add(new ResultMapping.Builder("createdOn", "created_on", registry.getTypeHandler(Date.class)).build(config));
+        add(new ResultMapping.Builder("section", "section", registry.getTypeHandler(Section.class)).build(config));
+        add(new ResultMapping.Builder("subject", "subject", registry.getTypeHandler(String.class)).build(config));
+        add(new ResultMapping.Builder("body", "body", registry.getTypeHandler(String.class)).build(config));
+        add(new ResultMapping.Builder("tags").nestedResultMapId(tagResultMap.getId()).build());
+        add(new ResultMapping.Builder("comments").nestedResultMapId(commentResultMap.getId()).build(config));
       }
     }).build();
 
@@ -717,8 +709,4 @@ final class ExecutorTestHelper {
               }
             }).build()).cache(authorCache).keyGenerator(new SelectKeyGenerator(kms, true)).keyProperty("id").build();
   }
-
-  private ExecutorTestHelper() {
-  }
-
 }

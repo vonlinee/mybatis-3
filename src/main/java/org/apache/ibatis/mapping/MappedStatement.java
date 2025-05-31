@@ -193,6 +193,7 @@ public final class MappedStatement {
       assert mappedStatement.id != null;
       assert mappedStatement.sqlSource != null;
       assert mappedStatement.lang != null;
+
       mappedStatement.resultMaps = Collections.unmodifiableList(mappedStatement.resultMaps);
       return mappedStatement;
     }

@@ -1,6 +1,7 @@
 package org.apache.ibatis.internal.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,14 @@ public class CollectionUtilsTest {
     Assertions.assertSame(list, Collections.emptyList());
     List<Integer> list1 = CollectionUtils.asList(1);
     Assertions.assertSame(list1.getClass(), Collections.singletonList(1).getClass());
+  }
+
+  @Test
+  void shouldCheckUnmodifiableCollection() {
+    Assertions.assertTrue(CollectionUtils.isUnmodifiable(Arrays.asList(1, 2)));
+    Assertions.assertTrue(CollectionUtils.isUnmodifiable(Collections.singletonList(1)));
+    Assertions.assertTrue(CollectionUtils.isUnmodifiable(Collections.unmodifiableList(CollectionUtils.asArrayList(1))));
+    Assertions.assertTrue(CollectionUtils.isModifiable(CollectionUtils.asArrayList(1)));
   }
 
   @Test
