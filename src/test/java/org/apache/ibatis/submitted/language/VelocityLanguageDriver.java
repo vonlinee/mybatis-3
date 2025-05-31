@@ -15,12 +15,12 @@
  */
 package org.apache.ibatis.submitted.language;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.SqlNode;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * Just a test case. Not a real Velocity implementation.

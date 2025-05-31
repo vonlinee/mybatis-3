@@ -28,13 +28,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.ibatis.BaseDataTest;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.scripting.MixedSqlNode;
 import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.scripting.StaticTextSqlNode;
 import org.apache.ibatis.scripting.TextSqlNode;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.junit.jupiter.api.Assertions;

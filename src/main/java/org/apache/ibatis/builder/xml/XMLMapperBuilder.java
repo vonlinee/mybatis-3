@@ -27,6 +27,7 @@ import java.util.Properties;
 import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.CacheRefResolver;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.IncompleteElementException;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.builder.ResultMapResolver;
@@ -43,11 +44,12 @@ import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.reflection.MetaClass;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
 /**
+ * <a href="https://mybatis.org/mybatis-3/sqlmap-xml.html">Xml Mapper Documentation</a>
+ *
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */

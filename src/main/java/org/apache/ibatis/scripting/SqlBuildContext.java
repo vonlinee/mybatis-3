@@ -18,9 +18,9 @@ package org.apache.ibatis.scripting;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.reflection.ParamNameResolver;
-import org.apache.ibatis.session.Configuration;
 
 public interface SqlBuildContext {
 

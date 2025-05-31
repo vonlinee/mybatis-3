@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.session;
+package org.apache.ibatis.builder;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,10 +30,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 
 import org.apache.ibatis.binding.MapperRegistry;
-import org.apache.ibatis.builder.CacheRefResolver;
-import org.apache.ibatis.builder.IncompleteElementException;
-import org.apache.ibatis.builder.MapperBuilderAssistant;
-import org.apache.ibatis.builder.ResultMapResolver;
 import org.apache.ibatis.builder.annotation.MethodResolver;
 import org.apache.ibatis.builder.xml.XMLStatementBuilder;
 import org.apache.ibatis.cache.Cache;
@@ -64,6 +60,11 @@ import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.LanguageDriverRegistry;
 import org.apache.ibatis.scripting.defaults.DefaultExtensionFactory;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
+import org.apache.ibatis.session.AutoMappingBehavior;
+import org.apache.ibatis.session.AutoMappingUnknownColumnBehavior;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.LocalCacheScope;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeAliasRegistry;

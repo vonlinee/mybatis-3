@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.ibatis.binding.ParamMap;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -34,7 +35,6 @@ import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.ObjectTypeHandler;
 import org.apache.ibatis.type.TypeException;
@@ -56,7 +56,7 @@ public class DefaultParameterHandler implements ParameterHandler {
 
   private ParameterMetaData paramMetaData;
   private MetaObject paramMetaObject;
-  private HashMap<Class<?>, MetaClass> metaClassCache = new HashMap<>();
+  private final HashMap<Class<?>, MetaClass> metaClassCache = new HashMap<>();
   private static final ParameterMetaData NULL_PARAM_METADATA = new ParameterMetaData() {
     // @formatter:off
     public <T> T unwrap(Class<T> iface) throws SQLException { return null; }

@@ -18,7 +18,7 @@ package org.apache.ibatis.scripting;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.builder.Configuration;
 import org.jetbrains.annotations.NotNull;
 
 /**

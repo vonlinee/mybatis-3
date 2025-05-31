@@ -20,8 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.result.ResultMapException;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * The base {@link TypeHandler} for references a generic type.

@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.BaseDataTest;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.mapping.Environment;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.SqlSession;
@@ -96,7 +96,7 @@ class RefCursorTest {
   @Test
   void shouldUseResultHandlerOnOutputParam() {
     class OrderResultHandler implements ResultHandler<Order> {
-      private List<Order> orders = new ArrayList<>();
+      private final List<Order> orders = new ArrayList<>();
 
       @Override
       public void handleResult(ResultContext<? extends Order> resultContext) {

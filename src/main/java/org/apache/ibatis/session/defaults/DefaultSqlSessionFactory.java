@@ -18,11 +18,11 @@ package org.apache.ibatis.session.defaults;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.exceptions.ExceptionFactory;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.Environment;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;

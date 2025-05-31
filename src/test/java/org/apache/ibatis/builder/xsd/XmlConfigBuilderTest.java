@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.CustomLongTypeHandler;
 import org.apache.ibatis.builder.CustomObjectWrapperFactory;
 import org.apache.ibatis.builder.CustomReflectorFactory;
@@ -45,7 +46,6 @@ import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 import org.apache.ibatis.session.AutoMappingBehavior;
 import org.apache.ibatis.session.AutoMappingUnknownColumnBehavior;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;

@@ -2,10 +2,10 @@ package org.apache.ibatis.executor;
 
 import java.util.List;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.session.Configuration;
 
 class DeferredLoad {
 

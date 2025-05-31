@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.scripting.defaults;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.BatchExecutor;
 import org.apache.ibatis.executor.CachingExecutor;
 import org.apache.ibatis.executor.ErrorContext;
@@ -34,7 +35,6 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.InterceptorChain;
 import org.apache.ibatis.scripting.ExtensionFactory;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;

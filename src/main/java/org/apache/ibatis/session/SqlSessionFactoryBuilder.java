@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.Properties;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.xml.XMLConfigBuilder;
 import org.apache.ibatis.exceptions.ExceptionFactory;
 import org.apache.ibatis.executor.ErrorContext;

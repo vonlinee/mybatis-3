@@ -23,11 +23,11 @@ import java.util.HashMap;
 
 import net.sf.cglib.proxy.Factory;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.loader.cglib.CglibProxyFactory;
 import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
-import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;

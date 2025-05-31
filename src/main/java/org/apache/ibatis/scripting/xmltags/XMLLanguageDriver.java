@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.ParameterMappingCollector;
 import org.apache.ibatis.builder.ParameterMappingTokenHandler;
 import org.apache.ibatis.builder.SqlSourceBuilder;
@@ -46,7 +47,6 @@ import org.apache.ibatis.scripting.StaticTextSqlNode;
 import org.apache.ibatis.scripting.TextSqlNode;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.scripting.expression.ExpressionException;
-import org.apache.ibatis.session.Configuration;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

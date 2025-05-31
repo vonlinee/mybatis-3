@@ -15,8 +15,8 @@
  */
 package org.apache.ibatis.submitted.include_property;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.exceptions.PersistenceException;
-import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

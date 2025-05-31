@@ -30,7 +30,6 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.mapping.ResultMapping;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.assertj.core.api.Assertions;

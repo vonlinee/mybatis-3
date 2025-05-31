@@ -18,11 +18,11 @@ package org.apache.ibatis.scripting;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.ParamNameResolver;
-import org.apache.ibatis.session.Configuration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

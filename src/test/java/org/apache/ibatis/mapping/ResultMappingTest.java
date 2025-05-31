@@ -17,7 +17,7 @@ package org.apache.ibatis.mapping;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

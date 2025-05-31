@@ -18,13 +18,13 @@ package org.apache.ibatis.scripting.xmltags;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.MixedSqlNode;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * <p>

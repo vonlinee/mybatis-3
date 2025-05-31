@@ -18,10 +18,10 @@ package org.apache.ibatis.binding;
 import java.lang.reflect.Method;
 
 import org.apache.ibatis.annotations.Flush;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.session.Configuration;
 
 public class SqlCommand {
 

@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.apache.ibatis.mapping.Environment;

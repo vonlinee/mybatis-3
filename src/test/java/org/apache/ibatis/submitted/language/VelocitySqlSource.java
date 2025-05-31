@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;
-import org.apache.ibatis.session.Configuration;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -100,8 +100,7 @@ public class VelocitySqlSource implements SqlSource {
     }
 
     public String next(Object prop) {
-      StringBuilder sb = new StringBuilder();
-      String name = sb.append(PREFIX).append("_ITEM").append("_").append(count++).toString();
+      String name = PREFIX + "_ITEM" + "_" + count++;
       bindings.put(name, prop);
       return name;
     }
