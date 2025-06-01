@@ -41,6 +41,7 @@ value CDATA #REQUIRED
 <!ATTLIST setting
 name CDATA #REQUIRED
 value CDATA #REQUIRED
+default CDATA #IMPLIED
 >
 
 <!ELEMENT typeAliases (typeAlias*,package*)>

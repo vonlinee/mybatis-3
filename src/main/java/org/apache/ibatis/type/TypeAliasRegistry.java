@@ -41,72 +41,76 @@ public class TypeAliasRegistry {
   private final Map<String, Class<?>> typeAliases = new HashMap<>();
 
   public TypeAliasRegistry() {
-    registerAlias("string", String.class);
+    registerDefaultTypeAlias(this);
+  }
 
-    registerAlias("byte", Byte.class);
-    registerAlias("char", Character.class);
-    registerAlias("character", Character.class);
-    registerAlias("long", Long.class);
-    registerAlias("short", Short.class);
-    registerAlias("int", Integer.class);
-    registerAlias("integer", Integer.class);
-    registerAlias("double", Double.class);
-    registerAlias("float", Float.class);
-    registerAlias("boolean", Boolean.class);
+  public static void registerDefaultTypeAlias(TypeAliasRegistry registry) {
+    registry.registerAlias("string", String.class);
 
-    registerAlias("byte[]", Byte[].class);
-    registerAlias("char[]", Character[].class);
-    registerAlias("character[]", Character[].class);
-    registerAlias("long[]", Long[].class);
-    registerAlias("short[]", Short[].class);
-    registerAlias("int[]", Integer[].class);
-    registerAlias("integer[]", Integer[].class);
-    registerAlias("double[]", Double[].class);
-    registerAlias("float[]", Float[].class);
-    registerAlias("boolean[]", Boolean[].class);
+    registry.registerAlias("byte", Byte.class);
+    registry.registerAlias("char", Character.class);
+    registry.registerAlias("character", Character.class);
+    registry.registerAlias("long", Long.class);
+    registry.registerAlias("short", Short.class);
+    registry.registerAlias("int", Integer.class);
+    registry.registerAlias("integer", Integer.class);
+    registry.registerAlias("double", Double.class);
+    registry.registerAlias("float", Float.class);
+    registry.registerAlias("boolean", Boolean.class);
 
-    registerAlias("_byte", byte.class);
-    registerAlias("_char", char.class);
-    registerAlias("_character", char.class);
-    registerAlias("_long", long.class);
-    registerAlias("_short", short.class);
-    registerAlias("_int", int.class);
-    registerAlias("_integer", int.class);
-    registerAlias("_double", double.class);
-    registerAlias("_float", float.class);
-    registerAlias("_boolean", boolean.class);
+    registry.registerAlias("byte[]", Byte[].class);
+    registry.registerAlias("char[]", Character[].class);
+    registry.registerAlias("character[]", Character[].class);
+    registry.registerAlias("long[]", Long[].class);
+    registry.registerAlias("short[]", Short[].class);
+    registry.registerAlias("int[]", Integer[].class);
+    registry.registerAlias("integer[]", Integer[].class);
+    registry.registerAlias("double[]", Double[].class);
+    registry.registerAlias("float[]", Float[].class);
+    registry.registerAlias("boolean[]", Boolean[].class);
 
-    registerAlias("_byte[]", byte[].class);
-    registerAlias("_char[]", char[].class);
-    registerAlias("_character[]", char[].class);
-    registerAlias("_long[]", long[].class);
-    registerAlias("_short[]", short[].class);
-    registerAlias("_int[]", int[].class);
-    registerAlias("_integer[]", int[].class);
-    registerAlias("_double[]", double[].class);
-    registerAlias("_float[]", float[].class);
-    registerAlias("_boolean[]", boolean[].class);
+    registry.registerAlias("_byte", byte.class);
+    registry.registerAlias("_char", char.class);
+    registry.registerAlias("_character", char.class);
+    registry.registerAlias("_long", long.class);
+    registry.registerAlias("_short", short.class);
+    registry.registerAlias("_int", int.class);
+    registry.registerAlias("_integer", int.class);
+    registry.registerAlias("_double", double.class);
+    registry.registerAlias("_float", float.class);
+    registry.registerAlias("_boolean", boolean.class);
 
-    registerAlias("date", Date.class);
-    registerAlias("decimal", BigDecimal.class);
-    registerAlias("bigdecimal", BigDecimal.class);
-    registerAlias("biginteger", BigInteger.class);
-    registerAlias("object", Object.class);
+    registry.registerAlias("_byte[]", byte[].class);
+    registry.registerAlias("_char[]", char[].class);
+    registry.registerAlias("_character[]", char[].class);
+    registry.registerAlias("_long[]", long[].class);
+    registry.registerAlias("_short[]", short[].class);
+    registry.registerAlias("_int[]", int[].class);
+    registry.registerAlias("_integer[]", int[].class);
+    registry.registerAlias("_double[]", double[].class);
+    registry.registerAlias("_float[]", float[].class);
+    registry.registerAlias("_boolean[]", boolean[].class);
 
-    registerAlias("date[]", Date[].class);
-    registerAlias("decimal[]", BigDecimal[].class);
-    registerAlias("bigdecimal[]", BigDecimal[].class);
-    registerAlias("biginteger[]", BigInteger[].class);
-    registerAlias("object[]", Object[].class);
+    registry.registerAlias("date", Date.class);
+    registry.registerAlias("decimal", BigDecimal.class);
+    registry.registerAlias("bigdecimal", BigDecimal.class);
+    registry.registerAlias("biginteger", BigInteger.class);
+    registry.registerAlias("object", Object.class);
 
-    registerAlias("map", Map.class);
-    registerAlias("hashmap", HashMap.class);
-    registerAlias("list", List.class);
-    registerAlias("arraylist", ArrayList.class);
-    registerAlias("collection", Collection.class);
-    registerAlias("iterator", Iterator.class);
+    registry.registerAlias("date[]", Date[].class);
+    registry.registerAlias("decimal[]", BigDecimal[].class);
+    registry.registerAlias("bigdecimal[]", BigDecimal[].class);
+    registry.registerAlias("biginteger[]", BigInteger[].class);
+    registry.registerAlias("object[]", Object[].class);
 
-    registerAlias("ResultSet", ResultSet.class);
+    registry.registerAlias("map", Map.class);
+    registry.registerAlias("hashmap", HashMap.class);
+    registry.registerAlias("list", List.class);
+    registry.registerAlias("arraylist", ArrayList.class);
+    registry.registerAlias("collection", Collection.class);
+    registry.registerAlias("iterator", Iterator.class);
+
+    registry.registerAlias("ResultSet", ResultSet.class);
   }
 
   /**

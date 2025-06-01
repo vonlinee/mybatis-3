@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+       Copyright 2009-2025 the original author or authors.
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+          https://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<!-- see: https://mybatis.org/mybatis-3/configuration.html -->
+<configuration>
+
+    <!-- See: https://mybatis.org/mybatis-3/configuration.html#properties -->
+    <properties>
+        <property name="org.apache.ibatis.parsing.PropertyParser.enable-default-value" value="true"/>
+        <property name="org.apache.ibatis.parsing.PropertyParser.default-value-separator" value="?:"/>
+    </properties>
+
+    <settings>
+        <setting name="cacheEnabled" value="true" default="true"/>
+        <setting name="lazyLoadingEnabled" value="false"/>
+        <setting name="aggressiveLazyLoading" value="false"/>
+        <setting name="useColumnLabel" value="true"/>
+        <setting name="useGeneratedKeys" value="false"/>
+        <setting name="autoMappingBehavior" value="PARTIAL"/>
+        <setting name="autoMappingUnknownColumnBehavior" value="NONE"/>
+        <setting name="defaultExecutorType" value="SIMPLE"/>
+        <setting name="defaultStatementTimeout" value="null"/>
+        <setting name="defaultFetchSize" value="null"/>
+        <setting name="safeRowBoundsEnabled" value="false"/>
+        <setting name="safeResultHandlerEnabled" value="true"/>
+        <setting name="mapUnderscoreToCamelCase" value="false"/>
+        <setting name="localCacheScope" value="SESSION"/>
+        <setting name="jdbcTypeForNull" value="OTHER"/>
+        <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString"/>
+        <setting name="defaultScriptingLanguage" value="org.apache.ibatis.scripting.xmltags.XMLLanguageDriver"/>
+        <setting name="defaultEnumTypeHandler" value="org.apache.ibatis.type.EnumTypeHandler"/>
+        <setting name="callSettersOnNulls" value="false"/>
+        <setting name="returnInstanceForEmptyRow" value="false"/>
+        <setting name="logPrefix" value="MyBatis"/>
+        <!-- SLF4J | LOG4J | LOG4J2 | JDK_LOGGING | COMMONS_LOGGING | STDOUT_LOGGING | NO_LOGGING -->
+        <setting name="logImpl" value="SLF4J"/>
+        <!-- CGLIB | JAVASSIST -->
+        <setting name="proxyFactory" value="JAVASSIST"/>
+        <!-- <setting name="vfsImpl" value="org.mybatis.example.YourselfVfsImpl"/> -->
+        <setting name="useActualParamName" value="true"/>
+        <!-- <setting name="configurationFactory" value="org.mybatis.example.ConfigurationFactory"/> -->
+    </settings>
+
+    <typeAliases>
+        <!-- primitive type -->
+        <typeAlias alias="_byte" type="byte"/>
+        <typeAlias alias="_short" type="short"/>
+        <typeAlias alias="_char" type="char"/>
+        <typeAlias alias="_character" type="char"/>
+        <typeAlias alias="_int" type="int"/>
+        <typeAlias alias="_integer" type="int"/>
+        <typeAlias alias="_long" type="long"/>
+        <typeAlias alias="_float" type="float"/>
+        <typeAlias alias="_double" type="double"/>
+        <typeAlias alias="_boolean" type="boolean"/>
+
+        <!-- array type of primitive type -->
+        <typeAlias alias="_byte[]" type="[B"/>
+        <typeAlias alias="_char[]" type="[C"/>
+        <typeAlias alias="_character[]" type="[C"/>
+        <typeAlias alias="_int[]" type="[I"/>
+        <typeAlias alias="_integer[]" type="[I"/>
+        <typeAlias alias="_double[]" type="[D"/>
+        <typeAlias alias="_short[]" type="[S"/>
+        <typeAlias alias="_float[]" type="[F"/>
+        <typeAlias alias="_long[]" type="[J"/>
+        <typeAlias alias="_boolean[]" type="[Z"/>
+
+        <!-- wrapper type of primitive type -->
+        <typeAlias alias="byte" type="java.lang.Byte"/>
+        <typeAlias alias="double" type="java.lang.Double"/>
+        <typeAlias alias="character" type="java.lang.Character"/>
+        <typeAlias alias="integer" type="java.lang.Integer"/>
+        <typeAlias alias="float" type="java.lang.Float"/>
+        <typeAlias alias="char" type="java.lang.Character"/>
+        <typeAlias alias="short" type="java.lang.Short"/>
+        <typeAlias alias="boolean" type="java.lang.Boolean"/>
+        <typeAlias alias="int" type="java.lang.Integer"/>
+        <typeAlias alias="long" type="java.lang.Long"/>
+
+        <!-- array type of wrapper type of primitive type -->
+        <typeAlias alias="short[]" type="[Ljava.lang.Short;"/>
+        <typeAlias alias="int[]" type="[Ljava.lang.Integer;"/>
+        <typeAlias alias="char[]" type="[Ljava.lang.Character;"/>
+        <typeAlias alias="float[]" type="[Ljava.lang.Float;"/>
+        <typeAlias alias="byte[]" type="[Ljava.lang.Byte;"/>
+        <typeAlias alias="boolean[]" type="[Ljava.lang.Boolean;"/>
+        <typeAlias alias="character[]" type="[Ljava.lang.Character;"/>
+        <typeAlias alias="double[]" type="[Ljava.lang.Double;"/>
+        <typeAlias alias="long[]" type="[Ljava.lang.Long;"/>
+        <typeAlias alias="integer[]" type="[Ljava.lang.Integer;"/>
+
+        <!-- Common Used Types -->
+        <typeAlias alias="string" type="java.lang.String"/>
+        <typeAlias alias="biginteger" type="java.math.BigInteger"/>
+        <typeAlias alias="biginteger[]" type="[Ljava.math.BigInteger;"/>
+        <typeAlias alias="decimal" type="java.math.BigDecimal"/>
+        <typeAlias alias="decimal[]" type="[Ljava.math.BigDecimal;"/>
+        <typeAlias alias="bigdecimal" type="java.math.BigDecimal"/>
+        <typeAlias alias="bigdecimal[]" type="[Ljava.math.BigDecimal;"/>
+        <typeAlias alias="date" type="java.util.Date"/>
+        <typeAlias alias="date[]" type="[Ljava.util.Date;"/>
+
+        <!-- common used collection -->
+        <typeAlias alias="arraylist" type="java.util.ArrayList"/>
+        <typeAlias alias="map" type="java.util.Map"/>
+        <typeAlias alias="hashmap" type="java.util.HashMap"/>
+        <typeAlias alias="collection" type="java.util.Collection"/>
+        <typeAlias alias="list" type="java.util.List"/>
+        <typeAlias alias="iterator" type="java.util.Iterator"/>
+
+        <typeAlias alias="resultset" type="java.sql.ResultSet"/>
+
+        <!-- object -->
+        <typeAlias alias="object" type="java.lang.Object"/>
+        <typeAlias alias="object[]" type="[Ljava.lang.Object;"/>
+    </typeAliases>
+
+    <typeHandlers>
+        <!--
+        Example:
+            <typeHandler javaType="String" jdbcType="VARCHAR" handler="org.apache.ibatis.builder.CustomStringTypeHandler"/>
+        -->
+    </typeHandlers>
+
+    <objectFactory type="org.apache.ibatis.reflection.factory.DefaultObjectFactory">
+        <!--<property name="objectFactoryProperty" value="100"/>-->
+    </objectFactory>
+
+    <!--
+        <plugins>
+            <plugin interceptor="org.apache.ibatis.builder.ExamplePlugin">
+                <property name="pluginProperty" value="100"/>
+            </plugin>
+        </plugins>
+    -->
+
+    <!--
+    <mappers>
+        <mapper resource="org/apache/ibatis/builder/xxx.xml"/>
+    </mappers>
+    -->
+</configuration>

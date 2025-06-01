@@ -1487,4 +1487,138 @@ public final class ClassUtils {
     return candidates;
   }
 
+  /**
+   * Field descriptor types and their interpretations as defined in the JVM specification.
+   * <p>
+   * The following table describes the mapping between field descriptors and Java types:
+   * <table style="border-collapse: collapse; width: 100%;">
+   * <caption style="font-weight: bold; margin-bottom: 5px;">Field Descriptor Types</caption>
+   * <tr>
+   * <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">FieldType</th>
+   * <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Type</th>
+   * <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Interpretation</th>
+   * </tr>
+   * <tr>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>B</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>byte</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;">signed byte</td>
+   * </tr>
+   * <tr>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>C</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>char</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;">Unicode character code point in the Basic Multilingual Plane,
+   * encoded with UTF-16</td>
+   * </tr>
+   * <tr>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>D</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>double</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;">double-precision floating-point value</td>
+   * </tr>
+   * <tr>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>F</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>float</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;">single-precision floating-point value</td>
+   * </tr>
+   * <tr>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>I</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>int</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;">integer</td>
+   * </tr>
+   * <tr>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>J</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>long</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;">long integer</td>
+   * </tr>
+   * <tr>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>LClassName;</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>reference</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;">an instance of class <code>ClassName</code></td>
+   * </tr>
+   * <tr>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>S</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>short</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;">signed short</td>
+   * </tr>
+   * <tr>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>Z</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>boolean</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>true</code> or <code>false</code></td>
+   * </tr>
+   * <tr>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>[</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;"><code>reference</code></td>
+   * <td style="border: 1px solid #ddd; padding: 8px;">one array dimension</td>
+   * </tr>
+   * </table>
+   *
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.3.2"> JVM Specification - Field
+   *      Descriptors</a>
+   * @see Class#getName()
+   */
+  @Nullable
+  private static Class<?> classForNameOfBaseTypeFieldDescriptorOrNull(String className) {
+    switch (className) {
+      case "[F":
+        return float[].class; // [F
+      case "[B":
+        return byte[].class; // [B
+      case "[I":
+        return int[].class; // [I
+      case "[C":
+        return char[].class; // [C
+      case "[D":
+        return double[].class; // [D
+      case "[S":
+        return short[].class; // [S
+      case "[J":
+        return long[].class; // [J
+      case "[Z":
+        return boolean[].class; // [Z
+      default:
+        return null;
+    }
+  }
+
+  @Nullable
+  private static Class<?> classForNameForPrimitiveTypeOrNull(String className) {
+    switch (className) {
+      case "boolean":
+        return boolean.class;
+      case "byte":
+        return byte.class;
+      case "short":
+        return short.class;
+      case "char":
+      case "character":
+        return char.class;
+      case "int":
+      case "integer":
+        return int.class;
+      case "long":
+        return long.class;
+      case "float":
+        return float.class;
+      case "double":
+        return double.class;
+      default:
+        return null;
+    }
+  }
+
+  @Nullable
+  public static Class<?> classForNameOrNull(@Nullable String className) {
+    if (StringUtils.isBlank(className)) {
+      return null;
+    }
+    if (className.length() == 2 && className.startsWith("[")) {
+      return classForNameOfBaseTypeFieldDescriptorOrNull(className.toUpperCase(Locale.ENGLISH));
+    } else if (StringUtils.isLowerCase(className)) {
+      return classForNameForPrimitiveTypeOrNull(className);
+    }
+    try {
+      return Class.forName(className);
+    } catch (ClassNotFoundException ignore) {
+    }
+    return null;
+  }
 }

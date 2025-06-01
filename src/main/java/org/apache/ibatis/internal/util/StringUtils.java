@@ -598,4 +598,89 @@ public final class StringUtils {
     sb.append(inString, pos, inString.length());
     return sb.toString();
   }
+
+  /**
+   * <pre>
+   * str.matches("[a-z]+")
+   * </pre>
+   *
+   * @param str
+   *          string to check
+   *
+   * @return whether all letters of the give string is lower case
+   */
+  public static boolean isLowerCase(@Nullable CharSequence str) {
+    if (str == null || str.length() == 0) {
+      return false;
+    }
+    final int len = str.length();
+    for (int i = 0; i < len; i++) {
+      if (!Character.isLowerCase(str.charAt(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public static boolean isAlphabeticLowerCase(@Nullable CharSequence str) {
+    if (str == null || str.length() == 0) {
+      return false;
+    }
+    final int len = str.length();
+    for (int i = 0; i < len; i++) {
+      if (Character.isAlphabetic(str.charAt(i)) && !Character.isLowerCase(str.charAt(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public static boolean isAlphabeticUpperCase(@Nullable CharSequence str) {
+    if (str == null || str.length() == 0) {
+      return false;
+    }
+    final int len = str.length();
+    for (int i = 0; i < len; i++) {
+      if (Character.isAlphabetic(str.charAt(i)) && !Character.isUpperCase(str.charAt(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public static boolean isUpperCase(@Nullable CharSequence str) {
+    if (str == null || str.length() == 0) {
+      return false;
+    }
+    final int len = str.length();
+    for (int i = 0; i < len; i++) {
+      if (!Character.isUpperCase(str.charAt(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public static boolean isAlphabetic(@Nullable CharSequence str) {
+    if (str == null || str.length() == 0) {
+      return false;
+    }
+    final int len = str.length();
+    for (int i = 0; i < len; i++) {
+      if (!Character.isAlphabetic(str.charAt(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public static boolean isNumber(String str) {
+    if (isBlank(str)) {
+      return false;
+    }
+    if ("null".equals(str)) {
+      return false;
+    }
+    return str.matches("\\d+");
+  }
 }

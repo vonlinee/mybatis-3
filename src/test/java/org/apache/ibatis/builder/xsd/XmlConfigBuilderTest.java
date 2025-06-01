@@ -28,9 +28,9 @@ import org.apache.ibatis.builder.CustomReflectorFactory;
 import org.apache.ibatis.builder.CustomStringTypeHandler;
 import org.apache.ibatis.builder.ExampleObjectFactory;
 import org.apache.ibatis.builder.ExamplePlugin;
+import org.apache.ibatis.builder.XMLConfigBuilder;
 import org.apache.ibatis.builder.mapper.CustomMapper;
 import org.apache.ibatis.builder.typehandler.CustomIntegerTypeHandler;
-import org.apache.ibatis.builder.xml.XMLConfigBuilder;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.domain.blog.Blog;
@@ -50,6 +50,7 @@ import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.TypeAliasRegistry;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -163,4 +164,35 @@ class XmlConfigBuilderTest {
     }
   }
 
+  @Test
+  void shouldEqualsDefaultConfiguration() {
+    Configuration _config = XMLConfigBuilder.withDefault();
+    Configuration config = new Configuration();
+
+    assertEquals(config.isCacheEnabled(), _config.isCacheEnabled());
+    assertEquals(config.isLazyLoadingEnabled(), _config.isLazyLoadingEnabled());
+    assertEquals(config.isAggressiveLazyLoading(), _config.isAggressiveLazyLoading());
+    assertEquals(config.isUseColumnLabel(), _config.isUseColumnLabel());
+    assertEquals(config.isUseGeneratedKeys(), _config.isUseGeneratedKeys());
+    assertEquals(config.getAutoMappingBehavior(), _config.getAutoMappingBehavior());
+    assertEquals(config.getAutoMappingUnknownColumnBehavior(), _config.getAutoMappingUnknownColumnBehavior());
+    assertEquals(config.getDefaultExecutorType(), _config.getDefaultExecutorType());
+    assertEquals(config.getDefaultStatementTimeout(), _config.getDefaultStatementTimeout());
+    assertEquals(config.getDefaultFetchSize(), _config.getDefaultFetchSize());
+    assertEquals(config.isSafeRowBoundsEnabled(), _config.isSafeRowBoundsEnabled());
+    assertEquals(config.isSafeResultHandlerEnabled(), _config.isSafeResultHandlerEnabled());
+    assertEquals(config.isMapUnderscoreToCamelCase(), _config.isMapUnderscoreToCamelCase());
+    assertEquals(config.getLocalCacheScope(), _config.getLocalCacheScope());
+    assertEquals(config.getJdbcTypeForNull(), _config.getJdbcTypeForNull());
+    assertEquals(config.getLazyLoadTriggerMethods(), _config.getLazyLoadTriggerMethods());
+    assertEquals(config.getDefaultScriptingLanguageInstance().getClass(),
+        _config.getDefaultScriptingLanguageInstance().getClass());
+    assertEquals(config.isCallSettersOnNulls(), _config.isCallSettersOnNulls());
+    assertEquals(config.isReturnInstanceForEmptyRow(), _config.isReturnInstanceForEmptyRow());
+    assertEquals(config.isUseActualParamName(), _config.isUseActualParamName());
+
+    TypeAliasRegistry typeAliasRegistry = config.getTypeAliasRegistry();
+    TypeAliasRegistry _typeAliasRegistry = config.getTypeAliasRegistry();
+    assertEquals(_typeAliasRegistry.getTypeAliases(), typeAliasRegistry.getTypeAliases());
+  }
 }

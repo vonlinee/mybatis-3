@@ -19,18 +19,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.BiFunction;
 
 import org.apache.ibatis.binding.MapperRegistry;
-import org.apache.ibatis.builder.annotation.MethodResolver;
 import org.apache.ibatis.builder.xml.XMLStatementBuilder;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.Executor;
@@ -74,7 +68,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 /**
  * @author Clinton Begin
  */
-public class Configuration {
+public class Configuration extends ConfigurationElementHolder {
 
   protected Environment environment;
 
@@ -146,15 +140,6 @@ public class Configuration {
 
   protected final Set<String> loadedResources = new HashSet<>();
   protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers");
-  protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>();
-  protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<>();
-  protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>();
-  protected final Collection<MethodResolver> incompleteMethods = new LinkedList<>();
-
-  private final ReentrantLock incompleteResultMapsLock = new ReentrantLock();
-  private final ReentrantLock incompleteCacheRefsLock = new ReentrantLock();
-  private final ReentrantLock incompleteStatementsLock = new ReentrantLock();
-  private final ReentrantLock incompleteMethodsLock = new ReentrantLock();
 
   /*
    * A map holds cache-ref relationship. The key is the namespace that references a cache bound to another namespace and
@@ -168,7 +153,7 @@ public class Configuration {
   }
 
   public Configuration() {
-    MapperBuilderAssistant.registerDefaultAlias(this.typeAliasRegistry);
+    MapperBuilderAssistant.registerDefaultTypeAlias(this.typeAliasRegistry);
     languageRegistry.setDefaultDriverClass(XMLLanguageDriver.class);
   }
 
@@ -753,42 +738,6 @@ public class Configuration {
     return incompleteStatements;
   }
 
-  public void addIncompleteStatement(XMLStatementBuilder incompleteStatement) {
-    incompleteStatementsLock.lock();
-    try {
-      incompleteStatements.add(incompleteStatement);
-    } finally {
-      incompleteStatementsLock.unlock();
-    }
-  }
-
-  public void addIncompleteCacheRef(CacheRefResolver incompleteCacheRef) {
-    incompleteCacheRefsLock.lock();
-    try {
-      incompleteCacheRefs.add(incompleteCacheRef);
-    } finally {
-      incompleteCacheRefsLock.unlock();
-    }
-  }
-
-  public void addIncompleteResultMap(ResultMapResolver resultMapResolver) {
-    incompleteResultMapsLock.lock();
-    try {
-      incompleteResultMaps.add(resultMapResolver);
-    } finally {
-      incompleteResultMapsLock.unlock();
-    }
-  }
-
-  public void addIncompleteMethod(MethodResolver builder) {
-    incompleteMethodsLock.lock();
-    try {
-      incompleteMethods.add(builder);
-    } finally {
-      incompleteMethodsLock.unlock();
-    }
-  }
-
   public MappedStatement getMappedStatement(String id) {
     return this.getMappedStatement(id, true);
   }
@@ -854,90 +803,6 @@ public class Configuration {
     parsePendingMethods(true);
   }
 
-  public void parsePendingMethods(boolean reportUnresolved) {
-    if (incompleteMethods.isEmpty()) {
-      return;
-    }
-    incompleteMethodsLock.lock();
-    try {
-      incompleteMethods.removeIf(x -> {
-        x.resolve();
-        return true;
-      });
-    } catch (IncompleteElementException e) {
-      if (reportUnresolved) {
-        throw e;
-      }
-    } finally {
-      incompleteMethodsLock.unlock();
-    }
-  }
-
-  public void parsePendingStatements(boolean reportUnresolved) {
-    if (incompleteStatements.isEmpty()) {
-      return;
-    }
-    incompleteStatementsLock.lock();
-    try {
-      incompleteStatements.removeIf(x -> {
-        x.parseStatementNode();
-        return true;
-      });
-    } catch (IncompleteElementException e) {
-      if (reportUnresolved) {
-        throw e;
-      }
-    } finally {
-      incompleteStatementsLock.unlock();
-    }
-  }
-
-  public void parsePendingCacheRefs(boolean reportUnresolved) {
-    if (incompleteCacheRefs.isEmpty()) {
-      return;
-    }
-    incompleteCacheRefsLock.lock();
-    try {
-      incompleteCacheRefs.removeIf(x -> x.resolveCacheRef() != null);
-    } catch (IncompleteElementException e) {
-      if (reportUnresolved) {
-        throw e;
-      }
-    } finally {
-      incompleteCacheRefsLock.unlock();
-    }
-  }
-
-  public void parsePendingResultMaps(boolean reportUnresolved) {
-    if (incompleteResultMaps.isEmpty()) {
-      return;
-    }
-    incompleteResultMapsLock.lock();
-    try {
-      boolean resolved;
-      IncompleteElementException ex = null;
-      do {
-        resolved = false;
-        Iterator<ResultMapResolver> iterator = incompleteResultMaps.iterator();
-        while (iterator.hasNext()) {
-          try {
-            iterator.next().resolve();
-            iterator.remove();
-            resolved = true;
-          } catch (IncompleteElementException e) {
-            ex = e;
-          }
-        }
-      } while (resolved);
-      if (reportUnresolved && !incompleteResultMaps.isEmpty() && ex != null) {
-        // At least one result map is unresolvable.
-        throw ex;
-      }
-    } finally {
-      incompleteResultMapsLock.unlock();
-    }
-  }
-
   /**
    * Extracts namespace from fully qualified statement id.
    *
@@ -984,94 +849,4 @@ public class Configuration {
       }
     }
   }
-
-  protected static class StrictMap<V> extends ConcurrentHashMap<String, V> {
-
-    private static final long serialVersionUID = -4950446264854982944L;
-    private final String name;
-    private BiFunction<V, V, String> conflictMessageProducer;
-    private static final Object AMBIGUITY_INSTANCE = new Object();
-
-    public StrictMap(String name, int initialCapacity, float loadFactor) {
-      super(initialCapacity, loadFactor);
-      this.name = name;
-    }
-
-    public StrictMap(String name, int initialCapacity) {
-      super(initialCapacity);
-      this.name = name;
-    }
-
-    public StrictMap(String name) {
-      this.name = name;
-    }
-
-    public StrictMap(String name, Map<String, ? extends V> m) {
-      super(m);
-      this.name = name;
-    }
-
-    /**
-     * Assign a function for producing a conflict error message when contains value with the same key.
-     * <p>
-     * function arguments are 1st is saved value and 2nd is target value.
-     *
-     * @param conflictMessageProducer
-     *          A function for producing a conflict error message
-     *
-     * @return a conflict error message
-     *
-     * @since 3.5.0
-     */
-    public StrictMap<V> conflictMessageProducer(BiFunction<V, V, String> conflictMessageProducer) {
-      this.conflictMessageProducer = conflictMessageProducer;
-      return this;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public V put(String key, V value) {
-      if (containsKey(key)) {
-        throw new IllegalArgumentException(name + " already contains key " + key
-            + (conflictMessageProducer == null ? "" : conflictMessageProducer.apply(super.get(key), value)));
-      }
-      if (key.contains(".")) {
-        final String shortKey = getShortName(key);
-        if (super.get(shortKey) == null) {
-          super.put(shortKey, value);
-        } else {
-          super.put(shortKey, (V) AMBIGUITY_INSTANCE);
-        }
-      }
-      return super.put(key, value);
-    }
-
-    @Override
-    public boolean containsKey(Object key) {
-      if (key == null) {
-        return false;
-      }
-
-      return super.get(key) != null;
-    }
-
-    @Override
-    public V get(Object key) {
-      V value = super.get(key);
-      if (value == null) {
-        throw new IllegalArgumentException(name + " does not contain value for " + key);
-      }
-      if (AMBIGUITY_INSTANCE == value) {
-        throw new IllegalArgumentException(key + " is ambiguous in " + name
-            + " (try using the full name including the namespace, or rename one of the entries)");
-      }
-      return value;
-    }
-
-    private String getShortName(String key) {
-      final String[] keyParts = key.split("\\.");
-      return keyParts[keyParts.length - 1];
-    }
-  }
-
 }

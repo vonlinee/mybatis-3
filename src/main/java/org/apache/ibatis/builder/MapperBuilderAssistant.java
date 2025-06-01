@@ -577,7 +577,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return configuration.getLanguageDriver(langClass);
   }
 
-  public static void registerDefaultAlias(@NotNull TypeAliasRegistry typeAliasRegistry) {
+  public static void registerDefaultTypeAlias(@NotNull TypeAliasRegistry typeAliasRegistry) {
     typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
     typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
 

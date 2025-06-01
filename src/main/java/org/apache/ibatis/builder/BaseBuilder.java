@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.ResultSetType;
 import org.apache.ibatis.type.JdbcType;
@@ -57,7 +58,7 @@ public abstract class BaseBuilder {
   }
 
   public Integer integerValueOf(String value, Integer defaultValue) {
-    return value == null ? defaultValue : Integer.valueOf(value);
+    return StringUtils.isNumber(value) ? Integer.valueOf(value) : defaultValue;
   }
 
   public Set<String> stringSetValueOf(String value, String defaultValue) {
@@ -160,6 +161,14 @@ public abstract class BaseBuilder {
     } catch (Exception ex) {
       throw new BuilderException("Parsing error was found in mapping " + openToken + content + closeToken
           + ".  Check syntax #{property|(expression), var1=value1, var2=value2, ...} ", ex);
+    }
+  }
+
+  protected Throwable reportThrowable(String msg, Throwable throwable) {
+    if (throwable instanceof BuilderException) {
+      return throwable;
+    } else {
+      return new BuilderException(msg, throwable);
     }
   }
 }

@@ -13,20 +13,22 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.builder.xml;
+package org.apache.ibatis.builder;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.ibatis.builder.BaseBuilder;
-import org.apache.ibatis.builder.BuilderException;
-import org.apache.ibatis.builder.Configuration;
+import org.apache.ibatis.builder.xml.XMLMapperBuilder;
+import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.datasource.DataSourceFactory;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.loader.ProxyFactory;
+import org.apache.ibatis.internal.util.ClassUtils;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.io.VFS;
 import org.apache.ibatis.logging.Log;
@@ -46,10 +48,16 @@ import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.type.JdbcType;
+import org.jetbrains.annotations.Nullable;
 
 /**
+ * the entry point of mybatis config to build a {@link Configuration}
+ * <a href="https://mybatis.org/mybatis-3/configuration.html">MyBatis Configuration</a>
+ *
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ *
+ * @see Configuration
  */
 public class XMLConfigBuilder extends BaseBuilder {
 
@@ -181,15 +189,20 @@ public class XMLConfigBuilder extends BaseBuilder {
       } else {
         String alias = child.getStringAttribute("alias");
         String type = child.getStringAttribute("type");
+        Class<?> clazz;
         try {
-          Class<?> clazz = Resources.classForName(type);
-          if (alias == null) {
-            typeAliasRegistry.registerAlias(clazz);
-          } else {
-            typeAliasRegistry.registerAlias(alias, clazz);
-          }
-        } catch (ClassNotFoundException e) {
+          clazz = resolveClass(type);
+        } catch (Throwable e) {
           throw new BuilderException("Error registering typeAlias for '" + alias + "'. Cause: " + e, e);
+        }
+        if (clazz == null) {
+          throw new BuilderException(
+              "Error registering typeAlias for '" + alias + "'. Cause: resolved type of give alias is null");
+        }
+        if (alias == null) {
+          typeAliasRegistry.registerAlias(clazz);
+        } else {
+          typeAliasRegistry.registerAlias(alias, clazz);
         }
       }
     }
@@ -385,7 +398,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
-  private void mappersElement(XNode context) throws Exception {
+  protected void mappersElement(XNode context) throws Exception {
     if (context == null) {
       return;
     }
@@ -440,4 +453,31 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  @Override
+  @SuppressWarnings("unchecked")
+  protected @Nullable <T> Class<? extends T> resolveClass(String alias) {
+    if (StringUtils.isBlank(alias)) {
+      return null;
+    }
+    Class<?> clazz = null;
+    if (alias.startsWith("[")) {
+      clazz = ClassUtils.classForNameOrNull(alias);
+    } else if (StringUtils.isLowerCase(alias) && StringUtils.isAlphabetic(alias)) {
+      clazz = ClassUtils.classForNameOrNull(alias);
+    }
+    if (clazz == null) {
+      clazz = super.resolveClass(alias);
+    }
+    return (Class<? extends T>) clazz;
+  }
+
+  public static Configuration withDefault() {
+    String resource = "org/apache/ibatis/builder/xml/mybatis-config-defaults.xml";
+    try (Reader reader = Resources.getResourceAsReader(resource)) {
+      XMLConfigBuilder builder = new XMLConfigBuilder(reader, resource);
+      return builder.parse();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }
