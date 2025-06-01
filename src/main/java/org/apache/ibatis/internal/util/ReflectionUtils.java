@@ -79,6 +79,15 @@ public final class ReflectionUtils {
     if (clazz.isInterface()) {
       throw new ReflectiveOperationException("Specified class " + clazz + "  is an interface");
     }
+    if (clazz.isPrimitive()) {
+      throw new ReflectiveOperationException("Specified class " + clazz + "  is primitive");
+    }
+    if (clazz.isAnnotation()) {
+      throw new ReflectiveOperationException("Specified class " + clazz + "  is annotation");
+    }
+    if (Modifier.isAbstract(clazz.getModifiers())) {
+      throw new ReflectiveOperationException("Specified class " + clazz + "  is abstract");
+    }
     Constructor<T> constructor;
     try {
       constructor = clazz.getDeclaredConstructor();

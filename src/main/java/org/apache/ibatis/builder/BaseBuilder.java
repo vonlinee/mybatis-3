@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.ibatis.internal.util.ClassUtils;
+import org.apache.ibatis.internal.util.ReflectionUtils;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.ResultSetType;
@@ -94,19 +96,28 @@ public abstract class BaseBuilder {
   }
 
   @Nullable
-  protected Object createInstance(String alias) {
+  @SuppressWarnings("unchecked")
+  protected <T> T createInstance(String alias, Class<T> requiredType) {
     Class<?> clazz = resolveClass(alias);
+    if (clazz == null) {
+      return null;
+    }
+    if (!ClassUtils.isAssignable(requiredType, clazz)) {
+      throw new BuilderException(
+          "Error creating instance " + requiredType + ". Cause: not compatible type " + requiredType + " to " + clazz);
+    }
     try {
-      return clazz == null ? null : clazz.getDeclaredConstructor().newInstance();
+      return (T) ReflectionUtils.instantiateClass(clazz);
     } catch (Exception e) {
       throw new BuilderException("Error creating instance. Cause: " + e, e);
     }
   }
 
   @Nullable
-  protected <T> Class<? extends T> resolveClass(String alias) {
+  @SuppressWarnings("unchecked")
+  protected <T> Class<T> resolveClass(String alias) {
     try {
-      return alias == null ? null : resolveAlias(alias);
+      return alias == null ? null : (Class<T>) resolveAlias(alias);
     } catch (Exception e) {
       throw new BuilderException("Error resolving class. Cause: " + e, e);
     }

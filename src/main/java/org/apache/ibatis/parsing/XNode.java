@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -266,6 +267,7 @@ public class XNode {
     return children;
   }
 
+  @NotNull
   public Properties getChildrenAsProperties() {
     Properties properties = new Properties();
     for (XNode child : getChildren()) {

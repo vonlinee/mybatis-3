@@ -126,9 +126,9 @@ class XmlMapperBuilderTest {
 
   @Test
   void createInstanceWithAbstractClass() {
-    when(() -> builder.createInstance("org.apache.ibatis.builder.BaseBuilder"));
+    when(() -> builder.createInstance("org.apache.ibatis.builder.BaseBuilder", BaseBuilder.class));
     then(caughtException()).isInstanceOf(BuilderException.class).hasMessage(
-        "Error creating instance. Cause: java.lang.NoSuchMethodException: org.apache.ibatis.builder.BaseBuilder.<init>()");
+        "Error creating instance. Cause: java.lang.ReflectiveOperationException: Specified class class org.apache.ibatis.builder.BaseBuilder  is abstract");
   }
 
   @Test

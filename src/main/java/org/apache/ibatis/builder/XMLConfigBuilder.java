@@ -28,6 +28,7 @@ import org.apache.ibatis.datasource.DataSourceFactory;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.loader.ProxyFactory;
 import org.apache.ibatis.internal.util.ClassUtils;
+import org.apache.ibatis.internal.util.ReflectionUtils;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.io.VFS;
@@ -119,19 +120,36 @@ public class XMLConfigBuilder extends BaseBuilder {
     return configuration;
   }
 
-  private void parseConfiguration(XNode root) {
+  protected void parseConfiguration(XNode root) {
     try {
       // issue #117 read properties first
-      propertiesElement(root.evalNode("properties"));
+      Properties defaults = propertiesElement(root.evalNode("properties"));
+      if (defaults != null) {
+        Properties vars = configuration.getVariables();
+        if (vars != null) {
+          defaults.putAll(vars);
+        }
+        parser.setVariables(defaults);
+        configuration.setVariables(defaults);
+      }
+
       Properties settings = settingsAsProperties(root.evalNode("settings"));
-      loadCustomVfsImpl(settings);
-      loadCustomLogImpl(settings);
+      if (settings != null) {
+        loadCustomVfsImpl(settings);
+        loadCustomLogImpl(settings);
+      }
+
       typeAliasesElement(root.evalNode("typeAliases"));
       pluginsElement(root.evalNode("plugins"));
       objectFactoryElement(root.evalNode("objectFactory"));
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
-      settingsElement(settings);
+
+      // should be called after typeAliases has been processed
+      if (settings != null) {
+        settingsElement(configuration, settings);
+      }
+
       // read it after objectFactory and objectWrapperFactory issue #631
       environmentsElement(root.evalNode("environments"));
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
@@ -142,7 +160,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
-  private Properties settingsAsProperties(XNode context) {
+  protected Properties settingsAsProperties(XNode context) {
     if (context == null) {
       return new Properties();
     }
@@ -158,13 +176,8 @@ public class XMLConfigBuilder extends BaseBuilder {
     return props;
   }
 
-  private void loadCustomVfsImpl(Properties props) throws ClassNotFoundException {
-    String value = props.getProperty("vfsImpl");
-    if (value == null) {
-      return;
-    }
-    String[] clazzes = value.split(",");
-    for (String clazz : clazzes) {
+  protected void loadCustomVfsImpl(Properties props) throws ClassNotFoundException {
+    for (String clazz : StringUtils.splitToArray(props.getProperty("vfsImpl"))) {
       if (!clazz.isEmpty()) {
         @SuppressWarnings("unchecked")
         Class<? extends VFS> vfsImpl = (Class<? extends VFS>) Resources.classForName(clazz);
@@ -175,10 +188,12 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private void loadCustomLogImpl(Properties props) {
     Class<? extends Log> logImpl = resolveClass(props.getProperty("logImpl"));
-    configuration.setLogImpl(logImpl);
+    if (logImpl != null) {
+      configuration.setLogImpl(logImpl);
+    }
   }
 
-  private void typeAliasesElement(XNode context) {
+  protected void typeAliasesElement(XNode context) {
     if (context == null) {
       return;
     }
@@ -208,48 +223,59 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
-  private void pluginsElement(XNode context) throws Exception {
+  protected void pluginsElement(XNode context) throws Exception {
     if (context != null) {
       for (XNode child : context.getChildren()) {
         String interceptor = child.getStringAttribute("interceptor");
         Properties properties = child.getChildrenAsProperties();
-        Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).getDeclaredConstructor()
-            .newInstance();
+        Interceptor interceptorInstance = createInstance(interceptor, Interceptor.class);
+        if (interceptorInstance == null) {
+          throw new BuilderException("failed to create Interceptor instance of type " + interceptor);
+        }
         interceptorInstance.setProperties(properties);
         configuration.addInterceptor(interceptorInstance);
       }
     }
   }
 
-  private void objectFactoryElement(XNode context) throws Exception {
+  protected void objectFactoryElement(XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
-      Properties properties = context.getChildrenAsProperties();
-      ObjectFactory factory = (ObjectFactory) resolveClass(type).getDeclaredConstructor().newInstance();
-      factory.setProperties(properties);
-      configuration.setObjectFactory(factory);
+      ObjectFactory factory = createInstance(type, ObjectFactory.class);
+      if (factory != null) {
+        Properties properties = context.getChildrenAsProperties();
+        factory.setProperties(properties);
+        configuration.setObjectFactory(factory);
+      }
     }
   }
 
-  private void objectWrapperFactoryElement(XNode context) throws Exception {
+  protected void objectWrapperFactoryElement(XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
-      ObjectWrapperFactory factory = (ObjectWrapperFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+      ObjectWrapperFactory factory = createInstance(type, ObjectWrapperFactory.class);
+      if (factory == null) {
+        throw new IllegalArgumentException("cannot create ObjectWrapperFactory");
+      }
       configuration.setObjectWrapperFactory(factory);
     }
   }
 
-  private void reflectorFactoryElement(XNode context) throws Exception {
+  protected void reflectorFactoryElement(XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
-      ReflectorFactory factory = (ReflectorFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+      ReflectorFactory factory = createInstance(type, ReflectorFactory.class);
+      if (factory == null) {
+        throw new IllegalArgumentException("cannot create ReflectorFactory");
+      }
       configuration.setReflectorFactory(factory);
     }
   }
 
-  private void propertiesElement(XNode context) throws Exception {
+  @Nullable
+  protected Properties propertiesElement(XNode context) throws Exception {
     if (context == null) {
-      return;
+      return null;
     }
     Properties defaults = context.getChildrenAsProperties();
     String resource = context.getStringAttribute("resource");
@@ -263,21 +289,16 @@ public class XMLConfigBuilder extends BaseBuilder {
     } else if (url != null) {
       defaults.putAll(Resources.getUrlAsProperties(url));
     }
-    Properties vars = configuration.getVariables();
-    if (vars != null) {
-      defaults.putAll(vars);
-    }
-    parser.setVariables(defaults);
-    configuration.setVariables(defaults);
+    return defaults;
   }
 
-  private void settingsElement(Properties props) {
+  protected void settingsElement(Configuration configuration, Properties props) {
     configuration
         .setAutoMappingBehavior(AutoMappingBehavior.valueOf(props.getProperty("autoMappingBehavior", "PARTIAL")));
     configuration.setAutoMappingUnknownColumnBehavior(
         AutoMappingUnknownColumnBehavior.valueOf(props.getProperty("autoMappingUnknownColumnBehavior", "NONE")));
     configuration.setCacheEnabled(booleanValueOf(props.getProperty("cacheEnabled"), true));
-    configuration.setProxyFactory((ProxyFactory) createInstance(props.getProperty("proxyFactory")));
+    configuration.setProxyFactory(createInstance(props.getProperty("proxyFactory"), ProxyFactory.class));
     configuration.setLazyLoadingEnabled(booleanValueOf(props.getProperty("lazyLoadingEnabled"), false));
     configuration.setAggressiveLazyLoading(booleanValueOf(props.getProperty("aggressiveLazyLoading"), false));
     configuration.setUseColumnLabel(booleanValueOf(props.getProperty("useColumnLabel"), true));
@@ -307,7 +328,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     configuration.setNullableOnForEach(booleanValueOf(props.getProperty("nullableOnForEach"), false));
   }
 
-  private void environmentsElement(XNode context) throws Exception {
+  protected void environmentsElement(XNode context) throws Exception {
     if (context == null) {
       return;
     }
@@ -328,7 +349,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
-  private void databaseIdProviderElement(XNode context) throws Exception {
+  protected void databaseIdProviderElement(XNode context) throws Exception {
     if (context == null) {
       return;
     }
@@ -338,39 +359,49 @@ public class XMLConfigBuilder extends BaseBuilder {
       type = "DB_VENDOR";
     }
     Properties properties = context.getChildrenAsProperties();
-    DatabaseIdProvider databaseIdProvider = (DatabaseIdProvider) resolveClass(type).getDeclaredConstructor()
-        .newInstance();
-    databaseIdProvider.setProperties(properties);
-    Environment environment = configuration.getEnvironment();
-    if (environment != null) {
-      String databaseId = databaseIdProvider.getDatabaseId(environment.getDataSource());
-      configuration.setDatabaseId(databaseId);
+    DatabaseIdProvider databaseIdProvider = createInstance(type, DatabaseIdProvider.class);
+    if (databaseIdProvider != null) {
+      databaseIdProvider.setProperties(properties);
+      Environment environment = configuration.getEnvironment();
+      if (environment != null) {
+        String databaseId = databaseIdProvider.getDatabaseId(environment.getDataSource());
+        configuration.setDatabaseId(databaseId);
+      }
     }
   }
 
-  private TransactionFactory transactionManagerElement(XNode context) throws Exception {
+  protected TransactionFactory transactionManagerElement(XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
       Properties props = context.getChildrenAsProperties();
-      TransactionFactory factory = (TransactionFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+      TransactionFactory factory = createInstance(type, TransactionFactory.class);
+      if (factory == null) {
+        throw new BuilderException("cannot create TransactionFactory instance");
+      }
       factory.setProperties(props);
       return factory;
     }
     throw new BuilderException("Environment declaration requires a TransactionFactory.");
   }
 
-  private DataSourceFactory dataSourceElement(XNode context) throws Exception {
+  protected DataSourceFactory dataSourceElement(XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
+      if (StringUtils.isBlank(type)) {
+        throw new BuilderException("cannot create DataSourceFactory instance, type is not set");
+      }
+      DataSourceFactory factory = createInstance(type, DataSourceFactory.class);
+      if (factory == null) {
+        throw new BuilderException("cannot create DataSourceFactory instance");
+      }
       Properties props = context.getChildrenAsProperties();
-      DataSourceFactory factory = (DataSourceFactory) resolveClass(type).getDeclaredConstructor().newInstance();
       factory.setProperties(props);
       return factory;
     }
     throw new BuilderException("Environment declaration requires a DataSourceFactory.");
   }
 
-  private void typeHandlersElement(XNode context) {
+  protected void typeHandlersElement(XNode context) {
     if (context == null) {
       return;
     }
@@ -447,15 +478,36 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private static Configuration newConfig(Class<? extends Configuration> configClass) {
     try {
-      return configClass.getDeclaredConstructor().newInstance();
+      return ReflectionUtils.instantiateClass(configClass);
     } catch (Exception ex) {
       throw new BuilderException("Failed to create a new Configuration instance.", ex);
     }
   }
 
+  /**
+   * if an alias has been set (not null), it should be created or throw exception
+   *
+   * @param alias
+   *          alias
+   * @param requiredType
+   *          expected type
+   * @param <T>
+   *          type of object to create
+   *
+   * @return instance of specified type
+   */
+  @Override
+  protected <T> @Nullable T createInstance(String alias, Class<T> requiredType) {
+    T instance = super.createInstance(alias, requiredType);
+    if (StringUtils.hasText(alias) && instance == null) {
+      throw new BuilderException("cannot instance " + requiredType + " with alias " + alias);
+    }
+    return instance;
+  }
+
   @Override
   @SuppressWarnings("unchecked")
-  protected @Nullable <T> Class<? extends T> resolveClass(String alias) {
+  protected @Nullable <T> Class<T> resolveAlias(@Nullable String alias) {
     if (StringUtils.isBlank(alias)) {
       return null;
     }
@@ -466,9 +518,9 @@ public class XMLConfigBuilder extends BaseBuilder {
       clazz = ClassUtils.classForNameOrNull(alias);
     }
     if (clazz == null) {
-      clazz = super.resolveClass(alias);
+      clazz = super.resolveAlias(alias);
     }
-    return (Class<? extends T>) clazz;
+    return (Class<T>) clazz;
   }
 
   public static Configuration withDefault() {

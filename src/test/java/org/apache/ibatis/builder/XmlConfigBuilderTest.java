@@ -41,7 +41,6 @@ import org.apache.ibatis.domain.blog.Blog;
 import org.apache.ibatis.domain.blog.mappers.BlogMapper;
 import org.apache.ibatis.domain.blog.mappers.NestedBlogMapper;
 import org.apache.ibatis.domain.jpetstore.Cart;
-import org.apache.ibatis.executor.loader.cglib.CglibProxyFactory;
 import org.apache.ibatis.executor.loader.javassist.JavassistProxyFactory;
 import org.apache.ibatis.io.JBoss6VFS;
 import org.apache.ibatis.io.Resources;
@@ -182,7 +181,7 @@ class XmlConfigBuilderTest {
       assertThat(config.getAutoMappingBehavior()).isEqualTo(AutoMappingBehavior.NONE);
       assertThat(config.getAutoMappingUnknownColumnBehavior()).isEqualTo(AutoMappingUnknownColumnBehavior.WARNING);
       assertThat(config.isCacheEnabled()).isFalse();
-      assertThat(config.getProxyFactory()).isInstanceOf(CglibProxyFactory.class);
+      assertThat(config.getProxyFactory()).isInstanceOf(JavassistProxyFactory.class);
       assertThat(config.isLazyLoadingEnabled()).isTrue();
       assertThat(config.isAggressiveLazyLoading()).isTrue();
       assertThat(config.isUseColumnLabel()).isFalse();
