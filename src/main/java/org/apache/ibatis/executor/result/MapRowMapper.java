@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.ibatis.executor.statement.JdbcUtils;
 import org.apache.ibatis.internal.util.LinkedCaseInsensitiveMap;
@@ -33,6 +34,16 @@ import org.jetbrains.annotations.Nullable;
  * {@link #createColumnMap} and {@link #getColumnKey}, respectively.
  */
 public class MapRowMapper implements RowMapper<Map<String, Object>> {
+
+  @Nullable
+  Function<String, String> namingStrategy;
+
+  public MapRowMapper() {
+  }
+
+  public MapRowMapper(@Nullable Function<String, String> namingStrategy) {
+    this.namingStrategy = namingStrategy;
+  }
 
   @Override
   public Map<String, Object> mapRow(@NotNull ResultSet rs, int rowNum) throws SQLException {
@@ -75,7 +86,11 @@ public class MapRowMapper implements RowMapper<Map<String, Object>> {
    * @see java.sql.ResultSetMetaData#getColumnName
    */
   protected String getColumnKey(String columnName) {
-    return columnName;
+    if (namingStrategy == null) {
+      return columnName;
+    }
+    String column = namingStrategy.apply(columnName);
+    return column == null ? columnName : column;
   }
 
   /**

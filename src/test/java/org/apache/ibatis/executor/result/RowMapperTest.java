@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.executor.statement.JdbcUtils;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.apache.ibatis.session.SqlSession;
@@ -57,19 +58,16 @@ class RowMapperTest {
   void testSingleColumn() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       sqlSessionFactory.getConfiguration().setNullableOnForEach(true);
-
-      DataSource dataSource = sqlSessionFactory.getConfiguration().getEnvironment().getDataSource();
-
-      try (Connection connection = dataSource.getConnection()) {
-
+      try (Connection connection = sqlSession.getConnection()) {
         List<String> list = JdbcUtils.queryForList(connection, "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES",
             String.class);
 
         List<Map<String, Object>> rows = JdbcUtils.queryForMapList(connection,
             "SELECT * FROM INFORMATION_SCHEMA.TABLES");
-        System.out.println(rows);
 
-        System.out.println(rows);
+        List<Map<String, Object>> rows1 = JdbcUtils.queryForMapList(connection,
+            "SELECT * FROM INFORMATION_SCHEMA.TABLES", StringUtils::underscoreToCamel);
+
       } catch (SQLException e) {
         throw new RuntimeException(e);
       }
@@ -85,6 +83,8 @@ class RowMapperTest {
     try (Connection connection = dataSource.getConnection()) {
       List<TableInfo> tables = JdbcUtils.queryForList(connection, "SELECT * FROM INFORMATION_SCHEMA.TABLES",
           TableInfo.class);
+
+      // System.out.println(tables);
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }

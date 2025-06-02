@@ -32,6 +32,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.ibatis.executor.result.BeanClassRowMapper;
 import org.apache.ibatis.executor.result.MapRowMapper;
@@ -355,33 +356,20 @@ public final class JdbcUtils {
   }
 
   public static <T> List<T> extractSingleColumn(ResultSet rs, Class<T> type) throws SQLException {
-    SingleColumnRowMapper<T> mapper = new SingleColumnRowMapper<>(type);
-    int i = 0;
-    List<T> rows = new ArrayList<>();
-    while (rs.next()) {
-      rows.add(mapper.mapRow(rs, i++));
-    }
-    return rows;
+    return extractRows(rs, new SingleColumnRowMapper<>(type));
   }
 
   public static <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
-    BeanClassRowMapper<T> mapper = new BeanClassRowMapper<>(type);
-    int i = 0;
-    List<T> rows = new ArrayList<>();
-    while (rs.next()) {
-      rows.add(mapper.mapRow(rs, i++));
-    }
-    return rows;
+    return extractRows(rs, new BeanClassRowMapper<>(type));
   }
 
   public static List<Map<String, Object>> toMapList(ResultSet rs) throws SQLException {
-    MapRowMapper mapper = new MapRowMapper();
-    int i = 0;
-    List<Map<String, Object>> rows = new ArrayList<>();
-    while (rs.next()) {
-      rows.add(mapper.mapRow(rs, i++));
-    }
-    return rows;
+    return extractRows(rs, new MapRowMapper());
+  }
+
+  public static List<Map<String, Object>> toMapList(ResultSet rs, Function<String, String> namingStrategy)
+      throws SQLException {
+    return extractRows(rs, new MapRowMapper(namingStrategy));
   }
 
   /**
@@ -432,6 +420,30 @@ public final class JdbcUtils {
     try (Statement statement = connection.createStatement()) {
       try (ResultSet rs = statement.executeQuery(sql)) {
         return toMapList(rs);
+      }
+    }
+  }
+
+  /**
+   * map rows Map<String, Object>
+   *
+   * @param connection
+   *          connection
+   * @param sql
+   *          sql
+   * @param columNameMapping
+   *          mapping from column name to key of map
+   *
+   * @return List<Map < String, Object>>
+   *
+   * @throws SQLException
+   *           data access error
+   */
+  public static List<Map<String, Object>> queryForMapList(@NotNull Connection connection, @NotNull String sql,
+      Function<String, String> columNameMapping) throws SQLException {
+    try (Statement statement = connection.createStatement()) {
+      try (ResultSet rs = statement.executeQuery(sql)) {
+        return toMapList(rs, columNameMapping);
       }
     }
   }
