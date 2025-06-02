@@ -15,9 +15,7 @@
  */
 package org.apache.ibatis.builder.xml.dynamic;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 
@@ -30,38 +28,36 @@ class ExpressionEvaluatorTest {
 
   private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
 
+  Author author = new Author(1, "cbegin", "******", "cbegin@apache.org", "N/A", Section.NEWS);
+  Author author_password_null = new Author(1, "cbegin", null, "cbegin@apache.org", "N/A", Section.NEWS);
+
   @Test
   void shouldCompareStringsReturnTrue() {
-    boolean value = evaluator.evaluateBoolean("username == 'cbegin'",
-        new Author(1, "cbegin", "******", "cbegin@apache.org", "N/A", Section.NEWS));
+    boolean value = evaluator.evaluateBoolean("username == 'cbegin'", author);
     assertTrue(value);
   }
 
   @Test
   void shouldCompareStringsReturnFalse() {
-    boolean value = evaluator.evaluateBoolean("username == 'norm'",
-        new Author(1, "cbegin", "******", "cbegin@apache.org", "N/A", Section.NEWS));
+    boolean value = evaluator.evaluateBoolean("username == 'norm'", author);
     assertFalse(value);
   }
 
   @Test
   void shouldReturnTrueIfNotNull() {
-    boolean value = evaluator.evaluateBoolean("username",
-        new Author(1, "cbegin", "******", "cbegin@apache.org", "N/A", Section.NEWS));
+    boolean value = evaluator.evaluateBoolean("username", author);
     assertTrue(value);
   }
 
   @Test
   void shouldReturnFalseIfNull() {
-    boolean value = evaluator.evaluateBoolean("password",
-        new Author(1, "cbegin", null, "cbegin@apache.org", "N/A", Section.NEWS));
+    boolean value = evaluator.evaluateBoolean("password", author_password_null);
     assertFalse(value);
   }
 
   @Test
   void shouldReturnTrueIfNotZero() {
-    boolean value = evaluator.evaluateBoolean("id",
-        new Author(1, "cbegin", null, "cbegin@apache.org", "N/A", Section.NEWS));
+    boolean value = evaluator.evaluateBoolean("id", author_password_null);
     assertTrue(value);
   }
 
@@ -83,11 +79,8 @@ class ExpressionEvaluatorTest {
 
   @Test
   void shouldIterateOverIterable() {
-    final HashMap<String, String[]> parameterObject = new HashMap<>() {
-      {
-        put("array", new String[] { "1", "2", "3" });
-      }
-    };
+    final HashMap<String, String[]> parameterObject = new HashMap<>(1);
+    parameterObject.put("array", new String[] { "1", "2", "3" });
     final Iterable<?> iterable = evaluator.evaluateIterable("array", parameterObject);
     int i = 0;
     for (Object o : iterable) {

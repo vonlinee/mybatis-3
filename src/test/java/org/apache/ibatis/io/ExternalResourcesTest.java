@@ -15,10 +15,7 @@
  */
 package org.apache.ibatis.io;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -51,34 +48,27 @@ class ExternalResourcesTest {
 
   @Test
   void testcopyExternalResource() {
-    assertDoesNotThrow(() -> {
-      ExternalResources.copyExternalResource(sourceFile, destFile);
-    });
-
+    assertDoesNotThrow(() -> ExternalResources.copyExternalResource(sourceFile, destFile));
   }
 
   @Test
   void testcopyExternalResource_fileNotFound() {
-
     try {
       badFile = new File("/tmp/nofile.sql");
       ExternalResources.copyExternalResource(badFile, destFile);
     } catch (IOException e) {
-      assertTrue(e instanceof FileNotFoundException);
+      assertInstanceOf(FileNotFoundException.class, e);
     }
-
   }
 
   @Test
   void testcopyExternalResource_emptyStringAsFile() {
-
     try {
       badFile = new File(" ");
       ExternalResources.copyExternalResource(badFile, destFile);
     } catch (Exception e) {
-      assertTrue(e instanceof FileNotFoundException);
+      assertInstanceOf(FileNotFoundException.class, e);
     }
-
   }
 
   @Test

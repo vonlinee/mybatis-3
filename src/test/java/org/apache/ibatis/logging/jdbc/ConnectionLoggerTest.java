@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.apache.ibatis.logging.Log;
@@ -37,9 +36,6 @@ class ConnectionLoggerTest {
 
   @Mock
   Connection connection;
-
-  @Mock
-  PreparedStatement preparedStatement;
 
   @Mock
   Log log;

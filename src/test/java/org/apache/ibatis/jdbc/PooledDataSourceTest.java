@@ -37,7 +37,6 @@ class PooledDataSourceTest extends BaseDataTest {
       runScript(ds, JPETSTORE_DDL);
       ds.setDefaultAutoCommit(false);
       ds.setDriverProperties(new Properties() {
-        private static final long serialVersionUID = 1L;
         {
           setProperty("username", "sa");
           setProperty("password", "");

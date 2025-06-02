@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import org.apache.ibatis.BaseDataTest;
@@ -139,7 +140,7 @@ class ResourcesTest extends BaseDataTest {
     Charset charset = Resources.getCharset();
 
     // charset
-    Resources.setCharset(Charset.forName("US-ASCII"));
+    Resources.setCharset(StandardCharsets.US_ASCII);
     assertNotNull(Resources.getResourceAsReader(JPETSTORE_PROPERTIES));
 
     // no charset
@@ -148,7 +149,6 @@ class ResourcesTest extends BaseDataTest {
 
     // clean up
     Resources.setCharset(charset);
-
   }
 
   @Test
@@ -158,7 +158,7 @@ class ResourcesTest extends BaseDataTest {
     Charset charset = Resources.getCharset();
 
     // charset
-    Resources.setCharset(Charset.forName("US-ASCII"));
+    Resources.setCharset(StandardCharsets.US_ASCII);
     assertNotNull(Resources.getResourceAsReader(getClass().getClassLoader(), JPETSTORE_PROPERTIES));
 
     // no charset
@@ -167,7 +167,5 @@ class ResourcesTest extends BaseDataTest {
 
     // clean up
     Resources.setCharset(charset);
-
   }
-
 }

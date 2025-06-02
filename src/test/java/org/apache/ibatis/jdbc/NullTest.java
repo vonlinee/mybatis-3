@@ -15,8 +15,7 @@
  */
 package org.apache.ibatis.jdbc;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.StringTypeHandler;
@@ -27,7 +26,7 @@ class NullTest {
   @Test
   void shouldGetTypeAndTypeHandlerForNullStringType() {
     assertEquals(JdbcType.VARCHAR, Null.STRING.getJdbcType());
-    assertTrue(Null.STRING.getTypeHandler() instanceof StringTypeHandler);
+    assertInstanceOf(StringTypeHandler.class, Null.STRING.getTypeHandler());
   }
 
 }

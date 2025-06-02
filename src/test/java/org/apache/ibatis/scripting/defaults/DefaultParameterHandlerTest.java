@@ -147,16 +147,13 @@ class DefaultParameterHandlerTest {
     MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
         new StaticSqlSource("some select statement"), SqlCommandType.SELECT).build();
 
-    Object parameterObject = null;
-
     BoundSql boundSql = new BoundSql("some select statement", new ArrayList<>() {
       {
         add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
-    }, parameterObject);
+    }, null);
 
-    DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
-        boundSql);
+    DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, null, boundSql);
 
     PreparedStatement ps = mock(PreparedStatement.class);
     ParameterMetaData pmd = mock(ParameterMetaData.class);

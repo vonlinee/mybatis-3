@@ -527,7 +527,7 @@ class SQLTest {
   }
 
   static class Bean {
-    private String a = "foo";
+    private final String a = "foo";
     private String b;
     private String c;
 
