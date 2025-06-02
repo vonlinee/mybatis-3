@@ -16,6 +16,7 @@
 package org.apache.ibatis.mapping;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -29,8 +30,6 @@ import org.apache.ibatis.type.TypeHandler;
  */
 public class ResultMapping {
 
-  @Deprecated
-  private Configuration configuration;
   private String property;
   private String column;
   private Class<?> javaType;
@@ -52,13 +51,6 @@ public class ResultMapping {
   public static class Builder {
     private final ResultMapping resultMapping = new ResultMapping();
 
-    @Deprecated
-    public Builder(Configuration configuration, String property, String column, TypeHandler<?> typeHandler) {
-      this(configuration, property);
-      resultMapping.column = column;
-      resultMapping.typeHandler = typeHandler;
-    }
-
     public Builder(String property, String column, TypeHandler<?> typeHandler) {
       this(property);
       resultMapping.column = column;
@@ -71,13 +63,6 @@ public class ResultMapping {
       resultMapping.typeHandler = typeHandler;
     }
 
-    @Deprecated
-    public Builder(Configuration configuration, String property, String column, Class<?> javaType) {
-      this(configuration, property);
-      resultMapping.column = column;
-      resultMapping.javaType = javaType;
-    }
-
     public Builder(String property, String column, Class<?> javaType) {
       this(property);
       resultMapping.column = column;
@@ -88,18 +73,6 @@ public class ResultMapping {
       this(property, lazyLoadingEnabled);
       resultMapping.column = column;
       resultMapping.javaType = javaType;
-    }
-
-    @Deprecated
-    public Builder(Configuration configuration, String property) {
-      resultMapping.configuration = configuration;
-      resultMapping.property = property;
-      resultMapping.flags = new ArrayList<>(2);
-      resultMapping.composites = new ArrayList<>();
-
-      if (configuration != null) {
-        resultMapping.lazy = configuration.isLazyLoadingEnabled();
-      }
     }
 
     public Builder(String property) {
@@ -116,7 +89,7 @@ public class ResultMapping {
     }
 
     public Builder(ResultMapping otherMapping) {
-      this(otherMapping.configuration, otherMapping.property);
+      this(otherMapping.property);
 
       resultMapping.flags.addAll(otherMapping.flags);
       resultMapping.composites.addAll(otherMapping.composites);
@@ -175,7 +148,7 @@ public class ResultMapping {
     }
 
     public Builder flags(List<ResultFlag> flags) {
-      resultMapping.flags = flags;
+      resultMapping.flags = flags == null ? Collections.emptyList() : flags;
       return this;
     }
 

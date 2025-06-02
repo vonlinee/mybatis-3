@@ -220,8 +220,8 @@ class ResultMappingConstructorResolverTest {
   void doesNotChangeCustomTypeHandlerAfterAutoTypeAndOrdering() {
     ResultMapping mappingA = createConstructorMappingFor(String.class, "a", "a");
     ResultMapping mappingB = createConstructorMappingFor(Object.class, "b", "b");
-    ResultMapping mappingC = new ResultMapping.Builder(configuration, "c", "c", Object.class)
-        .typeHandler(new MyTypeHandler()).build();
+    ResultMapping mappingC = new ResultMapping.Builder("c", "c", Object.class).typeHandler(new MyTypeHandler())
+        .build(configuration);
 
     final ResultMappingConstructorResolver resolver = createResolverFor(CustomObj.class, TEST_ID, mappingB, mappingA,
         mappingC);
@@ -292,7 +292,7 @@ class ResultMappingConstructorResolverTest {
   }
 
   private ResultMapping createConstructorMappingFor(Class<?> javaType, String property, String column) {
-    return new ResultMapping.Builder(configuration, property, column, javaType).build();
+    return new ResultMapping.Builder(property, column, javaType).build(configuration);
   }
 }
 

@@ -416,7 +416,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     if (StringUtils.isEmpty(nestedSelect) && StringUtils.isEmpty(foreignColumn)) {
       composites = Collections.emptyList();
     } else {
-      composites = parseCompositeColumnName(configuration, column);
+      composites = parseCompositeColumnName(column, lazy);
     }
     // @formatter:off
     return new ResultMapping.Builder(property, column, setterType.getValue())
@@ -425,7 +425,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
       .nestedResultMapId(applyCurrentNamespace(nestedResultMap, true))
       .resultSet(resultSet)
       .typeHandler(typeHandlerInstance)
-      .flags(flags == null ? Collections.emptyList() : flags)
+      .flags(flags)
       .composites(composites)
       .notNullColumns(parseMultipleColumnNames(notNullColumn))
       .columnPrefix(columnPrefix)
@@ -485,23 +485,24 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return configuration.getLanguageDriver(langClass);
   }
 
-  public static Set<String> parseMultipleColumnNames(String columnName) {
+  public Set<String> parseMultipleColumnNames(String columnName) {
+    if (columnName == null) {
+      return Collections.emptySet();
+    }
     Set<String> columns = new HashSet<>();
-    if (columnName != null) {
-      if (columnName.indexOf(',') > -1) {
-        StringTokenizer parser = new StringTokenizer(columnName, "{}, ", false);
-        while (parser.hasMoreTokens()) {
-          String column = parser.nextToken();
-          columns.add(column);
-        }
-      } else {
-        columns.add(columnName);
+    if (columnName.indexOf(',') > -1) {
+      StringTokenizer parser = new StringTokenizer(columnName, "{}, ", false);
+      while (parser.hasMoreTokens()) {
+        String column = parser.nextToken();
+        columns.add(column);
       }
+    } else {
+      columns.add(columnName);
     }
     return columns;
   }
 
-  public List<ResultMapping> parseCompositeColumnName(Configuration configuration, String columnName) {
+  public List<ResultMapping> parseCompositeColumnName(String columnName, boolean lazyLoadingEnabled) {
     List<ResultMapping> composites = new ArrayList<>();
     if (columnName != null && (columnName.indexOf('=') > -1 || columnName.indexOf(',') > -1)) {
       StringTokenizer parser = new StringTokenizer(columnName, "{}=, ", false);
@@ -509,7 +510,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         String property = parser.nextToken();
         String column = parser.nextToken();
         ResultMapping complexResultMapping = new ResultMapping.Builder(property, column, (TypeHandler<?>) null)
-            .build(configuration);
+            .lazy(lazyLoadingEnabled).build();
         composites.add(complexResultMapping);
       }
     }
