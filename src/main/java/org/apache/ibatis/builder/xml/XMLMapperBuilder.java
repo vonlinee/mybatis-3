@@ -130,12 +130,12 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
     for (XNode context : list) {
-      final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context,
+      final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant,
           requiredDatabaseId, mapperClass);
       try {
-        statementParser.parseStatementNode();
+        statementParser.parseStatementNode(context);
       } catch (IncompleteElementException e) {
-        configuration.addIncompleteStatement(statementParser);
+        configuration.addIncompleteStatement(new XMLStatementResolver(statementParser, context));
       }
     }
   }

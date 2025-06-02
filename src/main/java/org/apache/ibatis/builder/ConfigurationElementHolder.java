@@ -6,11 +6,11 @@ import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.ibatis.builder.annotation.MethodResolver;
-import org.apache.ibatis.builder.xml.XMLStatementBuilder;
+import org.apache.ibatis.builder.xml.XMLStatementResolver;
 
 class ConfigurationElementHolder {
 
-  protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>();
+  protected final Collection<XMLStatementResolver> incompleteStatements = new LinkedList<>();
   protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<>();
   protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>();
   protected final Collection<MethodResolver> incompleteMethods = new LinkedList<>();
@@ -20,7 +20,7 @@ class ConfigurationElementHolder {
   private final ReentrantLock incompleteStatementsLock = new ReentrantLock();
   private final ReentrantLock incompleteMethodsLock = new ReentrantLock();
 
-  public void addIncompleteStatement(XMLStatementBuilder incompleteStatement) {
+  public void addIncompleteStatement(XMLStatementResolver incompleteStatement) {
     incompleteStatementsLock.lock();
     try {
       incompleteStatements.add(incompleteStatement);
@@ -81,10 +81,7 @@ class ConfigurationElementHolder {
     }
     incompleteStatementsLock.lock();
     try {
-      incompleteStatements.removeIf(x -> {
-        x.parseStatementNode();
-        return true;
-      });
+      incompleteStatements.removeIf(XMLStatementResolver::resolve);
     } catch (IncompleteElementException e) {
       if (reportUnresolved) {
         throw e;

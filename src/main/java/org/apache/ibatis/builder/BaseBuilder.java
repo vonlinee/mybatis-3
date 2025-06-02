@@ -26,6 +26,7 @@ import org.apache.ibatis.internal.util.ReflectionUtils;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.ResultSetType;
+import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandler;
@@ -83,6 +84,18 @@ public abstract class BaseBuilder {
       return alias == null ? null : ResultSetType.valueOf(alias);
     } catch (IllegalArgumentException e) {
       throw new BuilderException("Error resolving ResultSetType. Cause: " + e, e);
+    }
+  }
+
+  protected StatementType resolveStatementType(String statementType) {
+    if (StringUtils.isBlank(statementType)) {
+      return StatementType.PREPARED;
+    }
+    try {
+      return StatementType.valueOf(statementType);
+    } catch (IllegalArgumentException e) {
+      throw new BuilderException(
+          "unknown statement type " + statementType + ", expected: [" + Arrays.toString(StatementType.values()) + "]");
     }
   }
 

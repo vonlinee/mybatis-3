@@ -25,7 +25,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.ibatis.binding.MapperRegistry;
-import org.apache.ibatis.builder.xml.XMLStatementBuilder;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -728,14 +727,6 @@ public class Configuration extends ConfigurationElementHolder {
   public Collection<MappedStatement> getMappedStatements() {
     buildAllStatements();
     return mappedStatements.values();
-  }
-
-  /**
-   * @deprecated call {@link #parsePendingStatements(boolean)}
-   */
-  @Deprecated
-  public Collection<XMLStatementBuilder> getIncompleteStatements() {
-    return incompleteStatements;
   }
 
   public MappedStatement getMappedStatement(String id) {

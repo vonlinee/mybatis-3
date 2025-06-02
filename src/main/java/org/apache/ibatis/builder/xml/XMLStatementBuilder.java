@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.builder.BaseBuilder;
-import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.builder.annotation.MapperAnnotationBuilder;
@@ -32,7 +31,6 @@ import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
-import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultSetType;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -49,21 +47,15 @@ import org.jetbrains.annotations.Nullable;
 public class XMLStatementBuilder extends BaseBuilder {
 
   private final MapperBuilderAssistant assistant;
-  private final XNode context;
   private final String requiredDatabaseId;
   private final Class<?> mapperClass;
 
-  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant assistant, XNode context,
-      String databaseId, Class<?> mapperClass) {
+  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant assistant, String databaseId,
+      Class<?> mapperClass) {
     super(configuration);
     this.assistant = assistant;
-    this.context = context;
     this.requiredDatabaseId = databaseId;
     this.mapperClass = mapperClass;
-  }
-
-  public MappedStatement parseStatementNode() {
-    return parseStatementNode(this.context);
   }
 
   @Nullable
@@ -155,18 +147,6 @@ public class XMLStatementBuilder extends BaseBuilder {
     return keyGenerator;
   }
 
-  protected StatementType resolveStatementType(String statementType) {
-    if (StringUtils.isBlank(statementType)) {
-      return StatementType.PREPARED;
-    }
-    try {
-      return StatementType.valueOf(statementType);
-    } catch (IllegalArgumentException e) {
-      throw new BuilderException(
-          "unknown statement type " + statementType + ", expected: [" + Arrays.toString(StatementType.values()) + "]");
-    }
-  }
-
   @Override
   protected ResultSetType resolveResultSetType(String alias) {
     ResultSetType resultSetTypeEnum = super.resolveResultSetType(alias);
@@ -206,8 +186,7 @@ public class XMLStatementBuilder extends BaseBuilder {
       LanguageDriver langDriver, String databaseId) {
     String resultType = nodeToHandle.getStringAttribute("resultType");
     Class<?> resultTypeClass = resolveClass(resultType);
-    StatementType statementType = StatementType
-        .valueOf(nodeToHandle.getStringAttribute("statementType", StatementType.PREPARED.toString()));
+    StatementType statementType = resolveStatementType(nodeToHandle.getStringAttribute("statementType"));
     String keyProperty = nodeToHandle.getStringAttribute("keyProperty");
     String keyColumn = nodeToHandle.getStringAttribute("keyColumn");
     boolean executeBefore = "BEFORE".equals(nodeToHandle.getStringAttribute("order", "AFTER"));
