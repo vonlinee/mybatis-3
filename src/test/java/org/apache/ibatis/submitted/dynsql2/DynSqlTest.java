@@ -49,14 +49,10 @@ class DynSqlTest {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       List<Name> names = new ArrayList<>();
 
-      Name name = new Name();
-      name.setFirstName("Fred");
-      name.setLastName("Flintstone");
+      Name name = new Name("Fred", "Flintstone");
       names.add(name);
 
-      name = new Name();
-      name.setFirstName("Barney");
-      name.setLastName("Rubble");
+      name = new Name("Barney", "Rubble");
       names.add(name);
 
       Parameter parameter = new Parameter();

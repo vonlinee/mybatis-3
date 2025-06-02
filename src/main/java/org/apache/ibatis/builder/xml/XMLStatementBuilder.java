@@ -115,8 +115,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     Integer fetchSize = context.getIntAttribute("fetchSize");
     Integer timeout = context.getIntAttribute("timeout");
     String parameterMap = context.getStringAttribute("parameterMap");
-    String resultType = context.getStringAttribute("resultType");
-    Class<?> resultTypeClass = resolveClass(resultType);
+    Class<?> resultTypeClass = resolveClass(context.getStringAttribute("resultType"));
     String resultMap = context.getStringAttribute("resultMap");
     if (resultTypeClass == null && resultMap == null) {
       resultTypeClass = MapperAnnotationBuilder.getMethodReturnType(assistant.getCurrentNamespace(), id);

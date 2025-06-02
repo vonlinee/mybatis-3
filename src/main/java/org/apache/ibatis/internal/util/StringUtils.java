@@ -17,6 +17,8 @@ package org.apache.ibatis.internal.util;
 
 import java.util.Collection;
 import java.util.StringJoiner;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -371,24 +373,56 @@ public final class StringUtils {
    *
    * @param arr
    *          the array to display (potentially {@code null} or empty)
-   * @param delim
+   * @param delimiter
    *          the delimiter to use (typically a ",")
    *
    * @return the delimited {@code String}
    */
-  public static String arrayToDelimitedString(@Nullable Object[] arr, String delim) {
+  public static <E> String join(@Nullable E[] arr, Function<? super E, ? extends String> mapper, CharSequence delimiter,
+      CharSequence prefix, CharSequence suffix) {
     if (ObjectUtils.isEmpty(arr)) {
-      return "";
+      return EMPTY;
     }
     if (arr.length == 1) {
       return ObjectUtils.nullSafeToString(arr[0]);
     }
-
-    StringJoiner sj = new StringJoiner(delim);
-    for (Object elem : arr) {
-      sj.add(String.valueOf(elem));
+    prefix = prefix == null ? EMPTY : prefix;
+    suffix = suffix == null ? EMPTY : suffix;
+    StringJoiner sj = new StringJoiner(delimiter, prefix, suffix);
+    for (E elem : arr) {
+      sj.add(mapper.apply(elem));
     }
     return sj.toString();
+  }
+
+  public static <E> String join(Collection<E> collection) {
+    return join(collection, String::valueOf, ",", null, null);
+  }
+
+  public static <E> String join(Collection<E> collection, CharSequence delimiter) {
+    return join(collection, String::valueOf, delimiter, null, null);
+  }
+
+  public static <E> String join(Collection<E> collection, Function<? super E, ? extends String> mapper) {
+    return join(collection, mapper, ",", null, null);
+  }
+
+  public static <E> String join(Collection<E> collection, Function<? super E, ? extends String> mapper,
+      CharSequence delimiter) {
+    return join(collection, mapper, delimiter, null, null);
+  }
+
+  public static <E> String join(Collection<E> collection, Function<? super E, ? extends String> mapper,
+      CharSequence delimiter, CharSequence prefix, CharSequence suffix) {
+    if (CollectionUtils.isEmpty(collection)) {
+      return EMPTY;
+    }
+    if (collection.size() == 1) {
+      return ObjectUtils.nullSafeToString(CollectionUtils.getFirst(collection));
+    }
+    prefix = prefix == null ? EMPTY : prefix;
+    suffix = suffix == null ? EMPTY : suffix;
+    return collection.stream().map(mapper).collect(Collectors.joining(delimiter, prefix, suffix));
   }
 
   /**
@@ -401,8 +435,20 @@ public final class StringUtils {
    *
    * @return the delimited {@code String}
    */
-  public static String arrayToCommaDelimitedString(@Nullable Object[] arr) {
-    return arrayToDelimitedString(arr, ",");
+  public static <E> String join(@Nullable E[] arr) {
+    return join(arr, String::valueOf, ",", null, null);
+  }
+
+  public static <E> String join(E[] arr, CharSequence delimiter) {
+    return join(arr, String::valueOf, delimiter, null, null);
+  }
+
+  public static <E> String join(E[] arr, Function<? super E, ? extends String> mapper) {
+    return join(arr, mapper, ",", null, null);
+  }
+
+  public static <E> String join(E[] arr, Function<? super E, ? extends String> mapper, CharSequence delimiter) {
+    return join(arr, mapper, delimiter, null, null);
   }
 
   /**

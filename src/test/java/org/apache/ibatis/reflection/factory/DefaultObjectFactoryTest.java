@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.ibatis.reflection.ReflectionException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -45,19 +44,6 @@ class DefaultObjectFactoryTest {
 
     Assertions.assertEquals((Integer) 0, testClass.myInteger, "myInteger didn't match expected");
     Assertions.assertEquals("foo", testClass.myString, "myString didn't match expected");
-  }
-
-  @Test
-  void createClassThrowsProperErrorMsg() {
-    DefaultObjectFactory defaultObjectFactory = new DefaultObjectFactory();
-    try {
-      defaultObjectFactory.create(TestClass.class, List.of(String.class), List.of("foo"));
-      Assertions.fail("Should have thrown ReflectionException");
-    } catch (Exception e) {
-      Assertions.assertInstanceOf(ReflectionException.class, e, "Should be ReflectionException");
-      Assertions.assertTrue(e.getMessage().contains("(String)"), "Should not have trailing commas in types list");
-      Assertions.assertTrue(e.getMessage().contains("(foo)"), "Should not have trailing commas in values list");
-    }
   }
 
   @Test

@@ -35,85 +35,16 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Note: This class is copied from Spring Framework. see <a href=
+ * "https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/CollectionUtils.html">CollectionUtils</a>
+ */
 public final class CollectionUtils {
 
   private static final EmptyMultiValueMap<?, ?> EMPTY_MULTI_VALUE_MAP = new EmptyMultiValueMap<>();
 
-  /**
-   * @see Collection
-   */
-  private static final Collection<?> EMPTY_COLLECTION = new Collection<>() {
-    @Override
-    public int size() {
-      return 0;
-    }
-
-    @Override
-    public boolean isEmpty() {
-      return true;
-    }
-
-    @Override
-    public boolean contains(Object o) {
-      return false;
-    }
-
-    @NotNull
-    @Override
-    public Iterator<Object> iterator() {
-      return Collections.emptyIterator();
-    }
-
-    @NotNull
-    @Override
-    public Object @NotNull [] toArray() {
-      return new Object[0];
-    }
-
-    @NotNull
-    @Override
-    public <T> T @NotNull [] toArray(@NotNull T @NotNull [] a) {
-      return a;
-    }
-
-    @Override
-    public boolean add(Object object) {
-      return false;
-    }
-
-    @Override
-    public boolean remove(Object o) {
-      return false;
-    }
-
-    @Override
-    public boolean containsAll(@NotNull Collection<?> c) {
-      return false;
-    }
-
-    @Override
-    public boolean addAll(@NotNull Collection<?> c) {
-      return false;
-    }
-
-    @Override
-    public boolean removeAll(@NotNull Collection<?> c) {
-      return false;
-    }
-
-    @Override
-    public boolean retainAll(@NotNull Collection<?> c) {
-      return false;
-    }
-
-    @Override
-    public void clear() {
-    }
-  };
-
-  @SuppressWarnings("unchecked")
   public static <E> Collection<E> emptyCollection() {
-    return (Collection<E>) EMPTY_COLLECTION;
+    return Collections.emptyList();
   }
 
   private CollectionUtils() {
@@ -174,6 +105,27 @@ public final class CollectionUtils {
   @Nullable
   public static <T> T getFirst(@Nullable List<T> list) {
     return isEmpty(list) ? null : list.get(0);
+  }
+
+  /**
+   * Retrieve the first element of the given List, accessing the zero index.
+   *
+   * @param collection
+   *          the collection to check (maybe {@code null} or empty)
+   *
+   * @return the first element, or {@code null} if none
+   */
+  @Nullable
+  public static <T> T getFirst(@Nullable Collection<T> collection) {
+    if (isEmpty(collection)) {
+      return null;
+    }
+    if (collection instanceof List) {
+      return ((List<T>) collection).get(0);
+    } else if (collection instanceof Set) {
+      return collection.iterator().next();
+    }
+    return null;
   }
 
   /**
@@ -451,7 +403,7 @@ public final class CollectionUtils {
   }
 
   /**
-   * @see CollectionUtils#asList(Object[])
+   * @see net.sf.cglib.core.CollectionUtils#asList(Object[])
    *
    * @param elements
    *          elements
@@ -527,24 +479,25 @@ public final class CollectionUtils {
       return false;
     }
     final String typeName = map.getClass().getName();
-    return "java.util.Collections.EmptyMap".equals(typeName) || "java.util.Collections$SingletonList".equals(typeName)
+    return "java.util.Collections.EmptyMap".equals(typeName) || "java.util.Collections$SingletonMap".equals(typeName)
         || typeName.startsWith("java.util.Collections$Unmodifiable")
         || typeName.startsWith("java.util.ImmutableCollections"); // java9+
-  }
-
-  public static boolean isModifiable(Set<?> s) {
-    if (s == null) {
-      return false;
-    }
-    final String name = s.getClass().getName();
-    return "java.util.Collections.UnmodifiableSet".equals(name);
   }
 
   public static boolean isUnmodifiable(Set<?> s) {
     if (s == null) {
       return false;
     }
-    return !isModifiable(s);
+    final String name = s.getClass().getName();
+    return "java.util.Collections$UnmodifiableSet".equals(name) || "java.util.Collections$EmptySet".equals(name)
+        || "java.util.Collections$SingletonSet".equals(name) || name.startsWith("java.util.ImmutableCollections"); // java9+
+  }
+
+  public static boolean isModifiable(Set<?> s) {
+    if (s == null) {
+      return false;
+    }
+    return !isUnmodifiable(s);
   }
 
   /**

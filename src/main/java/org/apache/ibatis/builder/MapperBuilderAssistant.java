@@ -142,6 +142,27 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return currentNamespace + "." + base;
   }
 
+  public String applyNamespace(String namespace, String base, boolean isReference) {
+    if (base == null) {
+      return null;
+    }
+    if (isReference) {
+      // is it qualified with any namespace yet?
+      if (base.contains(".")) {
+        return base;
+      }
+    } else {
+      // is it qualified with this namespace yet?
+      if (base.startsWith(namespace + ".")) {
+        return base;
+      }
+      if (base.contains(".")) {
+        throw new BuilderException("Dots are not allowed in element names, please remove it from " + base);
+      }
+    }
+    return namespace + "." + base;
+  }
+
   public Cache useCacheRef(String namespace) {
     if (namespace == null) {
       throw new BuilderException("cache-ref element requires a namespace attribute.");
@@ -183,6 +204,19 @@ public class MapperBuilderAssistant extends BaseBuilder {
     configuration.addParameterMap(parameterMap);
     return parameterMap;
   }
+
+  // @formatter:off
+  public ParameterMap buildParameterMap(String namespace,
+                                        String id,
+                                        Class<?> parameterClass,
+                                        List<ParameterMapping> parameterMappings) {
+    id = applyNamespace(namespace, id, false);
+    if (parameterMappings == null) {
+      parameterMappings = Collections.emptyList();
+    }
+    return new ParameterMap.Builder(id, parameterClass, parameterMappings).build();
+  }
+  // @formatter:on
 
   public ParameterMapping buildParameterMapping(Class<?> parameterType, String property, Class<?> javaType,
       JdbcType jdbcType, String resultMap, ParameterMode parameterMode, Class<? extends TypeHandler<?>> typeHandler,

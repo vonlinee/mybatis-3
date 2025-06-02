@@ -61,6 +61,7 @@ import org.apache.ibatis.annotations.TypeDiscriminator;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.binding.ParamMap;
+import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.CacheRefResolver;
 import org.apache.ibatis.builder.Configuration;
@@ -98,7 +99,7 @@ import org.apache.ibatis.type.UnknownTypeHandler;
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
-public class MapperAnnotationBuilder {
+public class MapperAnnotationBuilder extends BaseBuilder {
 
   private static final Set<Class<? extends Annotation>> statementAnnotationTypes = Stream
       .of(Select.class, Update.class, Insert.class, Delete.class, SelectProvider.class, UpdateProvider.class,
@@ -110,6 +111,7 @@ public class MapperAnnotationBuilder {
   private final Class<?> type;
 
   public MapperAnnotationBuilder(Configuration configuration, Class<?> type) {
+    super(configuration);
     String resource = type.getName().replace('.', '/') + ".java (best guess)";
     this.assistant = new MapperBuilderAssistant(configuration, resource);
     this.configuration = configuration;

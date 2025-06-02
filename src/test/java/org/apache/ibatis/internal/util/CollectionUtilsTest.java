@@ -18,6 +18,7 @@ package org.apache.ibatis.internal.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +40,10 @@ public class CollectionUtilsTest {
 
   @Test
   void shouldCheckUnmodifiableCollection() {
+    Assertions.assertTrue(CollectionUtils.isUnmodifiable(Collections.emptySet()));
+    Assertions.assertTrue(CollectionUtils.isUnmodifiable(Collections.unmodifiableSet(new HashSet<>())));
+    Assertions.assertTrue(CollectionUtils.isUnmodifiable(Collections.singleton(1)));
+
     Assertions.assertTrue(CollectionUtils.isUnmodifiable(Arrays.asList(1, 2)));
     Assertions.assertTrue(CollectionUtils.isUnmodifiable(Collections.singletonList(1)));
     Assertions.assertTrue(CollectionUtils.isUnmodifiable(Collections.unmodifiableList(CollectionUtils.asArrayList(1))));

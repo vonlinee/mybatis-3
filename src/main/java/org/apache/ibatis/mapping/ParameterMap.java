@@ -15,8 +15,9 @@
  */
 package org.apache.ibatis.mapping;
 
-import java.util.Collections;
 import java.util.List;
+
+import org.apache.ibatis.internal.util.CollectionUtils;
 
 /**
  * @author Clinton Begin
@@ -45,7 +46,7 @@ public class ParameterMap {
 
     public ParameterMap build() {
       // lock down collections
-      parameterMap.parameterMappings = Collections.unmodifiableList(parameterMap.parameterMappings);
+      parameterMap.parameterMappings = CollectionUtils.unmodifiableList(parameterMap.parameterMappings);
       return parameterMap;
     }
   }
