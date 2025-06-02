@@ -724,6 +724,35 @@ public class Configuration extends ConfigurationElementHolder {
     return mappedStatements.keySet();
   }
 
+  /**
+   * Note: code like below will throw {@link ClassCastException}: <blockquote>
+   *
+   * <pre>
+   * for (MappedStatement ms : configuration.getMappedStatements()) { // error during class cast
+   *   System.out.println(ms);
+   * }
+   * </pre>
+   *
+   * </blockquote>
+   * <p>
+   * <p>
+   * use code below to avoid this: <blockquote>
+   *
+   * <pre>
+   * for (Object ms : configuration.getMappedStatements()) {
+   *    if (ms instance MappedStatement) {
+   *       System.out.println((MappedStatement) ms);
+   *    }
+   * }
+   * </pre>
+   *
+   * </blockquote>
+   * <p>
+   * <p>
+   * TODO FIXME it is not an ideal behaviour and it should be fixed.
+   *
+   * @return all mapped statements
+   */
   public Collection<MappedStatement> getMappedStatements() {
     buildAllStatements();
     return mappedStatements.values();
