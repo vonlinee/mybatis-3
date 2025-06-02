@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.util.regex.Pattern;
 
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
+import org.apache.ibatis.builder.xml.XMLMapperResource;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultSetType;
@@ -43,10 +44,9 @@ class XmlMapperBuilderTest {
     assertDoesNotThrow(() -> {
       Configuration configuration = new Configuration();
       String resource = "org/apache/ibatis/builder/AuthorMapper.xml";
-      try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
-        XMLMapperBuilder builder = new XMLMapperBuilder(inputStream, configuration, resource,
-            configuration.getSqlFragments());
-        builder.parse();
+
+      try (XMLMapperResource res = new XMLMapperResource(resource)) {
+        res.build(configuration);
       }
     });
   }
@@ -55,10 +55,8 @@ class XmlMapperBuilderTest {
   void mappedStatementWithOptions() throws Exception {
     Configuration configuration = new Configuration();
     String resource = "org/apache/ibatis/builder/AuthorMapper.xml";
-    try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
-      XMLMapperBuilder builder = new XMLMapperBuilder(inputStream, configuration, resource,
-          configuration.getSqlFragments());
-      builder.parse();
+    try (XMLMapperResource res = new XMLMapperResource(resource)) {
+      res.build(configuration);
 
       MappedStatement mappedStatement = configuration.getMappedStatement("selectWithOptions");
       assertThat(mappedStatement.getFetchSize()).isEqualTo(200);
@@ -76,10 +74,8 @@ class XmlMapperBuilderTest {
     configuration.setDefaultResultSetType(ResultSetType.SCROLL_INSENSITIVE);
     String resource = "org/apache/ibatis/builder/AuthorMapper.xml";
 
-    try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
-      XMLMapperBuilder builder = new XMLMapperBuilder(inputStream, configuration, resource,
-          configuration.getSqlFragments());
-      builder.parse();
+    try (XMLMapperResource res = new XMLMapperResource(resource)) {
+      res.build(configuration);
     }
 
     MappedStatement mappedStatement = configuration.getMappedStatement("selectAuthor");

@@ -18,16 +18,23 @@ package org.apache.ibatis.builder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.ibatis.builder.xml.XMLMapperBuilder;
+import org.apache.ibatis.builder.annotation.ClassMapperResource;
+import org.apache.ibatis.builder.annotation.PackageMapperResource;
+import org.apache.ibatis.builder.xml.URLMapperResource;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
+import org.apache.ibatis.builder.xml.XMLMapperResource;
 import org.apache.ibatis.datasource.DataSourceFactory;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.loader.ProxyFactory;
 import org.apache.ibatis.internal.util.ClassUtils;
+import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.internal.util.ReflectionUtils;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.io.Resources;
@@ -154,9 +161,40 @@ public class XMLConfigBuilder extends BaseBuilder {
       environmentsElement(root.evalNode("environments"));
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
       typeHandlersElement(root.evalNode("typeHandlers"));
-      mappersElement(root.evalNode("mappers"));
+
+      // mappers
+      List<MapperResource> resources = mappersElement(root.evalNode("mappers"));
+      if (!CollectionUtils.isEmpty(resources)) {
+        handleMapperResources(configuration, resources);
+      }
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
+    }
+  }
+
+  protected void handleMapperResources(Configuration config, List<MapperResource> resources) throws Exception {
+    List<MapperResource> unfinishedResources = new ArrayList<>();
+    for (MapperResource resource : resources) {
+      handleMapperResource(resource, config, unfinishedResources);
+    }
+    if (!unfinishedResources.isEmpty()) {
+      for (MapperResource unfinishedResource : unfinishedResources) {
+        handleMapperResource(unfinishedResource, config, unfinishedResources);
+      }
+    }
+  }
+
+  protected void handleMapperResource(MapperResource resource, Configuration config,
+      List<MapperResource> unfinishedResources) throws Exception {
+    resource.init(config.getVariables());
+    if (resource.exists()) {
+      ErrorContext.instance().resource(resource.getResourceName());
+      boolean finished = resource.build(config);
+      if (finished) {
+        resource.cleanup(config);
+      } else {
+        unfinishedResources.add(resource);
+      }
     }
   }
 
@@ -429,41 +467,36 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
-  protected void mappersElement(XNode context) throws Exception {
+  protected List<MapperResource> mappersElement(XNode context) throws Exception {
     if (context == null) {
-      return;
+      return Collections.emptyList();
     }
-    for (XNode child : context.getChildren()) {
+    List<XNode> children = context.getChildren();
+    if (CollectionUtils.isEmpty(children)) {
+      return Collections.emptyList();
+    }
+    List<MapperResource> resources = new ArrayList<>(children.size());
+    for (XNode child : children) {
       if ("package".equals(child.getName())) {
         String mapperPackage = child.getStringAttribute("name");
-        configuration.addMappers(mapperPackage);
+        resources.add(new PackageMapperResource(mapperPackage));
       } else {
         String resource = child.getStringAttribute("resource");
         String url = child.getStringAttribute("url");
         String mapperClass = child.getStringAttribute("class");
         if (resource != null && url == null && mapperClass == null) {
-          ErrorContext.instance().resource(resource);
-          try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
-            XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource,
-                configuration.getSqlFragments());
-            mapperParser.parse();
-          }
+          resources.add(new XMLMapperResource(resource));
         } else if (resource == null && url != null && mapperClass == null) {
-          ErrorContext.instance().resource(url);
-          try (InputStream inputStream = Resources.getUrlAsStream(url)) {
-            XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url,
-                configuration.getSqlFragments());
-            mapperParser.parse();
-          }
+          resources.add(new URLMapperResource(url));
         } else if (resource == null && url == null && mapperClass != null) {
-          Class<?> mapperInterface = Resources.classForName(mapperClass);
-          configuration.addMapper(mapperInterface);
+          resources.add(new ClassMapperResource(mapperClass));
         } else {
           throw new BuilderException(
               "A mapper element may only specify a url, resource or class, but not more than one.");
         }
       }
     }
+    return resources;
   }
 
   private boolean isSpecifiedEnvironment(String id) {
