@@ -30,7 +30,6 @@ import java.util.TreeMap;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.binding.ParamMap;
-import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.internal.util.ReflectionUtils;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.apache.ibatis.session.ResultHandler;
@@ -67,8 +66,8 @@ public class ParamNameResolver {
   private boolean hasParamAnnotation;
   private boolean useParamMap;
 
-  public ParamNameResolver(Configuration config, Method method, Class<?> mapperClass) {
-    this.useActualParamName = config.isUseActualParamName();
+  public ParamNameResolver(Class<?> mapperClass, Method method, boolean useActualParamName) {
+    this.useActualParamName = useActualParamName;
     final Class<?>[] paramTypes = method.getParameterTypes();
     final Annotation[][] paramAnnotations = method.getParameterAnnotations();
     final SortedMap<Integer, String> map = new TreeMap<>();

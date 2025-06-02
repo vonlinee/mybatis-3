@@ -89,7 +89,7 @@ public class XMLLanguageDriver implements LanguageDriver {
       DynamicContext context = new DynamicContext(configuration, null, parameterType, paramNameResolver, false);
       rootSqlNode.apply(context);
       String sql = context.getSql();
-      return SqlSourceBuilder.buildSqlSource(configuration, sql, context.getParameterMappings());
+      sqlSource = SqlSourceBuilder.buildSqlSource(configuration, sql, context.getParameterMappings());
     }
     return sqlSource;
   }

@@ -43,7 +43,7 @@ class PlainMapperMethod extends MapperMethod {
   public PlainMapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
     this.command = new SqlCommand(config, mapperInterface, method);
     this.signature = parseSignature(config, mapperInterface, method);
-    this.paramNameResolver = new ParamNameResolver(config, method, mapperInterface);
+    this.paramNameResolver = new ParamNameResolver(mapperInterface, method, config.isUseActualParamName());
   }
 
   private Object convertArgsToSqlCommandParam(Object[] args) {

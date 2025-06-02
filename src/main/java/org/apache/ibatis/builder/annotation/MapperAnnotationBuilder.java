@@ -292,7 +292,8 @@ public class MapperAnnotationBuilder {
 
   protected void parseStatement(Class<?> type, Method method) {
     final Class<?> parameterTypeClass = getParameterType(method);
-    final ParamNameResolver paramNameResolver = new ParamNameResolver(configuration, method, type);
+    final ParamNameResolver paramNameResolver = new ParamNameResolver(type, method,
+        configuration.isUseActualParamName());
     final LanguageDriver languageDriver = getLanguageDriver(method);
 
     getAnnotationWrapper(method, true, statementAnnotationTypes).ifPresent(statementAnnotation -> {
