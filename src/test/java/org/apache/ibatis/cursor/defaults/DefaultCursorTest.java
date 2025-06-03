@@ -15,9 +15,7 @@
  */
 package org.apache.ibatis.cursor.defaults;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -55,6 +53,8 @@ class DefaultCursorTest {
   @Mock
   protected ResultSetMetaData rsmd;
 
+  final Configuration config = new Configuration();
+
   @SuppressWarnings("unchecked")
   @Test
   void shouldCloseImmediatelyIfResultSetIsClosed() throws Exception {
@@ -64,7 +64,7 @@ class DefaultCursorTest {
     final RowBounds rowBounds = RowBounds.DEFAULT;
 
     final DefaultResultSetHandler resultSetHandler = new DefaultResultSetHandler(null, ms, null, rowBounds);
-
+    resultSetHandler.setConfiguration(config);
     when(rsmd.getColumnCount()).thenReturn(2);
     doReturn("id").when(rsmd).getColumnLabel(1);
     doReturn(Types.INTEGER).when(rsmd).getColumnType(1);
@@ -75,9 +75,7 @@ class DefaultCursorTest {
 
     Configuration configuration = ms.getConfiguration();
 
-    TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
-
-    final ResultSetWrapper rsw = new ResultSetWrapper(rs, typeHandlerRegistry, configuration.isUseColumnLabel());
+    final ResultSetWrapper rsw = new ResultSetWrapper(rs, configuration.isUseColumnLabel());
 
     try (DefaultCursor<?> cursor = new DefaultCursor<>(resultSetHandler, rm, rsw, RowBounds.DEFAULT)) {
       Iterator<?> iter = cursor.iterator();
@@ -96,7 +94,6 @@ class DefaultCursorTest {
   }
 
   private MappedStatement getNestedAndOrderedMappedStatement() {
-    final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
     final boolean lazyLoadingEnabled = config.isLazyLoadingEnabled();

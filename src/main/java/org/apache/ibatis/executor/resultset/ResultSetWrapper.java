@@ -15,7 +15,6 @@
  */
 package org.apache.ibatis.executor.resultset;
 
-import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -31,9 +30,6 @@ import java.util.Set;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.type.JdbcType;
-import org.apache.ibatis.type.ObjectTypeHandler;
-import org.apache.ibatis.type.TypeHandler;
-import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -42,17 +38,14 @@ import org.jetbrains.annotations.Nullable;
 public class ResultSetWrapper {
 
   private final ResultSet resultSet;
-  private final TypeHandlerRegistry typeHandlerRegistry;
   private final List<String> columnNames = new ArrayList<>();
   private final List<String> classNames = new ArrayList<>();
   private final List<JdbcType> jdbcTypes = new ArrayList<>();
-  private final Map<String, Map<Type, TypeHandler<?>>> typeHandlerMap = new HashMap<>();
+
   private final Map<String, Set<String>> mappedColumnNamesMap = new HashMap<>();
   private final Map<String, List<String>> unMappedColumnNamesMap = new HashMap<>();
 
-  public ResultSetWrapper(ResultSet rs, TypeHandlerRegistry typeHandlerRegistry, boolean useColumnLabel)
-      throws SQLException {
-    this.typeHandlerRegistry = typeHandlerRegistry;
+  public ResultSetWrapper(ResultSet rs, boolean useColumnLabel) throws SQLException {
     this.resultSet = rs;
     initialize(rs, useColumnLabel);
   }
@@ -87,47 +80,6 @@ public class ResultSetWrapper {
   public JdbcType getJdbcType(String columnName) {
     int columnIndex = getColumnIndex(columnName);
     return columnIndex == -1 ? null : jdbcTypes.get(columnIndex);
-  }
-
-  /**
-   * Gets the type handler to use when reading the result set. Tries to get from the TypeHandlerRegistry by searching
-   * for the property type. If not found it gets the column JDBC type and tries to get a handler for it.
-   *
-   * @param propertyType
-   *          the property type
-   * @param columnName
-   *          the column name
-   *
-   * @return the type handler
-   */
-  public TypeHandler<?> getTypeHandler(Type propertyType, String columnName) {
-    return typeHandlerMap.computeIfAbsent(columnName, k -> new HashMap<>()).computeIfAbsent(propertyType, k -> {
-      int index = getColumnIndex(columnName);
-      if (index == -1) {
-        return ObjectTypeHandler.INSTANCE;
-      }
-
-      JdbcType jdbcType = getJdbcType(index);
-      TypeHandler<?> handler = typeHandlerRegistry.getTypeHandler(k, jdbcType, null);
-      if (handler != null) {
-        return handler;
-      }
-
-      Class<?> javaType = getColumnClass(index);
-      if (javaType == null) {
-        return null;
-      }
-      if (!(k instanceof Class && ((Class<?>) k).isAssignableFrom(javaType))) {
-        // Clearly incompatible
-        return null;
-      }
-
-      handler = typeHandlerRegistry.getTypeHandler(javaType, jdbcType, null);
-      if (handler == null) {
-        handler = typeHandlerRegistry.getTypeHandler(jdbcType);
-      }
-      return handler == null ? ObjectTypeHandler.INSTANCE : handler;
-    });
   }
 
   public int getColumnIndex(String columnName) {

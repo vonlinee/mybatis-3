@@ -36,8 +36,6 @@ import java.util.Set;
 
 import org.apache.ibatis.annotations.AutomapConstructor;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.binding.ParamMap;
-import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
@@ -49,6 +47,7 @@ import org.apache.ibatis.executor.result.DefaultCursor;
 import org.apache.ibatis.executor.result.DefaultResultContext;
 import org.apache.ibatis.executor.result.DefaultResultHandler;
 import org.apache.ibatis.executor.result.ResultMapException;
+import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -56,8 +55,6 @@ import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.ReflectorFactory;
-import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.AutoMappingBehavior;
 import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
@@ -65,7 +62,6 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.ObjectTypeHandler;
 import org.apache.ibatis.type.TypeHandler;
-import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
@@ -74,18 +70,14 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  * @author Kazuki Shimizu
  * @author Willie Scholtz
  */
-public class DefaultResultSetHandler implements ResultSetHandler {
+public class DefaultResultSetHandler extends BaseResultSetHandler {
 
   private static final Object DEFERRED = new Object();
 
   private final Executor executor;
-  private final Configuration configuration;
   private final MappedStatement mappedStatement;
   private final RowBounds rowBounds;
   private final ResultHandler<?> resultHandler;
-  private final TypeHandlerRegistry typeHandlerRegistry;
-  private final ObjectFactory objectFactory;
-  private final ReflectorFactory reflectorFactory;
 
   // pending creations property tracker
   private final Map<Object, PendingRelation> pendingPccRelations = new IdentityHashMap<>();
@@ -109,12 +101,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   public DefaultResultSetHandler(Executor executor, MappedStatement mappedStatement, ResultHandler<?> resultHandler,
       RowBounds rowBounds) {
     this.executor = executor;
-    this.configuration = mappedStatement.getConfiguration();
     this.mappedStatement = mappedStatement;
     this.rowBounds = rowBounds;
-    this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
-    this.objectFactory = configuration.getObjectFactory();
-    this.reflectorFactory = configuration.getReflectorFactory();
     this.resultHandler = resultHandler;
   }
 
@@ -176,58 +164,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     ResultMap resultMap = resultMaps.get(0);
     return new DefaultCursor<>(this, resultMap, rsw, rowBounds);
-  }
-
-  private ResultSetWrapper getFirstResultSet(Statement stmt) throws SQLException {
-    ResultSet rs = null;
-    SQLException e1 = null;
-
-    try {
-      rs = stmt.getResultSet();
-    } catch (SQLException e) {
-      // Oracle throws ORA-17283 for implicit cursor
-      e1 = e;
-    }
-
-    try {
-      while (rs == null) {
-        // move forward to get the first result set in case the driver
-        // doesn't return the result set as the first result (HSQLDB)
-        if (stmt.getMoreResults()) {
-          rs = stmt.getResultSet();
-        } else if (stmt.getUpdateCount() == -1) {
-          // no more results. Must be no result set
-          break;
-        }
-      }
-    } catch (SQLException e) {
-      throw e1 != null ? e1 : e;
-    }
-
-    return rs != null ? new ResultSetWrapper(rs, typeHandlerRegistry, configuration.isUseColumnLabel()) : null;
-  }
-
-  private ResultSetWrapper getNextResultSet(Statement stmt) {
-    // Making this method tolerant of bad JDBC drivers
-    try {
-      // We stopped checking DatabaseMetaData#supportsMultipleResultSets()
-      // because Oracle driver (incorrectly) returns false
-
-      // Crazy Standard JDBC way of determining if there are more results
-      // DO NOT try to 'improve' the condition even if IDE tells you to!
-      // It's important that getUpdateCount() is called here.
-      if (!(!stmt.getMoreResults() && stmt.getUpdateCount() == -1)) {
-        ResultSet rs = stmt.getResultSet();
-        if (rs == null) {
-          return getNextResultSet(stmt);
-        } else {
-          return new ResultSetWrapper(rs, typeHandlerRegistry, configuration.isUseColumnLabel());
-        }
-      }
-    } catch (Exception e) {
-      // Intentionally ignored.
-    }
-    return null;
   }
 
   private void cleanUpAfterHandlingResultSet() {
@@ -344,20 +280,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   private boolean shouldProcessMoreRows(ResultContext<?> context, RowBounds rowBounds) {
     return !context.isStopped() && context.getResultCount() < rowBounds.getLimit();
-  }
-
-  private void skipRows(ResultSet rs, RowBounds rowBounds) throws SQLException {
-    if (rs.getType() != ResultSet.TYPE_FORWARD_ONLY) {
-      if (rowBounds.getOffset() != RowBounds.NO_ROW_OFFSET) {
-        rs.absolute(rowBounds.getOffset());
-      }
-    } else {
-      for (int i = 0; i < rowBounds.getOffset(); i++) {
-        if (!rs.next()) {
-          break;
-        }
-      }
-    }
   }
 
   //
@@ -505,7 +427,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       if (typeHandler == null) {
         final String property = propertyMapping.getProperty();
         final Type javaType = property == null ? null : metaResultObject.getGenericSetterType(property).getKey();
-        typeHandler = rsw.getTypeHandler(javaType, column);
+        typeHandler = getTypeHandler(rsw, javaType, column);
         if (typeHandler == null) {
           throw new ExecutorException(
               "No type handler found for '" + javaType + "' and JDBC type '" + rsw.getJdbcType(column) + "'");
@@ -522,7 +444,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         configuration.getResultMap(propertyMapping.getNestedResultMapId()),
         getColumnPrefix(parentColumnPrefix, propertyMapping));
     ResultSetWrapper nestedRsw = new ResultSetWrapper(rsw.getResultSet().getObject(column, ResultSet.class),
-        typeHandlerRegistry, configuration.isUseColumnLabel());
+        configuration.isUseColumnLabel());
     List<Object> results = new ArrayList<>();
     handleResultSet(nestedRsw, nestedResultMap, results, null);
     return results;
@@ -556,7 +478,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
             continue;
           }
           final Type propertyType = metaObject.getGenericSetterType(property).getKey();
-          TypeHandler<?> typeHandler = rsw.getTypeHandler(propertyType, columnName);
+          TypeHandler<?> typeHandler = getTypeHandler(rsw, propertyType, columnName);
           if (typeHandler != null) {
             autoMapping.add(new UnMappedColumnAutoMapping(columnName, property, typeHandler,
                 propertyType instanceof Class && ((Class<?>) propertyType).isPrimitive()));
@@ -824,7 +746,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     for (int i = 0; i < parameterTypes.length; i++) {
       Class<?> parameterType = parameterTypes[i];
       String columnName = rsw.getColumnNames().get(i);
-      TypeHandler<?> typeHandler = rsw.getTypeHandler(parameterType, columnName);
+      TypeHandler<?> typeHandler = getTypeHandler(rsw, parameterType, columnName);
       Object value = typeHandler.getResult(rsw.getResultSet(), columnName);
       constructorArgTypes.add(parameterType);
       constructorArgs.add(value);
@@ -845,7 +767,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       for (String columnName : rsw.getColumnNames()) {
         if (columnMatchesParam(columnName, paramName, columnPrefix)) {
           Class<?> paramType = param.getType();
-          TypeHandler<?> typeHandler = rsw.getTypeHandler(paramType, columnName);
+          TypeHandler<?> typeHandler = getTypeHandler(rsw, paramType, columnName);
           Object value = typeHandler.getResult(rsw.getResultSet(), columnName);
           constructorArgTypes.add(paramType);
           constructorArgs.add(value);
@@ -895,7 +817,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     } else {
       columnName = rsw.getColumnNames().get(0);
     }
-    final TypeHandler<?> typeHandler = rsw.getTypeHandler(resultType, columnName);
+    final TypeHandler<?> typeHandler = getTypeHandler(rsw, resultType, columnName);
     return typeHandler.getResult(rsw.getResultSet(), columnName);
   }
 
@@ -966,7 +888,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       String columnPrefix) throws SQLException {
     // parameterType is ignored in this case
     final String columnName = prependPrefix(resultMapping.getColumn(), columnPrefix);
-    final TypeHandler<?> typeHandler = rsw.getTypeHandler(null, columnName);
+    final TypeHandler<?> typeHandler = getTypeHandler(rsw, null, columnName);
     return typeHandler.getResult(rsw.getResultSet(), columnName);
   }
 
@@ -978,8 +900,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     boolean foundValues = false;
     for (ResultMapping innerResultMapping : resultMapping.getComposites()) {
       final String columnName = prependPrefix(innerResultMapping.getColumn(), columnPrefix);
-      final TypeHandler<?> typeHandler = rsw
-          .getTypeHandler(metaObject.getGenericSetterType(innerResultMapping.getProperty()).getKey(), columnName);
+      final TypeHandler<?> typeHandler = getTypeHandler(rsw,
+          metaObject.getGenericSetterType(innerResultMapping.getProperty()).getKey(), columnName);
       final Object propValue = typeHandler.getResult(rsw.getResultSet(), columnName);
       // issue #353 & #560 do not execute nested query if key is null
       if (propValue != null) {
@@ -988,17 +910,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       }
     }
     return foundValues ? parameterObject : null;
-  }
-
-  private Object instantiateParameterObject(Class<?> parameterType) {
-    if (parameterType == null) {
-      return new HashMap<>();
-    }
-    if (ParamMap.class.equals(parameterType)) {
-      return new HashMap<>(); // issue #649
-    } else {
-      return objectFactory.create(parameterType);
-    }
   }
 
   //
@@ -1023,27 +934,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       }
     }
     return resultMap;
-  }
-
-  private Object getDiscriminatorValue(ResultSetWrapper rsw, Discriminator discriminator, String columnPrefix)
-      throws SQLException {
-    final ResultMapping resultMapping = discriminator.getResultMapping();
-    String column = prependPrefix(resultMapping.getColumn(), columnPrefix);
-    TypeHandler<?> typeHandler = resultMapping.getTypeHandler();
-    if (typeHandler == null) {
-      typeHandler = typeHandlerRegistry.getTypeHandler(resultMapping.getJavaType(), rsw.getJdbcType(column));
-    }
-    if (typeHandler == null) {
-      return null;
-    }
-    return typeHandler.getResult(rsw.getResultSet(), column);
-  }
-
-  private String prependPrefix(String columnName, String prefix) {
-    if (columnName == null || columnName.isEmpty() || prefix == null || prefix.isEmpty()) {
-      return columnName;
-    }
-    return prefix + columnName;
   }
 
   //
@@ -1527,7 +1417,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   private Object toSingleObj(List<?> list) {
     // Even if there are multiple elements, silently returns the first one.
-    return list.isEmpty() ? null : list.get(0);
+    return CollectionUtils.getFirst(list);
   }
 
   private Object instantiateCollectionPropertyIfAppropriate(ResultMapping resultMapping, MetaObject metaObject) {
@@ -1554,12 +1444,4 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
     return null;
   }
-
-  private boolean hasTypeHandlerForResultObject(ResultSetWrapper rsw, Class<?> resultType) {
-    if (rsw.getColumnNames().size() == 1) {
-      return typeHandlerRegistry.hasTypeHandler(resultType, rsw.getJdbcType(rsw.getColumnNames().get(0)));
-    }
-    return typeHandlerRegistry.hasTypeHandler(resultType);
-  }
-
 }

@@ -55,6 +55,8 @@ class DefaultResultSetHandlerTest {
   @Mock
   private ResultSetMetaData rsmd;
 
+  final Configuration config = new Configuration();
+
   /**
    * Contrary to the spec, some drivers require case-sensitive column names when getting result.
    *
@@ -67,7 +69,7 @@ class DefaultResultSetHandlerTest {
 
     final RowBounds rowBounds = new RowBounds(0, 100);
     final DefaultResultSetHandler fastResultSetHandler = new DefaultResultSetHandler(null, ms, null, rowBounds);
-
+    fastResultSetHandler.setConfiguration(config);
     when(stmt.getResultSet()).thenReturn(rs);
     when(rs.getMetaData()).thenReturn(rsmd);
     when(rs.getType()).thenReturn(ResultSet.TYPE_FORWARD_ONLY);
@@ -113,7 +115,6 @@ class DefaultResultSetHandlerTest {
   }
 
   MappedStatement getMappedStatement() {
-    final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource("some select statement"),
         SqlCommandType.SELECT).resultMaps(new ArrayList<>() {

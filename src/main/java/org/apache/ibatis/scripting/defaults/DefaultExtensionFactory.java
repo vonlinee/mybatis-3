@@ -61,7 +61,12 @@ public class DefaultExtensionFactory implements ExtensionFactory {
       ParameterHandler parameterHandler, ResultHandler<?> resultHandler, BoundSql boundSql) {
     ResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, mappedStatement, resultHandler,
         rowBounds);
-    return (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
+
+    resultSetHandler = (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
+
+    resultSetHandler.setConfiguration(this.configuration);
+
+    return resultSetHandler;
   }
 
   @Override

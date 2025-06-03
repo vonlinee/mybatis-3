@@ -15,22 +15,29 @@
  */
 package org.apache.ibatis.executor.resultset;
 
+import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.result.Cursor;
 import org.apache.ibatis.executor.statement.JdbcUtils;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.type.TypeHandler;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
  */
 public interface ResultSetHandler {
+
+  void setConfiguration(Configuration configuration);
 
   <E> List<E> handleResultSets(Statement stmt) throws SQLException;
 
@@ -38,6 +45,8 @@ public interface ResultSetHandler {
 
   void handleRowValues(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler, RowBounds rowBounds,
       ResultMapping parentMapping) throws SQLException;
+
+  TypeHandler<?> getTypeHandler(@NotNull ResultSetWrapper rsw, @Nullable Type propertyType, @NotNull String columnName);
 
   default void closeResultSet(ResultSet rs) {
     JdbcUtils.closeSilently(rs);
