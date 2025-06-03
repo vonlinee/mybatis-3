@@ -25,7 +25,7 @@ import java.util.Optional;
 
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.builder.Configuration;
-import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.result.Cursor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.reflection.MetaObject;

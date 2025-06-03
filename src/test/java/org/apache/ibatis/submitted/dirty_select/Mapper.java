@@ -19,7 +19,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.SelectProvider;
-import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.result.Cursor;
 
 public interface Mapper {
 
@@ -44,7 +44,7 @@ public interface Mapper {
   @Insert("insert into users (name) values (#{name}) returning id, name")
   int insert(User user);
 
-  static final class MyProvider {
+  final class MyProvider {
     public static String getSql() {
       return "insert into users (name) values (#{name}) returning id, name";
     }

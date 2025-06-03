@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.result.Cursor;
 import org.apache.ibatis.executor.statement.JdbcUtils;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;

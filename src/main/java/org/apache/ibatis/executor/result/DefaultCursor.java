@@ -13,13 +13,12 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.cursor.defaults;
+package org.apache.ibatis.executor.result;
 
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
 import org.apache.ibatis.executor.resultset.ResultSetWrapper;
 import org.apache.ibatis.executor.statement.JdbcUtils;

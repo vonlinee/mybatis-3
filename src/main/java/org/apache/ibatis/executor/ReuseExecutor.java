@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.builder.Configuration;
-import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.result.Cursor;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.mapping.BoundSql;

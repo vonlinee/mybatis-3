@@ -27,7 +27,7 @@ import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.impl.PerpetualCache;
-import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.result.Cursor;
 import org.apache.ibatis.executor.statement.JdbcUtils;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;

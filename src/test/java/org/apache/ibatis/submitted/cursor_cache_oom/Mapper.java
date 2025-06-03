@@ -15,7 +15,7 @@
  */
 package org.apache.ibatis.submitted.cursor_cache_oom;
 
-import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.result.Cursor;
 
 public interface Mapper {
 

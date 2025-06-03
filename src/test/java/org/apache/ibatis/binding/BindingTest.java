@@ -38,13 +38,13 @@ import net.sf.cglib.proxy.Factory;
 
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.builder.Configuration;
-import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.domain.blog.Blog;
 import org.apache.ibatis.domain.blog.DraftPost;
 import org.apache.ibatis.domain.blog.Post;
 import org.apache.ibatis.domain.blog.Section;
 import org.apache.ibatis.exceptions.PersistenceException;
+import org.apache.ibatis.executor.result.Cursor;
 import org.apache.ibatis.executor.result.DefaultResultHandler;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.RowBounds;

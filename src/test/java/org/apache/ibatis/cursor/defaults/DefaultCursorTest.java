@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.StaticSqlSource;
+import org.apache.ibatis.executor.result.DefaultCursor;
 import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
 import org.apache.ibatis.executor.resultset.ResultSetWrapper;
 import org.apache.ibatis.mapping.MappedStatement;

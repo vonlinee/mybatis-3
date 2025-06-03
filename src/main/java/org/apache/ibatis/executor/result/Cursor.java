@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.cursor;
+package org.apache.ibatis.executor.result;
 
 /**
  * Cursor contract to handle fetching items lazily using an Iterator. Cursors are a perfect fit to handle millions of

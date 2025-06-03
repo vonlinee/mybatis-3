@@ -15,7 +15,7 @@
  */
 package org.apache.ibatis.submitted.cursor_nested;
 
-import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.result.Cursor;
 
 public interface Mapper {
 

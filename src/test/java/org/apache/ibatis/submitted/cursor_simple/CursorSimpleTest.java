@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.apache.ibatis.BaseDataTest;
-import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.result.Cursor;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
