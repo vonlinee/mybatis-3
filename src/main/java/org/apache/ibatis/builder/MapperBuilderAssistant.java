@@ -198,13 +198,6 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return cache;
   }
 
-  public ParameterMap addParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
-    id = applyCurrentNamespace(id, false);
-    ParameterMap parameterMap = new ParameterMap.Builder(id, parameterClass, parameterMappings).build();
-    configuration.addParameterMap(parameterMap);
-    return parameterMap;
-  }
-
   // @formatter:off
   public ParameterMap buildParameterMap(String namespace,
                                         String id,
@@ -218,15 +211,23 @@ public class MapperBuilderAssistant extends BaseBuilder {
   }
   // @formatter:on
 
-  public ParameterMapping buildParameterMapping(Class<?> parameterType, String property, Class<?> javaType,
-      JdbcType jdbcType, String resultMap, ParameterMode parameterMode, Class<? extends TypeHandler<?>> typeHandler,
-      Integer numericScale) {
-    resultMap = applyCurrentNamespace(resultMap, true);
+  // @formatter:off
+  public ParameterMapping buildParameterMapping(
+    String namespace,
+    Class<?> parameterType,
+    String property,
+    Class<?> javaType,
+    JdbcType jdbcType,
+    String resultMap,
+    ParameterMode parameterMode,
+    Class<? extends TypeHandler<?>> typeHandler,
+    Integer numericScale) {
+    resultMap = applyNamespace(namespace, resultMap, true);
 
     // Class parameterType = parameterMapBuilder.type();
     Class<?> javaTypeClass = resolveParameterJavaType(parameterType, property, javaType, jdbcType);
     TypeHandler<?> typeHandlerInstance = resolveTypeHandler(javaTypeClass, jdbcType, typeHandler);
-    // @formatter:off
+
     return new ParameterMapping.Builder(property, javaTypeClass)
       .jdbcType(jdbcType)
       .resultMapId(resultMap)
@@ -566,7 +567,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return CollectionUtils.entry(Object.class, Object.class);
   }
 
-  private Class<?> resolveParameterJavaType(Class<?> resultType, String property, Class<?> javaType,
+  protected Class<?> resolveParameterJavaType(Class<?> resultType, String property, Class<?> javaType,
       JdbcType jdbcType) {
     if (javaType == null) {
       if (JdbcType.CURSOR.equals(jdbcType)) {

@@ -36,6 +36,7 @@ import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Discriminator;
+import org.apache.ibatis.mapping.ParameterMap;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.ResultFlag;
@@ -46,6 +47,7 @@ import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * <a href="https://mybatis.org/mybatis-3/sqlmap-xml.html">Xml Mapper Documentation</a>
@@ -56,7 +58,7 @@ import org.apache.ibatis.type.TypeHandler;
 public class XMLMapperBuilder extends BaseBuilder {
 
   private final XPathParser parser;
-  private final MapperBuilderAssistant builderAssistant;
+  private final MapperBuilderAssistant assistant;
   private final Map<String, XNode> sqlFragments;
   private final String resource;
   private Class<?> mapperClass;
@@ -70,7 +72,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   public XMLMapperBuilder(InputStream inputStream, Configuration configuration, String resource,
       Map<String, XNode> sqlFragments, String namespace) {
     this(inputStream, configuration, resource, sqlFragments);
-    this.builderAssistant.setCurrentNamespace(namespace);
+    this.assistant.setCurrentNamespace(namespace);
   }
 
   public XMLMapperBuilder(InputStream inputStream, Configuration configuration, String resource,
@@ -81,7 +83,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   XMLMapperBuilder(XPathParser parser, Configuration configuration, String resource, Map<String, XNode> sqlFragments) {
     super(configuration);
-    this.builderAssistant = new MapperBuilderAssistant(configuration, resource);
+    this.assistant = new MapperBuilderAssistant(configuration, resource);
     this.parser = parser;
     this.sqlFragments = sqlFragments;
     this.resource = resource;
@@ -91,7 +93,8 @@ public class XMLMapperBuilder extends BaseBuilder {
     if (!configuration.isResourceLoaded(resource)) {
       configurationElement(parser.evalNode("/mapper"));
       configuration.addLoadedResource(resource);
-      bindMapperForNamespace();
+
+      bindMapperForNamespace(assistant.getCurrentNamespace(), configuration);
     }
     configuration.parsePendingResultMaps(false);
     configuration.parsePendingCacheRefs(false);
@@ -102,35 +105,43 @@ public class XMLMapperBuilder extends BaseBuilder {
     return sqlFragments.get(refId);
   }
 
-  private void configurationElement(XNode context) {
+  protected void configurationElement(XNode context) {
     try {
       String namespace = context.getStringAttribute("namespace");
       if (namespace == null || namespace.isEmpty()) {
         throw new BuilderException("Mapper's namespace cannot be empty");
       }
-      builderAssistant.setCurrentNamespace(namespace);
+      assistant.setCurrentNamespace(namespace);
       cacheRefElement(context.evalNode("cache-ref"));
       cacheElement(context.evalNode("cache"));
-      parameterMapElement(context.evalNodes("/mapper/parameterMap"));
+
+      // parameterMap
+      parameterMapElement(namespace, context.evalNodes("/mapper/parameterMap"));
+
+      // resultMap
       resultMapElements(context.evalNodes("/mapper/resultMap"));
-      sqlElement(context.evalNodes("/mapper/sql"));
-      buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
+
+      // sql
+      sqlElement(namespace, context.evalNodes("/mapper/sql"));
+
+      // statements
+      buildStatementFromContext(namespace, context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
     }
   }
 
-  private void buildStatementFromContext(List<XNode> list) {
+  protected void buildStatementFromContext(String namespace, List<XNode> list) {
     if (configuration.getDatabaseId() != null) {
-      buildStatementFromContext(list, configuration.getDatabaseId());
+      buildStatementFromContext(namespace, list, configuration.getDatabaseId());
     }
-    buildStatementFromContext(list, null);
+    buildStatementFromContext(namespace, list, null);
   }
 
-  private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
+  protected void buildStatementFromContext(String namespace, List<XNode> list, String requiredDatabaseId) {
     for (XNode context : list) {
-      final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant,
-          requiredDatabaseId, mapperClass);
+      final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, assistant, requiredDatabaseId,
+          mapperClass);
       try {
         statementParser.parseStatementNode(context);
       } catch (IncompleteElementException e) {
@@ -139,11 +150,10 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
   }
 
-  private void cacheRefElement(XNode context) {
+  protected void cacheRefElement(XNode context) {
     if (context != null) {
-      configuration.addCacheRef(builderAssistant.getCurrentNamespace(), context.getStringAttribute("namespace"));
-      CacheRefResolver cacheRefResolver = new CacheRefResolver(builderAssistant,
-          context.getStringAttribute("namespace"));
+      configuration.addCacheRef(assistant.getCurrentNamespace(), context.getStringAttribute("namespace"));
+      CacheRefResolver cacheRefResolver = new CacheRefResolver(assistant, context.getStringAttribute("namespace"));
       try {
         cacheRefResolver.resolveCacheRef();
       } catch (IncompleteElementException e) {
@@ -152,7 +162,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
   }
 
-  private void cacheElement(XNode context) {
+  protected void cacheElement(XNode context) {
     if (context != null) {
       String type = context.getStringAttribute("type", "PERPETUAL");
       Class<? extends Cache> typeClass = typeAliasRegistry.resolveAlias(type);
@@ -163,17 +173,17 @@ public class XMLMapperBuilder extends BaseBuilder {
       boolean readWrite = !context.getBooleanAttribute("readOnly", false);
       boolean blocking = context.getBooleanAttribute("blocking", false);
       Properties props = context.getChildrenAsProperties();
-      builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
+      assistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
     }
   }
 
-  private void parameterMapElement(List<XNode> list) {
+  protected void parameterMapElement(String namespace, List<XNode> list) {
     for (XNode parameterMapNode : list) {
       String id = parameterMapNode.getStringAttribute("id");
       String type = parameterMapNode.getStringAttribute("type");
       Class<?> parameterClass = resolveClass(type);
       List<XNode> parameterNodes = parameterMapNode.evalNodes("parameter");
-      List<ParameterMapping> parameterMappings = new ArrayList<>();
+      List<ParameterMapping> parameterMappings = new ArrayList<>(parameterNodes.size());
       for (XNode parameterNode : parameterNodes) {
         String property = parameterNode.getStringAttribute("property");
         String javaType = parameterNode.getStringAttribute("javaType");
@@ -186,15 +196,17 @@ public class XMLMapperBuilder extends BaseBuilder {
         Class<?> javaTypeClass = resolveClass(javaType);
         JdbcType jdbcTypeEnum = resolveJdbcType(jdbcType);
         Class<? extends TypeHandler<?>> typeHandlerClass = resolveClass(typeHandler);
-        ParameterMapping parameterMapping = builderAssistant.buildParameterMapping(parameterClass, property,
+        ParameterMapping parameterMapping = assistant.buildParameterMapping(namespace, parameterClass, property,
             javaTypeClass, jdbcTypeEnum, resultMap, modeEnum, typeHandlerClass, numericScale);
         parameterMappings.add(parameterMapping);
       }
-      builderAssistant.addParameterMap(id, parameterClass, parameterMappings);
+
+      ParameterMap parameterMap = assistant.buildParameterMap(namespace, id, parameterClass, parameterMappings);
+      configuration.addParameterMap(parameterMap);
     }
   }
 
-  private void resultMapElements(List<XNode> list) {
+  protected void resultMapElements(List<XNode> list) {
     for (XNode resultMapNode : list) {
       try {
         resultMapElement(resultMapNode);
@@ -204,11 +216,11 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
   }
 
-  private ResultMap resultMapElement(XNode resultMapNode) {
+  protected ResultMap resultMapElement(XNode resultMapNode) {
     return resultMapElement(resultMapNode, Collections.emptyList(), null);
   }
 
-  private ResultMap resultMapElement(XNode resultMapNode, List<ResultMapping> additionalResultMappings,
+  protected ResultMap resultMapElement(XNode resultMapNode, List<ResultMapping> additionalResultMappings,
       Class<?> enclosingType) {
     ErrorContext.instance().activity("processing " + resultMapNode.getValueBasedIdentifier());
     String type = resultMapNode.getStringAttribute("type", resultMapNode.getStringAttribute("ofType",
@@ -239,7 +251,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       }
     }
 
-    ResultMapResolver resultMapResolver = new ResultMapResolver(builderAssistant, id, typeClass, extend, discriminator,
+    ResultMapResolver resultMapResolver = new ResultMapResolver(assistant, id, typeClass, extend, discriminator,
         resultMappings, autoMapping);
     try {
       return resultMapResolver.resolve();
@@ -262,7 +274,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     return null;
   }
 
-  private void processConstructorElement(XNode resultChild, Class<?> resultType, List<ResultMapping> resultMappings,
+  protected void processConstructorElement(XNode resultChild, Class<?> resultType, List<ResultMapping> resultMappings,
       String id) {
     List<XNode> argChildren = resultChild.getChildren();
 
@@ -282,7 +294,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     resultMappings.addAll(resolver.resolveWithConstructor());
   }
 
-  private Discriminator processDiscriminatorElement(XNode context, Class<?> resultType,
+  protected Discriminator processDiscriminatorElement(XNode context, Class<?> resultType,
       List<ResultMapping> resultMappings) {
     String column = context.getStringAttribute("column");
     String javaType = context.getStringAttribute("javaType");
@@ -298,29 +310,29 @@ public class XMLMapperBuilder extends BaseBuilder {
           () -> processNestedResultMappings(caseChild, resultMappings, resultType));
       discriminatorMap.put(value, resultMap);
     }
-    return builderAssistant.buildDiscriminator(resultType, column, javaTypeClass, jdbcTypeEnum, typeHandlerClass,
+    return assistant.buildDiscriminator(resultType, column, javaTypeClass, jdbcTypeEnum, typeHandlerClass,
         discriminatorMap);
   }
 
-  private void sqlElement(List<XNode> list) {
+  protected void sqlElement(String namespace, List<XNode> list) {
     if (configuration.getDatabaseId() != null) {
-      sqlElement(list, configuration.getDatabaseId());
+      sqlElement(namespace, list, configuration.getDatabaseId());
     }
-    sqlElement(list, null);
+    sqlElement(namespace, list, null);
   }
 
-  private void sqlElement(List<XNode> list, String requiredDatabaseId) {
+  protected void sqlElement(String namespace, List<XNode> list, @Nullable String requiredDatabaseId) {
     for (XNode context : list) {
       String databaseId = context.getStringAttribute("databaseId");
       String id = context.getStringAttribute("id");
-      id = builderAssistant.applyCurrentNamespace(id, false);
+      id = assistant.applyNamespace(namespace, id, false);
       if (databaseIdMatchesCurrent(id, databaseId, requiredDatabaseId)) {
         sqlFragments.put(id, context);
       }
     }
   }
 
-  private boolean databaseIdMatchesCurrent(String id, String databaseId, String requiredDatabaseId) {
+  protected boolean databaseIdMatchesCurrent(String id, String databaseId, String requiredDatabaseId) {
     if (requiredDatabaseId != null) {
       return requiredDatabaseId.equals(databaseId);
     }
@@ -335,7 +347,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     return context.getStringAttribute("databaseId") == null;
   }
 
-  private ResultMapping buildResultMappingFromContext(XNode context, Class<?> resultType, List<ResultFlag> flags) {
+  protected ResultMapping buildResultMappingFromContext(XNode context, Class<?> resultType, List<ResultFlag> flags) {
     String property;
     if (flags.contains(ResultFlag.CONSTRUCTOR)) {
       property = context.getStringAttribute("name");
@@ -358,11 +370,11 @@ public class XMLMapperBuilder extends BaseBuilder {
     Class<?> javaTypeClass = resolveClass(javaType);
     Class<? extends TypeHandler<?>> typeHandlerClass = resolveClass(typeHandler);
     JdbcType jdbcTypeEnum = resolveJdbcType(jdbcType);
-    return builderAssistant.buildResultMapping(resultType, property, column, javaTypeClass, jdbcTypeEnum, nestedSelect,
+    return assistant.buildResultMapping(resultType, property, column, javaTypeClass, jdbcTypeEnum, nestedSelect,
         nestedResultMap, notNullColumn, columnPrefix, typeHandlerClass, flags, resultSet, foreignColumn, lazy);
   }
 
-  private String processNestedResultMappings(XNode context, List<ResultMapping> resultMappings,
+  protected String processNestedResultMappings(XNode context, List<ResultMapping> resultMappings,
       Class<?> enclosingType) {
     if (Arrays.asList("association", "collection", "case").contains(context.getName())
         && context.getStringAttribute("select") == null) {
@@ -385,8 +397,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
   }
 
-  private void bindMapperForNamespace() {
-    String namespace = builderAssistant.getCurrentNamespace();
+  protected void bindMapperForNamespace(String namespace, Configuration configuration) {
     if (namespace != null) {
       // ignore, bound type is not required
       Class<?> boundType = Resources.classForNameOrNull(namespace);

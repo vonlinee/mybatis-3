@@ -31,6 +31,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -197,9 +198,10 @@ public class XPathParser {
     return evalNodes(document, expression);
   }
 
+  @NotNull
   public List<XNode> evalNodes(Object root, String expression) {
-    List<XNode> xNodes = new ArrayList<>();
     NodeList nodes = (NodeList) evaluate(expression, root, XPathConstants.NODESET);
+    List<XNode> xNodes = new ArrayList<>(nodes.getLength());
     for (int i = 0; i < nodes.getLength(); i++) {
       xNodes.add(new XNode(this, nodes.item(i), variables));
     }
