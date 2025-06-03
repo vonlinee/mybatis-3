@@ -204,7 +204,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       throw e1 != null ? e1 : e;
     }
 
-    return rs != null ? new ResultSetWrapper(rs, configuration) : null;
+    return rs != null ? new ResultSetWrapper(rs, typeHandlerRegistry, configuration.isUseColumnLabel()) : null;
   }
 
   private ResultSetWrapper getNextResultSet(Statement stmt) {
@@ -221,7 +221,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         if (rs == null) {
           return getNextResultSet(stmt);
         } else {
-          return new ResultSetWrapper(rs, configuration);
+          return new ResultSetWrapper(rs, typeHandlerRegistry, configuration.isUseColumnLabel());
         }
       }
     } catch (Exception e) {
@@ -522,7 +522,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         configuration.getResultMap(propertyMapping.getNestedResultMapId()),
         getColumnPrefix(parentColumnPrefix, propertyMapping));
     ResultSetWrapper nestedRsw = new ResultSetWrapper(rsw.getResultSet().getObject(column, ResultSet.class),
-        configuration);
+        typeHandlerRegistry, configuration.isUseColumnLabel());
     List<Object> results = new ArrayList<>();
     handleResultSet(nestedRsw, nestedResultMap, results, null);
     return results;

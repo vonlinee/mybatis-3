@@ -73,7 +73,11 @@ class DefaultCursorTest {
     doReturn(Types.VARCHAR).when(rsmd).getColumnType(2);
     doReturn(String.class.getCanonicalName()).when(rsmd).getColumnClassName(2);
 
-    final ResultSetWrapper rsw = new ResultSetWrapper(rs, ms.getConfiguration());
+    Configuration configuration = ms.getConfiguration();
+
+    TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+
+    final ResultSetWrapper rsw = new ResultSetWrapper(rs, typeHandlerRegistry, configuration.isUseColumnLabel());
 
     try (DefaultCursor<?> cursor = new DefaultCursor<>(resultSetHandler, rm, rsw, RowBounds.DEFAULT)) {
       Iterator<?> iter = cursor.iterator();

@@ -28,7 +28,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.type.JdbcType;
@@ -51,13 +50,18 @@ public class ResultSetWrapper {
   private final Map<String, Set<String>> mappedColumnNamesMap = new HashMap<>();
   private final Map<String, List<String>> unMappedColumnNamesMap = new HashMap<>();
 
-  public ResultSetWrapper(ResultSet rs, Configuration configuration) throws SQLException {
-    this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+  public ResultSetWrapper(ResultSet rs, TypeHandlerRegistry typeHandlerRegistry, boolean useColumnLabel)
+      throws SQLException {
+    this.typeHandlerRegistry = typeHandlerRegistry;
     this.resultSet = rs;
+    initialize(rs, useColumnLabel);
+  }
+
+  private void initialize(ResultSet rs, boolean useColumnLabel) throws SQLException {
     final ResultSetMetaData metaData = rs.getMetaData();
     final int columnCount = metaData.getColumnCount();
     for (int i = 1; i <= columnCount; i++) {
-      columnNames.add(configuration.isUseColumnLabel() ? metaData.getColumnLabel(i) : metaData.getColumnName(i));
+      columnNames.add(useColumnLabel ? metaData.getColumnLabel(i) : metaData.getColumnName(i));
       jdbcTypes.add(JdbcType.forCode(metaData.getColumnType(i)));
       classNames.add(metaData.getColumnClassName(i));
     }

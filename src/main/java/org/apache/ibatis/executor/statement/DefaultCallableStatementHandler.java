@@ -180,7 +180,7 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
     try {
       final String resultMapId = parameterMapping.getResultMapId();
       final ResultMap resultMap = configuration.getResultMap(resultMapId);
-      final ResultSetWrapper rsw = new ResultSetWrapper(rs, configuration);
+      final ResultSetWrapper rsw = new ResultSetWrapper(rs, typeHandlerRegistry, configuration.isUseColumnLabel());
       if (this.resultHandler == null) {
         final DefaultResultHandler resultHandler = new DefaultResultHandler(objectFactory);
         resultSetHandler.handleRowValues(rsw, resultMap, resultHandler, new RowBounds(), null);
