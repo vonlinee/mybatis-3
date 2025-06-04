@@ -26,7 +26,6 @@ import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
-import org.apache.ibatis.builder.annotation.MapperAnnotationBuilder;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
@@ -118,7 +117,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     Class<?> resultTypeClass = resolveClass(context.getStringAttribute("resultType"));
     String resultMap = context.getStringAttribute("resultMap");
     if (resultTypeClass == null && resultMap == null) {
-      resultTypeClass = MapperAnnotationBuilder.getMethodReturnType(assistant.getCurrentNamespace(), id);
+      resultTypeClass = this.getMethodReturnType(assistant.getCurrentNamespace(), id);
     }
     String resultSetType = context.getStringAttribute("resultSetType");
     ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);

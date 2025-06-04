@@ -269,11 +269,16 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return resultMap;
   }
 
-  public Discriminator buildDiscriminator(Class<?> resultType, String column, Class<?> javaType, JdbcType jdbcType,
-      Class<? extends TypeHandler<?>> typeHandler, Map<String, String> discriminatorMap) {
+  // @formatter:off
+  public Discriminator buildDiscriminator(Class<?> resultType,
+                                          String column,
+                                          Class<?> javaType,
+                                          JdbcType jdbcType,
+                                          Class<? extends TypeHandler<?>> typeHandler,
+                                          Map<String, String> discriminatorMap) {
     ResultMapping resultMapping = buildResultMapping(resultType, null, column, javaType, jdbcType, null, null, null,
-        null, typeHandler, new ArrayList<>(), null, null, false);
-    Map<String, String> namespaceDiscriminatorMap = new HashMap<>();
+        null, typeHandler, new ArrayList<>(0), null, null, false);
+    Map<String, String> namespaceDiscriminatorMap = new HashMap<>(discriminatorMap.size());
     for (Entry<String, String> e : discriminatorMap.entrySet()) {
       String resultMap = e.getValue();
       resultMap = applyCurrentNamespace(resultMap, true);
@@ -281,6 +286,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
     return new Discriminator.Builder(resultMapping, namespaceDiscriminatorMap).build();
   }
+  // @formatter:on
 
   public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType,
       SqlCommandType sqlCommandType, Integer fetchSize, Integer timeout, String parameterMap, Class<?> parameterType,
@@ -338,70 +344,6 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return addMappedStatement(id, sqlSource, statementType, sqlCommandType, null, null, null, parameterType, null,
         resultType, null, flushCache, useCache, resultOrdered, keyGenerator, keyProperty, keyColumn, databaseId, lang,
         resultSets, dirtySelect, paramNameResolver);
-  }
-
-  /**
-   * Backward compatibility signature 'addMappedStatement'.
-   *
-   * @param id
-   *          the id
-   * @param sqlSource
-   *          the sql source
-   * @param statementType
-   *          the statement type
-   * @param sqlCommandType
-   *          the sql command type
-   * @param fetchSize
-   *          the fetch size
-   * @param timeout
-   *          the timeout
-   * @param parameterMap
-   *          the parameter map
-   * @param parameterType
-   *          the parameter type
-   * @param resultMap
-   *          the result map
-   * @param resultType
-   *          the result type
-   * @param resultSetType
-   *          the result set type
-   * @param flushCache
-   *          the flush cache
-   * @param useCache
-   *          the use cache
-   * @param resultOrdered
-   *          the result ordered
-   * @param keyGenerator
-   *          the key generator
-   * @param keyProperty
-   *          the key property
-   * @param keyColumn
-   *          the key column
-   * @param databaseId
-   *          the database id
-   * @param lang
-   *          the lang
-   *
-   * @return the mapped statement
-   */
-  public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType,
-      SqlCommandType sqlCommandType, Integer fetchSize, Integer timeout, String parameterMap, Class<?> parameterType,
-      String resultMap, Class<?> resultType, ResultSetType resultSetType, boolean flushCache, boolean useCache,
-      boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId,
-      LanguageDriver lang, String resultSets) {
-    return addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
-        parameterType, resultMap, resultType, resultSetType, flushCache, useCache, resultOrdered, keyGenerator,
-        keyProperty, keyColumn, databaseId, lang, null, false, null);
-  }
-
-  public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType,
-      SqlCommandType sqlCommandType, Integer fetchSize, Integer timeout, String parameterMap, Class<?> parameterType,
-      String resultMap, Class<?> resultType, ResultSetType resultSetType, boolean flushCache, boolean useCache,
-      boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId,
-      LanguageDriver lang) {
-    return addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
-        parameterType, resultMap, resultType, resultSetType, flushCache, useCache, resultOrdered, keyGenerator,
-        keyProperty, keyColumn, databaseId, lang, null);
   }
 
   private ParameterMap getStatementParameterMap(String parameterMapName, Class<?> parameterTypeClass,

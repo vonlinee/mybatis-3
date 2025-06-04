@@ -15,18 +15,30 @@
  */
 package org.apache.ibatis.builder;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.ibatis.annotations.MapKey;
+import org.apache.ibatis.annotations.ResultType;
+import org.apache.ibatis.executor.result.Cursor;
 import org.apache.ibatis.internal.util.ClassUtils;
 import org.apache.ibatis.internal.util.ReflectionUtils;
 import org.apache.ibatis.internal.util.StringUtils;
+import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.ResultSetType;
 import org.apache.ibatis.mapping.StatementType;
+import org.apache.ibatis.reflection.TypeParameterResolver;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandler;
@@ -194,5 +206,83 @@ public abstract class BaseBuilder {
     } else {
       return new BuilderException(msg, throwable);
     }
+  }
+
+  public Class<?> getMethodReturnType(String mapperFqn, String localStatementId) {
+    if (mapperFqn == null || localStatementId == null) {
+      return null;
+    }
+    // No corresponding mapper interface which is OK
+    Class<?> mapperClass = Resources.classForNameOrNull(mapperFqn);
+    if (mapperClass == null) {
+      return null;
+    }
+    for (Method method : mapperClass.getMethods()) {
+      if (method.getName().equals(localStatementId) && canHaveStatement(method)) {
+        return getReturnType(method, mapperClass);
+      }
+    }
+    return null;
+  }
+
+  // issue #237
+  protected boolean canHaveStatement(Method method) {
+    return !method.isBridge() && !method.isDefault();
+  }
+
+  protected Class<?> getReturnType(Method method, Class<?> type) {
+    Class<?> returnType = method.getReturnType();
+    Type resolvedReturnType = TypeParameterResolver.resolveReturnType(method, type);
+    if (resolvedReturnType instanceof Class) {
+      returnType = (Class<?>) resolvedReturnType;
+      if (returnType.isArray()) {
+        returnType = returnType.getComponentType();
+      }
+      // gcode issue #508
+      if (void.class.equals(returnType)) {
+        ResultType rt = method.getAnnotation(ResultType.class);
+        if (rt != null) {
+          returnType = rt.value();
+        }
+      }
+    } else if (resolvedReturnType instanceof ParameterizedType) {
+      ParameterizedType parameterizedType = (ParameterizedType) resolvedReturnType;
+      Class<?> rawType = (Class<?>) parameterizedType.getRawType();
+      if (Collection.class.isAssignableFrom(rawType) || Cursor.class.isAssignableFrom(rawType)) {
+        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+        if (actualTypeArguments != null && actualTypeArguments.length == 1) {
+          Type returnTypeParameter = actualTypeArguments[0];
+          if (returnTypeParameter instanceof Class<?>) {
+            returnType = (Class<?>) returnTypeParameter;
+          } else if (returnTypeParameter instanceof ParameterizedType) {
+            // (gcode issue #443) actual type can be a also a parameterized type
+            returnType = (Class<?>) ((ParameterizedType) returnTypeParameter).getRawType();
+          } else if (returnTypeParameter instanceof GenericArrayType) {
+            Class<?> componentType = (Class<?>) ((GenericArrayType) returnTypeParameter).getGenericComponentType();
+            // (gcode issue #525) support List<byte[]>
+            returnType = Array.newInstance(componentType, 0).getClass();
+          }
+        }
+      } else if (method.isAnnotationPresent(MapKey.class) && Map.class.isAssignableFrom(rawType)) {
+        // (gcode issue 504) Do not look into Maps if there is not MapKey annotation
+        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+        if (actualTypeArguments != null && actualTypeArguments.length == 2) {
+          Type returnTypeParameter = actualTypeArguments[1];
+          if (returnTypeParameter instanceof Class<?>) {
+            returnType = (Class<?>) returnTypeParameter;
+          } else if (returnTypeParameter instanceof ParameterizedType) {
+            // (gcode issue 443) actual type can be a also a parameterized type
+            returnType = (Class<?>) ((ParameterizedType) returnTypeParameter).getRawType();
+          }
+        }
+      } else if (Optional.class.equals(rawType)) {
+        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+        Type returnTypeParameter = actualTypeArguments[0];
+        if (returnTypeParameter instanceof Class<?>) {
+          returnType = (Class<?>) returnTypeParameter;
+        }
+      }
+    }
+    return returnType;
   }
 }
