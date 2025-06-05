@@ -23,13 +23,14 @@ import java.util.Set;
 
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.internal.util.CollectionUtils;
+import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.type.JdbcType;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
  */
 public class ResultMap {
-  protected Configuration configuration;
 
   protected String id;
   protected Class<?> type;
@@ -51,13 +52,11 @@ public class ResultMap {
   public static class Builder {
     private final ResultMap resultMap = new ResultMap();
 
-    public Builder(Configuration configuration, String id, Class<?> type, List<ResultMapping> resultMappings) {
-      this(configuration, id, type, resultMappings, null);
+    public Builder(String id, Class<?> type, List<ResultMapping> resultMappings) {
+      this(id, type, resultMappings, null);
     }
 
-    public Builder(Configuration configuration, String id, Class<?> type, List<ResultMapping> resultMappings,
-        Boolean autoMapping) {
-      resultMap.configuration = configuration;
+    public Builder(String id, Class<?> type, List<ResultMapping> resultMappings, Boolean autoMapping) {
       resultMap.id = id;
       resultMap.type = type;
       resultMap.resultMappings = resultMappings;
@@ -107,12 +106,69 @@ public class ResultMap {
 
         if (resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR)) {
           resultMap.constructorResultMappings.add(resultMapping);
+        } else {
+          resultMap.propertyResultMappings.add(resultMapping);
+        }
+
+        if (resultMapping.getFlags().contains(ResultFlag.ID)) {
+          resultMap.idResultMappings.add(resultMapping);
+        }
+      }
+
+      if (resultMap.idResultMappings.isEmpty()) {
+        resultMap.idResultMappings.addAll(resultMap.resultMappings);
+      }
+
+      // lock down collections
+      resultMap.resultMappings = CollectionUtils.unmodifiableList(resultMap.resultMappings);
+      resultMap.idResultMappings = CollectionUtils.unmodifiableList(resultMap.idResultMappings);
+      resultMap.constructorResultMappings = CollectionUtils.unmodifiableList(resultMap.constructorResultMappings);
+      resultMap.propertyResultMappings = CollectionUtils.unmodifiableList(resultMap.propertyResultMappings);
+      resultMap.mappedColumns = CollectionUtils.unmodifiableSet(resultMap.mappedColumns);
+
+      return resultMap;
+    }
+
+    public ResultMap build(@NotNull Configuration configuration) {
+      if (resultMap.id == null) {
+        throw new IllegalArgumentException("ResultMaps must have an id");
+      }
+
+      resultMap.mappedColumns = new HashSet<>();
+      resultMap.mappedProperties = new HashSet<>();
+      resultMap.idResultMappings = new ArrayList<>();
+      resultMap.constructorResultMappings = new ArrayList<>();
+      resultMap.propertyResultMappings = new ArrayList<>();
+
+      for (ResultMapping resultMapping : resultMap.resultMappings) {
+        resultMap.hasNestedQueries = resultMap.hasNestedQueries || resultMapping.getNestedQueryId() != null;
+        resultMap.hasNestedResultMaps = resultMap.hasNestedResultMaps || resultMapping.getNestedResultMapId() != null
+            && resultMapping.getResultSet() == null && !JdbcType.CURSOR.equals(resultMapping.getJdbcType());
+        final String column = resultMapping.getColumn();
+        if (column != null) {
+          resultMap.mappedColumns.add(column.toUpperCase(Locale.ENGLISH));
+        } else if (resultMapping.isCompositeResult()) {
+          for (ResultMapping compositeResultMapping : resultMapping.getComposites()) {
+            final String compositeColumn = compositeResultMapping.getColumn();
+            if (compositeColumn != null) {
+              resultMap.mappedColumns.add(compositeColumn.toUpperCase(Locale.ENGLISH));
+            }
+          }
+        }
+
+        final String property = resultMapping.getProperty();
+        if (property != null) {
+          resultMap.mappedProperties.add(property);
+        }
+
+        if (resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR)) {
+          resultMap.constructorResultMappings.add(resultMapping);
 
           // #101
           Class<?> javaType = resultMapping.getJavaType();
           resultMap.hasResultMapsUsingConstructorCollection = resultMap.hasResultMapsUsingConstructorCollection
               || (resultMapping.getNestedQueryId() == null && resultMapping.getTypeHandler() == null && javaType != null
-                  && resultMap.configuration.getObjectFactory().isCollection(javaType));
+                  && configuration.getObjectFactory().isCollection(javaType));
         } else {
           resultMap.propertyResultMappings.add(resultMapping);
         }
@@ -143,6 +199,19 @@ public class ResultMap {
 
   public boolean hasResultMapsUsingConstructorCollection() {
     return hasResultMapsUsingConstructorCollection;
+  }
+
+  public void setHasResultMapsUsingConstructorCollection(ObjectFactory objectFactory) {
+    if (this.constructorResultMappings == null) {
+      return;
+    }
+    for (ResultMapping resultMapping : this.constructorResultMappings) {
+      // #101
+      Class<?> javaType = resultMapping.getJavaType();
+      this.hasResultMapsUsingConstructorCollection = this.hasResultMapsUsingConstructorCollection
+          || (resultMapping.getNestedQueryId() == null && resultMapping.getTypeHandler() == null && javaType != null
+              && objectFactory.isCollection(javaType));
+    }
   }
 
   public boolean hasNestedResultMaps() {

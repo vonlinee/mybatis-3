@@ -263,8 +263,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
       }
       resultMappings.addAll(extendedResultMappings);
     }
-    ResultMap resultMap = new ResultMap.Builder(configuration, id, type, resultMappings, autoMapping)
-        .discriminator(discriminator).build();
+    ResultMap resultMap = new ResultMap.Builder(id, type, resultMappings, autoMapping).discriminator(discriminator)
+        .build(configuration);
     configuration.addResultMap(resultMap);
     return resultMap;
   }

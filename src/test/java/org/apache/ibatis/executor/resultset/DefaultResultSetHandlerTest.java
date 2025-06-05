@@ -119,12 +119,12 @@ class DefaultResultSetHandlerTest {
     return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource("some select statement"),
         SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
           {
-            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<>() {
+            add(new ResultMap.Builder("testMap", HashMap.class, new ArrayList<>() {
               {
                 add(new ResultMapping.Builder("cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class))
                     .build(config));
               }
-            }).build());
+            }).build(config));
           }
         }).build();
   }

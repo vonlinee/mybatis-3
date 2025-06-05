@@ -98,22 +98,22 @@ class DefaultCursorTest {
 
     final boolean lazyLoadingEnabled = config.isLazyLoadingEnabled();
 
-    ResultMap nestedResultMap = new ResultMap.Builder(config, "roleMap", HashMap.class, new ArrayList<>() {
+    ResultMap nestedResultMap = new ResultMap.Builder("roleMap", HashMap.class, new ArrayList<>() {
       {
         add(new ResultMapping.Builder("role", "role", registry.getTypeHandler(String.class)).build(config));
       }
-    }).build();
+    }).build(config);
     config.addResultMap(nestedResultMap);
 
     return new MappedStatement.Builder(config, "selectPerson", new StaticSqlSource("select person..."),
         SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
           {
-            add(new ResultMap.Builder(config, "personMap", HashMap.class, new ArrayList<>() {
+            add(new ResultMap.Builder("personMap", HashMap.class, new ArrayList<>() {
               {
                 add(new ResultMapping.Builder("id", "id", registry.getTypeHandler(Integer.class)).build(config));
                 add(new ResultMapping.Builder("roles", lazyLoadingEnabled).nestedResultMapId("roleMap").build());
               }
-            }).build());
+            }).build(config));
           }
         }).resultOrdered(true).build();
   }
