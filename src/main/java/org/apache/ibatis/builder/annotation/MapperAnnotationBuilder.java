@@ -104,6 +104,8 @@ public class MapperAnnotationBuilder extends BaseBuilder {
   private final MapperBuilderAssistant assistant;
   private final Class<?> type;
 
+  private String currentNamespace;
+
   public MapperAnnotationBuilder(Configuration configuration, Class<?> type) {
     super(configuration);
     String resource = type.getName().replace('.', '/') + ".java (best guess)";
@@ -133,6 +135,7 @@ public class MapperAnnotationBuilder extends BaseBuilder {
       }
       configuration.addLoadedResource(resource);
       assistant.setCurrentNamespace(type.getName());
+      this.currentNamespace = type.getName();
       parseCache(type);
       parseCacheRef(type);
       for (Method method : type.getMethods()) {
@@ -241,15 +244,26 @@ public class MapperAnnotationBuilder extends BaseBuilder {
     return type.getName() + "." + method.getName() + suffix;
   }
 
-  protected void applyResultMap(String resultMapId, Class<?> returnType, Arg[] args, Result[] results,
+  protected void applyResultMap(String fullIdOfResultMap, Class<?> returnType, Arg[] args, Result[] results,
       TypeDiscriminator discriminator) {
     List<ResultMapping> resultMappings = new ArrayList<>();
-    applyConstructorArgs(args, returnType, resultMappings, resultMapId);
-    applyResults(results, returnType, resultMappings);
-    Discriminator disc = applyDiscriminator(resultMapId, returnType, discriminator);
+
+    if (args != null && args.length != 0) {
+      applyConstructorArgs(args, returnType, resultMappings, fullIdOfResultMap);
+    }
+
+    if (results != null && results.length != 0) {
+      applyResults(results, returnType, resultMappings);
+    }
+
+    Discriminator disc = applyDiscriminator(fullIdOfResultMap, returnType, discriminator);
     // TODO add AutoMappingBehaviour
-    assistant.addResultMap(resultMapId, returnType, null, disc, resultMappings, null);
-    createDiscriminatorResultMaps(resultMapId, returnType, discriminator);
+    org.apache.ibatis.mapping.ResultMap resultMap = assistant.buildResultMap(this.currentNamespace, fullIdOfResultMap,
+        returnType, disc, resultMappings, null);
+
+    resultMap.setHasResultMapsUsingConstructorCollection(configuration.getObjectFactory());
+    configuration.addResultMap(resultMap);
+    createDiscriminatorResultMaps(fullIdOfResultMap, returnType, discriminator);
   }
 
   protected void createDiscriminatorResultMaps(String resultMapId, Class<?> resultType,

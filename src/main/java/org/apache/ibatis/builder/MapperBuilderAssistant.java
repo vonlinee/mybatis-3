@@ -238,6 +238,19 @@ public class MapperBuilderAssistant extends BaseBuilder {
     // @formatter:on
   }
 
+  // @formatter:off
+  public ResultMap buildResultMap(String namespace,
+                                  String id,
+                                  Class<?> type,
+                                  Discriminator discriminator,
+                                  List<ResultMapping> resultMappings,
+                                  Boolean autoMapping) {
+    id = applyNamespace(namespace, id, false);
+    return new ResultMap.Builder(id, type, resultMappings, autoMapping).discriminator(discriminator)
+      .build();
+  }
+  // @formatter:on
+
   public ResultMap addResultMap(String id, Class<?> type, String extend, Discriminator discriminator,
       List<ResultMapping> resultMappings, Boolean autoMapping) {
     id = applyCurrentNamespace(id, false);
