@@ -20,5 +20,5 @@ import java.sql.SQLException;
 
 public interface CallableStatementHandler extends StatementHandler {
 
-  void handleOutputParameters(CallableStatement cs) throws SQLException;
+  void handleOutputParameters(CallableStatement cs, Object parameterObject) throws SQLException;
 }

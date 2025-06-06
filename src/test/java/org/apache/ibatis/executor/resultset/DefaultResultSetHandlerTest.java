@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -101,7 +102,7 @@ class DefaultResultSetHandlerTest {
     when(resultMapping.getColumn()).thenReturn("column");
     when(resultMapping.getTypeHandler()).thenReturn(typeHandler);
     when(typeHandler.getResult(any(ResultSet.class), any(String.class))).thenThrow(new SQLException("exception"));
-    List<ResultMapping> constructorMappings = List.of(resultMapping);
+    List<ResultMapping> constructorMappings = Collections.singletonList(resultMapping);
 
     try {
       defaultResultSetHandler.createParameterizedResultObject(rsw, null/* resultType */, constructorMappings,
@@ -117,9 +118,9 @@ class DefaultResultSetHandlerTest {
   MappedStatement getMappedStatement() {
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource("some select statement"),
-        SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
+        SqlCommandType.SELECT).resultMaps(new ArrayList<>(1) {
           {
-            add(new ResultMap.Builder("testMap", HashMap.class, new ArrayList<>() {
+            add(new ResultMap.Builder("testMap", HashMap.class, new ArrayList<>(1) {
               {
                 add(new ResultMapping.Builder("cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class))
                     .build(config));

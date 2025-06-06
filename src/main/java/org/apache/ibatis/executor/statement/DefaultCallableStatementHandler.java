@@ -61,7 +61,7 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
     Object parameterObject = boundSql.getParameterObject();
     KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
     keyGenerator.processAfter(executor, mappedStatement, cs, parameterObject);
-    handleOutputParameters(cs);
+    handleOutputParameters(cs, parameterHandler.getParameterObject());
     return rows;
   }
 
@@ -80,7 +80,7 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
         this.getParameterHandler(), resultHandler, boundSql);
 
     List<E> resultList = resultSetHandler.handleResultSets(cs);
-    handleOutputParameters(cs);
+    handleOutputParameters(cs, parameterHandler.getParameterObject());
     return resultList;
   }
 
@@ -92,7 +92,7 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
     ResultSetHandler resultSetHandler = extensionFactory.newResultSetHandler(executor, mappedStatement, rowBounds,
         this.getParameterHandler(), resultHandler, boundSql);
     Cursor<E> resultList = resultSetHandler.handleCursorResultSets(cs);
-    handleOutputParameters(cs);
+    handleOutputParameters(cs, parameterHandler.getParameterObject());
     return resultList;
   }
 
@@ -107,11 +107,11 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
 
   @Override
   public void parameterize(Statement statement) throws SQLException {
-    registerOutputParameters((CallableStatement) statement);
+    registerOutputParameters((CallableStatement) statement, this.boundSql);
     parameterHandler.setParameters((CallableStatement) statement);
   }
 
-  private void registerOutputParameters(CallableStatement cs) throws SQLException {
+  protected void registerOutputParameters(CallableStatement cs, BoundSql boundSql) throws SQLException {
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     for (int i = 0, n = parameterMappings.size(); i < n; i++) {
       ParameterMapping parameterMapping = parameterMappings.get(i);
@@ -136,8 +136,7 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
   }
 
   @Override
-  public void handleOutputParameters(CallableStatement cs) throws SQLException {
-    final Object parameterObject = parameterHandler.getParameterObject();
+  public void handleOutputParameters(CallableStatement cs, Object parameterObject) throws SQLException {
     final MetaObject metaParam = configuration.newMetaObject(parameterObject);
     final List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     for (int i = 0; i < parameterMappings.size(); i++) {
@@ -183,10 +182,10 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
       final ResultSetWrapper rsw = new ResultSetWrapper(rs, configuration.isUseColumnLabel());
       if (this.resultHandler == null) {
         final DefaultResultHandler resultHandler = new DefaultResultHandler(objectFactory);
-        resultSetHandler.handleRowValues(rsw, resultMap, resultHandler, new RowBounds(), null);
+        resultSetHandler.handleRowValues(rsw, resultMap, resultHandler, RowBounds.DEFAULT, null);
         metaParam.setValue(parameterMapping.getProperty(), resultHandler.getResultList());
       } else {
-        resultSetHandler.handleRowValues(rsw, resultMap, resultHandler, new RowBounds(), null);
+        resultSetHandler.handleRowValues(rsw, resultMap, resultHandler, RowBounds.DEFAULT, null);
       }
     } finally {
       // issue #228 (close result sets)

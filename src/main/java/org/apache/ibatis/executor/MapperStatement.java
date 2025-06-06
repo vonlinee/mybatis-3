@@ -22,7 +22,7 @@ import org.apache.ibatis.reflection.ParamNameResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class MapperStatement {
+public abstract class MapperStatement implements JdbcStatement {
 
   @NotNull
   protected final MappedStatement mappedStatement;
