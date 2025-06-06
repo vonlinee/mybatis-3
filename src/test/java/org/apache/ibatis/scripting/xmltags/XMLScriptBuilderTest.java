@@ -29,15 +29,8 @@ class XMLScriptBuilderTest {
 
   @Test
   void shouldWhereInsertWhitespace() throws Exception {
-    String xml = """
-        <script>
-        select * from user
-        <where>
-        <if test="1==1">and id = 1</if>
-        <if test="1==1">and id > 0</if>
-        </where>
-        </script>
-        """;
+    String xml = "<script>\n" + "select * from user\n" + "<where>\n" + "<if test=\"1==1\">and id = 1</if>\n"
+        + "<if test=\"1==1\">and id > 0</if>\n" + "</where>\n" + "</script>\n";
 
     XNode node = new XPathParser(xml).evalNode("/script");
 

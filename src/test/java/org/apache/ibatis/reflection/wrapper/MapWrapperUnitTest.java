@@ -50,13 +50,11 @@ class MapWrapperUnitTest extends ObjectWrapperBase {
   @Mock
   private List<Integer> list;
 
-  private MetaObject metaObject;
-
   private ObjectWrapper wrapper;
 
   @BeforeEach
   void setup() {
-    this.metaObject = SystemMetaObject.forObject(map);
+    MetaObject metaObject = SystemMetaObject.forObject(map);
     this.wrapper = new MapWrapper(metaObject, map);
   }
 

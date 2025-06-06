@@ -729,4 +729,15 @@ public final class StringUtils {
     }
     return str.matches("\\d+");
   }
+
+  public static String repeat(String str, int times) {
+    if (isEmpty(str) || times < 0) {
+      return EMPTY;
+    }
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < times; i++) {
+      sb.append(str);
+    }
+    return sb.toString();
+  }
 }

@@ -512,10 +512,10 @@ class TypeParameterResolverTest {
     assertEquals(String.class, types[0]);
   }
 
-  class AA {
+  static class AA {
   }
 
-  class BB {
+  static class BB {
   }
 
   interface IfaceA extends ParentIface<AA> {

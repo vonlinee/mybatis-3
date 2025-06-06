@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.apache.ibatis.internal.util.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -109,15 +110,11 @@ class GenericTokenParserTest {
         }
       }));
 
-      StringBuilder input = new StringBuilder();
-      for (int i = 0; i < 10000; i++) {
-        input.append("${first_name} ${initial} ${last_name} reporting. ");
-      }
-      StringBuilder expected = new StringBuilder();
-      for (int i = 0; i < 10000; i++) {
-        expected.append("James T Kirk reporting. ");
-      }
-      assertEquals(expected.toString(), parser.parse(input.toString()));
+      String input = StringUtils.repeat("${first_name} ${initial} ${last_name} reporting. ", 10000);
+
+      String expected = StringUtils.repeat("James T Kirk reporting. ", 10000);
+
+      assertEquals(expected, parser.parse(input));
     });
   }
 

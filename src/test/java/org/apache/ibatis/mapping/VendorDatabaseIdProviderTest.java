@@ -85,8 +85,6 @@ class VendorDatabaseIdProviderTest {
     when(dataSource.getConnection()).thenThrow(SQLException.class);
 
     VendorDatabaseIdProvider provider = new VendorDatabaseIdProvider();
-    Properties properties = new Properties();
-    properties.put("Ewok DB", "ewok");
     try {
       provider.getDatabaseId(dataSource);
       fail("Should BuilderException be thrown.");
