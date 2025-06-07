@@ -24,6 +24,8 @@ import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
@@ -35,20 +37,23 @@ public class ForEachSqlNode extends XmlSqlNode {
   /**
    * property expression that evaluate to a value of collection type
    */
+  @NotNull
   private final String collectionExpression;
+  @Nullable
   private final Boolean nullable;
+  @NotNull
   private final SqlNode contents;
+  @Nullable
   private final String open;
+  @Nullable
   private final String close;
+  @Nullable
   private final String separator;
+  @Nullable
   private final String item;
+  @Nullable
   private final String index;
 
-  /**
-   * @deprecated Since 3.5.9, use the
-   *             {@link #ForEachSqlNode(SqlNode, String, Boolean, String, String, String, String, String)}.
-   */
-  @Deprecated
   public ForEachSqlNode(SqlNode contents, String collectionExpression, String index, String item, String open,
       String close, String separator) {
     this(contents, collectionExpression, null, index, item, open, close, separator);
@@ -57,8 +62,9 @@ public class ForEachSqlNode extends XmlSqlNode {
   /**
    * @since 3.5.9
    */
-  public ForEachSqlNode(SqlNode contents, String collectionExpression, Boolean nullable, String index, String item,
-      String open, String close, String separator) {
+  public ForEachSqlNode(@NotNull SqlNode contents, @NotNull String collectionExpression, @Nullable Boolean nullable,
+      @Nullable String index, @Nullable String item, @Nullable String open, @Nullable String close,
+      @Nullable String separator) {
     this.collectionExpression = collectionExpression;
     this.nullable = nullable;
     this.contents = contents;
@@ -117,25 +123,25 @@ public class ForEachSqlNode extends XmlSqlNode {
     return true;
   }
 
-  private void applyIndex(DynamicContext context, Object o) {
+  protected void applyIndex(SqlBuildContext context, Object o) {
     if (index != null) {
       context.bind(index, o);
     }
   }
 
-  private void applyItem(DynamicContext context, Object o) {
+  protected void applyItem(SqlBuildContext context, Object o) {
     if (item != null) {
       context.bind(item, o);
     }
   }
 
-  private void applyOpen(SqlBuildContext context) {
+  protected void applyOpen(SqlBuildContext context) {
     if (open != null) {
       context.appendSql(open);
     }
   }
 
-  private void applyClose(SqlBuildContext context) {
+  protected void applyClose(SqlBuildContext context) {
     if (close != null) {
       context.appendSql(close);
     }
@@ -147,8 +153,7 @@ public class ForEachSqlNode extends XmlSqlNode {
     private boolean prefixApplied;
 
     public PrefixedContext(SqlBuildContext delegate, String prefix) {
-      super(delegate.getConfiguration(), delegate.getParameterObject(), delegate.getParameterType(),
-          delegate.getParamNameResolver(), delegate.isParamExists());
+      super(delegate);
       this.delegate = delegate;
       this.bindings.putAll(delegate.getBindings());
       resetPrefix(prefix);
@@ -183,35 +188,35 @@ public class ForEachSqlNode extends XmlSqlNode {
     }
   }
 
-  public String getClose() {
+  public @Nullable String getClose() {
     return close;
   }
 
-  public String getCollectionExpression() {
+  public @NotNull String getCollectionExpression() {
     return collectionExpression;
   }
 
-  public SqlNode getContents() {
+  public @NotNull SqlNode getContents() {
     return contents;
   }
 
-  public String getIndex() {
+  public @Nullable String getIndex() {
     return index;
   }
 
-  public String getItem() {
+  public @Nullable String getItem() {
     return item;
   }
 
-  public Boolean getNullable() {
+  public @Nullable Boolean getNullable() {
     return nullable;
   }
 
-  public String getOpen() {
+  public @Nullable String getOpen() {
     return open;
   }
 
-  public String getSeparator() {
+  public @Nullable String getSeparator() {
     return separator;
   }
 }

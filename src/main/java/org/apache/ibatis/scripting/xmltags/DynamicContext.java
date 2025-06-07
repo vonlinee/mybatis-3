@@ -28,6 +28,7 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.ContextMap;
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -38,7 +39,7 @@ public class DynamicContext implements SqlBuildContext {
   protected final ContextMap bindings;
   private final StringJoiner sqlBuilder = new StringJoiner(" ");
 
-  protected final Configuration configuration;
+  private final Configuration configuration;
   private final Object parameterObject;
   private final Class<?> parameterType;
   private final ParamNameResolver paramNameResolver;
@@ -49,15 +50,25 @@ public class DynamicContext implements SqlBuildContext {
 
   public DynamicContext(Configuration configuration, Object parameterObject, @Nullable Class<?> parameterType,
       @Nullable ParamNameResolver paramNameResolver, boolean paramExists) {
-    this.bindings = createBindings(configuration, parameterObject);
     this.configuration = configuration;
     this.parameterObject = parameterObject;
     this.paramExists = paramExists;
     this.parameterType = parameterType;
     this.paramNameResolver = paramNameResolver;
+    this.bindings = createBindings(parameterObject);
   }
 
-  private ContextMap createBindings(Configuration configuration, Object parameterObject) {
+  public DynamicContext(@NotNull SqlBuildContext delegate) {
+    this.configuration = delegate.getConfiguration();
+    this.parameterObject = delegate.getParameterObject();
+    this.paramExists = delegate.isParamExists();
+    this.parameterType = delegate.getParameterType();
+    this.paramNameResolver = delegate.getParamNameResolver();
+    this.bindings = createBindings(parameterObject);
+  }
+
+  @Override
+  public @NotNull ContextMap createBindings(@Nullable Object parameterObject) {
     ContextMap bindings;
     if (parameterObject == null || parameterObject instanceof Map) {
       bindings = new ContextMap(null, false);
@@ -72,18 +83,18 @@ public class DynamicContext implements SqlBuildContext {
   }
 
   @Override
-  public Configuration getConfiguration() {
+  public @NotNull Configuration getConfiguration() {
     return configuration;
   }
 
   @Override
-  public Map<String, Object> getBindings() {
+  public @NotNull ContextMap getBindings() {
     return bindings;
   }
 
   @Override
-  public void bind(String name, Object value) {
-    bindings.put(name, value);
+  public void bind(@NotNull String name, Object value) {
+    bindings.bind(name, value);
   }
 
   @Override
@@ -99,7 +110,7 @@ public class DynamicContext implements SqlBuildContext {
   private void initTokenParser(List<ParameterMapping> parameterMappings) {
     if (tokenParser == null) {
       tokenHandler = new ParameterMappingTokenHandler(parameterMappings != null ? parameterMappings : new ArrayList<>(),
-          configuration, parameterObject, parameterType, bindings, paramNameResolver, paramExists);
+          getConfiguration(), parameterObject, parameterType, bindings, paramNameResolver, paramExists);
       tokenParser = new GenericTokenParser("#{", "}", tokenHandler);
     }
   }

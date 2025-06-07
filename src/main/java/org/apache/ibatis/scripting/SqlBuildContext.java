@@ -16,22 +16,28 @@
 package org.apache.ibatis.scripting;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.reflection.ParamNameResolver;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface SqlBuildContext {
 
   String PARAMETER_OBJECT_KEY = "_parameter";
   String DATABASE_ID_KEY = "_databaseId";
 
+  @NotNull
   Configuration getConfiguration();
 
-  Map<String, Object> getBindings();
+  @NotNull
+  ContextMap createBindings(@Nullable Object parameterObject);
 
-  void bind(String name, Object value);
+  @NotNull
+  ContextMap getBindings();
+
+  void bind(@NotNull String name, @Nullable Object value);
 
   void appendSql(String sql);
 

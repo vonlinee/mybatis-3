@@ -16,11 +16,9 @@
 package org.apache.ibatis.scripting.xmltags;
 
 import java.util.List;
-import java.util.Map;
 
-import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.internal.util.StringUtils;
-import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.scripting.BufferedSqlBuildContext;
 import org.apache.ibatis.scripting.MixedSqlNode;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.SqlNode;
@@ -67,10 +65,9 @@ abstract class ConditionSqlNode extends MixedSqlNode {
         return false;
       }
     }
-    Configuration configuration = context.getConfiguration();
     boolean res;
     if (getChildCount() > 1) {
-      DynamicContextWrapper wrapper = new DynamicContextWrapper(configuration, context);
+      BufferedSqlBuildContext wrapper = new BufferedSqlBuildContext(context);
       res = super.apply(wrapper);
       // remove leading and / or
       // nested
@@ -80,7 +77,7 @@ abstract class ConditionSqlNode extends MixedSqlNode {
       context.appendSql(getNestedSqlFragments(wrapper.getSql()));
       context.appendSql(")");
     } else {
-      DynamicContextWrapper wrapperContext = new DynamicContextWrapper(configuration, context);
+      BufferedSqlBuildContext wrapperContext = new BufferedSqlBuildContext(context);
       res = super.apply(wrapperContext);
       context.appendSql(" ");
       context.appendSql(getConditionConnector());
@@ -92,67 +89,5 @@ abstract class ConditionSqlNode extends MixedSqlNode {
 
   protected String getNestedSqlFragments(String sql) {
     return StringUtils.deleteFirst(sql, getConditionConnector(), true);
-  }
-
-  static class DynamicContextWrapper extends DynamicContext {
-
-    private SqlBuildContext delegate;
-    private final StringBuilder sqlBuffer;
-
-    public void setDelegate(DynamicContext delegate) {
-      this.delegate = delegate;
-    }
-
-    public DynamicContextWrapper(Configuration configuration, SqlBuildContext delegate) {
-      super(configuration, delegate.getParameterObject(), delegate.getParameterType(), delegate.getParamNameResolver(),
-          delegate.isParamExists());
-      this.delegate = delegate;
-      sqlBuffer = new StringBuilder();
-    }
-
-    @Override
-    public void appendSql(String sql) {
-      sqlBuffer.append(sql);
-    }
-
-    @Override
-    public String getSql() {
-      return sqlBuffer.toString();
-    }
-
-    @Override
-    public Map<String, Object> getBindings() {
-      return delegate.getBindings();
-    }
-
-    @Override
-    public void bind(String name, Object value) {
-      delegate.bind(name, value);
-    }
-
-    @Override
-    public List<ParameterMapping> getParameterMappings() {
-      return delegate.getParameterMappings();
-    }
-
-    @Override
-    public String parseParam(String sql) {
-      return delegate.parseParam(sql);
-    }
-
-    @Override
-    public Object getParameterObject() {
-      return delegate.getParameterObject();
-    }
-
-    @Override
-    public boolean isParamExists() {
-      return delegate.isParamExists();
-    }
-
-    @Override
-    public Class<?> getParameterType() {
-      return delegate.getParameterType();
-    }
   }
 }

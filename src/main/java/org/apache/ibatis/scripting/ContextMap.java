@@ -18,13 +18,20 @@ package org.apache.ibatis.scripting;
 import java.util.HashMap;
 
 import org.apache.ibatis.reflection.MetaObject;
+import org.jetbrains.annotations.Nullable;
 
 public class ContextMap extends HashMap<String, Object> {
   private static final long serialVersionUID = 2977601501966151582L;
+
+  @Nullable
   private final MetaObject parameterMetaObject;
   private final boolean fallbackParameterObject;
 
-  public ContextMap(MetaObject parameterMetaObject, boolean fallbackParameterObject) {
+  public ContextMap() {
+    this(null, false);
+  }
+
+  public ContextMap(@Nullable MetaObject parameterMetaObject, boolean fallbackParameterObject) {
     this.parameterMetaObject = parameterMetaObject;
     this.fallbackParameterObject = fallbackParameterObject;
   }
@@ -45,5 +52,15 @@ public class ContextMap extends HashMap<String, Object> {
     }
     // issue #61 do not modify the context when reading
     return parameterMetaObject.getValue(strKey);
+  }
+
+  public ContextMap copy() {
+    ContextMap copy = new ContextMap(this.parameterMetaObject, this.fallbackParameterObject);
+    copy.putAll(this);
+    return copy;
+  }
+
+  public void bind(String name, Object value) {
+    put(name, value);
   }
 }

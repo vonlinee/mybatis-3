@@ -77,8 +77,7 @@ public class TrimSqlNode extends XmlSqlNode {
     private StringBuilder sqlBuffer;
 
     public FilteredDynamicContext(SqlBuildContext delegate) {
-      super(delegate.getConfiguration(), delegate.getParameterObject(), delegate.getParameterType(),
-          delegate.getParamNameResolver(), delegate.isParamExists());
+      super(delegate);
       this.delegate = delegate;
       this.prefixApplied = false;
       this.suffixApplied = false;
@@ -117,8 +116,16 @@ public class TrimSqlNode extends XmlSqlNode {
       }
       prefixApplied = true;
       if (prefixesToOverride != null) {
-        prefixesToOverride.stream().filter(trimmedUppercaseSql::startsWith).findFirst()
-            .ifPresent(toRemove -> sql.delete(0, toRemove.trim().length()));
+        String prefixToRemove = null;
+        for (String prefix : prefixesToOverride) {
+          if (trimmedUppercaseSql.startsWith(prefix)) {
+            prefixToRemove = prefix;
+            break;
+          }
+        }
+        if (prefixToRemove != null) {
+          sql.delete(0, prefixToRemove.trim().length());
+        }
       }
       if (prefix != null) {
         sql.insert(0, " ").insert(0, prefix);
@@ -131,13 +138,19 @@ public class TrimSqlNode extends XmlSqlNode {
       }
       suffixApplied = true;
       if (suffixesToOverride != null) {
-        suffixesToOverride.stream()
-            .filter(toRemove -> trimmedUppercaseSql.endsWith(toRemove) || trimmedUppercaseSql.endsWith(toRemove.trim()))
-            .findFirst().ifPresent(toRemove -> {
-              int start = sql.length() - toRemove.trim().length();
-              int end = sql.length();
-              sql.delete(start, end);
-            });
+        String suffixToRemove = null;
+        for (String suffix : suffixesToOverride) {
+          if (trimmedUppercaseSql.endsWith(suffix) || trimmedUppercaseSql.endsWith(suffix.trim())) {
+            suffixToRemove = suffix;
+            break;
+          }
+        }
+
+        if (suffixToRemove != null) {
+          int start = sql.length() - suffixToRemove.trim().length();
+          int end = sql.length();
+          sql.delete(start, end);
+        }
       }
       if (suffix != null) {
         sql.append(" ").append(suffix);
