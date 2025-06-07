@@ -58,6 +58,7 @@
         <!-- <setting name="vfsImpl" value="org.mybatis.example.YourselfVfsImpl"/> -->
         <setting name="useActualParamName" value="true"/>
         <!-- <setting name="configurationFactory" value="org.mybatis.example.ConfigurationFactory"/> -->
+        <setting name="defaultPageSize" value="20"/>
     </settings>
 
     <typeAliases>

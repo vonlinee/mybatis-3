@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2022 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.apache.ibatis.mapping;
 
 import javax.sql.DataSource;
 
+import org.apache.ibatis.sql.dialect.SQLDialect;
 import org.apache.ibatis.transaction.TransactionFactory;
 
 /**
@@ -26,6 +27,7 @@ public final class Environment {
   private final String id;
   private final TransactionFactory transactionFactory;
   private final DataSource dataSource;
+  private SQLDialect dialect;
 
   public Environment(String id, TransactionFactory transactionFactory, DataSource dataSource) {
     if (id == null) {
@@ -46,6 +48,7 @@ public final class Environment {
     private final String id;
     private TransactionFactory transactionFactory;
     private DataSource dataSource;
+    private SQLDialect dialect;
 
     public Builder(String id) {
       this.id = id;
@@ -61,14 +64,20 @@ public final class Environment {
       return this;
     }
 
+    public Builder dialect(SQLDialect dialect) {
+      this.dialect = dialect;
+      return this;
+    }
+
     public String id() {
       return this.id;
     }
 
     public Environment build() {
-      return new Environment(this.id, this.transactionFactory, this.dataSource);
+      Environment env = new Environment(this.id, this.transactionFactory, this.dataSource);
+      env.setDialect(dialect);
+      return env;
     }
-
   }
 
   public String getId() {
@@ -83,4 +92,11 @@ public final class Environment {
     return this.dataSource;
   }
 
+  public SQLDialect getDialect() {
+    return dialect;
+  }
+
+  public void setDialect(SQLDialect dialect) {
+    this.dialect = dialect;
+  }
 }

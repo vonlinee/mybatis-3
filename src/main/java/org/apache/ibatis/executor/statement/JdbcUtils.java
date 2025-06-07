@@ -44,6 +44,14 @@ import org.apache.ibatis.internal.util.TypeUtils;
 import org.apache.ibatis.jdbc.RuntimeSqlException;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
+import org.apache.ibatis.sql.dialect.Db2Dialect;
+import org.apache.ibatis.sql.dialect.HsqlDbDialect;
+import org.apache.ibatis.sql.dialect.MariaDbDialect;
+import org.apache.ibatis.sql.dialect.MySqlDialect;
+import org.apache.ibatis.sql.dialect.OracleDialect;
+import org.apache.ibatis.sql.dialect.PostgresDialect;
+import org.apache.ibatis.sql.dialect.SQLDialect;
+import org.apache.ibatis.sql.dialect.SqlServerDialect;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -455,5 +463,27 @@ public final class JdbcUtils {
       list.add(rowMapper.mapRow(rs, rowNum++));
     }
     return list;
+  }
+
+  public static SQLDialect dialect(String dialectClassName) {
+    if (StringUtils.isBlank(dialectClassName)) {
+      return SQLDialect.DEFAULT;
+    }
+    if (HsqlDbDialect.class.getName().equalsIgnoreCase(dialectClassName)) {
+      return HsqlDbDialect.INSTANCE;
+    } else if (Db2Dialect.class.getName().equalsIgnoreCase(dialectClassName)) {
+      return Db2Dialect.INSTANCE;
+    } else if (MariaDbDialect.class.getName().equalsIgnoreCase(dialectClassName)) {
+      return MariaDbDialect.INSTANCE;
+    } else if (MySqlDialect.class.getName().equalsIgnoreCase(dialectClassName)) {
+      return MySqlDialect.INSTANCE;
+    } else if (OracleDialect.class.getName().equalsIgnoreCase(dialectClassName)) {
+      return OracleDialect.INSTANCE;
+    } else if (PostgresDialect.class.getName().equalsIgnoreCase(dialectClassName)) {
+      return PostgresDialect.INSTANCE;
+    } else if (SqlServerDialect.class.getName().equalsIgnoreCase(dialectClassName)) {
+      return SqlServerDialect.INSTANCE;
+    }
+    return SQLDialect.DEFAULT;
   }
 }

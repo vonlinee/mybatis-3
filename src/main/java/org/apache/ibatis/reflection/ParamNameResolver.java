@@ -32,6 +32,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.internal.util.ReflectionUtils;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
+import org.apache.ibatis.session.Pagination;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
@@ -131,8 +132,11 @@ public class ParamNameResolver {
     return ReflectionUtils.getParamNames(method).get(paramIndex);
   }
 
-  private static boolean isSpecialParameter(Class<?> clazz) {
-    return RowBounds.class.isAssignableFrom(clazz) || ResultHandler.class.isAssignableFrom(clazz);
+  public boolean isSpecialParameter(Class<?> clazz) {
+    if (RowBounds.class.isAssignableFrom(clazz)) {
+      return !Pagination.class.isAssignableFrom(clazz);
+    }
+    return ResultHandler.class.isAssignableFrom(clazz);
   }
 
   /**

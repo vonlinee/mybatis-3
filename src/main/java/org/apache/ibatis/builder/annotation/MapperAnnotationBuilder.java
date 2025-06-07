@@ -82,6 +82,7 @@ import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.parsing.PropertyParser;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.LanguageDriver;
+import org.apache.ibatis.session.Pagination;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.JdbcType;
@@ -302,7 +303,7 @@ public class MapperAnnotationBuilder extends BaseBuilder {
   }
 
   protected void parseStatement(Class<?> type, Method method) {
-    final Class<?> parameterTypeClass = getParameterType(method);
+    final Class<?> parameterTypeClass = getParameterType(type, method);
     final ParamNameResolver paramNameResolver = new ParamNameResolver(type, method,
         configuration.isUseActualParamName());
     final LanguageDriver languageDriver = getLanguageDriver(method);
@@ -332,7 +333,7 @@ public class MapperAnnotationBuilder extends BaseBuilder {
         SelectKey selectKey = getAnnotationWrapper(method, false, SelectKey.class)
             .map(x -> (SelectKey) x.getAnnotation()).orElse(null);
         if (selectKey != null) {
-          keyGenerator = handleSelectKeyAnnotation(selectKey, mappedStatementId, getParameterType(method),
+          keyGenerator = handleSelectKeyAnnotation(selectKey, mappedStatementId, getParameterType(type, method),
               paramNameResolver, languageDriver);
           keyProperty = selectKey.keyProperty();
         } else if (options == null) {
@@ -402,12 +403,12 @@ public class MapperAnnotationBuilder extends BaseBuilder {
     return configuration.getLanguageDriver(langClass);
   }
 
-  protected Class<?> getParameterType(Method method) {
+  protected Class<?> getParameterType(Class<?> type, Method method) {
     Class<?> parameterType = null;
     Parameter[] parameters = method.getParameters();
     for (Parameter param : parameters) {
       Class<?> paramType = param.getType();
-      if (RowBounds.class.isAssignableFrom(paramType) || ResultHandler.class.isAssignableFrom(paramType)) {
+      if (isSpecialParameter(type, method, paramType)) {
         continue;
       }
       if (parameterType == null && param.getAnnotation(Param.class) == null) {
@@ -417,6 +418,13 @@ public class MapperAnnotationBuilder extends BaseBuilder {
       }
     }
     return parameterType;
+  }
+
+  protected boolean isSpecialParameter(Class<?> mapperClass, Method method, Class<?> parameterType) {
+    if (RowBounds.class.isAssignableFrom(parameterType) || ResultHandler.class.isAssignableFrom(parameterType)) {
+      return !Pagination.class.isAssignableFrom(parameterType);
+    }
+    return false;
   }
 
   private void applyResults(Result[] results, Class<?> resultType, List<ResultMapping> resultMappings) {

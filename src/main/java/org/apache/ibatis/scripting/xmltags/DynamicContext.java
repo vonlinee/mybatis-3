@@ -28,6 +28,7 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.ContextMap;
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.sql.dialect.SQLDialect;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,12 +46,17 @@ public class DynamicContext implements SqlBuildContext {
   private final ParamNameResolver paramNameResolver;
   private final boolean paramExists;
 
+  private SQLDialect dialect;
+
   private GenericTokenParser tokenParser;
   private ParameterMappingTokenHandler tokenHandler;
 
   public DynamicContext(Configuration configuration, Object parameterObject, @Nullable Class<?> parameterType,
       @Nullable ParamNameResolver paramNameResolver, boolean paramExists) {
     this.configuration = configuration;
+    if (configuration.getEnvironment() != null) {
+      this.dialect = configuration.getEnvironment().getDialect();
+    }
     this.parameterObject = parameterObject;
     this.paramExists = paramExists;
     this.parameterType = parameterType;
@@ -65,6 +71,10 @@ public class DynamicContext implements SqlBuildContext {
     this.parameterType = delegate.getParameterType();
     this.paramNameResolver = delegate.getParamNameResolver();
     this.bindings = createBindings(parameterObject);
+  }
+
+  public void setDialect(SQLDialect dialect) {
+    this.dialect = dialect;
   }
 
   @Override
@@ -145,5 +155,10 @@ public class DynamicContext implements SqlBuildContext {
   @Override
   public boolean isParamExists() {
     return paramExists;
+  }
+
+  @Override
+  public SQLDialect dialect() {
+    return dialect;
   }
 }

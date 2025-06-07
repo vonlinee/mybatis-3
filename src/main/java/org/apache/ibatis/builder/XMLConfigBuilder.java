@@ -33,6 +33,7 @@ import org.apache.ibatis.builder.xml.XMLMapperResource;
 import org.apache.ibatis.datasource.DataSourceFactory;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.loader.ProxyFactory;
+import org.apache.ibatis.executor.statement.JdbcUtils;
 import org.apache.ibatis.internal.util.ClassUtils;
 import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.internal.util.ReflectionUtils;
@@ -364,6 +365,7 @@ public class XMLConfigBuilder extends BaseBuilder {
         booleanValueOf(props.getProperty("argNameBasedConstructorAutoMapping"), false));
     configuration.setDefaultSqlProviderType(resolveClass(props.getProperty("defaultSqlProviderType")));
     configuration.setNullableOnForEach(booleanValueOf(props.getProperty("nullableOnForEach"), false));
+    configuration.setDefaultPageSize(integerValueOf(props.getProperty("defaultPageSize"), 10));
   }
 
   protected void environmentsElement(XNode context) throws Exception {
@@ -379,8 +381,11 @@ public class XMLConfigBuilder extends BaseBuilder {
         TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
         DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
         DataSource dataSource = dsFactory.getDataSource();
+
+        String dialect = child.getStringAttribute("dialect");
+
         Environment.Builder environmentBuilder = new Environment.Builder(id).transactionFactory(txFactory)
-            .dataSource(dataSource);
+            .dialect(JdbcUtils.dialect(dialect)).dataSource(dataSource);
         configuration.setEnvironment(environmentBuilder.build());
         break;
       }

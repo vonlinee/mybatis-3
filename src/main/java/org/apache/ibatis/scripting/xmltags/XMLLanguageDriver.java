@@ -29,6 +29,7 @@ import org.apache.ibatis.builder.ParameterMappingTokenHandler;
 import org.apache.ibatis.builder.SqlSourceBuilder;
 import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
+import org.apache.ibatis.internal.util.ObjectUtils;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
@@ -213,6 +214,7 @@ public class XMLLanguageDriver implements LanguageDriver {
     nodeHandlerMap.put("otherwise", new OtherwiseHandler());
     nodeHandlerMap.put("bind", new BindHandler());
     nodeHandlerMap.put("in", new InHandler());
+    nodeHandlerMap.put("pagination", new PaginationSqlNodeHandler());
     return nodeHandlerMap;
   }
 
@@ -261,11 +263,27 @@ public class XMLLanguageDriver implements LanguageDriver {
   @Override
   public void setConfiguration(Configuration configuration) {
     this.configuration = configuration;
+    for (NodeHandler handler : nodeHandlerMap.values()) {
+      handler.setConfiguration(configuration);
+    }
   }
 
   public interface NodeHandler {
 
+    default void setConfiguration(Configuration configuration) {
+    }
+
     void handleNode(XNode nodeToHandle, List<SqlNode> targetContents);
+  }
+
+  static abstract class AbstractNodeHandler implements NodeHandler {
+
+    Configuration configuration;
+
+    @Override
+    public void setConfiguration(Configuration configuration) {
+      this.configuration = configuration;
+    }
   }
 
   private static class BindHandler implements NodeHandler {
@@ -528,6 +546,55 @@ public class XMLLanguageDriver implements LanguageDriver {
         return tokenizer.getName();
       }
       return itemExpression;
+    }
+  }
+
+  private static class PaginationSqlNodeHandler extends AbstractNodeHandler {
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      String test = nodeToHandle.getStringAttribute("test");
+      String pageNum = nodeToHandle.getStringAttribute("page-num");
+      String pageSize = nodeToHandle.getStringAttribute("page-size");
+
+      String pageNumExpression = null;
+      int defaultPageNum = 0;
+      if (!StringUtils.isBlank(pageNum)) {
+        String[] split = pageNum.split(":");
+        if (split.length == 2) {
+          pageNumExpression = split[0];
+          defaultPageNum = ObjectUtils.parseInt(split[1], 1);
+        } else if (split.length == 1) {
+          if (StringUtils.isNumber(split[0])) {
+            defaultPageNum = ObjectUtils.parseInt(split[0], 1);
+          } else {
+            pageNumExpression = split[0];
+          }
+        } else {
+          throw new BuilderException("illegal expression of page-num " + pageNum);
+        }
+      }
+
+      String pageSizeExpression = null;
+      int defaultPageSize = this.configuration.getDefaultPageSize();
+      if (!StringUtils.isBlank(pageSize)) {
+        String[] split = pageSize.split(":");
+        if (split.length == 2) {
+          pageSizeExpression = split[0];
+          defaultPageSize = ObjectUtils.parseInt(split[1], defaultPageSize);
+        } else if (split.length == 1) {
+          if (StringUtils.isNumber(split[0])) {
+            defaultPageSize = ObjectUtils.parseInt(split[0], 0);
+          } else {
+            pageSizeExpression = split[0];
+          }
+        } else {
+          throw new BuilderException("illegal expression of page-size " + pageNum);
+        }
+      }
+      PaginationSqlNode sqlNode = new PaginationSqlNode(test, pageNumExpression, pageSizeExpression, defaultPageNum,
+          defaultPageSize);
+      targetContents.add(sqlNode);
     }
   }
 }

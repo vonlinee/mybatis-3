@@ -90,6 +90,7 @@ public class Configuration extends ConfigurationElementHolder {
   protected boolean shrinkWhitespacesInSql;
   protected boolean nullableOnForEach;
   protected boolean argNameBasedConstructorAutoMapping;
+  private int defaultPageSize = 10;
 
   protected String logPrefix;
   protected Class<? extends Log> logImpl;
@@ -221,6 +222,14 @@ public class Configuration extends ConfigurationElementHolder {
 
   public boolean isUseActualParamName() {
     return useActualParamName;
+  }
+
+  public void setDefaultPageSize(int defaultPageSize) {
+    this.defaultPageSize = defaultPageSize;
+  }
+
+  public int getDefaultPageSize() {
+    return defaultPageSize;
   }
 
   public void setUseActualParamName(boolean useActualParamName) {

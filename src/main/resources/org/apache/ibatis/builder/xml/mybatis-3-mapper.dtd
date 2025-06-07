@@ -179,11 +179,11 @@ test CDATA #IMPLIED
 test CDATA #IMPLIED
 >
 
-<!ELEMENT limit (#PCDATA)*>
-<!ATTLIST limit
+<!ELEMENT pagination (#PCDATA)*>
+<!ATTLIST pagination
 test CDATA #IMPLIED
-limit CDATA #IMPLIED
-offset CDATA #IMPLIED
+page-num CDATA #IMPLIED
+page-size CDATA #IMPLIED
 >
 
 <!-- <in></in> -->
@@ -196,7 +196,7 @@ nullable CDATA #IMPLIED
 test CDATA #IMPLIED
 >
 
-<!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind | and | or | in | limit )*>
+<!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind | and | or | in | pagination )*>
 <!ATTLIST select
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -241,7 +241,7 @@ order (BEFORE|AFTER) #IMPLIED
 databaseId CDATA #IMPLIED
 >
 
-<!ELEMENT update (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind | and | or | in | limit )*>
+<!ELEMENT update (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind | and | or | in | pagination )*>
 <!ATTLIST update
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -256,7 +256,7 @@ databaseId CDATA #IMPLIED
 lang CDATA #IMPLIED
 >
 
-<!ELEMENT delete (#PCDATA | include | trim | where | set | foreach | choose | if | bind | and | or | in | limit )*>
+<!ELEMENT delete (#PCDATA | include | trim | where | set | foreach | choose | if | bind | and | or | in | pagination )*>
 <!ATTLIST delete
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -281,24 +281,24 @@ refid CDATA #REQUIRED
  value CDATA #REQUIRED
 >
 
-<!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if | bind | and | or )*>
+<!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if | bind | and | or | pagination)*>
 <!ATTLIST sql
 id CDATA #REQUIRED
 lang CDATA #IMPLIED
 databaseId CDATA #IMPLIED
 >
 
-<!ELEMENT trim (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT trim (#PCDATA | include | trim | where | set | foreach | choose | if | bind | pagination)*>
 <!ATTLIST trim
 prefix CDATA #IMPLIED
 prefixOverrides CDATA #IMPLIED
 suffix CDATA #IMPLIED
 suffixOverrides CDATA #IMPLIED
 >
-<!ELEMENT where (#PCDATA | include | trim | where | set | foreach | choose | if | bind | and | or | in)*>
+<!ELEMENT where (#PCDATA | include | trim | where | set | foreach | choose | if | bind | and | or | in | pagination)*>
 <!ELEMENT set (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
 
-<!ELEMENT foreach (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT foreach (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 <!ATTLIST foreach
 collection CDATA #REQUIRED
 nullable (true|false) #IMPLIED
@@ -314,9 +314,9 @@ separator CDATA #IMPLIED
 <!ATTLIST when
 test CDATA #REQUIRED
 >
-<!ELEMENT otherwise (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT otherwise (#PCDATA | include | trim | where | set | foreach | choose | if | bind | pagination)*>
 
-<!ELEMENT if (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT if (#PCDATA | include | trim | where | set | foreach | choose | if | bind | pagination)*>
 <!ATTLIST if
 test CDATA #REQUIRED
 >
