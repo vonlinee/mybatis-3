@@ -55,7 +55,7 @@ class NestedResultHandlerAssociationTest {
     Date targetMonth = fmt.parse("2014-01-01");
     final List<Account> accounts = new ArrayList<>();
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      sqlSession.select("collectPageByBirthMonth", targetMonth, new RowBounds(1, 2), context -> {
+      sqlSession.select("collectPageByBirthMonth", targetMonth, RowBounds.valueOf(1, 2), context -> {
         Account account = (Account) context.getResultObject();
         accounts.add(account);
       });

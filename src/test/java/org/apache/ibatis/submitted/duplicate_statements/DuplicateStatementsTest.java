@@ -59,7 +59,7 @@ class DuplicateStatementsTest {
   void shouldGetFirstFourUsers() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Mapper mapper = sqlSession.getMapper(Mapper.class);
-      List<User> users = mapper.getAllUsers(new RowBounds(0, 4));
+      List<User> users = mapper.getAllUsers(RowBounds.valueOf(0, 4));
       Assertions.assertEquals(4, users.size());
     }
   }
@@ -81,7 +81,7 @@ class DuplicateStatementsTest {
     sqlSessionFactory.getConfiguration().addMapper(AnnotatedMapper.class);
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       AnnotatedMapper mapper = sqlSession.getMapper(AnnotatedMapper.class);
-      List<User> users = mapper.getAllUsers(new RowBounds(0, 4));
+      List<User> users = mapper.getAllUsers(RowBounds.valueOf(0, 4));
       Assertions.assertEquals(4, users.size());
     }
   }

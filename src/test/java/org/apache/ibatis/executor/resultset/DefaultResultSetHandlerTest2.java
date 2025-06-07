@@ -73,7 +73,7 @@ class DefaultResultSetHandlerTest2 {
           }
         }).build();
 
-    final RowBounds rowBounds = new RowBounds(5, 1);
+    final RowBounds rowBounds = RowBounds.valueOf(5, 1);
     final DefaultResultSetHandler resultSetHandler = new DefaultResultSetHandler(null, ms, null, rowBounds);
 
     when(stmt.getResultSet()).thenReturn(rs);
@@ -108,7 +108,7 @@ class DefaultResultSetHandlerTest2 {
           }
         }).resultOrdered(true).build();
 
-    final RowBounds rowBounds = new RowBounds(5, 1);
+    final RowBounds rowBounds = RowBounds.valueOf(5, 1);
     final DefaultResultSetHandler resultSetHandler = new DefaultResultSetHandler(null, ms, null, rowBounds);
 
     when(stmt.getResultSet()).thenReturn(rs);

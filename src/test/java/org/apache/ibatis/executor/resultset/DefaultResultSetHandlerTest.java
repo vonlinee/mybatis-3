@@ -68,7 +68,7 @@ class DefaultResultSetHandlerTest {
 
     final MappedStatement ms = getMappedStatement();
 
-    final RowBounds rowBounds = new RowBounds(0, 100);
+    final RowBounds rowBounds = RowBounds.valueOf(0, 100);
     final DefaultResultSetHandler fastResultSetHandler = new DefaultResultSetHandler(null, ms, null, rowBounds);
     fastResultSetHandler.setConfiguration(config);
     when(stmt.getResultSet()).thenReturn(rs);
@@ -89,7 +89,7 @@ class DefaultResultSetHandlerTest {
   @Test
   void shouldThrowExceptionWithColumnName() throws Exception {
     final MappedStatement ms = getMappedStatement();
-    final RowBounds rowBounds = new RowBounds(0, 100);
+    final RowBounds rowBounds = RowBounds.valueOf(0, 100);
 
     final DefaultResultSetHandler defaultResultSetHandler = new DefaultResultSetHandler(null/* executor */, ms,
         null/* resultHandler */, rowBounds);

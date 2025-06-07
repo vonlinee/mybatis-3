@@ -224,7 +224,7 @@ void select (String statement, Object parameter, RowBounds rowBounds, ResultHand
 
   <source>int offset = 100;
 int limit = 25;
-RowBounds rowBounds = new RowBounds(offset, limit);</source>
+RowBounds rowBounds = RowBounds.valueOf(offset, limit);</source>
   <p>数据库驱动决定了略过记录时的查询效率。为了获得最佳的性能，建议将 ResultSet 类型设置为 SCROLL_SENSITIVE 或 SCROLL_INSENSITIVE（换句话说：不要使用 FORWARD_ONLY）。</p>
   <p>ResultHandler 参数允许自定义每行结果的处理过程。你可以将它添加到 List 中、创建 Map 和 Set，甚至丢弃每个返回值，只保留计算后的统计结果。你可以使用 ResultHandler 做很多事，这其实就是 MyBatis 构建 结果列表的内部实现办法。</p>
   <p>从版本 3.4.6 开始，<code>ResultHandler</code> 会在存储过程的 REFCURSOR 输出参数中传递使用的 <code>CALLABLE</code> 语句。</p>

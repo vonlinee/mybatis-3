@@ -75,7 +75,7 @@ class ActualParamNameTest {
       }
       // use actual name #2693
       {
-        long count = mapper.getUserCountUsingList_RowBounds(new RowBounds(0, 5), Arrays.asList(1, 2));
+        long count = mapper.getUserCountUsingList_RowBounds(RowBounds.valueOf(0, 5), Arrays.asList(1, 2));
         assertEquals(2, count);
       }
     }

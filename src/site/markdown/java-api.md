@@ -252,7 +252,7 @@ The `RowBounds` parameter causes MyBatis to skip the number of records specified
 ```java
 int offset = 100;
 int limit = 25;
-RowBounds rowBounds = new RowBounds(offset, limit);
+RowBounds rowBounds = RowBounds.valueOf(offset, limit);
 ```
 
 Different drivers are able to achieve different levels of efficiency in this regard. For the best performance, use result set types of `SCROLL_SENSITIVE` or `SCROLL_INSENSITIVE` (in other words: not `FORWARD_ONLY`).

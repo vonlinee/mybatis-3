@@ -53,29 +53,29 @@ class ResultSetTypeTest {
 
   @Test
   void withStatement() {
-    test(mapper -> mapper.getUserWithStatementAndUnset(new RowBounds(5, 3)), 0);
-    test(mapper -> mapper.getUserWithStatementAndDefault(new RowBounds(4, 3)), 1);
-    test(mapper -> mapper.getUserWithStatementAndForwardOnly(new RowBounds(3, 3)), 2);
-    test(mapper -> mapper.getUserWithStatementAndScrollInsensitive(new RowBounds(2, 2)), 2);
-    test(mapper -> mapper.getUserWithStatementAndScrollSensitive(new RowBounds(1, 1)), 1);
+    test(mapper -> mapper.getUserWithStatementAndUnset(RowBounds.valueOf(5, 3)), 0);
+    test(mapper -> mapper.getUserWithStatementAndDefault(RowBounds.valueOf(4, 3)), 1);
+    test(mapper -> mapper.getUserWithStatementAndForwardOnly(RowBounds.valueOf(3, 3)), 2);
+    test(mapper -> mapper.getUserWithStatementAndScrollInsensitive(RowBounds.valueOf(2, 2)), 2);
+    test(mapper -> mapper.getUserWithStatementAndScrollSensitive(RowBounds.valueOf(1, 1)), 1);
   }
 
   @Test
   void withPrepared() {
-    test(mapper -> mapper.getUserWithPreparedAndUnset(new RowBounds(5, 3)), 0);
-    test(mapper -> mapper.getUserWithPreparedAndDefault(new RowBounds(4, 3)), 1);
-    test(mapper -> mapper.getUserWithPreparedAndForwardOnly(new RowBounds(3, 3)), 2);
-    test(mapper -> mapper.getUserWithPreparedAndScrollInsensitive(new RowBounds(2, 2)), 2);
-    test(mapper -> mapper.getUserWithPreparedAndScrollSensitive(new RowBounds(1, 1)), 1);
+    test(mapper -> mapper.getUserWithPreparedAndUnset(RowBounds.valueOf(5, 3)), 0);
+    test(mapper -> mapper.getUserWithPreparedAndDefault(RowBounds.valueOf(4, 3)), 1);
+    test(mapper -> mapper.getUserWithPreparedAndForwardOnly(RowBounds.valueOf(3, 3)), 2);
+    test(mapper -> mapper.getUserWithPreparedAndScrollInsensitive(RowBounds.valueOf(2, 2)), 2);
+    test(mapper -> mapper.getUserWithPreparedAndScrollSensitive(RowBounds.valueOf(1, 1)), 1);
   }
 
   @Test
   void withCallable() {
-    test(mapper -> mapper.getUserWithCallableAndUnset(new RowBounds(5, 3)), 0);
-    test(mapper -> mapper.getUserWithCallableAndDefault(new RowBounds(4, 3)), 1);
-    test(mapper -> mapper.getUserWithCallableAndForwardOnly(new RowBounds(3, 3)), 2);
-    test(mapper -> mapper.getUserWithCallableAndScrollInsensitive(new RowBounds(2, 2)), 2);
-    test(mapper -> mapper.getUserWithCallableAndScrollSensitive(new RowBounds(1, 1)), 1);
+    test(mapper -> mapper.getUserWithCallableAndUnset(RowBounds.valueOf(5, 3)), 0);
+    test(mapper -> mapper.getUserWithCallableAndDefault(RowBounds.valueOf(4, 3)), 1);
+    test(mapper -> mapper.getUserWithCallableAndForwardOnly(RowBounds.valueOf(3, 3)), 2);
+    test(mapper -> mapper.getUserWithCallableAndScrollInsensitive(RowBounds.valueOf(2, 2)), 2);
+    test(mapper -> mapper.getUserWithCallableAndScrollSensitive(RowBounds.valueOf(1, 1)), 1);
   }
 
   private void test(Function<Mapper, List<User>> usersSupplier, int expectedSize) {

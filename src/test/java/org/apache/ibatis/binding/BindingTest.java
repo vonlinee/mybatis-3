@@ -122,7 +122,7 @@ class BindingTest {
   void shouldFindThreeSpecificPosts() {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       BoundAuthorMapper mapper = session.getMapper(BoundAuthorMapper.class);
-      List<Post> posts = mapper.findThreeSpecificPosts(1, new RowBounds(1, 1), 3, 5);
+      List<Post> posts = mapper.findThreeSpecificPosts(1, RowBounds.valueOf(1, 1), 3, 5);
       assertEquals(1, posts.size());
       assertEquals(3, posts.get(0).getId());
       session.rollback();
@@ -318,7 +318,7 @@ class BindingTest {
   void shouldSelectListOfPostsLike() {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       BoundBlogMapper mapper = session.getMapper(BoundBlogMapper.class);
-      List<Post> posts = mapper.selectPostsLike(new RowBounds(1, 1), "%a%");
+      List<Post> posts = mapper.selectPostsLike(RowBounds.valueOf(1, 1), "%a%");
       assertEquals(1, posts.size());
     }
   }
@@ -327,7 +327,7 @@ class BindingTest {
   void shouldSelectListOfPostsLikeTwoParameters() {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       BoundBlogMapper mapper = session.getMapper(BoundBlogMapper.class);
-      List<Post> posts = mapper.selectPostsLikeSubjectAndBody(new RowBounds(1, 1), "%a%", "%a%");
+      List<Post> posts = mapper.selectPostsLikeSubjectAndBody(RowBounds.valueOf(1, 1), "%a%", "%a%");
       assertEquals(1, posts.size());
     }
   }
@@ -647,7 +647,7 @@ class BindingTest {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       BoundBlogMapper mapper = session.getMapper(BoundBlogMapper.class);
       final DefaultResultHandler handler = new DefaultResultHandler();
-      mapper.collectRangeBlogs(handler, new RowBounds(1, 1));
+      mapper.collectRangeBlogs(handler, RowBounds.valueOf(1, 1));
 
       assertEquals(1, handler.getResultList().size());
       Blog blog = (Blog) handler.getResultList().get(0);
@@ -659,7 +659,7 @@ class BindingTest {
   void executeWithMapKeyAndRowBounds() {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       BoundBlogMapper mapper = session.getMapper(BoundBlogMapper.class);
-      Map<Integer, Blog> blogs = mapper.selectRangeBlogsAsMapById(new RowBounds(1, 1));
+      Map<Integer, Blog> blogs = mapper.selectRangeBlogsAsMapById(RowBounds.valueOf(1, 1));
 
       assertEquals(1, blogs.size());
       Blog blog = blogs.get(2);
@@ -671,7 +671,7 @@ class BindingTest {
   void executeWithCursorAndRowBounds() {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       BoundBlogMapper mapper = session.getMapper(BoundBlogMapper.class);
-      try (Cursor<Blog> blogs = mapper.openRangeBlogs(new RowBounds(1, 1))) {
+      try (Cursor<Blog> blogs = mapper.openRangeBlogs(RowBounds.valueOf(1, 1))) {
         Iterator<Blog> blogIterator = blogs.iterator();
         Blog blog = blogIterator.next();
         assertEquals(2, blog.getId());

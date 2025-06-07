@@ -262,7 +262,7 @@ class BaseExecutorTest extends BaseDataTest {
     Executor executor = createExecutor(new JdbcTransaction(ds, null, false));
     try {
       MappedStatement selectStatement = ExecutorTestHelper.prepareSelectDiscriminatedPost(config);
-      List<Map<String, String>> products = executor.query(selectStatement, null, new RowBounds(2, 2));
+      List<Map<String, String>> products = executor.query(selectStatement, null, RowBounds.valueOf(2, 2));
       assertEquals(2, products.size());
       for (Map<String, String> m : products) {
         if ("IMAGES".equals(m.get("SECTION"))) {

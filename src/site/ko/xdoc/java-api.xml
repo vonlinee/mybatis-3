@@ -290,7 +290,7 @@ void select (String statement, Object parameter, RowBounds rowBounds, ResultHand
 
   <source>int offset = 100;
 int limit = 25;
-RowBounds rowBounds = new RowBounds(offset, limit);</source>
+RowBounds rowBounds = RowBounds.valueOf(offset, limit);</source>
 
   <p>가장 좋은 성능을 위해 결과셋의 타입을 SCROLL_SENSITIVE나 SCROLL_INSENSITIVE로 사용하라.</p>
   <p>ResultHandler파라미터는 레코드별로 다룰수 있도록 해준다.

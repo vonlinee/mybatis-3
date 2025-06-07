@@ -92,7 +92,7 @@ class CursorNestedTest {
   @Test
   void cursorWithRowBound() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Cursor<User> usersCursor = sqlSession.selectCursor("getAllUsers", null, new RowBounds(2, 1));
+      Cursor<User> usersCursor = sqlSession.selectCursor("getAllUsers", null, RowBounds.valueOf(2, 1));
 
       Iterator<User> iterator = usersCursor.iterator();
 
