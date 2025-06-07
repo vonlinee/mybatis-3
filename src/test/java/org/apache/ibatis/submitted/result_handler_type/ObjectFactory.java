@@ -25,8 +25,6 @@ import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
 
 public class ObjectFactory extends DefaultObjectFactory {
 
-  private static final long serialVersionUID = -8855120656740914948L;
-
   @Override
   protected Class<?> resolveInterface(Class<?> type) {
     Class<?> classToCreate;

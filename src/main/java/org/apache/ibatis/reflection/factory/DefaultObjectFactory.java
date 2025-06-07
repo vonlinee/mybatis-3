@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.ibatis.internal.PropertiesHolder;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.Reflector;
@@ -34,7 +35,7 @@ import org.apache.ibatis.reflection.Reflector;
 /**
  * @author Clinton Begin
  */
-public class DefaultObjectFactory implements ObjectFactory, Serializable {
+public class DefaultObjectFactory extends PropertiesHolder implements ObjectFactory, Serializable {
 
   private static final long serialVersionUID = -8855120656740914948L;
 

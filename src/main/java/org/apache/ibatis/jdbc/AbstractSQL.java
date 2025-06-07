@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
+import org.apache.ibatis.internal.ForEachConsumer;
+
 /**
  * @author Clinton Begin
  * @author Jeff Butler
@@ -804,31 +806,4 @@ public abstract class AbstractSQL<T> {
       return answer;
     }
   }
-
-  /**
-   * Consumer for 'forEach' operation.
-   *
-   * @param <T>
-   *          SQL type
-   * @param <E>
-   *          Element type of iterable
-   *
-   * @since 3.5.15
-   */
-  public interface ForEachConsumer<T, E> {
-
-    /**
-     * Accept an iterable element with index.
-     *
-     * @param sql
-     *          SQL instance
-     * @param element
-     *          an iterable element
-     * @param elementIndex
-     *          an element index
-     */
-    void accept(T sql, E element, int elementIndex);
-
-  }
-
 }
