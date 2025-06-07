@@ -70,6 +70,10 @@ public final class CollectionUtils {
     return (collection == null || collection.isEmpty());
   }
 
+  public static boolean isNotEmpty(@Nullable Collection<?> collection) {
+    return collection != null && !collection.isEmpty();
+  }
+
   /**
    * Return {@code true} if the supplied Map is {@code null} or empty. Otherwise, return {@code false}.
    *
@@ -80,6 +84,10 @@ public final class CollectionUtils {
    */
   public static boolean isEmpty(@Nullable Map<?, ?> map) {
     return (map == null || map.isEmpty());
+  }
+
+  public static boolean isNotEmpty(@Nullable Map<?, ?> map) {
+    return map != null && !map.isEmpty();
   }
 
   /**
@@ -94,6 +102,10 @@ public final class CollectionUtils {
     return arr == null || arr.length == 0;
   }
 
+  public static <T> boolean isNotEmpty(@Nullable T[] arr) {
+    return arr != null && arr.length > 0;
+  }
+
   /**
    * Retrieve the first element of the given List, accessing the zero index.
    *
@@ -105,6 +117,19 @@ public final class CollectionUtils {
   @Nullable
   public static <T> T getFirst(@Nullable List<T> list) {
     return isEmpty(list) ? null : list.get(0);
+  }
+
+  /**
+   * Retrieve the first element of the given set, accessing the zero index.
+   *
+   * @param set
+   *          the set
+   *
+   * @return the first element, or {@code null} if none
+   */
+  @Nullable
+  public static <T> T getFirst(@Nullable Set<T> set) {
+    return isEmpty(set) ? null : set.iterator().next();
   }
 
   /**
@@ -403,7 +428,7 @@ public final class CollectionUtils {
   }
 
   /**
-   * @see net.sf.cglib.core.CollectionUtils#asList(Object[])
+   * @see CollectionUtils#asList(Object[])
    *
    * @param elements
    *          elements
@@ -516,6 +541,9 @@ public final class CollectionUtils {
     if (isUnmodifiable(list)) {
       return list;
     }
+    if (list.size() == 1) {
+      return Collections.singletonList(list.get(0));
+    }
     return Collections.unmodifiableList(list);
   }
 
@@ -545,6 +573,9 @@ public final class CollectionUtils {
     }
     if (isUnmodifiable(s)) {
       return (Set<T>) s;
+    }
+    if (s.size() == 1) {
+      return Collections.singleton(s.iterator().next());
     }
     return Collections.unmodifiableSet(s);
   }
