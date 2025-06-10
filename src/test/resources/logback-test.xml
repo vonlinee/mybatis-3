@@ -18,7 +18,8 @@
 -->
 <!DOCTYPE configuration>
 <configuration>
-
+  <!-- disable internal log output when bootstrap logback -->
+  <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
   <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
