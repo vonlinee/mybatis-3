@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -596,5 +597,19 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
     typeAliasRegistry.registerAlias("CGLIB", CglibProxyFactory.class);
     typeAliasRegistry.registerAlias("JAVASSIST", JavassistProxyFactory.class);
+  }
+
+  /**
+   * Extracts namespace from fully qualified statement id.
+   *
+   * @param statementId
+   *          the statement id
+   *
+   * @return namespace or null when id does not contain period.
+   */
+  public static String extractNamespace(@NotNull String statementId) {
+    Objects.requireNonNull(statementId, "statement id cannot be null");
+    int lastPeriod = statementId.lastIndexOf('.');
+    return lastPeriod > 0 ? statementId.substring(0, lastPeriod) : null;
   }
 }

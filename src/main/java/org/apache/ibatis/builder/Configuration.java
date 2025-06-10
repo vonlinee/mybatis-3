@@ -840,19 +840,6 @@ public class Configuration extends ConfigurationElementHolder {
     parsePendingMethods(true);
   }
 
-  /**
-   * Extracts namespace from fully qualified statement id.
-   *
-   * @param statementId
-   *          the statement id
-   *
-   * @return namespace or null when id does not contain period.
-   */
-  protected String extractNamespace(String statementId) {
-    int lastPeriod = statementId.lastIndexOf('.');
-    return lastPeriod > 0 ? statementId.substring(0, lastPeriod) : null;
-  }
-
   // Slow but a one time cost. A better solution is welcome.
   protected void checkGloballyForDiscriminatedNestedResultMaps(ResultMap rm) {
     if (rm.hasNestedResultMaps()) {

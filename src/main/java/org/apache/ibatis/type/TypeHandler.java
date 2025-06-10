@@ -44,6 +44,17 @@ public interface TypeHandler<T> {
 
   T getResult(ResultSet rs, int columnIndex) throws SQLException;
 
+  /**
+   * @param cs
+   *          CallableStatement
+   * @param columnIndex
+   *          start from 1
+   *
+   * @return value
+   *
+   * @throws SQLException
+   *           error when access database.
+   */
   T getResult(CallableStatement cs, int columnIndex) throws SQLException;
 
 }

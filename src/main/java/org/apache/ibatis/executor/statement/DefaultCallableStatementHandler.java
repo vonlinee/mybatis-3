@@ -42,6 +42,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.ObjectTypeHandler;
 import org.apache.ibatis.type.TypeHandler;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
@@ -141,38 +142,46 @@ public class DefaultCallableStatementHandler extends BaseStatementHandler implem
     final List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     for (int i = 0; i < parameterMappings.size(); i++) {
       final ParameterMapping parameterMapping = parameterMappings.get(i);
-      if (parameterMapping.getMode() == ParameterMode.OUT || parameterMapping.getMode() == ParameterMode.INOUT) {
+      if (isOutputParameter(parameterMapping)) {
         if (ResultSet.class.equals(parameterMapping.getJavaType())) {
-          handleRefCursorOutputParameter((ResultSet) cs.getObject(i + 1), parameterMapping, metaParam);
-        } else {
-          final String property = parameterMapping.getProperty();
-          TypeHandler<?> typeHandler = parameterMapping.getTypeHandler();
-          if (typeHandler == null) {
-            Type javaType = parameterMapping.getJavaType();
-            if (javaType == null || javaType == Object.class) {
-              javaType = metaParam.getGenericSetterType(property).getKey();
-            }
-            JdbcType jdbcType = parameterMapping.getJdbcType();
-            typeHandler = typeHandlerRegistry.getTypeHandler(javaType, jdbcType, null);
-            if (typeHandler == null) {
-              typeHandler = typeHandlerRegistry.getTypeHandler(jdbcType);
-              if (typeHandler == null) {
-                typeHandler = ObjectTypeHandler.INSTANCE;
-              }
-            }
+          ResultSet resultSet = (ResultSet) cs.getObject(i + 1);
+          if (resultSet != null) {
+            handleRefCursorOutputParameter(resultSet, parameterMapping, metaParam);
           }
-          metaParam.setValue(property, typeHandler.getResult(cs, i + 1));
+        } else {
+          TypeHandler<?> typeHandler = determineTypeHandler(metaParam, parameterMapping, i + 1);
+          metaParam.setValue(parameterMapping.getProperty(), typeHandler.getResult(cs, i + 1));
         }
       }
     }
   }
 
-  private void handleRefCursorOutputParameter(ResultSet rs, ParameterMapping parameterMapping, MetaObject metaParam)
-      throws SQLException {
-    if (rs == null) {
-      return;
-    }
+  public boolean isOutputParameter(ParameterMapping parameterMapping) {
+    return parameterMapping.getMode() == ParameterMode.OUT || parameterMapping.getMode() == ParameterMode.INOUT;
+  }
 
+  public TypeHandler<?> determineTypeHandler(MetaObject metaParam, ParameterMapping parameterMapping, int paramIndex) {
+    final String property = parameterMapping.getProperty();
+    TypeHandler<?> typeHandler = parameterMapping.getTypeHandler();
+    if (typeHandler == null) {
+      Type javaType = parameterMapping.getJavaType();
+      if (javaType == null || javaType == Object.class) {
+        javaType = metaParam.getGenericSetterType(property).getKey();
+      }
+      JdbcType jdbcType = parameterMapping.getJdbcType();
+      typeHandler = typeHandlerRegistry.getTypeHandler(javaType, jdbcType, null);
+      if (typeHandler == null) {
+        typeHandler = typeHandlerRegistry.getTypeHandler(jdbcType);
+        if (typeHandler == null) {
+          typeHandler = ObjectTypeHandler.INSTANCE;
+        }
+      }
+    }
+    return typeHandler;
+  }
+
+  public void handleRefCursorOutputParameter(@NotNull ResultSet rs, ParameterMapping parameterMapping,
+      MetaObject metaParam) throws SQLException {
     ResultSetHandler resultSetHandler = extensionFactory.newResultSetHandler(executor, mappedStatement, rowBounds,
         this.getParameterHandler(), resultHandler, boundSql);
 
