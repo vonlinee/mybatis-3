@@ -16,7 +16,7 @@
 
 root = true
 
-[*.{java, xml, sql}]
+[*.{java,xml,sql}]
 charset = utf-8
 indent_style = space
 indent_size = 2
