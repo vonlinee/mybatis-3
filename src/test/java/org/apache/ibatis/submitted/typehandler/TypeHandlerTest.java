@@ -195,7 +195,7 @@ class TypeHandlerTest {
     // it will be used when result type is Map
     sqlSessionFactory.getConfiguration().getTypeHandlerRegistry().register(Object.class, JdbcType.DATE,
         new LocalDateTypeHandler());
-    // The follwing also works for now, but it is not recommended because it could affect
+    // The following also works for now, but it is not recommended because it could affect
     // internal type handling like cache key creation.
     // sqlSessionFactory.getConfiguration().getTypeHandlerRegistry().register(JdbcType.DATE, new
     // LocalDateTypeHandler());

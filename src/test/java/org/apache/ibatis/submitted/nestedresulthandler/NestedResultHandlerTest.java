@@ -97,7 +97,7 @@ class NestedResultHandlerTest {
   }
 
   /**
-   * Fix bug caused by issue #542, see new issue #22 on github If we order by a nested result map attribute we can miss
+   * Fix bug caused by issue #542, see new issue #22 on GitHub If we order by a nested result map attribute we can miss
    * some records and end up with duplicates instead.
    */
   @Test

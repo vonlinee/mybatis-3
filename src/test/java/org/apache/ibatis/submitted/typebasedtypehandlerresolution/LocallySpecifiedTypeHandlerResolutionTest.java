@@ -80,8 +80,8 @@ class LocallySpecifiedTypeHandlerResolutionTest {
       {
         User user = new User();
         user.setId(12);
-        user.setStrvalue(new FuzzyBean<String>("park"));
-        user.setIntvalue(new FuzzyBean<Integer>(7));
+        user.setStrvalue(new FuzzyBean<>("park"));
+        user.setIntvalue(new FuzzyBean<>(7));
         user.setDatevalue(LocalDate.of(2020, 5, 10));
         user.setDatevalue2(LocalDate.of(2020, 5, 8));
         user.setStrings(Arrays.asList("aa", "bb"));
@@ -107,8 +107,8 @@ class LocallySpecifiedTypeHandlerResolutionTest {
       {
         User user = new User();
         user.setId(21);
-        user.setStrvalue(new FuzzyBean<String>("park"));
-        user.setIntvalue(new FuzzyBean<Integer>(7));
+        user.setStrvalue(new FuzzyBean<>("park"));
+        user.setIntvalue(new FuzzyBean<>(7));
         user.setDatevalue(LocalDate.of(2020, 5, 10));
         user.setDatevalue2(LocalDate.of(2020, 5, 8));
         user.setStrings(Arrays.asList("aa", "bb"));
@@ -134,8 +134,8 @@ class LocallySpecifiedTypeHandlerResolutionTest {
       {
         User user = new User();
         user.setId(13);
-        user.setStrvalue(new FuzzyBean<String>("well"));
-        user.setIntvalue(new FuzzyBean<Integer>(23));
+        user.setStrvalue(new FuzzyBean<>("well"));
+        user.setIntvalue(new FuzzyBean<>(23));
         user.setDatevalue(LocalDate.of(2020, 5, 16));
         user.setDatevalue2(LocalDate.of(2020, 5, 3));
         user.setStrings(Arrays.asList("aa", "bb"));
@@ -159,8 +159,8 @@ class LocallySpecifiedTypeHandlerResolutionTest {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       LocallySpecifiedHandlerMapper mapper = sqlSession.getMapper(LocallySpecifiedHandlerMapper.class);
       {
-        mapper.insertUserParamMap(20, new FuzzyBean<String>("well"), new FuzzyBean<Integer>(23),
-            LocalDate.of(2020, 5, 16), LocalDate.of(2020, 5, 3), Arrays.asList("aa", "bb"), Arrays.asList(11, 22));
+        mapper.insertUserParamMap(20, new FuzzyBean<>("well"), new FuzzyBean<>(23), LocalDate.of(2020, 5, 16),
+            LocalDate.of(2020, 5, 3), Arrays.asList("aa", "bb"), Arrays.asList(11, 22));
       }
       {
         User user = mapper.getUser(20);
@@ -181,8 +181,8 @@ class LocallySpecifiedTypeHandlerResolutionTest {
       {
         User user = new User();
         user.setId(14);
-        user.setStrvalue(new FuzzyBean<String>("reservoir"));
-        user.setIntvalue(new FuzzyBean<Integer>(71));
+        user.setStrvalue(new FuzzyBean<>("reservoir"));
+        user.setIntvalue(new FuzzyBean<>(71));
         user.setDatevalue(LocalDate.of(2020, 6, 2));
         user.setDatevalue2(LocalDate.of(2020, 4, 3));
         user.setStrings(Arrays.asList("aa", "bb"));
@@ -208,8 +208,8 @@ class LocallySpecifiedTypeHandlerResolutionTest {
       {
         User user = new User();
         user.setId(15);
-        user.setStrvalue(new FuzzyBean<String>("dentist"));
-        user.setIntvalue(new FuzzyBean<Integer>(31));
+        user.setStrvalue(new FuzzyBean<>("dentist"));
+        user.setIntvalue(new FuzzyBean<>(31));
         user.setDatevalue(LocalDate.of(2020, 6, 3));
         user.setDatevalue2(LocalDate.of(2020, 4, 4));
         user.setStrings(Arrays.asList("aa", "bb"));
@@ -235,8 +235,8 @@ class LocallySpecifiedTypeHandlerResolutionTest {
       {
         User user = new User();
         user.setId(22);
-        user.setStrvalue(new FuzzyBean<String>("dentist"));
-        user.setIntvalue(new FuzzyBean<Integer>(31));
+        user.setStrvalue(new FuzzyBean<>("dentist"));
+        user.setIntvalue(new FuzzyBean<>(31));
         user.setDatevalue(LocalDate.of(2020, 6, 3));
         user.setDatevalue2(LocalDate.of(2020, 4, 4));
         user.setStrings(Arrays.asList("aa", "bb"));
@@ -275,8 +275,8 @@ class LocallySpecifiedTypeHandlerResolutionTest {
       {
         User user = new User();
         user.setId(13);
-        user.setStrvalue(new FuzzyBean<String>("pond"));
-        user.setIntvalue(new FuzzyBean<Integer>(23));
+        user.setStrvalue(new FuzzyBean<>("pond"));
+        user.setIntvalue(new FuzzyBean<>(23));
         user.setDatevalue(LocalDate.of(2020, 5, 13));
         user.setDatevalue2(LocalDate.of(2020, 5, 7));
         user.setStrings(Arrays.asList("aa", "bb"));
@@ -302,8 +302,8 @@ class LocallySpecifiedTypeHandlerResolutionTest {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       User user = new User();
       user.setId(14);
-      user.setStrvalue(new FuzzyBean<String>("pond"));
-      user.setIntvalue(new FuzzyBean<Integer>(23));
+      user.setStrvalue(new FuzzyBean<>("pond"));
+      user.setIntvalue(new FuzzyBean<>(23));
       user.setDatevalue(LocalDate.of(2020, 5, 13));
       user.setDatevalue2(LocalDate.of(2020, 5, 7));
       // There is no way to obtain info about type parameters.

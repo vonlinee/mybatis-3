@@ -86,7 +86,7 @@ class InvalidNamedConstructorArgsTest {
 
   interface ConstructorMissingRequiresJavaType {
     // There is a constructor with arg name 'id', but its type
-    // is different from the type of a property with the same name.
+    // is different from the type of property with the same name.
     // javaType is required in this case.
     // Debug log shows the detail of the matching error.
     @ConstructorArgs({ @Arg(column = "id", name = "id"), })
