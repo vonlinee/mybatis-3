@@ -126,9 +126,19 @@ public class XMLStatementBuilder extends BaseBuilder {
     String resultSets = context.getStringAttribute("resultSets");
     boolean dirtySelect = context.getBooleanAttribute("affectData", Boolean.FALSE);
 
-    return assistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
-        parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, resultOrdered,
-        keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect, paramNameResolver);
+    MappedStatement mappedStatement = assistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType,
+        fetchSize, timeout, parameterMap, parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache,
+        useCache, resultOrdered, keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect,
+        paramNameResolver);
+
+    String countSql = context.getStringAttribute("countSql");
+    if (countSql != null) {
+      if (!countSql.contains(".")) {
+        countSql = assistant.applyCurrentNamespace(countSql, false);
+      }
+    }
+    mappedStatement.setCountStatement(countSql);
+    return mappedStatement;
   }
 
   protected KeyGenerator processKeyGenerator(XNode context, String statementId, SqlCommandType sqlCommandType) {

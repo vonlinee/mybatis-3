@@ -29,4 +29,21 @@ public class ParamMap extends HashMap<String, Object> {
     return super.get(key);
   }
 
+  protected void assertContainsParamName(Object key) {
+    if (!super.containsKey(key)) {
+      throw new BindingException("Parameter '" + key + "' not found. Available parameters are " + keySet());
+    }
+  }
+
+  public int getInt(Object key) {
+    assertContainsParamName(key);
+    Object value = super.get(key);
+    if (value instanceof Number) {
+      return ((Number) value).intValue();
+    } else {
+      String typeName = value == null ? "null" : value.getClass().getName();
+      throw new BindingException(
+          "Parameter '" + key + "' exists but type mismatch. expected number, actual " + typeName);
+    }
+  }
 }

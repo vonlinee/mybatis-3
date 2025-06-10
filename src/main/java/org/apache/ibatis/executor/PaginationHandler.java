@@ -13,24 +13,25 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.submitted.pagination;
+package org.apache.ibatis.executor;
 
-import java.util.List;
+import java.util.Collection;
 
-import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.Page;
+import org.jetbrains.annotations.NotNull;
 
-public interface Mapper {
+public interface PaginationHandler {
 
-  List<User> selectUsers(UserListParam param);
+  @NotNull
+  default String getPageNumVariableName() {
+    return "pageNum";
+  }
 
-  List<User> selectUsers1(UserListParam param);
+  @NotNull
+  default String getPageSizeVariableName() {
+    return "pageSize";
+  }
 
-  List<User> selectUsers2(UserListParam param);
-
-  Page<User> selectPage(UserListParam param);
-
-  Page<User> selectPage1(String name, int pageIndex, int pageSize);
-
-  Page<User> selectPage2(String name, @Param("pageNum") int pageIndex, int pageSize);
+  @NotNull
+  <T> Page<T> createPage(Integer pageNum, Integer pageSize, Integer total, Collection<T> records);
 }

@@ -86,8 +86,7 @@ public class BatchExecutor extends BaseExecutor {
       flushStatements();
       StatementHandler handler = extensionFactory.newStatementHandler(wrapper, ms, parameterObject, rowBounds,
           resultHandler, boundSql);
-      Connection connection = getConnection(ms.getStatementLog());
-      stmt = handler.prepare(connection, transaction.getTimeout());
+      stmt = prepareStatement(handler, ms);
       handler.parameterize(stmt);
       return handler.query(stmt, resultHandler);
     } finally {
@@ -96,12 +95,17 @@ public class BatchExecutor extends BaseExecutor {
   }
 
   @Override
+  public Statement prepareStatement(StatementHandler handler, MappedStatement mappedStatement) throws SQLException {
+    Connection connection = getConnection(mappedStatement.getStatementLog());
+    return handler.prepare(connection, transaction.getTimeout());
+  }
+
+  @Override
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
       throws SQLException {
     flushStatements();
     StatementHandler handler = extensionFactory.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
-    Connection connection = getConnection(ms.getStatementLog());
-    Statement stmt = handler.prepare(connection, transaction.getTimeout());
+    Statement stmt = prepareStatement(handler, ms);
     handler.parameterize(stmt);
     Cursor<E> cursor = handler.queryCursor(stmt);
     stmt.closeOnCompletion();

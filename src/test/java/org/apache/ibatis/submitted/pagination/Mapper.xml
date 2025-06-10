@@ -39,4 +39,27 @@
     where name like '%${name}%'
     <pagination/>
   </select>
+
+  <select id="selectCount" resultType="int">
+    select count(*) from users
+    where name like '%${name}%'
+  </select>
+
+  <select id="selectPage" resultType="org.apache.ibatis.submitted.pagination.User" countSql="selectCount">
+    select * from users
+    where name like '%${name}%'
+    <pagination/>
+  </select>
+
+  <select id="selectPage1" resultType="org.apache.ibatis.submitted.pagination.User" countSql="selectCount">
+    select * from users
+    where name like '%${name}%'
+    <pagination page-num="pageNum" page-size="pageSize"/>
+  </select>
+
+  <select id="selectPage2" resultType="org.apache.ibatis.submitted.pagination.User" countSql="selectCount">
+    select * from users
+    where name like '%${name}%'
+    <pagination page-num="pageNum" page-size="pageSize"/>
+  </select>
 </mapper>

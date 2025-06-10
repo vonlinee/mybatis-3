@@ -60,6 +60,11 @@ public final class MappedStatement {
   private ParamNameResolver paramNameResolver;
   private boolean dirtySelect;
 
+  /**
+   * a {@link MappedStatement#id} that returns a count
+   */
+  private String countStatement;
+
   MappedStatement() {
     // constructor disabled
   }
@@ -120,6 +125,11 @@ public final class MappedStatement {
 
     public Builder statementType(StatementType statementType) {
       mappedStatement.statementType = statementType;
+      return this;
+    }
+
+    public Builder countStatement(String countStatement) {
+      mappedStatement.countStatement = countStatement;
       return this;
     }
 
@@ -327,4 +337,11 @@ public final class MappedStatement {
     return in.split(",");
   }
 
+  public String getCountStatement() {
+    return countStatement;
+  }
+
+  public void setCountStatement(String countStatement) {
+    this.countStatement = countStatement;
+  }
 }

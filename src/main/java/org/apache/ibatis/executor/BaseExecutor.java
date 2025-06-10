@@ -29,6 +29,7 @@ import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.executor.result.Cursor;
 import org.apache.ibatis.executor.statement.JdbcUtils;
+import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.logging.jdbc.ConnectionLogger;
@@ -376,4 +377,7 @@ public abstract class BaseExecutor implements Executor {
   public void setExecutorWrapper(Executor wrapper) {
     this.wrapper = wrapper;
   }
+
+  protected abstract Statement prepareStatement(StatementHandler handler, MappedStatement mappedStatement)
+      throws SQLException;
 }

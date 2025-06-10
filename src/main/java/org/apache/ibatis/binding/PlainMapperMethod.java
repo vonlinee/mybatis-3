@@ -25,12 +25,15 @@ import java.util.Optional;
 
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.builder.Configuration;
+import org.apache.ibatis.executor.PaginationHandler;
 import org.apache.ibatis.executor.result.Cursor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.reflection.TypeParameterResolver;
+import org.apache.ibatis.session.Page;
+import org.apache.ibatis.session.Pagination;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
@@ -111,7 +114,7 @@ class PlainMapperMethod extends MapperMethod {
 
   private Object execute(SqlSession sqlSession, Object[] args) {
     SqlCommand command = this.command;
-    Object result;
+    Object result = null;
     switch (command.getType()) {
       case INSERT: {
         Object param = convertArgsToSqlCommandParam(args);
@@ -131,13 +134,14 @@ class PlainMapperMethod extends MapperMethod {
       case SELECT:
         if (signature.returnsVoid() && signature.hasResultHandler()) {
           executeWithResultHandler(sqlSession, args);
-          result = null;
         } else if (signature.returnsMany()) {
           result = executeForMany(sqlSession, args);
         } else if (signature.returnsMap()) {
           result = executeForMap(sqlSession, args);
         } else if (signature.returnsCursor()) {
           result = executeForCursor(sqlSession, args);
+        } else if (Page.class.isAssignableFrom(signature.getReturnType())) {
+          result = executeForPage(sqlSession, args);
         } else {
           Object param = convertArgsToSqlCommandParam(args);
           result = sqlSession.selectOne(command.getName(), param);
@@ -194,6 +198,50 @@ class PlainMapperMethod extends MapperMethod {
     } else {
       sqlSession.select(command.getName(), param, signature.extractResultHandler(args));
     }
+  }
+
+  public <E> Page<E> executeForPage(SqlSession sqlSession, Object[] args) {
+    final Object param = convertArgsToSqlCommandParam(args);
+    List<E> list = sqlSession.selectList(command.getName(), param, RowBounds.DEFAULT);
+    Configuration configuration = sqlSession.getConfiguration();
+    MappedStatement ms = configuration.getMappedStatement(command.getName());
+
+    PaginationHandler paginationHandler = configuration.getPaginationHandler();
+    boolean foundPageData = false;
+    Integer pageNum = null, pageSize = null;
+    if (param instanceof Pagination) {
+      Pagination<?> paginationParam = (Pagination<?>) param;
+      pageNum = paginationParam.getPageNum();
+      pageSize = paginationParam.getPageSize();
+      foundPageData = true;
+    } else if (param instanceof ParamMap) {
+      ParamMap paramMap = (ParamMap) param;
+      pageNum = paramMap.getInt(paginationHandler.getPageNumVariableName());
+      pageSize = paramMap.getInt(paginationHandler.getPageSizeVariableName());
+      foundPageData = true;
+    }
+    if (!foundPageData) {
+      throw new BindingException(
+          "cannot find pageNum and pageSize from parameters, parameter object neither a sub type of "
+              + Pagination.class.getName() + ", nor contains pageNum[" + paginationHandler.getPageNumVariableName()
+              + "] and pageSize[" + paginationHandler.getPageSizeVariableName() + "] in paramMap");
+    }
+    Page<E> page;
+    if (ms.getCountStatement() == null) {
+      // cannot fetch total
+      page = paginationHandler.createPage(pageNum, pageSize, -1, list);
+    } else {
+      // fetch count
+      Object totalCount = sqlSession.selectOne(ms.getCountStatement(), param);
+      if (totalCount instanceof Number) {
+        page = paginationHandler.createPage(pageNum, pageSize, ((Number) totalCount).intValue(), list);
+      } else if (totalCount == null) {
+        page = paginationHandler.createPage(pageNum, pageSize, -1, list);
+      } else {
+        throw new BindingException("count statement should return a number, but " + totalCount.getClass());
+      }
+    }
+    return page;
   }
 
   public <E> Object executeForMany(SqlSession sqlSession, Object[] args) {

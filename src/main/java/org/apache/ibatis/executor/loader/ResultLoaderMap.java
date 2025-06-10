@@ -22,6 +22,7 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -33,6 +34,7 @@ import org.apache.ibatis.executor.BaseExecutor;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.result.Cursor;
+import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.mapping.BoundSql;
@@ -307,6 +309,12 @@ public class ResultLoaderMap {
 
     @Override
     protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
+        throws SQLException {
+      throw new UnsupportedOperationException("Not supported.");
+    }
+
+    @Override
+    protected Statement prepareStatement(StatementHandler handler, MappedStatement mappedStatement)
         throws SQLException {
       throw new UnsupportedOperationException("Not supported.");
     }

@@ -13,24 +13,30 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.submitted.pagination;
+package org.apache.ibatis.session;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.session.Page;
+/**
+ * @param <T>
+ *
+ * @see Pagination
+ */
+public interface Page<T> {
 
-public interface Mapper {
+  void setTotal(int total);
 
-  List<User> selectUsers(UserListParam param);
+  int getTotal();
 
-  List<User> selectUsers1(UserListParam param);
+  void setPageNum(int pageNum);
 
-  List<User> selectUsers2(UserListParam param);
+  int getPageNum();
 
-  Page<User> selectPage(UserListParam param);
+  void setPageSize(int pageSize);
 
-  Page<User> selectPage1(String name, int pageIndex, int pageSize);
+  int getPageSize();
 
-  Page<User> selectPage2(String name, @Param("pageNum") int pageIndex, int pageSize);
+  void setRecords(List<T> records);
+
+  List<T> getRecords();
 }

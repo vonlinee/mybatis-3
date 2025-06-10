@@ -26,7 +26,6 @@ import java.util.Map;
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.result.Cursor;
 import org.apache.ibatis.executor.statement.StatementHandler;
-import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.ResultHandler;
@@ -47,7 +46,7 @@ public class ReuseExecutor extends BaseExecutor {
   @Override
   public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
     StatementHandler handler = extensionFactory.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
-    Statement stmt = prepareStatement(handler, ms.getStatementLog());
+    Statement stmt = prepareStatement(handler, ms);
     return handler.update(stmt);
   }
 
@@ -56,7 +55,7 @@ public class ReuseExecutor extends BaseExecutor {
       BoundSql boundSql) throws SQLException {
     StatementHandler handler = extensionFactory.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler,
         boundSql);
-    Statement stmt = prepareStatement(handler, ms.getStatementLog());
+    Statement stmt = prepareStatement(handler, ms);
     return handler.query(stmt, resultHandler);
   }
 
@@ -64,7 +63,7 @@ public class ReuseExecutor extends BaseExecutor {
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
       throws SQLException {
     StatementHandler handler = extensionFactory.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
-    Statement stmt = prepareStatement(handler, ms.getStatementLog());
+    Statement stmt = prepareStatement(handler, ms);
     return handler.queryCursor(stmt);
   }
 
@@ -77,7 +76,8 @@ public class ReuseExecutor extends BaseExecutor {
     return Collections.emptyList();
   }
 
-  private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
+  @Override
+  public Statement prepareStatement(StatementHandler handler, MappedStatement mappedStatement) throws SQLException {
     Statement stmt;
     BoundSql boundSql = handler.getBoundSql();
     String sql = boundSql.getSql();
@@ -85,7 +85,7 @@ public class ReuseExecutor extends BaseExecutor {
       stmt = getStatement(sql);
       applyTransactionTimeout(stmt);
     } else {
-      Connection connection = getConnection(statementLog);
+      Connection connection = getConnection(mappedStatement.getStatementLog());
       stmt = handler.prepare(connection, transaction.getTimeout());
       putStatement(sql, stmt);
     }

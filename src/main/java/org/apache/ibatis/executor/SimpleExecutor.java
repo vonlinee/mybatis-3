@@ -24,7 +24,6 @@ import java.util.List;
 import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.executor.result.Cursor;
 import org.apache.ibatis.executor.statement.StatementHandler;
-import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.ResultHandler;
@@ -46,7 +45,7 @@ public class SimpleExecutor extends BaseExecutor {
     try {
       StatementHandler handler = extensionFactory.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null,
           null);
-      stmt = prepareStatement(handler, ms.getStatementLog());
+      stmt = prepareStatement(handler, ms);
       return handler.update(stmt);
     } finally {
       closeStatement(stmt);
@@ -60,7 +59,7 @@ public class SimpleExecutor extends BaseExecutor {
     try {
       StatementHandler handler = extensionFactory.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler,
           boundSql);
-      stmt = prepareStatement(handler, ms.getStatementLog());
+      stmt = prepareStatement(handler, ms);
       return handler.query(stmt, resultHandler);
     } finally {
       closeStatement(stmt);
@@ -71,7 +70,7 @@ public class SimpleExecutor extends BaseExecutor {
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
       throws SQLException {
     StatementHandler handler = extensionFactory.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
-    Statement stmt = prepareStatement(handler, ms.getStatementLog());
+    Statement stmt = prepareStatement(handler, ms);
     Cursor<E> cursor = handler.queryCursor(stmt);
     stmt.closeOnCompletion();
     return cursor;
@@ -82,9 +81,10 @@ public class SimpleExecutor extends BaseExecutor {
     return Collections.emptyList();
   }
 
-  private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
+  @Override
+  public Statement prepareStatement(StatementHandler handler, MappedStatement mappedStatement) throws SQLException {
     Statement stmt;
-    Connection connection = getConnection(statementLog);
+    Connection connection = getConnection(mappedStatement.getStatementLog());
     stmt = handler.prepare(connection, transaction.getTimeout());
     handler.parameterize(stmt);
     return stmt;

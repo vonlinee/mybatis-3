@@ -26,7 +26,9 @@ import java.util.Set;
 
 import org.apache.ibatis.binding.MapperRegistry;
 import org.apache.ibatis.cache.Cache;
+import org.apache.ibatis.executor.DefaultPaginationHandler;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.PaginationHandler;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.loader.ProxyFactory;
 import org.apache.ibatis.executor.loader.javassist.JavassistProxyFactory;
@@ -140,6 +142,8 @@ public class Configuration extends ConfigurationElementHolder {
 
   protected final Set<String> loadedResources = new HashSet<>();
   protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers");
+
+  protected final PaginationHandler paginationHandler = new DefaultPaginationHandler();
 
   /*
    * A map holds cache-ref relationship. The key is the namespace that references a cache bound to another namespace and
@@ -519,6 +523,10 @@ public class Configuration extends ConfigurationElementHolder {
 
   public TypeHandlerRegistry getTypeHandlerRegistry() {
     return typeHandlerRegistry;
+  }
+
+  public PaginationHandler getPaginationHandler() {
+    return paginationHandler;
   }
 
   /**

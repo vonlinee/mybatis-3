@@ -15,12 +15,17 @@
  */
 package org.apache.ibatis.submitted.pagination;
 
+import static com.googlecode.catchexception.apis.BDDCatchException.caughtException;
+import static com.googlecode.catchexception.apis.BDDCatchException.when;
+import static org.assertj.core.api.BDDAssertions.then;
+
 import java.io.Reader;
 import java.util.List;
 
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
+import org.apache.ibatis.session.Page;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -65,6 +70,53 @@ class PaginationTest {
       param.setPageSize(20);
       List<User> users1 = mapper.selectUsers1(param);
       Assertions.assertEquals(20, users1.size());
+    }
+  }
+
+  @Test
+  void shouldSelectPageWithPaginationAsParam() {
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+      Mapper mapper = sqlSession.getMapper(Mapper.class);
+      UserListParam param = new UserListParam();
+      param.setPageNum(1);
+      param.setPageSize(10);
+      Page<User> page = mapper.selectPage(param);
+      Assertions.assertEquals(1, page.getPageNum());
+      Assertions.assertEquals(10, page.getPageSize());
+      Assertions.assertEquals(23, page.getTotal());
+      Assertions.assertEquals(10, page.getRecords().size());
+    }
+  }
+
+  @Test
+  void shouldSelectPage() {
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+      Mapper mapper = sqlSession.getMapper(Mapper.class);
+
+      UserListParam param = new UserListParam();
+      param.setPageNum(1);
+      param.setPageSize(10);
+
+      when(() -> mapper.selectPage1("", 1, 10));
+      then(caughtException()).hasRootCauseMessage(
+          "Parameter 'pageNum' not found. Available parameters are [pageIndex, name, pageSize, param3, param1, param2]");
+    }
+  }
+
+  @Test
+  void shouldSelectPageWithCustomPageVariableName() {
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+      Mapper mapper = sqlSession.getMapper(Mapper.class);
+
+      UserListParam param = new UserListParam();
+      param.setPageNum(1);
+      param.setPageSize(10);
+      Page<User> page = mapper.selectPage2("", 1, 10);
+
+      Assertions.assertEquals(1, page.getPageNum());
+      Assertions.assertEquals(10, page.getPageSize());
+      Assertions.assertEquals(23, page.getTotal());
+      Assertions.assertEquals(10, page.getRecords().size());
     }
   }
 }
