@@ -72,9 +72,7 @@ public class JdbcTransaction implements Transaction {
   @Override
   public void commit() throws SQLException {
     if (connection != null && !connection.getAutoCommit()) {
-      if (log.isDebugEnabled()) {
-        log.debug("Committing JDBC Connection [" + connection + "]");
-      }
+      log.debugIfEnabled("Committing JDBC Connection [" + connection + "]");
       connection.commit();
     }
   }
@@ -82,9 +80,7 @@ public class JdbcTransaction implements Transaction {
   @Override
   public void rollback() throws SQLException {
     if (connection != null && !connection.getAutoCommit()) {
-      if (log.isDebugEnabled()) {
-        log.debug("Rolling back JDBC Connection [" + connection + "]");
-      }
+      log.debugIfEnabled("Rolling back JDBC Connection [" + connection + "]");
       connection.rollback();
     }
   }
@@ -93,9 +89,7 @@ public class JdbcTransaction implements Transaction {
   public void close() throws SQLException {
     if (connection != null) {
       resetAutoCommit();
-      if (log.isDebugEnabled()) {
-        log.debug("Closing JDBC Connection [" + connection + "]");
-      }
+      log.debugIfEnabled("Closing JDBC Connection [" + connection + "]");
       connection.close();
     }
   }
@@ -103,9 +97,7 @@ public class JdbcTransaction implements Transaction {
   protected void setDesiredAutoCommit(boolean desiredAutoCommit) {
     try {
       if (connection.getAutoCommit() != desiredAutoCommit) {
-        if (log.isDebugEnabled()) {
-          log.debug("Setting autocommit to " + desiredAutoCommit + " on JDBC Connection [" + connection + "]");
-        }
+        log.debugIfEnabled("Setting autocommit to " + desiredAutoCommit + " on JDBC Connection [" + connection + "]");
         connection.setAutoCommit(desiredAutoCommit);
       }
     } catch (SQLException e) {
@@ -126,9 +118,7 @@ public class JdbcTransaction implements Transaction {
         // and they mandate a commit/rollback before closing the connection.
         // A workaround is setting the autocommit to true before closing the connection.
         // Sybase throws an exception here.
-        if (log.isDebugEnabled()) {
-          log.debug("Resetting autocommit to true on JDBC Connection [" + connection + "]");
-        }
+        log.debugIfEnabled("Resetting autocommit to true on JDBC Connection [" + connection + "]");
         connection.setAutoCommit(true);
       }
     } catch (SQLException e) {

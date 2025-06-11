@@ -19,6 +19,7 @@ import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -611,5 +612,21 @@ public class MapperBuilderAssistant extends BaseBuilder {
     Objects.requireNonNull(statementId, "statement id cannot be null");
     int lastPeriod = statementId.lastIndexOf('.');
     return lastPeriod > 0 ? statementId.substring(0, lastPeriod) : null;
+  }
+
+  public static void sortParameterMappings(List<ParameterMapping> mappings) {
+    if (CollectionUtils.isEmpty(mappings)) {
+      return;
+    }
+    mappings.sort(Comparator.comparing(ParameterMapping::getProperty));
+  }
+
+  public static void mergeParameterMappings(List<ParameterMapping> mappings) {
+    if (CollectionUtils.isEmpty(mappings)) {
+      return;
+    }
+    HashSet<ParameterMapping> parameterMappings = new HashSet<>(mappings);
+    mappings.clear();
+    mappings.addAll(parameterMappings);
   }
 }

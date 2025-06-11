@@ -43,7 +43,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
    *
    * @return the count of the given key.
    */
-  int count(K key);
+  int size(K key);
 
   /**
    * Return the first value for the given key.
@@ -159,6 +159,11 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
    */
   Map<K, V> toSingleValueMap();
 
+  /**
+   * @see Map#values()
+   *
+   * @return all values of all keys
+   */
   default List<V> flattenValues() {
     return this.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
   }

@@ -53,7 +53,7 @@ class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
   // MultiValueMap implementation
 
   @Override
-  public int count(K key) {
+  public int size(K key) {
     List<V> values = this.targetMap.get(key);
     if (values == null) {
       return 0;

@@ -15,7 +15,10 @@
  */
 package org.apache.ibatis.mapping;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
+import java.util.Comparator;
+import java.util.Objects;
 
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
@@ -24,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * @author Clinton Begin
  */
-public class ParameterMapping {
+public class ParameterMapping implements Comparator<ParameterMapping>, Serializable {
 
   private static final Object UNSET = new Object();
 
@@ -52,6 +55,36 @@ public class ParameterMapping {
   private Object value = UNSET;
 
   public ParameterMapping() {
+  }
+
+  @Override
+  public int compare(ParameterMapping o1, ParameterMapping o2) {
+    if (o1.getProperty() == null) {
+      return -1;
+    } else if (o2.getProperty() == null) {
+      return 0;
+    }
+    return o1.getProperty().compareTo(o2.getProperty());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (!(o instanceof ParameterMapping))
+      return false;
+    ParameterMapping that = (ParameterMapping) o;
+    return Objects.equals(property, that.property) && mode == that.mode && Objects.equals(javaType, that.javaType)
+        && jdbcType == that.jdbcType && Objects.equals(numericScale, that.numericScale)
+        && Objects.equals(typeHandler, that.typeHandler) && Objects.equals(javaTypeName, that.javaTypeName)
+        && Objects.equals(typeHandlerName, that.typeHandlerName) && Objects.equals(resultMapId, that.resultMapId)
+        && Objects.equals(jdbcTypeName, that.jdbcTypeName) && Objects.equals(expression, that.expression);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(property, mode, javaType, jdbcType, numericScale, typeHandler, javaTypeName, typeHandlerName,
+        resultMapId, jdbcTypeName, expression);
   }
 
   public static class Builder {
@@ -223,13 +256,10 @@ public class ParameterMapping {
 
   @Override
   public String toString() {
-    // sb.append("configuration=").append(configuration); // configuration doesn't have a useful .toString()
-    String sb = "ParameterMapping{" + "property='" + property + '\'' + ", mode=" + mode + ", javaType=" + javaType
-        + ", jdbcType=" + jdbcType + ", numericScale=" + numericScale +
-        // sb.append(", typeHandler=").append(typeHandler); // typeHandler also doesn't have a useful .toString()
-        ", resultMapId='" + resultMapId + '\'' + ", jdbcTypeName='" + jdbcTypeName + '\'' + ", expression='"
-        + expression + '\'' + ", value='" + value + '\'' + '}';
-    return sb;
+    return "ParameterMapping{" + "property='" + property + '\'' + ", mode=" + mode + ", javaType=" + javaType
+        + ", jdbcType=" + jdbcType + ", numericScale=" + numericScale + ", resultMapId='" + resultMapId + '\''
+        + ", jdbcTypeName='" + jdbcTypeName + '\'' + ", expression='" + expression + '\'' + ", value='" + value + '\''
+        + '}';
   }
 
   public void setTypeHandler(TypeHandler<?> typeHandler) {

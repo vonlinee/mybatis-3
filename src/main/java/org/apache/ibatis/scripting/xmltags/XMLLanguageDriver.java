@@ -32,6 +32,7 @@ import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.internal.util.ObjectUtils;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.PropertyParser;
@@ -158,6 +159,7 @@ public class XMLLanguageDriver implements LanguageDriver {
     } else if (sqlNode instanceof ForEachSqlNode) {
       // foreach
       ParameterMapping pm = new ParameterMapping();
+      pm.setMode(ParameterMode.IN);
       pm.setProperty(((ForEachSqlNode) sqlNode).getCollectionExpression());
       pm.setJavaType(Collection.class);
       parameterMappings.add(pm);
@@ -177,6 +179,7 @@ public class XMLLanguageDriver implements LanguageDriver {
       }
     } else if (sqlNode instanceof VarDeclSqlNode) {
       ParameterMapping pm = new ParameterMapping();
+      pm.setMode(ParameterMode.IN);
       pm.setProperty(((VarDeclSqlNode) sqlNode).getExpression());
       pm.setJavaType(Object.class);
       parameterMappings.add(pm);

@@ -442,7 +442,7 @@ public final class CollectionUtils {
   @NotNull
   public static <E> List<E> asArrayList(E... elements) {
     if (elements == null || elements.length == 0) {
-      return new ArrayList<>(0);
+      return emptyList();
     }
     return new ArrayList<>(Arrays.asList(elements));
   }
@@ -589,7 +589,7 @@ public final class CollectionUtils {
   private static class EmptyMultiValueMap<K, V> implements MultiValueMap<K, V> {
 
     @Override
-    public int count(K key) {
+    public int size(K key) {
       return 0;
     }
 

@@ -54,6 +54,9 @@ public class XMLLanguageDriverTest extends BaseDataTest {
 
     List<ParameterMapping> mappings = driver.collectParameters(ms.getSqlSource());
 
+    MapperBuilderAssistant.mergeParameterMappings(mappings);
+
+    MapperBuilderAssistant.sortParameterMappings(mappings);
     // TODO not finished
     Assertions.assertFalse(mappings.isEmpty());
   }
