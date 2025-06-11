@@ -82,10 +82,9 @@ public enum AutoMappingUnknownColumnBehavior {
    */
   private static String buildMessage(MappedStatement mappedStatement, String columnName, String property,
       Type propertyType) {
-    return new StringBuilder("Unknown column is detected on '").append(mappedStatement.getId())
-        .append("' auto-mapping. Mapping parameters are ").append("[").append("columnName=").append(columnName)
-        .append(",").append("propertyName=").append(property).append(",").append("propertyType=")
-        .append(propertyType != null ? propertyType.getTypeName() : null).append("]").toString();
+    return "Unknown column is detected on '" + mappedStatement.getId() + "' auto-mapping. Mapping parameters are " + "["
+        + "columnName=" + columnName + "," + "propertyName=" + property + "," + "propertyType="
+        + (propertyType != null ? propertyType.getTypeName() : null) + "]";
   }
 
   private static class LogHolder {

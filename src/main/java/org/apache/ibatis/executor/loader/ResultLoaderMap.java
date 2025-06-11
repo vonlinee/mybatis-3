@@ -118,11 +118,11 @@ public class ResultLoaderMap {
      */
     private static final String FACTORY_METHOD = "getConfiguration";
     /**
-     * Object to check whether we went through serialization..
+     * Object to check whether we went through serialization.
      */
     private final transient Object serializationCheck = new Object();
     /**
-     * Meta object which sets loaded properties.
+     * Meta Object which sets loaded properties.
      */
     private transient MetaObject metaResultObject;
     /**
@@ -178,7 +178,7 @@ public class ResultLoaderMap {
 
     public void load() throws SQLException {
       /*
-       * These field should not be null unless the loadpair was serialized. Yet in that case this method should not be
+       * These field should not be null unless the load pair was serialized. Yet in that case this method should not be
        * called.
        */
       if (this.metaResultObject == null) {

@@ -122,7 +122,7 @@ public class JdbcTransaction implements Transaction {
     try {
       if (!skipSetAutoCommitOnClose && !connection.getAutoCommit()) {
         // MyBatis does not call commit/rollback on a connection if just selects were performed.
-        // Some databases start transactions with select statements
+        // Some databases start transactions with select statements,
         // and they mandate a commit/rollback before closing the connection.
         // A workaround is setting the autocommit to true before closing the connection.
         // Sybase throws an exception here.

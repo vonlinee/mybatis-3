@@ -315,12 +315,11 @@ public class ResultMapping {
 
   @Override
   public String toString() {
-    String sb = "ResultMapping{" + "property='" + property + '\'' + ", column='" + column + '\'' + ", javaType="
-        + javaType + ", jdbcType=" + jdbcType + ", nestedResultMapId='" + nestedResultMapId + '\'' + ", nestedQueryId='"
+    return "ResultMapping{" + "property='" + property + '\'' + ", column='" + column + '\'' + ", javaType=" + javaType
+        + ", jdbcType=" + jdbcType + ", nestedResultMapId='" + nestedResultMapId + '\'' + ", nestedQueryId='"
         + nestedQueryId + '\'' + ", notNullColumns=" + notNullColumns + ", columnPrefix='" + columnPrefix + '\''
         + ", flags=" + flags + ", composites=" + composites + ", resultSet='" + resultSet + '\'' + ", foreignColumn='"
         + foreignColumn + '\'' + ", lazy=" + lazy + '}';
-    return sb;
   }
 
 }

@@ -42,7 +42,7 @@ public interface RowMapper<T> {
    * @param rowNum
    *          the number of the current row
    *
-   * @return the result object for the current row (may be {@code null})
+   * @return the result object for the current row (maybe {@code null})
    *
    * @throws SQLException
    *           if an SQLException is encountered while getting column values (that is, there's no need to catch
