@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.mapping;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.ibatis.internal.util.CollectionUtils;
@@ -29,6 +30,12 @@ public class ParameterMap {
   protected List<ParameterMapping> parameterMappings;
 
   ParameterMap() {
+  }
+
+  public ParameterMap(String id) {
+    this.id = id;
+    this.type = null;
+    this.parameterMappings = Collections.emptyList();
   }
 
   public static class Builder {

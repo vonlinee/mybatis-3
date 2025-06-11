@@ -99,7 +99,7 @@ class DynamicSqlSourceTest extends BaseDataTest {
   void shouldConditionallyChooseFirst() throws Exception {
     final String expected = "SELECT * FROM BLOG WHERE CATEGORY = ?";
     DynamicSqlSource source = createDynamicSqlSource(new TextSqlNode("SELECT * FROM BLOG"),
-        new ChooseSqlNode(new ArrayList<>() {
+        new ChooseSqlNode(new ArrayList<>(2) {
           {
             add(new IfSqlNode(mixedContents(new TextSqlNode("WHERE CATEGORY = ?")), "true"));
             add(new IfSqlNode(mixedContents(new TextSqlNode("WHERE CATEGORY = 'NONE'")), "false"));
@@ -113,7 +113,7 @@ class DynamicSqlSourceTest extends BaseDataTest {
   void shouldConditionallyChooseSecond() throws Exception {
     final String expected = "SELECT * FROM BLOG WHERE CATEGORY = 'NONE'";
     DynamicSqlSource source = createDynamicSqlSource(new TextSqlNode("SELECT * FROM BLOG"),
-        new ChooseSqlNode(new ArrayList<>() {
+        new ChooseSqlNode(new ArrayList<>(2) {
           {
             add(new IfSqlNode(mixedContents(new TextSqlNode("WHERE CATEGORY = ?")), "false"));
             add(new IfSqlNode(mixedContents(new TextSqlNode("WHERE CATEGORY = 'NONE'")), "true"));
@@ -322,7 +322,7 @@ class DynamicSqlSourceTest extends BaseDataTest {
   @Test
   void cornerCase_ForeachComesFirst() throws Exception {
     final Map<String, Object> param = new HashMap<>();
-    List<Bean> beans = new ArrayList<>();
+    List<Bean> beans = new ArrayList<>(2);
     beans.add(new Bean("bean id 1"));
     beans.add(new Bean("bean id 2"));
     param.put("beans", beans);

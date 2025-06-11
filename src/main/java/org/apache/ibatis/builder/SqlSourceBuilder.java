@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.mapping.SqlSource;
 
 /**
  * @author Clinton Begin
@@ -30,7 +29,7 @@ public class SqlSourceBuilder {
     super();
   }
 
-  public static SqlSource buildSqlSource(Configuration configuration, String sql,
+  public static StaticSqlSource buildSqlSource(Configuration configuration, String sql,
       List<ParameterMapping> parameterMappings) {
     return new StaticSqlSource(
         configuration.isShrinkWhitespacesInSql() ? SqlSourceBuilder.removeExtraWhitespaces(sql) : sql,

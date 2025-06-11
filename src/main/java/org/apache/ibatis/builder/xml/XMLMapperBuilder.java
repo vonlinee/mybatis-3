@@ -34,6 +34,7 @@ import org.apache.ibatis.builder.ResultMapResolver;
 import org.apache.ibatis.builder.ResultMappingConstructorResolver;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.ErrorContext;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.ParameterMap;
@@ -107,8 +108,8 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   protected void configurationElement(XNode context) {
     try {
-      String namespace = context.getStringAttribute("namespace");
-      if (namespace == null || namespace.isEmpty()) {
+      final String namespace = context.getStringAttribute("namespace");
+      if (StringUtils.isEmpty(namespace)) {
         throw new BuilderException("Mapper's namespace cannot be empty");
       }
       assistant.setCurrentNamespace(namespace);
@@ -125,27 +126,26 @@ public class XMLMapperBuilder extends BaseBuilder {
       sqlElement(namespace, context.evalNodes("/mapper/sql"));
 
       // statements
-      buildStatementFromContext(namespace, context.evalNodes("select|insert|update|delete"));
+      List<XNode> statementNodes = context.evalNodes("select|insert|update|delete");
+
+      if (configuration.getDatabaseId() != null) {
+        buildStatementFromContext(namespace, statementNodes, configuration.getDatabaseId());
+      }
+      buildStatementFromContext(namespace, statementNodes, null);
     } catch (Exception e) {
       throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
     }
   }
 
-  protected void buildStatementFromContext(String namespace, List<XNode> list) {
-    if (configuration.getDatabaseId() != null) {
-      buildStatementFromContext(namespace, list, configuration.getDatabaseId());
-    }
-    buildStatementFromContext(namespace, list, null);
-  }
-
   protected void buildStatementFromContext(String namespace, List<XNode> list, String requiredDatabaseId) {
+    final XMLStatementBuilder builder = new XMLStatementBuilder(configuration, assistant);
+    builder.setRequiredDatabaseId(requiredDatabaseId);
+    builder.setMapperClass(this.mapperClass);
     for (XNode context : list) {
-      final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, assistant, requiredDatabaseId,
-          mapperClass);
       try {
-        statementParser.parseStatementNode(context);
+        builder.parseStatementNode(context);
       } catch (IncompleteElementException e) {
-        configuration.addIncompleteStatement(new XMLStatementResolver(statementParser, context));
+        configuration.addIncompleteStatement(new XMLStatementResolver(builder, context));
       }
     }
   }

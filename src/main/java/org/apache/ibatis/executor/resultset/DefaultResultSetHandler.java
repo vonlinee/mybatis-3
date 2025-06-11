@@ -131,7 +131,7 @@ public class DefaultResultSetHandler extends BaseResultSetHandler {
     }
 
     String[] resultSets = mappedStatement.getResultSets();
-    if (resultSets != null) {
+    if (CollectionUtils.isNotEmpty(resultSets)) {
       while (rsw != null && resultSetCount < resultSets.length) {
         ResultMapping parentMapping = nextResultMaps.get(resultSets[resultSetCount]);
         if (parentMapping != null) {

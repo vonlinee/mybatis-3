@@ -16,7 +16,6 @@
 package org.apache.ibatis.mapping;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.ibatis.builder.Configuration;
@@ -24,6 +23,8 @@ import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
+import org.apache.ibatis.internal.util.CollectionUtils;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.reflection.ParamNameResolver;
@@ -32,7 +33,7 @@ import org.apache.ibatis.scripting.LanguageDriver;
 /**
  * @author Clinton Begin
  */
-public final class MappedStatement {
+public final class MappedStatement implements SqlSource {
 
   private String resource;
   private Configuration configuration;
@@ -79,7 +80,7 @@ public final class MappedStatement {
       mappedStatement.statementType = StatementType.PREPARED;
       mappedStatement.resultSetType = ResultSetType.DEFAULT;
       mappedStatement.parameterMap = new ParameterMap.Builder("defaultParameterMap", null, new ArrayList<>()).build();
-      mappedStatement.resultMaps = new ArrayList<>();
+      mappedStatement.resultMaps = new ArrayList<>(1);
       mappedStatement.sqlCommandType = sqlCommandType;
       mappedStatement.keyGenerator = configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType)
           ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
@@ -164,12 +165,12 @@ public final class MappedStatement {
     }
 
     public Builder keyProperty(String keyProperty) {
-      mappedStatement.keyProperties = delimitedStringToArray(keyProperty);
+      mappedStatement.keyProperties = StringUtils.delimitedStringToArray(keyProperty);
       return this;
     }
 
     public Builder keyColumn(String keyColumn) {
-      mappedStatement.keyColumns = delimitedStringToArray(keyColumn);
+      mappedStatement.keyColumns = StringUtils.delimitedStringToArray(keyColumn);
       return this;
     }
 
@@ -184,7 +185,7 @@ public final class MappedStatement {
     }
 
     public Builder resultSets(String resultSet) {
-      mappedStatement.resultSets = delimitedStringToArray(resultSet);
+      mappedStatement.resultSets = StringUtils.delimitedStringToArray(resultSet);
       return this;
     }
 
@@ -204,7 +205,7 @@ public final class MappedStatement {
       assert mappedStatement.sqlSource != null;
       assert mappedStatement.lang != null;
 
-      mappedStatement.resultMaps = Collections.unmodifiableList(mappedStatement.resultMaps);
+      mappedStatement.resultMaps = CollectionUtils.unmodifiableList(mappedStatement.resultMaps);
       return mappedStatement;
     }
   }
@@ -309,10 +310,11 @@ public final class MappedStatement {
     return paramNameResolver;
   }
 
+  @Override
   public BoundSql getBoundSql(Object parameterObject) {
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
-    if (parameterMappings == null || parameterMappings.isEmpty()) {
+    if (CollectionUtils.isEmpty(parameterMappings)) {
       boundSql = new BoundSql(boundSql.getSql(), parameterMap.getParameterMappings(), parameterObject);
     }
 
@@ -330,11 +332,9 @@ public final class MappedStatement {
     return boundSql;
   }
 
-  private static String[] delimitedStringToArray(String in) {
-    if (in == null || in.trim().isEmpty()) {
-      return null;
-    }
-    return in.split(",");
+  @Override
+  public List<ParameterMapping> getParameterMappings() {
+    return parameterMap.getParameterMappings();
   }
 
   public String getCountStatement() {

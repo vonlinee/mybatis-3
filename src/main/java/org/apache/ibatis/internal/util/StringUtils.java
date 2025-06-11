@@ -740,4 +740,12 @@ public final class StringUtils {
     }
     return sb.toString();
   }
+
+  @Nullable
+  public static String[] delimitedStringToArray(String in) {
+    if (in == null || in.trim().isEmpty()) {
+      return null;
+    }
+    return in.split(",");
+  }
 }

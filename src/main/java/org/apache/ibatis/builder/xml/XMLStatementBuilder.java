@@ -38,6 +38,7 @@ import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.LanguageDriver;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -46,19 +47,28 @@ import org.jetbrains.annotations.Nullable;
 public class XMLStatementBuilder extends BaseBuilder {
 
   private final MapperBuilderAssistant assistant;
-  private final String requiredDatabaseId;
-  private final Class<?> mapperClass;
 
-  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant assistant, String databaseId,
-      Class<?> mapperClass) {
+  @Nullable
+  private String requiredDatabaseId;
+
+  @Nullable
+  private Class<?> mapperClass;
+
+  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant assistant) {
     super(configuration);
     this.assistant = assistant;
-    this.requiredDatabaseId = databaseId;
+  }
+
+  public void setMapperClass(@Nullable Class<?> mapperClass) {
     this.mapperClass = mapperClass;
   }
 
+  public void setRequiredDatabaseId(@Nullable String requiredDatabaseId) {
+    this.requiredDatabaseId = requiredDatabaseId;
+  }
+
   @Nullable
-  public MappedStatement parseStatementNode(XNode context) {
+  public MappedStatement parseStatementNode(@NotNull XNode context) {
     String id = context.getStringAttribute("id");
     String databaseId = context.getStringAttribute("databaseId");
 
@@ -78,6 +88,7 @@ public class XMLStatementBuilder extends BaseBuilder {
 
     String parameterType = context.getStringAttribute("parameterType");
     Class<?> parameterTypeClass = resolveClass(parameterType);
+
     ParamNameResolver paramNameResolver = null;
     if (parameterTypeClass == null && mapperClass != null) {
       List<Method> mapperMethods = Arrays.stream(mapperClass.getMethods())
