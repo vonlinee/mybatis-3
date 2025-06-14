@@ -122,4 +122,13 @@ public class CollectionUtilsTest {
       return "Blog{" + "id=" + id + ", title='" + title + '\'' + '}';
     }
   }
+
+  @Test
+  void useArraySet() {
+    ArraySet<Integer> set = new ArraySet<>();
+    set.add(1);
+    set.add(2);
+    set.add(2);
+    Assertions.assertEquals(2, set.size());
+  }
 }
