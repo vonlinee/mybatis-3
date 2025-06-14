@@ -18,6 +18,8 @@ package org.apache.ibatis.reflection;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * @author Clinton Begin
  */
@@ -40,4 +42,15 @@ public class ExceptionUtil {
     }
   }
 
+  @Nullable
+  public static Throwable extractThrowable(@Nullable Object[] arr) {
+    if (arr == null || arr.length == 0) {
+      return null;
+    }
+    final Object lastEntry = arr[arr.length - 1];
+    if (lastEntry instanceof Throwable) {
+      return (Throwable) lastEntry;
+    }
+    return null;
+  }
 }

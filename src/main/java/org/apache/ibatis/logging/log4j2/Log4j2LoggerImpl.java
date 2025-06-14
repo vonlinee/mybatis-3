@@ -70,6 +70,11 @@ public class Log4j2LoggerImpl implements Log {
   }
 
   @Override
+  public void info(String format, Object... arguments) {
+    log.info(format, arguments);
+  }
+
+  @Override
   public void error(String s, Throwable e) {
     log.error(MARKER, s, e);
   }
@@ -80,8 +85,18 @@ public class Log4j2LoggerImpl implements Log {
   }
 
   @Override
+  public void error(String format, Object... arguments) {
+    log.error(format, arguments);
+  }
+
+  @Override
   public void debug(String s) {
     log.debug(MARKER, s);
+  }
+
+  @Override
+  public void debug(String format, Object... arguments) {
+    log.debug(format, arguments);
   }
 
   @Override
@@ -100,6 +115,11 @@ public class Log4j2LoggerImpl implements Log {
   }
 
   @Override
+  public void trace(String format, Object... arguments) {
+    log.trace(format, arguments);
+  }
+
+  @Override
   public void warn(String s) {
     log.warn(MARKER, s);
   }
@@ -107,6 +127,11 @@ public class Log4j2LoggerImpl implements Log {
   @Override
   public void warn(String s, Throwable e) {
     log.warn(MARKER, s, e);
+  }
+
+  @Override
+  public void warn(String format, Object... arguments) {
+    log.warn(format, arguments);
   }
 
 }

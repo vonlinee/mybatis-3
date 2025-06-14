@@ -76,6 +76,11 @@ public class Log4j2AbstractLoggerImpl implements Log {
   }
 
   @Override
+  public void info(String format, Object... arguments) {
+    log.info(format, arguments);
+  }
+
+  @Override
   public void error(String s, Throwable e) {
     log.logIfEnabled(FQCN, Level.ERROR, MARKER, (Message) new SimpleMessage(s), e);
   }
@@ -86,8 +91,18 @@ public class Log4j2AbstractLoggerImpl implements Log {
   }
 
   @Override
+  public void error(String format, Object... arguments) {
+    log.error(format, arguments);
+  }
+
+  @Override
   public void debug(String s) {
     log.logIfEnabled(FQCN, Level.DEBUG, MARKER, (Message) new SimpleMessage(s), null);
+  }
+
+  @Override
+  public void debug(String format, Object... arguments) {
+    log.debug(format, arguments);
   }
 
   @Override
@@ -106,6 +121,11 @@ public class Log4j2AbstractLoggerImpl implements Log {
   }
 
   @Override
+  public void trace(String format, Object... arguments) {
+    log.trace(format, arguments);
+  }
+
+  @Override
   public void warn(String s) {
     log.logIfEnabled(FQCN, Level.WARN, MARKER, (Message) new SimpleMessage(s), null);
   }
@@ -113,6 +133,11 @@ public class Log4j2AbstractLoggerImpl implements Log {
   @Override
   public void warn(String s, Throwable e) {
     log.logIfEnabled(FQCN, Level.WARN, MARKER, (Message) new SimpleMessage(s), e);
+  }
+
+  @Override
+  public void warn(String format, Object... arguments) {
+    log.warn(format, arguments);
   }
 
 }

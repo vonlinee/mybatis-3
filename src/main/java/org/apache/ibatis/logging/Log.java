@@ -34,11 +34,17 @@ public interface Log {
 
   void info(String s, Throwable e);
 
+  void info(String format, Object... arguments);
+
   void error(String s, Throwable e);
 
   void error(String s);
 
+  void error(String format, Object... arguments);
+
   void debug(String s);
+
+  void debug(String format, Object... arguments);
 
   void debug(String s, Throwable e);
 
@@ -46,9 +52,13 @@ public interface Log {
 
   void trace(String s, Throwable e);
 
+  void trace(String format, Object... arguments);
+
   void warn(String s);
 
   void warn(String s, Throwable e);
+
+  void warn(String format, Object... arguments);
 
   default void debugIfEnabled(String s) {
     if (isDebugEnabled()) {

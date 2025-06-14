@@ -67,6 +67,11 @@ public class Jdk14LoggingImpl implements Log {
   }
 
   @Override
+  public void info(String format, Object... arguments) {
+    log.log(Level.INFO, format, arguments);
+  }
+
+  @Override
   public void error(String s, Throwable e) {
     log.log(Level.SEVERE, s, e);
   }
@@ -77,8 +82,18 @@ public class Jdk14LoggingImpl implements Log {
   }
 
   @Override
+  public void error(String format, Object... arguments) {
+    log.log(Level.SEVERE, format, arguments);
+  }
+
+  @Override
   public void debug(String s) {
     log.log(Level.FINE, s);
+  }
+
+  @Override
+  public void debug(String format, Object... arguments) {
+    log.log(Level.FINE, format, arguments);
   }
 
   @Override
@@ -97,6 +112,11 @@ public class Jdk14LoggingImpl implements Log {
   }
 
   @Override
+  public void trace(String format, Object... arguments) {
+    log.log(Level.INFO, format, arguments);
+  }
+
+  @Override
   public void warn(String s) {
     log.log(Level.WARNING, s);
   }
@@ -104,6 +124,11 @@ public class Jdk14LoggingImpl implements Log {
   @Override
   public void warn(String s, Throwable e) {
     log.log(Level.WARNING, s, e);
+  }
+
+  @Override
+  public void warn(String format, Object... arguments) {
+    log.log(Level.WARNING, format, arguments);
   }
 
 }

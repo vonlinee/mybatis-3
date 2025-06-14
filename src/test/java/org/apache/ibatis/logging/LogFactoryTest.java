@@ -74,6 +74,8 @@ class LogFactoryTest {
   void shouldUseSlf4j() {
     LogFactory.useSlf4jLogging();
     Log log = LogFactory.getLog(Object.class);
+
+    log.info("founded {} xxxx", 1, new RuntimeException());
     logSomething(log);
     assertEquals(log.getClass().getName(), Slf4jImpl.class.getName());
   }

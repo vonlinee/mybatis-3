@@ -39,7 +39,7 @@
     <appender-ref ref="lastEventSavedAppender"/>
   </logger>
 
-  <root level="error">
+  <root>
     <appender-ref ref="stdout"/>
   </root>
 

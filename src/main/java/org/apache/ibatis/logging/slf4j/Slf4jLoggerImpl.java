@@ -65,6 +65,11 @@ class Slf4jLoggerImpl implements Log {
   }
 
   @Override
+  public void info(String format, Object... arguments) {
+    log.info(format, arguments);
+  }
+
+  @Override
   public void error(String s, Throwable e) {
     log.error(s, e);
   }
@@ -75,8 +80,18 @@ class Slf4jLoggerImpl implements Log {
   }
 
   @Override
+  public void error(String format, Object... arguments) {
+    log.error(format, arguments);
+  }
+
+  @Override
   public void debug(String s) {
     log.debug(s);
+  }
+
+  @Override
+  public void debug(String format, Object... arguments) {
+    log.debug(format, arguments);
   }
 
   @Override
@@ -95,6 +110,11 @@ class Slf4jLoggerImpl implements Log {
   }
 
   @Override
+  public void trace(String format, Object... arguments) {
+    log.trace(format, arguments);
+  }
+
+  @Override
   public void warn(String s) {
     log.warn(s);
   }
@@ -102,6 +122,11 @@ class Slf4jLoggerImpl implements Log {
   @Override
   public void warn(String s, Throwable e) {
     log.warn(s, e);
+  }
+
+  @Override
+  public void warn(String format, Object... arguments) {
+    log.warn(format, arguments);
   }
 
 }

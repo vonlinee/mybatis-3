@@ -641,4 +641,23 @@ public final class ObjectUtils {
       return Arrays.toString((Object[]) obj);
     }
   }
+
+  /**
+   * @param arr
+   *          arr
+   *
+   * @return copied objects
+   */
+  public static Object[] trimmedLast(Object[] arr) {
+    if (arr == null || arr.length == 0) {
+      throw new IllegalArgumentException("null or empty array to trim");
+    }
+    final int trimmedLen = arr.length - 1;
+    if (trimmedLen == 0) {
+      return EMPTY_OBJECT_ARRAY;
+    }
+    Object[] trimmed = new Object[trimmedLen];
+    System.arraycopy(arr, 0, trimmed, 0, trimmedLen);
+    return trimmed;
+  }
 }

@@ -17,6 +17,8 @@ package org.apache.ibatis.logging.commons;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ibatis.internal.util.ObjectUtils;
+import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
  * @author Clinton Begin
@@ -65,6 +67,17 @@ public class JakartaCommonsLoggingImpl implements org.apache.ibatis.logging.Log 
   }
 
   @Override
+  public void info(String format, Object... arguments) {
+    Throwable throwable = ExceptionUtil.extractThrowable(arguments);
+    if (throwable == null) {
+      info(String.format(format, arguments));
+    } else {
+      arguments = ObjectUtils.trimmedLast(arguments);
+      info(String.format(format, arguments), throwable);
+    }
+  }
+
+  @Override
   public void error(String s, Throwable e) {
     log.error(s, e);
   }
@@ -75,8 +88,30 @@ public class JakartaCommonsLoggingImpl implements org.apache.ibatis.logging.Log 
   }
 
   @Override
+  public void error(String format, Object... arguments) {
+    Throwable throwable = ExceptionUtil.extractThrowable(arguments);
+    if (throwable == null) {
+      error(String.format(format, arguments));
+    } else {
+      arguments = ObjectUtils.trimmedLast(arguments);
+      error(String.format(format, arguments), throwable);
+    }
+  }
+
+  @Override
   public void debug(String s) {
     log.debug(s);
+  }
+
+  @Override
+  public void debug(String format, Object... arguments) {
+    Throwable throwable = ExceptionUtil.extractThrowable(arguments);
+    if (throwable == null) {
+      debug(String.format(format, arguments));
+    } else {
+      arguments = ObjectUtils.trimmedLast(arguments);
+      debug(String.format(format, arguments), throwable);
+    }
   }
 
   @Override
@@ -95,6 +130,17 @@ public class JakartaCommonsLoggingImpl implements org.apache.ibatis.logging.Log 
   }
 
   @Override
+  public void trace(String format, Object... arguments) {
+    Throwable throwable = ExceptionUtil.extractThrowable(arguments);
+    if (throwable == null) {
+      trace(String.format(format, arguments));
+    } else {
+      arguments = ObjectUtils.trimmedLast(arguments);
+      trace(String.format(format, arguments), throwable);
+    }
+  }
+
+  @Override
   public void warn(String s) {
     log.warn(s);
   }
@@ -102,6 +148,17 @@ public class JakartaCommonsLoggingImpl implements org.apache.ibatis.logging.Log 
   @Override
   public void warn(String s, Throwable e) {
     log.warn(s, e);
+  }
+
+  @Override
+  public void warn(String format, Object... arguments) {
+    Throwable throwable = ExceptionUtil.extractThrowable(arguments);
+    if (throwable == null) {
+      warn(String.format(format, arguments));
+    } else {
+      arguments = ObjectUtils.trimmedLast(arguments);
+      warn(String.format(format, arguments), throwable);
+    }
   }
 
 }

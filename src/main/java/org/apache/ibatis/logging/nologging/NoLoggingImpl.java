@@ -62,6 +62,11 @@ public class NoLoggingImpl implements Log {
   }
 
   @Override
+  public void info(String format, Object... arguments) {
+    // Do Nothing
+  }
+
+  @Override
   public void error(String s, Throwable e) {
     // Do Nothing
   }
@@ -72,7 +77,17 @@ public class NoLoggingImpl implements Log {
   }
 
   @Override
+  public void error(String format, Object... arguments) {
+    // Do Nothing
+  }
+
+  @Override
   public void debug(String s) {
+    // Do Nothing
+  }
+
+  @Override
+  public void debug(String format, Object... arguments) {
     // Do Nothing
   }
 
@@ -92,12 +107,22 @@ public class NoLoggingImpl implements Log {
   }
 
   @Override
+  public void trace(String format, Object... arguments) {
+    // Do Nothing
+  }
+
+  @Override
   public void warn(String s) {
     // Do Nothing
   }
 
   @Override
   public void warn(String s, Throwable e) {
+    // Do Nothing
+  }
+
+  @Override
+  public void warn(String format, Object... arguments) {
     // Do Nothing
   }
 

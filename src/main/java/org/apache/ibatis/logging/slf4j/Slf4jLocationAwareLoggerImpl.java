@@ -72,6 +72,19 @@ class Slf4jLocationAwareLoggerImpl implements Log {
   }
 
   @Override
+  public void info(String format, Object... arguments) {
+    if (arguments.length == 0) {
+      logger.info(format);
+    } else if (arguments.length == 1) {
+      logger.info(format, arguments[0]);
+    } else if (arguments.length == 2) {
+      logger.info(format, arguments[0], arguments[1]);
+    } else {
+      logger.info(format, arguments);
+    }
+  }
+
+  @Override
   public void error(String s, Throwable e) {
     logger.log(MARKER, FQCN, LocationAwareLogger.ERROR_INT, s, null, e);
   }
@@ -82,8 +95,38 @@ class Slf4jLocationAwareLoggerImpl implements Log {
   }
 
   @Override
+  public void error(String format, Object... arguments) {
+    if (arguments.length == 0) {
+      logger.error(format);
+    } else if (arguments.length == 1) {
+      logger.error(format, arguments[0]);
+    } else if (arguments.length == 2) {
+      logger.error(format, arguments[0], arguments[1]);
+    } else {
+      logger.error(format, arguments);
+    }
+  }
+
+  /**
+   * @param s
+   *          msg
+   */
+  @Override
   public void debug(String s) {
     logger.log(MARKER, FQCN, LocationAwareLogger.DEBUG_INT, s, null, null);
+  }
+
+  @Override
+  public void debug(String format, Object... arguments) {
+    if (arguments.length == 0) {
+      logger.debug(format);
+    } else if (arguments.length == 1) {
+      logger.debug(format, arguments[0]);
+    } else if (arguments.length == 2) {
+      logger.debug(format, arguments[0], arguments[1]);
+    } else {
+      logger.debug(format, arguments);
+    }
   }
 
   @Override
@@ -102,6 +145,19 @@ class Slf4jLocationAwareLoggerImpl implements Log {
   }
 
   @Override
+  public void trace(String format, Object... arguments) {
+    if (arguments.length == 0) {
+      logger.trace(format);
+    } else if (arguments.length == 1) {
+      logger.trace(format, arguments[0]);
+    } else if (arguments.length == 2) {
+      logger.trace(format, arguments[0], arguments[1]);
+    } else {
+      logger.trace(format, arguments);
+    }
+  }
+
+  @Override
   public void warn(String s) {
     logger.log(MARKER, FQCN, LocationAwareLogger.WARN_INT, s, null, null);
   }
@@ -111,4 +167,16 @@ class Slf4jLocationAwareLoggerImpl implements Log {
     logger.warn(MARKER, FQCN, LocationAwareLogger.WARN_INT, s, null, e);
   }
 
+  @Override
+  public void warn(String format, Object... arguments) {
+    if (arguments.length == 0) {
+      logger.warn(format);
+    } else if (arguments.length == 1) {
+      logger.warn(format, arguments[0]);
+    } else if (arguments.length == 2) {
+      logger.warn(format, arguments[0], arguments[1]);
+    } else {
+      logger.warn(format, arguments);
+    }
+  }
 }

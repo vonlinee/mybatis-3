@@ -70,7 +70,8 @@ public final class LogFactory {
   }
 
   /**
-   * @deprecated Since 3.5.9 - See https://github.com/mybatis/mybatis-3/issues/1223. This method will remove future.
+   * @deprecated Since 3.5.9 - See <a href="https://github.com/mybatis/mybatis-3/issues/1223">issue 1223</a>. This
+   *             method will remove future.
    */
   @Deprecated
   public static void useLog4JLogging() {
