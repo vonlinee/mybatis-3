@@ -48,7 +48,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.ibatis.binding.ParamMap;
-import org.apache.ibatis.builder.Configuration;
 import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.reflection.TypeParameterResolver;
 import org.jetbrains.annotations.Nullable;
@@ -70,13 +69,6 @@ public final class TypeHandlerRegistry {
   private Class<? extends TypeHandler> defaultEnumTypeHandler = EnumTypeHandler.class;
 
   /**
-   * The default constructor.
-   */
-  public TypeHandlerRegistry() {
-    this(new Configuration());
-  }
-
-  /**
    * The constructor that pass the MyBatis configuration.
    *
    * @param configuration
@@ -84,7 +76,7 @@ public final class TypeHandlerRegistry {
    *
    * @since 3.5.4
    */
-  public TypeHandlerRegistry(Configuration configuration) {
+  public TypeHandlerRegistry() {
     // If a handler is registered against null JDBC type, it is the default handler for the Java type. Users can
     // override the default handler (e.g. `register(boolean.class, null, new YNBooleanTypeHandler())` or register a
     // custom handler for a specific Java-JDBC type combination (e.g. `register(boolean.class, JdbcType.CHAR, new

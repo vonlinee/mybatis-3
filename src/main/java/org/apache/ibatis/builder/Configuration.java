@@ -127,7 +127,7 @@ public class Configuration extends ConfigurationElementHolder {
 
   protected final MapperRegistry mapperRegistry = new MapperRegistry(this);
   protected final InterceptorChain interceptorChain = new InterceptorChain();
-  protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this);
+  protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
   protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
   protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry(this);
   protected final ExtensionFactory extensionFactory = new DefaultExtensionFactory(this);
