@@ -40,9 +40,9 @@ public class DefaultReflectorFactory implements ReflectorFactory {
   public Reflector findForClass(Type type) {
     if (classCacheEnabled) {
       // synchronized (type) removed see issue #461
-      return reflectorMap.computeIfAbsent(type, Reflector::new);
+      return reflectorMap.computeIfAbsent(type, ReflectorImpl::new);
     }
-    return new Reflector(type);
+    return new ReflectorImpl(type);
   }
 
 }

@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ReflectPermission;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -166,5 +167,28 @@ public final class ReflectionUtils {
         || !Modifier.isPublic(constructor.getDeclaringClass().getModifiers())) && !constructor.isAccessible()) {
       constructor.setAccessible(true);
     }
+  }
+
+  /**
+   * Checks whether you can control member accessible.
+   *
+   * @return If you can control member accessible, it return {@literal true}
+   *
+   * @since 3.5.0
+   */
+  public static boolean canControlMemberAccessible() {
+    try {
+      SecurityManager securityManager = System.getSecurityManager();
+      if (null != securityManager) {
+        securityManager.checkPermission(new ReflectPermission("suppressAccessChecks"));
+      }
+    } catch (SecurityException e) {
+      return false;
+    }
+    return true;
+  }
+
+  public static boolean isPropertyNameValid(String name) {
+    return !name.startsWith("$") && !"serialVersionUID".equals(name) && !"class".equals(name);
   }
 }

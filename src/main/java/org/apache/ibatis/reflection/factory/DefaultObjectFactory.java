@@ -28,9 +28,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.ibatis.internal.PropertiesHolder;
+import org.apache.ibatis.internal.util.ReflectionUtils;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.reflection.ReflectionException;
-import org.apache.ibatis.reflection.Reflector;
 
 /**
  * @author Clinton Begin
@@ -60,7 +60,7 @@ public class DefaultObjectFactory extends PropertiesHolder implements ObjectFact
         try {
           return constructor.newInstance();
         } catch (IllegalAccessException e) {
-          if (Reflector.canControlMemberAccessible()) {
+          if (ReflectionUtils.canControlMemberAccessible()) {
             constructor.setAccessible(true);
             return constructor.newInstance();
           }
@@ -71,7 +71,7 @@ public class DefaultObjectFactory extends PropertiesHolder implements ObjectFact
       try {
         return constructor.newInstance(constructorArgs.toArray(new Object[0]));
       } catch (IllegalAccessException e) {
-        if (Reflector.canControlMemberAccessible()) {
+        if (ReflectionUtils.canControlMemberAccessible()) {
           constructor.setAccessible(true);
           return constructor.newInstance(constructorArgs.toArray(new Object[0]));
         }

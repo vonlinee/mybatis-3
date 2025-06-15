@@ -26,9 +26,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.ibatis.internal.util.ReflectionUtils;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.reflection.ReflectionException;
-import org.apache.ibatis.reflection.Reflector;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -78,7 +78,7 @@ public final class BeanUtils {
           try {
             field.set(destinationBean, field.get(sourceBean));
           } catch (IllegalAccessException e) {
-            if (!Reflector.canControlMemberAccessible()) {
+            if (!ReflectionUtils.canControlMemberAccessible()) {
               throw e;
             }
             field.setAccessible(true);
