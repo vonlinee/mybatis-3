@@ -112,6 +112,13 @@ public final class StringUtils {
     return cs == null || cs.length() == 0;
   }
 
+  public static boolean isNullOrBlank(String str) {
+    if (isBlank(str)) {
+      return true;
+    }
+    return "null".equalsIgnoreCase(str) || "nil".equalsIgnoreCase(str) || "undefined".equalsIgnoreCase(str);
+  }
+
   public static String prepend(String str, String prefix) {
     if (str == null || str.isEmpty() || prefix == null || prefix.isEmpty()) {
       return EMPTY;

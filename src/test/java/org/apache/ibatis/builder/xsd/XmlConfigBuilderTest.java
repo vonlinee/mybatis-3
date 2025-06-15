@@ -29,6 +29,7 @@ import org.apache.ibatis.builder.CustomStringTypeHandler;
 import org.apache.ibatis.builder.ExampleObjectFactory;
 import org.apache.ibatis.builder.ExamplePlugin;
 import org.apache.ibatis.builder.XMLConfigBuilder;
+import org.apache.ibatis.builder.XMLConfigWriter;
 import org.apache.ibatis.builder.mapper.CustomMapper;
 import org.apache.ibatis.builder.typehandler.CustomIntegerTypeHandler;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
@@ -194,5 +195,12 @@ class XmlConfigBuilderTest {
     TypeAliasRegistry typeAliasRegistry = config.getTypeAliasRegistry();
     TypeAliasRegistry _typeAliasRegistry = config.getTypeAliasRegistry();
     assertEquals(_typeAliasRegistry.getTypeAliases(), typeAliasRegistry.getTypeAliases());
+  }
+
+  @Test
+  void shouldSerializeConfiguration() throws Exception {
+    Configuration config = new Configuration();
+    XMLConfigWriter serializer = new XMLConfigWriter(config);
+    serializer.writeToFile("D:/1.xml");
   }
 }

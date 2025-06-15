@@ -32,11 +32,16 @@ import java.util.Objects;
  */
 public class TypeParameterResolver {
 
+  static final Type[] EMPTY_TYPES_ARRAY = new Type[0];
+
   public static Type[] resolveClassTypeParams(Class<?> classWithTypeParams, Class<?> childClass) {
     TypeVariable<?>[] typeArgs = classWithTypeParams.getTypeParameters();
+    if (typeArgs.length == 0) {
+      return EMPTY_TYPES_ARRAY;
+    }
     Type[] result = new Type[typeArgs.length];
     for (int i = 0; i < typeArgs.length; i++) {
-      result[i] = resolveTypeVar(typeArgs[i], childClass, classWithTypeParams);
+      result[i] = resolveTypeVariable(typeArgs[i], childClass, classWithTypeParams);
     }
     return result;
   }
@@ -103,7 +108,7 @@ public class TypeParameterResolver {
 
   private static Type resolveType(Type type, Type srcType, Class<?> declaringClass) {
     if (type instanceof TypeVariable) {
-      return resolveTypeVar((TypeVariable<?>) type, srcType, declaringClass);
+      return resolveTypeVariable((TypeVariable<?>) type, srcType, declaringClass);
     } else if (type instanceof ParameterizedType) {
       return resolveParameterizedType((ParameterizedType) type, srcType, declaringClass);
     } else if (type instanceof GenericArrayType) {
@@ -140,7 +145,7 @@ public class TypeParameterResolver {
     return new WildcardTypeImpl(lowerBounds, upperBounds);
   }
 
-  private static Type resolveTypeVar(TypeVariable<?> typeVar, Type srcType, Class<?> declaringClass) {
+  private static Type resolveTypeVariable(TypeVariable<?> typeVar, Type srcType, Class<?> declaringClass) {
     Type result;
     Class<?> clazz;
     if (srcType instanceof Class) {
@@ -203,10 +208,10 @@ public class TypeParameterResolver {
         }
       }
       if (declaringClass.isAssignableFrom(parentAsClass)) {
-        return resolveTypeVar(typeVar, parentAsType, declaringClass);
+        return resolveTypeVariable(typeVar, parentAsType, declaringClass);
       }
     } else if (superclass instanceof Class && declaringClass.isAssignableFrom((Class<?>) superclass)) {
-      return resolveTypeVar(typeVar, superclass, declaringClass);
+      return resolveTypeVariable(typeVar, superclass, declaringClass);
     }
     return null;
   }

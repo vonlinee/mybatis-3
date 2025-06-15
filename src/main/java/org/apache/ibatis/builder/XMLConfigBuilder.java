@@ -522,6 +522,14 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  @Override
+  protected @Nullable JdbcType resolveJdbcType(String alias) {
+    if (StringUtils.isNullOrBlank(alias)) {
+      return null;
+    }
+    return super.resolveJdbcType(alias);
+  }
+
   /**
    * if an alias has been set (not null), it should be created or throw exception
    *
@@ -546,10 +554,11 @@ public class XMLConfigBuilder extends BaseBuilder {
   @Override
   @SuppressWarnings("unchecked")
   protected @Nullable <T> Class<T> resolveAlias(@Nullable String alias) {
-    if (StringUtils.isBlank(alias)) {
+    if (StringUtils.isNullOrBlank(alias)) {
       return null;
     }
     Class<?> clazz = null;
+    assert alias != null;
     if (alias.startsWith("[")) {
       clazz = ClassUtils.classForNameOrNull(alias);
     } else if (StringUtils.isLowerCase(alias) && StringUtils.isAlphabetic(alias)) {

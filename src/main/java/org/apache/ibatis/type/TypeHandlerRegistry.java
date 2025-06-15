@@ -50,6 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.reflection.TypeParameterResolver;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -58,7 +59,15 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class TypeHandlerRegistry {
 
-  private final Map<JdbcType, TypeHandler<?>> jdbcTypeHandlerMap = new EnumMap<>(JdbcType.class);
+  // Type handlers in the `jdbcTypeHandlerMap` are used when Java type is unknown or
+  // as a last resort when no matching handler is found for the target Java type.
+  // It is also used in some internal purposes like creating cache keys.
+  // Although it is possible for users to override these mappings via register(JdbcType, TypeHandler),
+  // it might have unexpected side effect.
+  // To configure type handlers for mapping to Map, for example, it is recommended to call the 3-args
+  // version of register method. e.g. register(Object.class, JdbcType.DATE, new DateTypeHandler())
+  private final EnumMap<JdbcType, TypeHandler<?>> jdbcTypeHandlerMap = new EnumMap<>(JdbcType.class);
+
   private final Map<Type, Map<JdbcType, TypeHandler<?>>> typeHandlerMap = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<Type, Constructor<?>> smartHandlers = new ConcurrentHashMap<>();
   private final Map<Class<?>, TypeHandler<?>> allTypeHandlersMap = new HashMap<>();
@@ -68,14 +77,6 @@ public final class TypeHandlerRegistry {
   @SuppressWarnings("rawtypes")
   private Class<? extends TypeHandler> defaultEnumTypeHandler = EnumTypeHandler.class;
 
-  /**
-   * The constructor that pass the MyBatis configuration.
-   *
-   * @param configuration
-   *          a MyBatis configuration
-   *
-   * @since 3.5.4
-   */
   public TypeHandlerRegistry() {
     // If a handler is registered against null JDBC type, it is the default handler for the Java type. Users can
     // override the default handler (e.g. `register(boolean.class, null, new YNBooleanTypeHandler())` or register a
@@ -125,13 +126,10 @@ public final class TypeHandlerRegistry {
     register(Date.class, JdbcType.TIME, TimeOnlyTypeHandler.INSTANCE);
     register(String.class, JdbcType.SQLXML, new SqlxmlTypeHandler());
 
-    // Type handlers in the `jdbcTypeHandlerMap` are used when Java type is unknown or
-    // as a last resort when no matching handler is found for the target Java type.
-    // It is also used in some internal purposes like creating cache keys.
-    // Although it is possible for users to override these mappings via register(JdbcType, TypeHandler),
-    // it might have unexpected side effect.
-    // To configure type handlers for mapping to Map, for example, it is recommended to call the 3-args
-    // version of register method. e.g. register(Object.class, JdbcType.DATE, new DateTypeHandler())
+    registerJdbcTypeHandlerMapping(this.jdbcTypeHandlerMap);
+  }
+
+  public static void registerJdbcTypeHandlerMapping(@NotNull Map<JdbcType, TypeHandler<?>> jdbcTypeHandlerMap) {
     jdbcTypeHandlerMap.put(JdbcType.BOOLEAN, BooleanTypeHandler.INSTANCE);
     jdbcTypeHandlerMap.put(JdbcType.BIT, BooleanTypeHandler.INSTANCE);
     jdbcTypeHandlerMap.put(JdbcType.TINYINT, ByteTypeHandler.INSTANCE);
@@ -364,7 +362,7 @@ public final class TypeHandlerRegistry {
   // Only handler
 
   public <T> void register(TypeHandler<T> handler) {
-    register(mappedJavaTypes(handler.getClass()), mappedJdbcTypes(handler.getClass()), handler);
+    register(getMappedJavaTypes(handler.getClass()), getMappedJdbcTypes(handler.getClass()), handler);
   }
 
   // java type + handler
@@ -374,7 +372,7 @@ public final class TypeHandlerRegistry {
   }
 
   private void register(Type mappedJavaType, TypeHandler<?> handler) {
-    register(new Type[] { mappedJavaType }, mappedJdbcTypes(handler.getClass()), handler);
+    register(new Type[] { mappedJavaType }, getMappedJdbcTypes(handler.getClass()), handler);
   }
 
   // @Deprecated(since = "3.6.0", forRemoval = true)
@@ -427,13 +425,13 @@ public final class TypeHandlerRegistry {
   // Only handler type
 
   public void register(Class<?> handlerClass) {
-    register(mappedJavaTypes(handlerClass), mappedJdbcTypes(handlerClass), handlerClass);
+    register(getMappedJavaTypes(handlerClass), getMappedJdbcTypes(handlerClass), handlerClass);
   }
 
   // java type + handler type
 
   public void register(Type mappedJavaType, Class<?> handlerClass) {
-    register(new Type[] { mappedJavaType }, mappedJdbcTypes(handlerClass), handlerClass);
+    register(new Type[] { mappedJavaType }, getMappedJdbcTypes(handlerClass), handlerClass);
   }
 
   // java type + jdbc type + handler type
@@ -462,7 +460,7 @@ public final class TypeHandlerRegistry {
     register(mappedJavaTypes, mappedJdbcTypes, getInstance(null, handlerClass));
   }
 
-  private Type[] mappedJavaTypes(Class<?> clazz) {
+  public static Type[] getMappedJavaTypes(@NotNull Class<?> clazz) {
     MappedTypes mappedTypesAnno = clazz.getAnnotation(MappedTypes.class);
     if (mappedTypesAnno != null) {
       return mappedTypesAnno.value();
@@ -470,7 +468,7 @@ public final class TypeHandlerRegistry {
     return TypeParameterResolver.resolveClassTypeParams(TypeHandler.class, clazz);
   }
 
-  private JdbcType[] mappedJdbcTypes(Class<?> clazz) {
+  public static JdbcType[] getMappedJdbcTypes(@NotNull Class<?> clazz) {
     MappedJdbcTypes mappedJdbcTypesAnno = clazz.getAnnotation(MappedJdbcTypes.class);
     if (mappedJdbcTypesAnno != null) {
       JdbcType[] jdbcTypes = mappedJdbcTypesAnno.value();
@@ -481,7 +479,7 @@ public final class TypeHandlerRegistry {
       }
       return jdbcTypes;
     }
-    return new JdbcType[] { null };
+    return new JdbcType[] {};
   }
 
   // Construct a handler (used also from Builders)
@@ -542,4 +540,7 @@ public final class TypeHandlerRegistry {
     return Collections.unmodifiableCollection(allTypeHandlersMap.values());
   }
 
+  public Map<Class<?>, TypeHandler<?>> getTypeHandlerMap() {
+    return allTypeHandlersMap;
+  }
 }
