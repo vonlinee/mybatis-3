@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@ package org.apache.ibatis.builder.annotation;
 
 import java.lang.reflect.Method;
 
+import org.apache.ibatis.reflection.ParamNameResolver;
+import org.apache.ibatis.session.Configuration;
+
 /**
  * The context object for sql provider method.
  *
@@ -29,6 +32,9 @@ public final class ProviderContext {
   private final Class<?> mapperType;
   private final Method mapperMethod;
   private final String databaseId;
+  private final Configuration configuration;
+  private final ParamNameResolver paramNameResolver;
+  private final Object parameterObject;
 
   /**
    * Constructor.
@@ -40,10 +46,14 @@ public final class ProviderContext {
    * @param databaseId
    *          A database id
    */
-  ProviderContext(Class<?> mapperType, Method mapperMethod, String databaseId) {
+  ProviderContext(Configuration configuration, Class<?> mapperType, Method mapperMethod, String databaseId,
+      ParamNameResolver paramNameResolver, Object parameterObject) {
     this.mapperType = mapperType;
     this.mapperMethod = mapperMethod;
     this.databaseId = databaseId;
+    this.configuration = configuration;
+    this.paramNameResolver = paramNameResolver;
+    this.parameterObject = parameterObject;
   }
 
   /**
@@ -75,4 +85,15 @@ public final class ProviderContext {
     return databaseId;
   }
 
+  public Configuration getConfiguration() {
+    return configuration;
+  }
+
+  public Object getParameterObject() {
+    return parameterObject;
+  }
+
+  public ParamNameResolver getParamNameResolver() {
+    return paramNameResolver;
+  }
 }
