@@ -317,8 +317,8 @@ public class MapperMethod {
       return resultHandlerIndex != null;
     }
 
-    public ResultHandler extractResultHandler(Object[] args) {
-      return hasResultHandler() ? (ResultHandler) args[resultHandlerIndex] : null;
+    public ResultHandler<?> extractResultHandler(Object[] args) {
+      return hasResultHandler() ? (ResultHandler<?>) args[resultHandlerIndex] : null;
     }
 
     public Class<?> getReturnType() {

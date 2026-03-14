@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -210,17 +210,17 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
   }
 
   @Override
-  public void select(String statement, ResultHandler handler) {
+  public <T> void select(String statement, ResultHandler<T> handler) {
     sqlSessionProxy.select(statement, handler);
   }
 
   @Override
-  public void select(String statement, Object parameter, ResultHandler handler) {
+  public <T> void select(String statement, Object parameter, ResultHandler<T> handler) {
     sqlSessionProxy.select(statement, parameter, handler);
   }
 
   @Override
-  public void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
+  public <T> void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler<T> handler) {
     sqlSessionProxy.select(statement, parameter, rowBounds, handler);
   }
 

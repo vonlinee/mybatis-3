@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -208,7 +208,7 @@ public interface SqlSession extends Closeable {
    * @param handler
    *          ResultHandler that will handle each retrieved row
    */
-  void select(String statement, Object parameter, ResultHandler handler);
+  <T> void select(String statement, Object parameter, ResultHandler<T> handler);
 
   /**
    * Retrieve a single row mapped from the statement using a {@code ResultHandler}.
@@ -218,7 +218,7 @@ public interface SqlSession extends Closeable {
    * @param handler
    *          ResultHandler that will handle each retrieved row
    */
-  void select(String statement, ResultHandler handler);
+  <T> void select(String statement, ResultHandler<T> handler);
 
   /**
    * Retrieve a single row mapped from the statement key and parameter using a {@code ResultHandler} and
@@ -233,7 +233,7 @@ public interface SqlSession extends Closeable {
    * @param handler
    *          ResultHandler that will handle each retrieved row
    */
-  void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler);
+  <T> void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler<T> handler);
 
   /**
    * Execute an insert statement.
