@@ -46,44 +46,6 @@ public class ProviderSqlSource implements SqlSource {
   private final Integer providerContextIndex;
 
   /**
-   * This constructor will remove at a future version.
-   *
-   * @param configuration
-   *          the configuration
-   * @param provider
-   *          the provider
-   *
-   * @deprecated Since 3.5.3, Please use the {@link #ProviderSqlSource(Configuration, Annotation, Class, Method)}
-   *             instead of this.
-   */
-  @Deprecated
-  public ProviderSqlSource(Configuration configuration, Object provider) {
-    this(configuration, provider, null, null);
-  }
-
-  /**
-   * This constructor will remove at a future version.
-   *
-   * @param configuration
-   *          the configuration
-   * @param provider
-   *          the provider
-   * @param mapperType
-   *          the mapper type
-   * @param mapperMethod
-   *          the mapper method
-   *
-   * @since 3.4.5
-   *
-   * @deprecated Since 3.5.3, Please use the {@link #ProviderSqlSource(Configuration, Annotation, Class, Method)}
-   *             instead of this.
-   */
-  @Deprecated
-  public ProviderSqlSource(Configuration configuration, Object provider, Class<?> mapperType, Method mapperMethod) {
-    this(configuration, (Annotation) provider, mapperType, mapperMethod);
-  }
-
-  /**
    * Instantiates a new provider sql source.
    *
    * @param configuration
