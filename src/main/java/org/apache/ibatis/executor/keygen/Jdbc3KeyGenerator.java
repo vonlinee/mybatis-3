@@ -38,7 +38,6 @@ import org.apache.ibatis.reflection.ArrayUtil;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.defaults.DefaultSqlSession.StrictMap;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
@@ -92,7 +91,7 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
   @SuppressWarnings("unchecked")
   private void assignKeys(Configuration configuration, ResultSet rs, ResultSetMetaData rsmd, String[] keyProperties,
       Object parameter) throws SQLException {
-    if (parameter instanceof ParamMap || parameter instanceof StrictMap) {
+    if (parameter instanceof ParamMap) {
       // Multi-param or single param with @Param
       assignKeysToParamMap(configuration, rs, rsmd, keyProperties, (Map<String, ?>) parameter);
     } else if (parameter instanceof ArrayList && !((ArrayList<?>) parameter).isEmpty()
