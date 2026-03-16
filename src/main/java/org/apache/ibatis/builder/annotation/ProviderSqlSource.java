@@ -102,7 +102,8 @@ public class ProviderSqlSource implements SqlSource {
           + "' not found in SqlProvider '" + this.providerType.getName() + "'.");
     }
     this.providerMethod = candidateProviderMethod;
-    this.paramNameResolver = new ParamNameResolver(configuration, this.providerMethod, mapperType);
+    this.paramNameResolver = new ParamNameResolver(mapperType, this.providerMethod,
+        configuration.isUseActualParamName());
     this.providerMethodParameterTypes = this.providerMethod.getParameterTypes();
     this.providerContextIndex = getCandidateProviderContextIndex();
   }

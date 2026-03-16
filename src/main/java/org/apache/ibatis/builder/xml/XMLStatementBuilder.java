@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -94,7 +94,8 @@ public class XMLStatementBuilder extends BaseBuilder {
       List<Method> mapperMethods = Arrays.stream(mapperClass.getMethods())
           .filter(m -> m.getName().equals(id) && !m.isDefault() && !m.isBridge()).collect(Collectors.toList());
       if (mapperMethods.size() == 1) {
-        paramNameResolver = new ParamNameResolver(configuration, mapperMethods.get(0), mapperClass);
+        paramNameResolver = new ParamNameResolver(mapperClass, mapperMethods.get(0),
+            configuration.isUseActualParamName());
         if (paramNameResolver.isUseParamMap()) {
           parameterTypeClass = ParamMap.class;
         } else {

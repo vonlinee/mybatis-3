@@ -59,7 +59,7 @@ public class MethodSignature {
     this.returnsMap = this.mapKey != null;
     this.rowBoundsIndex = getUniqueParamIndex(method, RowBounds.class);
     this.resultHandlerIndex = getUniqueParamIndex(method, ResultHandler.class);
-    this.paramNameResolver = new ParamNameResolver(configuration, method, mapperInterface);
+    this.paramNameResolver = new ParamNameResolver(mapperInterface, method, configuration.isUseActualParamName());
   }
 
   public Object convertArgsToSqlCommandParam(Object[] args) {

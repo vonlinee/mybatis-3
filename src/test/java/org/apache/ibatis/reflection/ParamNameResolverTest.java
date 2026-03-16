@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Test;
 
 class ParamNameResolverTest {
 
+  Configuration configuration = new Configuration();
+
   // @formatter:off
   class A {
     void m1(@Param("p") Integer p) {}
@@ -39,7 +41,7 @@ class ParamNameResolverTest {
   void testGetTypeSimple() throws Exception {
     Class<?> clazz = A.class;
     Method method = clazz.getDeclaredMethod("m1", Integer.class);
-    ParamNameResolver resolver = new ParamNameResolver(new Configuration(), method, clazz);
+    ParamNameResolver resolver = new ParamNameResolver(clazz, method, configuration.isUseActualParamName());
     assertEquals(Integer.class, resolver.getType("p"));
     assertEquals(Integer.class, resolver.getType("param1"));
   }
@@ -48,7 +50,7 @@ class ParamNameResolverTest {
   void testGetTypeList() throws Exception {
     Class<?> clazz = A.class;
     Method method = clazz.getDeclaredMethod("m2", List.class);
-    ParamNameResolver resolver = new ParamNameResolver(new Configuration(), method, clazz);
+    ParamNameResolver resolver = new ParamNameResolver(clazz, method, configuration.isUseActualParamName());
     assertEquals(List.class, ((ParameterizedType) resolver.getType("p")).getRawType());
     assertEquals(String.class, resolver.getType("p[0]"));
     assertEquals(String.class, resolver.getType("param1[0]"));
@@ -58,7 +60,7 @@ class ParamNameResolverTest {
   void testGetTypeArray() throws Exception {
     Class<?> clazz = A.class;
     Method method = clazz.getDeclaredMethod("m3", Integer[].class);
-    ParamNameResolver resolver = new ParamNameResolver(new Configuration(), method, clazz);
+    ParamNameResolver resolver = new ParamNameResolver(clazz, method, configuration.isUseActualParamName());
     assertEquals(Integer[].class, resolver.getType("p"));
     assertEquals(Integer.class, resolver.getType("p[0]"));
     assertEquals(Integer[].class, resolver.getType("param1"));
