@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.ibatis.binding.MapperMethod.ParamMap;
+import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -97,7 +97,7 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
     } else if (parameter instanceof ArrayList && !((ArrayList<?>) parameter).isEmpty()
         && ((ArrayList<?>) parameter).get(0) instanceof ParamMap) {
       // Multi-param or single param with @Param in batch operation
-      assignKeysToParamMapList(configuration, rs, rsmd, keyProperties, (ArrayList<ParamMap<?>>) parameter);
+      assignKeysToParamMapList(configuration, rs, rsmd, keyProperties, (ArrayList<ParamMap>) parameter);
     } else {
       // Single param without @Param
       assignKeysToParam(configuration, rs, rsmd, keyProperties, parameter);
@@ -125,15 +125,15 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
   }
 
   private void assignKeysToParamMapList(Configuration configuration, ResultSet rs, ResultSetMetaData rsmd,
-      String[] keyProperties, ArrayList<ParamMap<?>> paramMapList) throws SQLException {
-    Iterator<ParamMap<?>> iterator = paramMapList.iterator();
+      String[] keyProperties, ArrayList<ParamMap> paramMapList) throws SQLException {
+    Iterator<ParamMap> iterator = paramMapList.iterator();
     List<KeyAssigner> assignerList = new ArrayList<>();
     long counter = 0;
     while (rs.next()) {
       if (!iterator.hasNext()) {
         throw new ExecutorException(String.format(MSG_TOO_MANY_KEYS, counter));
       }
-      ParamMap<?> paramMap = iterator.next();
+      ParamMap paramMap = iterator.next();
       if (assignerList.isEmpty()) {
         for (int i = 0; i < keyProperties.length; i++) {
           assignerList
@@ -250,7 +250,7 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
     protected void assign(ResultSet rs, Object param) {
       if (paramName != null) {
         // If paramName is set, param is ParamMap
-        param = ((ParamMap<?>) param).get(paramName);
+        param = ((ParamMap) param).get(paramName);
       }
       MetaObject metaParam = configuration.newMetaObject(param);
       try {

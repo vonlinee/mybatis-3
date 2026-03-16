@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import org.apache.ibatis.binding.MapperMethod.ParamMap;
+import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.builder.annotation.MapperAnnotationBuilder;
