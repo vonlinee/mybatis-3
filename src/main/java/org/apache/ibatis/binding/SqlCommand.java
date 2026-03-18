@@ -18,6 +18,7 @@ package org.apache.ibatis.binding;
 import java.lang.reflect.Method;
 
 import org.apache.ibatis.annotations.Flush;
+import org.apache.ibatis.builder.annotation.MapperAnnotationBuilder;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
@@ -57,7 +58,7 @@ public class SqlCommand {
 
   private MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName, Class<?> declaringClass,
       Configuration configuration) {
-    String statementId = mapperInterface.getName() + "." + methodName;
+    String statementId = MapperAnnotationBuilder.getQualifiedStatementId(mapperInterface, methodName);
     if (configuration.hasStatement(statementId)) {
       return configuration.getMappedStatement(statementId);
     }

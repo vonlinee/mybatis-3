@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -41,5 +41,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
 public @interface Mapper {
-  // Interface Mapper
+
+  /**
+   * The namespace that contains the SQL.
+   *
+   * @return The namespace that contains the SQL.
+   */
+  String namespace() default "";
 }

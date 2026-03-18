@@ -24,46 +24,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.ibatis.annotations.AnnotationConstants;
-import org.apache.ibatis.annotations.Arg;
-import org.apache.ibatis.annotations.CacheNamespace;
-import org.apache.ibatis.annotations.CacheNamespaceRef;
-import org.apache.ibatis.annotations.Case;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.DeleteProvider;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.InsertProvider;
-import org.apache.ibatis.annotations.Lang;
-import org.apache.ibatis.annotations.MapKey;
-import org.apache.ibatis.annotations.NamedResultMap;
-import org.apache.ibatis.annotations.NamedResultMaps;
-import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.annotations.Options.FlushCachePolicy;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Property;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.ResultMap;
-import org.apache.ibatis.annotations.ResultOrdered;
-import org.apache.ibatis.annotations.ResultType;
-import org.apache.ibatis.annotations.Results;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.SelectKey;
-import org.apache.ibatis.annotations.SelectProvider;
-import org.apache.ibatis.annotations.TypeDiscriminator;
-import org.apache.ibatis.annotations.Update;
-import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.CacheRefResolver;
@@ -111,12 +77,27 @@ public class MapperAnnotationBuilder {
   private final Configuration configuration;
   private final MapperBuilderAssistant assistant;
   private final Class<?> type;
+  private final String namespace;
 
   public MapperAnnotationBuilder(Configuration configuration, Class<?> type) {
+    this.namespace = getNamespace(type);
     String resource = type.getName().replace('.', '/') + ".java (best guess)";
     this.assistant = new MapperBuilderAssistant(configuration, resource);
     this.configuration = configuration;
     this.type = type;
+  }
+
+  public static String getNamespace(Class<?> mapperClass) {
+    Objects.requireNonNull(mapperClass, "mapper class is null.");
+    Mapper mapperClassAnnotation = mapperClass.getAnnotation(Mapper.class);
+    String namespace = mapperClass.getName();
+    if (mapperClassAnnotation != null) {
+      String specifiedNamespace = mapperClassAnnotation.namespace();
+      if (!specifiedNamespace.isEmpty()) {
+        namespace = specifiedNamespace;
+      }
+    }
+    return namespace;
   }
 
   public void parse() {
@@ -124,7 +105,7 @@ public class MapperAnnotationBuilder {
     if (!configuration.isResourceLoaded(resource)) {
       loadXmlResource();
       configuration.addLoadedResource(resource);
-      assistant.setCurrentNamespace(type.getName());
+      assistant.setCurrentNamespace(namespace);
       parseCache();
       parseCacheRef();
 
@@ -163,8 +144,8 @@ public class MapperAnnotationBuilder {
     // Spring may not know the real resource name so we check a flag
     // to prevent loading again a resource twice
     // this flag is set at XMLMapperBuilder#bindMapperForNamespace
-    if (!configuration.isResourceLoaded("namespace:" + type.getName())) {
-      String xmlResource = type.getName().replace('.', '/') + ".xml";
+    if (!configuration.isResourceLoaded("namespace:" + namespace)) {
+      String xmlResource = namespace.replace('.', '/') + ".xml";
       // #1347
       InputStream inputStream = type.getResourceAsStream("/" + xmlResource);
       if (inputStream == null) {
@@ -245,7 +226,7 @@ public class MapperAnnotationBuilder {
   private void parseNamedResultMap(NamedResultMap namedResultMap) {
     validateNamedResultMap(namedResultMap);
 
-    String resultMapId = type.getName() + '.' + namedResultMap.id();
+    String resultMapId = namespace + '.' + namedResultMap.id();
     Class<?> returnType = namedResultMap.javaType();
     Arg[] args = namedResultMap.constructorArguments();
     Result[] results = namedResultMap.propertyMappings();
@@ -271,7 +252,7 @@ public class MapperAnnotationBuilder {
   private String generateResultMapName(Method method) {
     Results results = method.getAnnotation(Results.class);
     if (results != null && !results.id().isEmpty()) {
-      return type.getName() + "." + results.id();
+      return namespace + "." + results.id();
     }
     StringBuilder suffix = new StringBuilder();
     for (Class<?> c : method.getParameterTypes()) {
@@ -281,7 +262,7 @@ public class MapperAnnotationBuilder {
     if (suffix.length() < 1) {
       suffix.append("-void");
     }
-    return type.getName() + "." + method.getName() + suffix;
+    return namespace + "." + method.getName() + suffix;
   }
 
   private void applyResultMap(String resultMapId, Class<?> returnType, Arg[] args, Result[] results,
@@ -343,7 +324,7 @@ public class MapperAnnotationBuilder {
           .orElse(null);
       final ResultOrdered resultOrderedAnnotation = getAnnotationWrapper(method, false, ResultOrdered.class)
           .map(x -> (ResultOrdered) x.getAnnotation()).orElse(null);
-      final String mappedStatementId = type.getName() + "." + method.getName();
+      final String mappedStatementId = namespace + "." + method.getName();
 
       final KeyGenerator keyGenerator;
       String keyProperty = null;
@@ -533,7 +514,7 @@ public class MapperAnnotationBuilder {
       resultMapId = result.many().resultMap();
     }
     if (!resultMapId.contains(".")) {
-      resultMapId = type.getName() + "." + resultMapId;
+      resultMapId = namespace + "." + resultMapId;
     }
     return resultMapId;
   }
@@ -551,7 +532,7 @@ public class MapperAnnotationBuilder {
       nestedSelect = result.many().select();
     }
     if (!nestedSelect.contains(".")) {
-      nestedSelect = type.getName() + "." + nestedSelect;
+      nestedSelect = namespace + "." + nestedSelect;
     }
     return nestedSelect;
   }
@@ -770,5 +751,21 @@ public class MapperAnnotationBuilder {
     boolean isDirtySelect() {
       return dirtySelect;
     }
+  }
+
+  public static String getQualifiedStatementId(Method method) {
+    return getQualifiedStatementId(method.getDeclaringClass(), method);
+  }
+
+  public static String getQualifiedStatementId(Class<?> mapperClass, Method method) {
+    return getQualifiedStatementId(getNamespace(mapperClass), method.getName());
+  }
+
+  public static String getQualifiedStatementId(Class<?> mapperClass, String statementName) {
+    return getQualifiedStatementId(getNamespace(mapperClass), statementName);
+  }
+
+  public static String getQualifiedStatementId(String namespace, String statementName) {
+    return namespace + "." + statementName;
   }
 }
