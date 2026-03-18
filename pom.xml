@@ -325,6 +325,31 @@
   </dependencies>
 
   <build>
+      <testResources>
+          <testResource>
+              <directory>${project.basedir}/src/test/java</directory>
+              <filtering>false</filtering>
+              <includes>
+                  <include>**/*.xml</include>
+                  <include>**/*.xsd</include>
+                  <include>**/*.properties</include>
+                  <include>**/*.dtd</include>
+                  <include>**/*.sql</include>
+              </includes>
+          </testResource>
+          <testResource>
+              <directory>${project.basedir}/src/test/resources</directory>
+              <filtering>false</filtering>
+              <includes>
+                  <include>**/*.xml</include>
+                  <include>**/*.xsd</include>
+                  <include>**/*.properties</include>
+                  <include>**/*.dtd</include>
+                  <include>**/*.sql</include>
+              </includes>
+          </testResource>
+      </testResources>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
