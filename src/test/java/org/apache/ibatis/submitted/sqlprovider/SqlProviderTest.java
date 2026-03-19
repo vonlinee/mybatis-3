@@ -15,31 +15,21 @@
  */
 package org.apache.ibatis.submitted.sqlprovider;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.Reader;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.ibatis.BaseDataTest;
-import org.apache.ibatis.annotations.DeleteProvider;
-import org.apache.ibatis.annotations.InsertProvider;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.SelectProvider;
-import org.apache.ibatis.annotations.UpdateProvider;
+import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.builder.BuilderException;
-import org.apache.ibatis.builder.annotation.ProviderContext;
-import org.apache.ibatis.builder.annotation.ProviderSqlSource;
+import org.apache.ibatis.builder.annotation.*;
 import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -271,13 +261,24 @@ class SqlProviderTest {
     }
   }
 
+  private ProviderSqlSource createProviderSqlSource(Configuration configuration, Class<?> mapperType,
+      Method mapperMethod, Class<? extends Annotation> providerType) {
+    SqlProvider sqlProvider = new AnnotationSqlProvider(configuration, mapperMethod.getAnnotation(providerType),
+        mapperType, mapperMethod);
+    return new ProviderSqlSource(configuration, mapperType, mapperMethod, sqlProvider);
+  }
+
+  private ProviderSqlSource createProviderSqlSource(Class<?> mapperType, Method mapperMethod,
+      Class<? extends Annotation> providerType) {
+    return createProviderSqlSource(new Configuration(), mapperType, mapperMethod, providerType);
+  }
+
   @Test
   void methodNotFound() throws NoSuchMethodException {
     try {
       Class<?> mapperType = ErrorMapper.class;
       Method mapperMethod = mapperType.getMethod("methodNotFound");
-      new ProviderSqlSource(new Configuration(), mapperMethod.getAnnotation(SelectProvider.class), mapperType,
-          mapperMethod);
+      createProviderSqlSource(mapperType, mapperMethod, SelectProvider.class);
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
@@ -290,8 +291,7 @@ class SqlProviderTest {
     try {
       Class<?> mapperType = ErrorMapper.class;
       Method mapperMethod = mapperType.getMethod("methodOverload", String.class);
-      new ProviderSqlSource(new Configuration(), mapperMethod.getAnnotation(SelectProvider.class), mapperType,
-          mapperMethod);
+      createProviderSqlSource(mapperType, mapperMethod, SelectProvider.class);
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
@@ -303,7 +303,8 @@ class SqlProviderTest {
   void notSqlProvider() throws NoSuchMethodException {
     Test testAnnotation = getClass().getDeclaredMethod("notSqlProvider").getAnnotation(Test.class);
     try {
-      new ProviderSqlSource(new Configuration(), testAnnotation, null, null);
+      AnnotationSqlProvider sqlProvider = new AnnotationSqlProvider(new Configuration(), testAnnotation, null, null);
+      new ProviderSqlSource(new Configuration(), null, null, sqlProvider);
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
@@ -316,8 +317,7 @@ class SqlProviderTest {
     try {
       Class<?> mapperType = ErrorMapper.class;
       Method mapperMethod = mapperType.getMethod("omitType");
-      new ProviderSqlSource(new Configuration(), mapperMethod.getAnnotation(SelectProvider.class), mapperType,
-          mapperMethod);
+      createProviderSqlSource(mapperType, mapperMethod, SelectProvider.class);
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
@@ -330,8 +330,7 @@ class SqlProviderTest {
     try {
       Class<?> mapperType = ErrorMapper.class;
       Method mapperMethod = mapperType.getMethod("differentTypeAndValue");
-      new ProviderSqlSource(new Configuration(), mapperMethod.getAnnotation(DeleteProvider.class), mapperType,
-          mapperMethod);
+      createProviderSqlSource(mapperType, mapperMethod, DeleteProvider.class);
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
@@ -344,8 +343,7 @@ class SqlProviderTest {
     try {
       Class<?> mapperType = ErrorMapper.class;
       Method mapperMethod = mapperType.getMethod("multipleProviderContext");
-      new ProviderSqlSource(new Configuration(), mapperMethod.getAnnotation(SelectProvider.class), mapperType,
-          mapperMethod);
+      createProviderSqlSource(mapperType, mapperMethod, SelectProvider.class);
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
@@ -358,8 +356,7 @@ class SqlProviderTest {
     try {
       Class<?> mapperType = Mapper.class;
       Method mapperMethod = mapperType.getMethod("getUsersByName", String.class, String.class);
-      new ProviderSqlSource(new Configuration(), mapperMethod.getAnnotation(SelectProvider.class), mapperType,
-          mapperMethod).getBoundSql(new Object());
+      createProviderSqlSource(mapperType, mapperMethod, SelectProvider.class).getBoundSql(new Object());
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
@@ -372,8 +369,7 @@ class SqlProviderTest {
     try {
       Class<?> mapperType = Mapper.class;
       Method mapperMethod = mapperType.getMethod("getUsersByNameWithParamName", String.class);
-      new ProviderSqlSource(new Configuration(), mapperMethod.getAnnotation(SelectProvider.class), mapperType,
-          mapperMethod).getBoundSql(new Object());
+      createProviderSqlSource(mapperType, mapperMethod, SelectProvider.class).getBoundSql(new Object());
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
@@ -386,8 +382,7 @@ class SqlProviderTest {
     try {
       Class<?> mapperType = ErrorMapper.class;
       Method mapperMethod = mapperType.getMethod("invokeError");
-      new ProviderSqlSource(new Configuration(), mapperMethod.getAnnotation(SelectProvider.class), mapperType,
-          mapperMethod).getBoundSql(new Object());
+      createProviderSqlSource(mapperType, mapperMethod, SelectProvider.class).getBoundSql(new Object());
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
@@ -400,8 +395,7 @@ class SqlProviderTest {
     try {
       Class<?> mapperType = ErrorMapper.class;
       Method mapperMethod = mapperType.getMethod("invokeNestedError");
-      new ProviderSqlSource(new Configuration(), mapperMethod.getAnnotation(SelectProvider.class), mapperType,
-          mapperMethod).getBoundSql(new Object());
+      createProviderSqlSource(mapperType, mapperMethod, SelectProvider.class).getBoundSql(new Object());
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
@@ -414,8 +408,7 @@ class SqlProviderTest {
     try {
       Class<?> mapperType = ErrorMapper.class;
       Method mapperMethod = mapperType.getMethod("invalidArgumentsCombination", String.class);
-      new ProviderSqlSource(new Configuration(), mapperMethod.getAnnotation(DeleteProvider.class), mapperType,
-          mapperMethod).getBoundSql("foo");
+      createProviderSqlSource(mapperType, mapperMethod, DeleteProvider.class).getBoundSql("foo");
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
@@ -655,8 +648,7 @@ class SqlProviderTest {
   void keepBackwardCompatibilityOnDeprecatedConstructorWithAnnotation() throws NoSuchMethodException {
     Class<?> mapperType = StaticMethodSqlProviderMapper.class;
     Method mapperMethod = mapperType.getMethod("noArgument");
-    ProviderSqlSource sqlSource = new ProviderSqlSource(new Configuration(),
-        mapperMethod.getAnnotation(SelectProvider.class), mapperType, mapperMethod);
+    ProviderSqlSource sqlSource = createProviderSqlSource(mapperType, mapperMethod, SelectProvider.class);
     assertEquals("SELECT 1 FROM INFORMATION_SCHEMA.SYSTEM_USERS", sqlSource.getBoundSql(null).getSql());
   }
 
@@ -667,26 +659,26 @@ class SqlProviderTest {
     configuration.setDefaultSqlProviderType(DefaultSqlProviderMapper.SqlProvider.class);
     {
       Method mapperMethod = mapperType.getMethod("select", int.class);
-      String sql = new ProviderSqlSource(configuration, mapperMethod.getAnnotation(SelectProvider.class), mapperType,
-          mapperMethod).getBoundSql(1).getSql();
+      String sql = createProviderSqlSource(configuration, mapperType, mapperMethod, SelectProvider.class).getBoundSql(1)
+          .getSql();
       assertEquals("select name from foo where id = ?", sql);
     }
     {
       Method mapperMethod = mapperType.getMethod("insert", String.class);
-      String sql = new ProviderSqlSource(configuration, mapperMethod.getAnnotation(InsertProvider.class), mapperType,
-          mapperMethod).getBoundSql("Taro").getSql();
+      String sql = createProviderSqlSource(configuration, mapperType, mapperMethod, InsertProvider.class)
+          .getBoundSql("Taro").getSql();
       assertEquals("insert into foo (name) values(?)", sql);
     }
     {
       Method mapperMethod = mapperType.getMethod("update", int.class, String.class);
-      String sql = new ProviderSqlSource(configuration, mapperMethod.getAnnotation(UpdateProvider.class), mapperType,
-          mapperMethod).getBoundSql(Collections.emptyMap()).getSql();
+      String sql = createProviderSqlSource(configuration, mapperType, mapperMethod, UpdateProvider.class)
+          .getBoundSql(Collections.emptyMap()).getSql();
       assertEquals("update foo set name = ? where id = ?", sql);
     }
     {
       Method mapperMethod = mapperType.getMethod("delete", int.class);
-      String sql = new ProviderSqlSource(configuration, mapperMethod.getAnnotation(DeleteProvider.class), mapperType,
-          mapperMethod).getBoundSql(Collections.emptyMap()).getSql();
+      String sql = createProviderSqlSource(configuration, mapperType, mapperMethod, DeleteProvider.class)
+          .getBoundSql(Collections.emptyMap()).getSql();
       assertEquals("delete from foo where id = ?", sql);
     }
   }
@@ -1000,4 +992,80 @@ class SqlProviderTest {
     }
   }
 
+  @Test
+  void shouldThrowExceptionWhenUseFactoriedSqlProviderButSqlProviderFactoryIsNotSet() {
+    Configuration configuration = new Configuration();
+    // configuration.setSqlProviderFactory(new MySqlProviderFactory(sqlSessionFactory.getConfiguration()));
+    assertThatThrownBy(() -> configuration.addMapper(SqlProviderMapper.class)).isNotNull()
+        .isInstanceOf(BuilderException.class).hasMessageMatching(
+            "a type of sql provider factory .+ is used as the provider type in the mapper method .+, but the SqlProviderFactory is not configured.");
+  }
+
+  @Test
+  void shouldUseFactoriedSqlProvider() {
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+      sqlSessionFactory.getConfiguration()
+          .setSqlProviderFactory(new MySqlProviderFactory(sqlSessionFactory.getConfiguration()));
+      sqlSessionFactory.getConfiguration().addMapper(SqlProviderMapper.class);
+      SqlProviderMapper mapper = sqlSession.getMapper(SqlProviderMapper.class);
+      User user = mapper.selectById(1);
+      assertEquals("User1", user.getName());
+      user.setName("User1-updated");
+      mapper.updateById(user);
+      User newUser = mapper.selectById(1);
+      assertEquals("User1-updated", newUser.getName());
+    }
+  }
+
+  static class MySqlProviderFactory implements SqlProviderFactory {
+
+    private final Configuration configuration;
+
+    public MySqlProviderFactory(Configuration configuration) {
+      this.configuration = configuration;
+    }
+
+    @Override
+    public SqlProvider getSqlProvider(Class<?> mapperInterface, Method method) {
+      if (method.getName().equals("selectById")) {
+        return new SimpleSqlProvider(configuration) {
+          @Override
+          public String provideSql(ProviderContext providerContext) {
+            return "select * from users where id = " + providerContext.getParameterObject();
+          }
+        };
+      } else if (method.getName().equals("updateById")) {
+        return new SimpleSqlProvider(configuration) {
+          @Override
+          public String provideSql(ProviderContext providerContext) {
+            User user = (User) providerContext.getParameterObject();
+            return "update users set name = '" + user.getName() + "' where id = " + user.getId();
+          }
+        };
+      }
+      return null;
+    }
+  }
+
+  static abstract class SimpleSqlProvider implements SqlProvider {
+
+    protected final Configuration configuration;
+
+    public SimpleSqlProvider(Configuration configuration) {
+      this.configuration = configuration;
+    }
+
+    @Override
+    public ParamNameResolver resolveParameterNames(Class<?> mapperClass, Method mapperMethod) {
+      return new ParamNameResolver(mapperClass, mapperMethod, configuration.isUseActualParamName());
+    }
+  }
+
+  interface SqlProviderMapper {
+    @SelectProvider(type = MySqlProviderFactory.class)
+    User selectById(int id);
+
+    @UpdateProvider(type = MySqlProviderFactory.class)
+    void updateById(User user);
+  }
 }

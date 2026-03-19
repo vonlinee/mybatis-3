@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.apache.ibatis.builder.CacheRefResolver;
 import org.apache.ibatis.builder.IncompleteElementException;
 import org.apache.ibatis.builder.ResultMapResolver;
 import org.apache.ibatis.builder.annotation.MethodResolver;
+import org.apache.ibatis.builder.annotation.SqlProviderFactory;
 import org.apache.ibatis.builder.xml.XMLStatementBuilder;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.decorators.FifoCache;
@@ -96,6 +97,7 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
@@ -181,6 +183,9 @@ public class Configuration {
    * the value is the namespace which the actual cache is bound to.
    */
   protected final Map<String, String> cacheRefMap = new HashMap<>();
+
+  @Nullable
+  protected SqlProviderFactory sqlProviderFactory;
 
   public Configuration(Environment environment) {
     this();
@@ -1106,6 +1111,15 @@ public class Configuration {
         }
       }
     }
+  }
+
+  public void setSqlProviderFactory(@Nullable SqlProviderFactory sqlProviderFactory) {
+    this.sqlProviderFactory = sqlProviderFactory;
+  }
+
+  @Nullable
+  public SqlProviderFactory getSqlProviderFactory() {
+    return sqlProviderFactory;
   }
 
   protected static class StrictMap<V> extends ConcurrentHashMap<String, V> {

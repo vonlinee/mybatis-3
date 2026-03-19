@@ -15,14 +15,9 @@
  */
 package org.apache.ibatis.builder.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Map;
 
 import org.apache.ibatis.annotations.Lang;
-import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.reflection.ParamNameResolver;
@@ -36,22 +31,17 @@ import org.apache.ibatis.session.Configuration;
 public class ProviderSqlSource implements SqlSource {
 
   private final Configuration configuration;
-  private final Class<?> providerType;
   private final Class<?> mapperType;
   private final LanguageDriver languageDriver;
   private final Method mapperMethod;
-  private final Method providerMethod;
+  private final SqlProvider sqlProvider;
   private final ParamNameResolver paramNameResolver;
-  private final Class<?>[] providerMethodParameterTypes;
-  private final Integer providerContextIndex;
 
   /**
    * Instantiates a new provider sql source.
    *
    * @param configuration
    *          the configuration
-   * @param provider
-   *          the provider
    * @param mapperType
    *          the mapper type
    * @param mapperMethod
@@ -59,183 +49,25 @@ public class ProviderSqlSource implements SqlSource {
    *
    * @since 3.5.3
    */
-  public ProviderSqlSource(Configuration configuration, Annotation provider, Class<?> mapperType, Method mapperMethod) {
+  public ProviderSqlSource(Configuration configuration, Class<?> mapperType, Method mapperMethod,
+      SqlProvider sqlProvider) {
     this.mapperType = mapperType;
-    String candidateProviderMethodName;
-    Method candidateProviderMethod = null;
-    try {
-      this.configuration = configuration;
-      this.mapperMethod = mapperMethod;
-      Lang lang = mapperMethod == null ? null : mapperMethod.getAnnotation(Lang.class);
-      this.languageDriver = configuration.getLanguageDriver(lang == null ? null : lang.value());
-      this.providerType = getProviderType(configuration, provider, mapperMethod);
-      candidateProviderMethodName = (String) provider.annotationType().getMethod("method").invoke(provider);
-
-      if (candidateProviderMethodName.length() == 0
-          && ProviderMethodResolver.class.isAssignableFrom(this.providerType)) {
-        candidateProviderMethod = ((ProviderMethodResolver) this.providerType.getDeclaredConstructor().newInstance())
-            .resolveMethod(new ProviderContext(configuration, mapperType, mapperMethod, configuration.getDatabaseId(),
-                null, null));
-      }
-      if (candidateProviderMethod == null) {
-        candidateProviderMethodName = candidateProviderMethodName.length() == 0 ? "provideSql"
-            : candidateProviderMethodName;
-        for (Method m : this.providerType.getMethods()) {
-          if (candidateProviderMethodName.equals(m.getName())
-              && CharSequence.class.isAssignableFrom(m.getReturnType())) {
-            if (candidateProviderMethod != null) {
-              throw new BuilderException("Error creating SqlSource for SqlProvider. Method '"
-                  + candidateProviderMethodName + "' is found multiple in SqlProvider '" + this.providerType.getName()
-                  + "'. Sql provider method can not overload.");
-            }
-            candidateProviderMethod = m;
-          }
-        }
-      }
-    } catch (BuilderException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new BuilderException("Error creating SqlSource for SqlProvider.  Cause: " + e, e);
-    }
-    if (candidateProviderMethod == null) {
-      throw new BuilderException("Error creating SqlSource for SqlProvider. Method '" + candidateProviderMethodName
-          + "' not found in SqlProvider '" + this.providerType.getName() + "'.");
-    }
-    this.providerMethod = candidateProviderMethod;
-    this.paramNameResolver = new ParamNameResolver(mapperType, this.providerMethod,
-        configuration.isUseActualParamName());
-    this.providerMethodParameterTypes = this.providerMethod.getParameterTypes();
-    this.providerContextIndex = getCandidateProviderContextIndex();
-  }
-
-  private Integer getCandidateProviderContextIndex() {
-    Integer candidateProviderContextIndex = null;
-    for (int i = 0; i < this.providerMethodParameterTypes.length; i++) {
-      Class<?> parameterType = this.providerMethodParameterTypes[i];
-      if (parameterType == ProviderContext.class) {
-        if (candidateProviderContextIndex != null) {
-          throw new BuilderException(
-              "Error creating SqlSource for SqlProvider. ProviderContext found multiple in SqlProvider method ("
-                  + this.providerType.getName() + "." + providerMethod.getName()
-                  + "). ProviderContext can not define multiple in SqlProvider method argument.");
-        }
-        candidateProviderContextIndex = i;
-      }
-    }
-    return candidateProviderContextIndex;
+    this.configuration = configuration;
+    this.mapperMethod = mapperMethod;
+    Lang lang = mapperMethod == null ? null : mapperMethod.getAnnotation(Lang.class);
+    this.languageDriver = configuration.getLanguageDriver(lang == null ? null : lang.value());
+    this.sqlProvider = sqlProvider;
+    this.paramNameResolver = sqlProvider.resolveParameterNames(mapperType, mapperMethod);
   }
 
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
     ProviderContext providerContext = new ProviderContext(configuration, mapperType, mapperMethod,
         configuration.getDatabaseId(), paramNameResolver, parameterObject);
-
-    SqlSource sqlSource = createSqlSource(providerContext, parameterObject);
+    String sql = sqlProvider.provideSql(providerContext);
+    Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
+    SqlSource sqlSource = languageDriver.createSqlSource(configuration, sql, parameterType, paramNameResolver);
     return sqlSource.getBoundSql(parameterObject);
-  }
-
-  private SqlSource createSqlSource(ProviderContext providerContext, Object parameterObject) {
-    try {
-      String sql;
-      if (parameterObject instanceof Map) {
-        int bindParameterCount = providerMethodParameterTypes.length - (providerContextIndex == null ? 0 : 1);
-        if (bindParameterCount == 1
-            && providerMethodParameterTypes[Integer.valueOf(0).equals(providerContextIndex) ? 1 : 0]
-                .isAssignableFrom(parameterObject.getClass())) {
-          sql = invokeProviderMethod(extractProviderMethodArguments(providerContext, parameterObject));
-        } else {
-          @SuppressWarnings("unchecked")
-          Map<String, Object> params = (Map<String, Object>) parameterObject;
-          sql = invokeProviderMethod(
-              extractProviderMethodArguments(providerContext, params, paramNameResolver.getNames()));
-        }
-      } else {
-        switch (providerMethodParameterTypes.length) {
-          case 0:
-            sql = invokeProviderMethod();
-            break;
-          case 1:
-            if (providerContextIndex == null) {
-              sql = invokeProviderMethod(parameterObject);
-            } else {
-              sql = invokeProviderMethod(providerContext);
-            }
-            break;
-          case 2:
-            sql = invokeProviderMethod(extractProviderMethodArguments(providerContext, parameterObject));
-            break;
-          default:
-            throw new BuilderException("Cannot invoke SqlProvider method '" + providerMethod
-                + "' with specify parameter '" + (parameterObject == null ? null : parameterObject.getClass())
-                + "' because SqlProvider method arguments for '" + mapperMethod + "' is an invalid combination.");
-        }
-      }
-      Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
-      return languageDriver.createSqlSource(configuration, sql, parameterType, paramNameResolver);
-    } catch (BuilderException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new BuilderException("Error invoking SqlProvider method '" + providerMethod + "' with specify parameter '"
-          + (parameterObject == null ? null : parameterObject.getClass()) + "'.  Cause: " + extractRootCause(e), e);
-    }
-  }
-
-  private Throwable extractRootCause(Exception e) {
-    Throwable cause = e;
-    while (cause.getCause() != null) {
-      cause = cause.getCause();
-    }
-    return cause;
-  }
-
-  private Object[] extractProviderMethodArguments(ProviderContext providerContext, Object parameterObject) {
-    if (providerContextIndex != null) {
-      Object[] args = new Object[2];
-      args[providerContextIndex == 0 ? 1 : 0] = parameterObject;
-      args[providerContextIndex] = providerContext;
-      return args;
-    }
-    return new Object[] { parameterObject };
-  }
-
-  private Object[] extractProviderMethodArguments(ProviderContext providerContext, Map<String, Object> params,
-      String[] argumentNames) {
-    Object[] args = new Object[argumentNames.length];
-    for (int i = 0; i < args.length; i++) {
-      if (providerContextIndex != null && providerContextIndex == i) {
-        args[i] = providerContext;
-      } else {
-        args[i] = params.get(argumentNames[i]);
-      }
-    }
-    return args;
-  }
-
-  private String invokeProviderMethod(Object... args) throws Exception {
-    Object targetObject = null;
-    if (!Modifier.isStatic(providerMethod.getModifiers())) {
-      targetObject = providerType.getDeclaredConstructor().newInstance();
-    }
-    CharSequence sql = (CharSequence) providerMethod.invoke(targetObject, args);
-    return sql != null ? sql.toString() : null;
-  }
-
-  private Class<?> getProviderType(Configuration configuration, Annotation providerAnnotation, Method mapperMethod)
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    Class<?> type = (Class<?>) providerAnnotation.annotationType().getMethod("type").invoke(providerAnnotation);
-    Class<?> value = (Class<?>) providerAnnotation.annotationType().getMethod("value").invoke(providerAnnotation);
-    if (value == void.class && type == void.class) {
-      if (configuration.getDefaultSqlProviderType() != null) {
-        return configuration.getDefaultSqlProviderType();
-      }
-      throw new BuilderException("Please specify either 'value' or 'type' attribute of @"
-          + providerAnnotation.annotationType().getSimpleName() + " at the '" + mapperMethod.toString() + "'.");
-    }
-    if (value != void.class && type != void.class && value != type) {
-      throw new BuilderException("Cannot specify different class on 'value' and 'type' attribute of @"
-          + providerAnnotation.annotationType().getSimpleName() + " at the '" + mapperMethod.toString() + "'.");
-    }
-    return value == void.class ? type : value;
   }
 
 }

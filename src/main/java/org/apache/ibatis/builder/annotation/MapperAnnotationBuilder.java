@@ -632,7 +632,9 @@ public class MapperAnnotationBuilder {
       return buildSqlSourceFromStrings(((SelectKey) annotation).statement(), parameterType, paramNameResolver,
           languageDriver);
     }
-    return new ProviderSqlSource(assistant.getConfiguration(), annotation, type, method);
+
+    SqlProvider sqlProvider = new AnnotationSqlProvider(configuration, annotation, type, method);
+    return new ProviderSqlSource(assistant.getConfiguration(), type, method, sqlProvider);
   }
 
   private SqlSource buildSqlSourceFromStrings(String[] strings, Class<?> parameterTypeClass,
