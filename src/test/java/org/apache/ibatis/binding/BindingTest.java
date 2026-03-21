@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -601,7 +601,7 @@ class BindingTest {
       mapper.selectBlog(1);
       assertEquals(1, mapperProxyFactory.getMethodCache().size());
       assertTrue(mapperProxyFactory.getMethodCache().containsKey(selectBlog));
-      final MapperMethodInvoker cachedSelectBlog = mapperProxyFactory.getMethodCache().get(selectBlog);
+      final MapperMethod cachedSelectBlog = mapperProxyFactory.getMethodCache().get(selectBlog);
 
       // Call mapper method again and verify the cache is unchanged:
       session.clearCache();
