@@ -48,8 +48,8 @@ public class MapperProxyFactory<T> {
   }
 
   public T newInstance(SqlSession sqlSession) {
-    final MapperProxy<T> mapperProxy = new MapperProxy<>(sqlSession, mapperInterface, methodCache);
+    final MapperProxy<T> mapperProxy = new MapperProxy<>(sqlSession, mapperInterface,
+        new CachedMethodLookup(methodCache, sqlSession.getConfiguration().getMethodLookup()));
     return newInstance(mapperProxy);
   }
-
 }

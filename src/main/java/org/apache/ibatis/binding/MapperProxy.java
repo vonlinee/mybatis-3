@@ -18,7 +18,6 @@ package org.apache.ibatis.binding;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Map;
 
 import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.session.SqlSession;
@@ -32,12 +31,12 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   private static final long serialVersionUID = -4724728412955527868L;
   private final SqlSession sqlSession;
   private final Class<T> mapperInterface;
-  private final Map<Method, MapperMethod> methodCache;
+  private final MapperMethod.Lookup methodLookup;
 
-  public MapperProxy(SqlSession sqlSession, Class<T> mapperInterface, Map<Method, MapperMethod> methodCache) {
+  public MapperProxy(SqlSession sqlSession, Class<T> mapperInterface, MapperMethod.Lookup methodLookup) {
     this.sqlSession = sqlSession;
     this.mapperInterface = mapperInterface;
-    this.methodCache = methodCache;
+    this.methodLookup = methodLookup;
   }
 
   @Override
@@ -46,24 +45,14 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, args);
       }
-      return cachedInvoker(method).invoke(proxy, method, args, sqlSession);
+      MapperMethod mapperMethod = methodLookup.findMethod(proxy, mapperInterface, method, args, sqlSession);
+      if (mapperMethod == null) {
+        throw new BindingException(
+            "Invalid bound statement (not found): " + mapperInterface.getName() + "." + method.getName());
+      }
+      return mapperMethod.invoke(proxy, method, args, sqlSession);
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);
     }
   }
-
-  private MapperMethod cachedInvoker(Method method) throws Throwable {
-    try {
-      return methodCache.computeIfAbsent(method, m -> {
-        if (!m.isDefault()) {
-          return new MappedSqlMethod(mapperInterface, method, sqlSession.getConfiguration());
-        }
-        return new DefaultMapperMethod(method);
-      });
-    } catch (RuntimeException re) {
-      Throwable cause = re.getCause();
-      throw cause == null ? re : cause;
-    }
-  }
-
 }

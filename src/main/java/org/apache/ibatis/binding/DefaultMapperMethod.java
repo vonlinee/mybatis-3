@@ -21,6 +21,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.SqlSession;
 
 class DefaultMapperMethod implements MapperMethod {
@@ -43,6 +44,16 @@ class DefaultMapperMethod implements MapperMethod {
     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public final boolean isDefault() {
+    return true;
+  }
+
+  @Override
+  public SqlCommandType getSqlCommandType() {
+    return SqlCommandType.UNKNOWN;
   }
 
   @Override

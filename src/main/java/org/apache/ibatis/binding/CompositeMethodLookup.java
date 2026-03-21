@@ -16,23 +16,30 @@
 package org.apache.ibatis.binding;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.SqlSession;
 import org.jetbrains.annotations.Nullable;
 
-public interface MapperMethod {
+public class CompositeMethodLookup implements MapperMethod.Lookup {
 
-  boolean isDefault();
+  private final List<MapperMethod.Lookup> lookups = new ArrayList<>();
 
-  SqlCommandType getSqlCommandType();
+  public void addMethodLookup(MapperMethod.Lookup lookup) {
+    lookups.add(lookup);
+  }
 
-  Object invoke(Object proxy, Method method, Object[] args, SqlSession sqlSession) throws Throwable;
-
-  interface Lookup {
-
-    @Nullable
-    MapperMethod findMethod(Object proxy, Class<?> mapperInterface, Method method, Object[] args, SqlSession sqlSession)
-        throws Throwable;
+  @Override
+  @Nullable
+  public MapperMethod findMethod(Object proxy, Class<?> mapperInterface, Method method, Object[] args,
+      SqlSession sqlSession) throws Throwable {
+    for (MapperMethod.Lookup lookup : lookups) {
+      MapperMethod mapperMethod = lookup.findMethod(proxy, mapperInterface, method, args, sqlSession);
+      if (mapperMethod != null) {
+        return mapperMethod;
+      }
+    }
+    return null;
   }
 }

@@ -29,6 +29,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 
+import org.apache.ibatis.binding.CompositeMethodLookup;
+import org.apache.ibatis.binding.MappedStatementMethodLookup;
+import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.binding.MapperRegistry;
 import org.apache.ibatis.builder.CacheRefResolver;
 import org.apache.ibatis.builder.IncompleteElementException;
@@ -184,6 +187,8 @@ public class Configuration {
    */
   protected final Map<String, String> cacheRefMap = new HashMap<>();
 
+  private final CompositeMethodLookup methodLookup = new CompositeMethodLookup();
+
   @Nullable
   protected SqlProviderFactory sqlProviderFactory;
 
@@ -224,6 +229,8 @@ public class Configuration {
 
     languageRegistry.setDefaultDriverClass(XMLLanguageDriver.class);
     languageRegistry.register(RawLanguageDriver.class);
+
+    this.methodLookup.addMethodLookup(new MappedStatementMethodLookup());
   }
 
   public String getLogPrefix() {
@@ -1120,6 +1127,10 @@ public class Configuration {
   @Nullable
   public SqlProviderFactory getSqlProviderFactory() {
     return sqlProviderFactory;
+  }
+
+  public MapperMethod.Lookup getMethodLookup() {
+    return methodLookup;
   }
 
   protected static class StrictMap<V> extends ConcurrentHashMap<String, V> {

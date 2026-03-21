@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
@@ -35,14 +36,24 @@ import org.apache.ibatis.session.SqlSession;
  * @author Lasse Voss
  * @author Kazuki Shimizu
  */
-public class MappedSqlMethod implements MapperMethod {
+class MappedSqlMethod implements MapperMethod {
 
   private final SqlCommand command;
   private final MethodSignature method;
 
-  public MappedSqlMethod(Class<?> mapperInterface, Method method, Configuration config) {
-    this.command = new SqlCommand(config, mapperInterface, method);
-    this.method = new MethodSignature(config, mapperInterface, method);
+  public MappedSqlMethod(SqlCommand sqlCommand, MethodSignature methodSignature) {
+    this.command = sqlCommand;
+    this.method = methodSignature;
+  }
+
+  @Override
+  public final boolean isDefault() {
+    return false;
+  }
+
+  @Override
+  public SqlCommandType getSqlCommandType() {
+    return command.getType();
   }
 
   @Override
@@ -85,9 +96,6 @@ public class MappedSqlMethod implements MapperMethod {
             result = Optional.ofNullable(result);
           }
         }
-        break;
-      case FLUSH:
-        result = sqlSession.flushStatements();
         break;
       default:
         throw new BindingException("Unknown execution method for: " + command.getName());
