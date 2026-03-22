@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.apache.ibatis;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -27,6 +28,11 @@ import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.jdbc.ScriptRunner;
+import org.apache.ibatis.mapping.Environment;
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 
 public abstract class BaseDataTest {
 
@@ -58,6 +64,28 @@ public abstract class BaseDataTest {
     return ds;
   }
 
+  public static void runScript(SqlSessionFactory sqlSessionFactory, String resource) throws SQLException, IOException {
+    DataSource ds = sqlSessionFactory.getConfiguration().getEnvironment().getDataSource();
+    runScript(ds, resource);
+  }
+
+  public static void runScriptSql(SqlSessionFactory sqlSessionFactory, String sqlScript)
+      throws SQLException, IOException {
+    DataSource ds = sqlSessionFactory.getConfiguration().getEnvironment().getDataSource();
+    runScript(ds, new StringReader(sqlScript));
+  }
+
+  public static void runScript(DataSource ds, Reader reader) throws IOException, SQLException {
+    try (Connection connection = ds.getConnection()) {
+      ScriptRunner runner = new ScriptRunner(connection);
+      runner.setAutoCommit(true);
+      runner.setStopOnError(false);
+      runner.setLogWriter(null);
+      runner.setErrorLogWriter(null);
+      runScript(runner, reader);
+    }
+  }
+
   public static void runScript(DataSource ds, String resource) throws IOException, SQLException {
     try (Connection connection = ds.getConnection()) {
       ScriptRunner runner = new ScriptRunner(connection);
@@ -67,6 +95,10 @@ public abstract class BaseDataTest {
       runner.setErrorLogWriter(null);
       runScript(runner, resource);
     }
+  }
+
+  public static void runScript(ScriptRunner runner, Reader reader) {
+    runner.runScript(reader);
   }
 
   public static void runScript(ScriptRunner runner, String resource) throws IOException, SQLException {
@@ -87,5 +119,46 @@ public abstract class BaseDataTest {
     runScript(ds, JPETSTORE_DDL);
     runScript(ds, JPETSTORE_DATA);
     return ds;
+  }
+
+  public static DataSource createUnpooledHsqlDbDataSource(String dataSourceName) {
+    UnpooledDataSource dataSource = new UnpooledDataSource();
+    dataSource.setUrl("jdbc:hsqldb:mem:" + dataSourceName);
+    dataSource.setDriver("org.hsqldb.jdbcDriver");
+    dataSource.setUsername("sa");
+    return dataSource;
+  }
+
+  public static Environment createDefaultHsqlDbEnvironment(String dataSourceName) {
+    DataSource dataSource = createUnpooledHsqlDbDataSource(dataSourceName);
+    return new Environment("default", new JdbcTransactionFactory(), dataSource);
+  }
+
+  /**
+   * this method is to replace the following code: <blockquote>
+   *
+   * <pre>
+   * // create a SqlSessionFactory
+   * try (Reader reader = Resources
+   *     .getResourceAsReader("org/apache/ibatis/submitted/missing_id_property/MapperConfig.xml")) {
+   *   sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+   * }
+   *
+   * // populate in-memory database
+   * BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+   *     "org/apache/ibatis/submitted/missing_id_property/CreateDB.sql");
+   * </pre>
+   *
+   * </blockquote>
+   *
+   * @param dataSourceName
+   *          data source name
+   *
+   * @return SqlSessionFactory
+   */
+  public static SqlSessionFactory createDefaultHsqlDbSqlSessionFactory(String dataSourceName) {
+    Environment environment = createDefaultHsqlDbEnvironment(dataSourceName);
+    Configuration configuration = new Configuration(environment);
+    return new SqlSessionFactoryBuilder().build(configuration);
   }
 }
