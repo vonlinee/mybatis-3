@@ -1005,7 +1005,7 @@ class SqlProviderTest {
   void shouldUseFactoriedSqlProvider() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       sqlSessionFactory.getConfiguration()
-          .setSqlProviderFactory(new MySqlProviderFactory(sqlSessionFactory.getConfiguration()));
+          .addSqlProviderFactory(new MySqlProviderFactory(sqlSessionFactory.getConfiguration()));
       sqlSessionFactory.getConfiguration().addMapper(SqlProviderMapper.class);
       SqlProviderMapper mapper = sqlSession.getMapper(SqlProviderMapper.class);
       User user = mapper.selectById(1);

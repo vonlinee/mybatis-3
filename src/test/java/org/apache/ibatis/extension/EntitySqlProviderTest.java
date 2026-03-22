@@ -53,7 +53,7 @@ class EntitySqlProviderTest extends BaseDataTest {
     runScriptSql(sqlSessionFactory, "create table users (id int, name varchar(20), email varchar(100));");
 
     Configuration configuration = sqlSessionFactory.getConfiguration();
-    configuration.setSqlProviderFactory(new EntitySqlProviderFactory());
+    configuration.addSqlProviderFactory(new EntitySqlProviderFactory());
     configuration.addMapper(UserMapper.class);
 
     try (SqlSession session = sqlSessionFactory.openSession(true)) {

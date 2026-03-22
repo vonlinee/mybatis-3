@@ -15,16 +15,7 @@
  */
 package org.apache.ibatis.session;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
@@ -101,7 +92,6 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
@@ -191,8 +181,7 @@ public class Configuration {
   private final CompositeMethodLookup methodLookup = new CompositeMethodLookup();
   protected final TableInfoRegistry tableInfoRegistry = new TableInfoRegistry();
 
-  @Nullable
-  protected SqlProviderFactory sqlProviderFactory;
+  protected final Map<Class<?>, SqlProviderFactory> sqlProviderFactories = new ConcurrentHashMap<>();
 
   public Configuration(Environment environment) {
     this();
@@ -1122,13 +1111,19 @@ public class Configuration {
     }
   }
 
-  public void setSqlProviderFactory(@Nullable SqlProviderFactory sqlProviderFactory) {
-    this.sqlProviderFactory = sqlProviderFactory;
+  public void addSqlProviderFactory(SqlProviderFactory sqlProviderFactory) {
+    Objects.requireNonNull(sqlProviderFactory, "sqlProviderFactory is null.");
+    addSqlProviderFactory(sqlProviderFactory.getClass(), sqlProviderFactory);
   }
 
-  @Nullable
-  public SqlProviderFactory getSqlProviderFactory() {
-    return sqlProviderFactory;
+  public void addSqlProviderFactory(Class<?> providerType, SqlProviderFactory sqlProviderFactory) {
+    Objects.requireNonNull(providerType, "providerType is null.");
+    Objects.requireNonNull(sqlProviderFactory, "sqlProviderFactory is null.");
+    this.sqlProviderFactories.put(providerType, sqlProviderFactory);
+  }
+
+  public SqlProviderFactory getSqlProviderFactory(Class<?> providerType) {
+    return sqlProviderFactories.get(providerType);
   }
 
   public TableInfoRegistry getTableInfoRegistry() {

@@ -36,7 +36,7 @@ public class AnnotationSqlProvider implements SqlProvider {
     try {
       Class<?> providerType = getProviderType(configuration, provider, mapperMethod);
       if (SqlProviderFactory.class.isAssignableFrom(providerType)) {
-        SqlProviderFactory sqlProviderFactory = configuration.getSqlProviderFactory();
+        SqlProviderFactory sqlProviderFactory = configuration.getSqlProviderFactory(providerType);
         if (sqlProviderFactory == null) {
           throw new BuilderException(String.format(
               "a type of sql provider factory [%s] is used as the provider type in the mapper method %s#%s, but the SqlProviderFactory is not configured.",
