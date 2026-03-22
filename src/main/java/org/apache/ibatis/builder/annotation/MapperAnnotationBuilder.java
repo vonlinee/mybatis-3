@@ -453,7 +453,7 @@ public class MapperAnnotationBuilder {
     } else if (resolvedReturnType instanceof ParameterizedType) {
       ParameterizedType parameterizedType = (ParameterizedType) resolvedReturnType;
       Class<?> rawType = (Class<?>) parameterizedType.getRawType();
-      if (Collection.class.isAssignableFrom(rawType) || Cursor.class.isAssignableFrom(rawType)) {
+      if (isSequentialType(rawType)) {
         Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
         if (actualTypeArguments != null && actualTypeArguments.length == 1) {
           Type returnTypeParameter = actualTypeArguments[0];
@@ -490,6 +490,11 @@ public class MapperAnnotationBuilder {
     }
 
     return returnType;
+  }
+
+  private static boolean isSequentialType(Class<?> type) {
+    return Collection.class.isAssignableFrom(type) || Cursor.class.isAssignableFrom(type)
+        || Iterator.class.isAssignableFrom(type) || Stream.class.isAssignableFrom(type);
   }
 
   private void applyResults(Result[] results, Class<?> resultType, List<ResultMapping> resultMappings) {

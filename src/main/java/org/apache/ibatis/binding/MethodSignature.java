@@ -18,8 +18,10 @@ package org.apache.ibatis.binding;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.cursor.Cursor;
@@ -35,6 +37,8 @@ public class MethodSignature {
   private final boolean returnsMap;
   private final boolean returnsVoid;
   private final boolean returnsCursor;
+  private final boolean returnsIterator;
+  private final boolean returnsStream;
   private final boolean returnsOptional;
   private final Class<?> returnType;
   private final String mapKey;
@@ -54,6 +58,8 @@ public class MethodSignature {
     this.returnsVoid = void.class.equals(this.returnType);
     this.returnsMany = configuration.getObjectFactory().isCollection(this.returnType) || this.returnType.isArray();
     this.returnsCursor = Cursor.class.equals(this.returnType);
+    this.returnsIterator = Iterator.class.equals(this.returnType);
+    this.returnsStream = Stream.class.equals(this.returnType);
     this.returnsOptional = Optional.class.equals(this.returnType);
     this.mapKey = getMapKey(method);
     this.returnsMap = this.mapKey != null;
@@ -100,6 +106,14 @@ public class MethodSignature {
 
   public boolean returnsCursor() {
     return returnsCursor;
+  }
+
+  public boolean returnsIterator() {
+    return returnsIterator;
+  }
+
+  public boolean returnsStream() {
+    return returnsStream;
   }
 
   /**

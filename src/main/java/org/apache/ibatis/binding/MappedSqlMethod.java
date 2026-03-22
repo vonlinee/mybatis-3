@@ -17,9 +17,12 @@ package org.apache.ibatis.binding;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -89,6 +92,10 @@ class MappedSqlMethod implements MapperMethod {
           result = executeForMap(sqlSession, args);
         } else if (method.returnsCursor()) {
           result = executeForCursor(sqlSession, args);
+        } else if (method.returnsIterator()) {
+          result = executeForIterator(sqlSession, args);
+        } else if (method.returnsStream()) {
+          result = executeForStream(sqlSession, args);
         } else {
           Object param = method.convertArgsToSqlCommandParam(args);
           result = sqlSession.selectOne(command.getName(), param);
@@ -158,6 +165,16 @@ class MappedSqlMethod implements MapperMethod {
       return convertToDeclaredCollection(sqlSession.getConfiguration(), result);
     }
     return result;
+  }
+
+  private <T> Iterator<T> executeForIterator(SqlSession sqlSession, Object[] args) {
+    Cursor<T> cursor = executeForCursor(sqlSession, args);
+    return cursor.iterator();
+  }
+
+  private <T> Stream<T> executeForStream(SqlSession sqlSession, Object[] args) {
+    Cursor<T> cursor = executeForCursor(sqlSession, args);
+    return StreamSupport.stream(cursor.spliterator(), false).onClose(cursor::close);
   }
 
   private <T> Cursor<T> executeForCursor(SqlSession sqlSession, Object[] args) {
