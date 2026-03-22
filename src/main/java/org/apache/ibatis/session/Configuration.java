@@ -62,6 +62,7 @@ import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.executor.statement.RoutingStatementHandler;
 import org.apache.ibatis.executor.statement.StatementHandler;
+import org.apache.ibatis.extension.TableInfoRegistry;
 import org.apache.ibatis.io.VFS;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
@@ -188,6 +189,7 @@ public class Configuration {
   protected final Map<String, String> cacheRefMap = new HashMap<>();
 
   private final CompositeMethodLookup methodLookup = new CompositeMethodLookup();
+  protected final TableInfoRegistry tableInfoRegistry = new TableInfoRegistry();
 
   @Nullable
   protected SqlProviderFactory sqlProviderFactory;
@@ -1129,8 +1131,20 @@ public class Configuration {
     return sqlProviderFactory;
   }
 
+  public TableInfoRegistry getTableInfoRegistry() {
+    return tableInfoRegistry;
+  }
+
+  public void registerTable(Class<?> entityType) {
+    tableInfoRegistry.register(entityType);
+  }
+
   public MapperMethod.Lookup getMethodLookup() {
     return methodLookup;
+  }
+
+  public void addMethodLookup(MapperMethod.Lookup lookup) {
+    this.methodLookup.addMethodLookup(lookup);
   }
 
   protected static class StrictMap<V> extends ConcurrentHashMap<String, V> {

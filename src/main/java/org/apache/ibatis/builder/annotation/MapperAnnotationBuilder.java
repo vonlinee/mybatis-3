@@ -42,6 +42,7 @@ import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
+import org.apache.ibatis.extension.CrudMapper;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.FetchType;
@@ -109,6 +110,8 @@ public class MapperAnnotationBuilder {
       parseCache();
       parseCacheRef();
 
+      registerTable(type);
+
       if (type.isAnnotationPresent(NamedResultMap.class)) {
         parseNamedResultMap(type.getAnnotation(NamedResultMap.class));
       }
@@ -133,6 +136,15 @@ public class MapperAnnotationBuilder {
       }
     }
     configuration.parsePendingMethods(false);
+  }
+
+  protected void registerTable(Class<?> mapperClass) {
+    if (CrudMapper.class.isAssignableFrom(mapperClass)) {
+      Type type = TypeParameterResolver.resolveClassTypeParams(CrudMapper.class, mapperClass)[0];
+      if (type instanceof Class) {
+        configuration.registerTable((Class<?>) type);
+      }
+    }
   }
 
   private static boolean canHaveStatement(Method method) {
