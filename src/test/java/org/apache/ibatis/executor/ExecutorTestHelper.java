@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -68,20 +68,24 @@ final class ExecutorTestHelper {
     return new MappedStatement.Builder(config, "insertAuthor",
         new StaticSqlSource(config,
             "INSERT INTO author (id,username,password,email,bio,favourite_section) values(?,?,?,?,?,?)"),
-        SqlCommandType.INSERT).parameterMap(
-            new ParameterMap.Builder(config, "defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
-              private static final long serialVersionUID = 1L;
-              {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-                add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
-                    .jdbcType(JdbcType.VARCHAR).build());
-                add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
-                    .jdbcType(JdbcType.VARCHAR).build());
-              }
-            }).build()).cache(authorCache).build();
+        SqlCommandType.INSERT)
+            .parameterMap(
+                new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
+                  private static final long serialVersionUID = 1L;
+                  {
+                    add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+                    add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class))
+                        .build());
+                    add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class))
+                        .build());
+                    add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
+                    add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
+                        .jdbcType(JdbcType.VARCHAR).build());
+                    add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
+                        .jdbcType(JdbcType.VARCHAR).build());
+                  }
+                }).build())
+            .cache(authorCache).build();
   }
 
   static MappedStatement prepareInsertAuthorMappedStatementWithAutoKey(final Configuration config) {
@@ -89,64 +93,78 @@ final class ExecutorTestHelper {
     return new MappedStatement.Builder(config, "insertAuthor",
         new StaticSqlSource(config,
             "INSERT INTO author (username,password,email,bio,favourite_section) values(?,?,?,?,?)"),
-        SqlCommandType.INSERT).parameterMap(
-            new ParameterMap.Builder(config, "defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
-              private static final long serialVersionUID = 1L;
-              {
-                add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
-                    .jdbcType(JdbcType.VARCHAR).build());
-                add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
-                    .jdbcType(JdbcType.VARCHAR).build());
-              }
-            }).build()).cache(authorCache).keyGenerator(Jdbc3KeyGenerator.INSTANCE).keyProperty("id").build();
+        SqlCommandType.INSERT)
+            .parameterMap(
+                new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
+                  private static final long serialVersionUID = 1L;
+                  {
+                    add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class))
+                        .build());
+                    add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class))
+                        .build());
+                    add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
+                    add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
+                        .jdbcType(JdbcType.VARCHAR).build());
+                    add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
+                        .jdbcType(JdbcType.VARCHAR).build());
+                  }
+                }).build())
+            .cache(authorCache).keyGenerator(Jdbc3KeyGenerator.INSTANCE).keyProperty("id").build();
   }
 
   static MappedStatement prepareInsertAuthorProc(final Configuration config) {
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "insertAuthorProc",
-        new StaticSqlSource(config, "{call insertAuthor(?,?,?,?)}"), SqlCommandType.INSERT).parameterMap(
-            new ParameterMap.Builder(config, "defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
-              private static final long serialVersionUID = 1L;
-              {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-                add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
-              }
-            }).build()).cache(authorCache).build();
+        new StaticSqlSource(config, "{call insertAuthor(?,?,?,?)}"), SqlCommandType.INSERT)
+            .parameterMap(
+                new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
+                  private static final long serialVersionUID = 1L;
+                  {
+                    add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+                    add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class))
+                        .build());
+                    add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class))
+                        .build());
+                    add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
+                  }
+                }).build())
+            .cache(authorCache).build();
   }
 
   static MappedStatement prepareUpdateAuthorMappedStatement(final Configuration config) {
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "updateAuthor",
         new StaticSqlSource(config, "UPDATE author SET username = ?, password = ?, email = ?, bio = ? WHERE id = ?"),
-        SqlCommandType.UPDATE).parameterMap(
-            new ParameterMap.Builder(config, "defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
-              private static final long serialVersionUID = 1L;
-              {
-                add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
-                    .jdbcType(JdbcType.VARCHAR).build());
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-              }
-            }).build()).cache(authorCache).build();
+        SqlCommandType.UPDATE)
+            .parameterMap(
+                new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
+                  private static final long serialVersionUID = 1L;
+                  {
+                    add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class))
+                        .build());
+                    add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class))
+                        .build());
+                    add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
+                    add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
+                        .jdbcType(JdbcType.VARCHAR).build());
+                    add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+                  }
+                }).build())
+            .cache(authorCache).build();
   }
 
   static MappedStatement prepareDeleteAuthorMappedStatement(final Configuration config) {
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "deleteAuthor",
-        new StaticSqlSource(config, "DELETE FROM author WHERE id = ?"), SqlCommandType.DELETE).parameterMap(
-            new ParameterMap.Builder(config, "defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
-              private static final long serialVersionUID = 1L;
-              {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-              }
-            }).build()).cache(authorCache).build();
+        new StaticSqlSource(config, "DELETE FROM author WHERE id = ?"), SqlCommandType.DELETE)
+            .parameterMap(
+                new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
+                  private static final long serialVersionUID = 1L;
+                  {
+                    add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+                  }
+                }).build())
+            .cache(authorCache).build();
   }
 
   static MappedStatement prepareSelectOneAuthorMappedStatement(final Configuration config) {
@@ -169,13 +187,15 @@ final class ExecutorTestHelper {
         }).build();
 
     return new MappedStatement.Builder(config, "selectAuthor",
-        new StaticSqlSource(config, "SELECT * FROM author WHERE id = ?"), SqlCommandType.SELECT).parameterMap(
-            new ParameterMap.Builder(config, "defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
-              private static final long serialVersionUID = 1L;
-              {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-              }
-            }).build()).resultMaps(new ArrayList<ResultMap>() {
+        new StaticSqlSource(config, "SELECT * FROM author WHERE id = ?"), SqlCommandType.SELECT)
+            .parameterMap(
+                new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
+                  private static final long serialVersionUID = 1L;
+                  {
+                    add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+                  }
+                }).build())
+            .resultMaps(new ArrayList<ResultMap>() {
               private static final long serialVersionUID = 1L;
               {
                 add(rm);
@@ -205,13 +225,15 @@ final class ExecutorTestHelper {
   static MappedStatement prepareSelectOneAuthorMappedStatementWithConstructorResults(final Configuration config) {
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "selectAuthor",
-        new StaticSqlSource(config, "SELECT * FROM author WHERE id = ?"), SqlCommandType.SELECT).parameterMap(
-            new ParameterMap.Builder(config, "defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
-              private static final long serialVersionUID = 1L;
-              {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-              }
-            }).build()).resultMaps(new ArrayList<ResultMap>() {
+        new StaticSqlSource(config, "SELECT * FROM author WHERE id = ?"), SqlCommandType.SELECT)
+            .parameterMap(
+                new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
+                  private static final long serialVersionUID = 1L;
+                  {
+                    add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+                  }
+                }).build())
+            .resultMaps(new ArrayList<ResultMap>() {
               private static final long serialVersionUID = 1L;
               {
                 add(new ResultMap.Builder(config, "defaultResultMap", Author.class, new ArrayList<ResultMapping>() {
@@ -243,8 +265,8 @@ final class ExecutorTestHelper {
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "selectTwoSetsOfAuthors",
         new StaticSqlSource(config, "{call selectTwoSetsOfAuthors(?,?)}"), SqlCommandType.SELECT)
-            .statementType(StatementType.CALLABLE).parameterMap(new ParameterMap.Builder(config, "defaultParameterMap",
-                Author.class, new ArrayList<ParameterMapping>() {
+            .statementType(StatementType.CALLABLE).parameterMap(
+                new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
                   private static final long serialVersionUID = 1L;
                   {
                     add(new ParameterMapping.Builder(config, "id1", registry.getTypeHandler(int.class)).build());
@@ -279,8 +301,8 @@ final class ExecutorTestHelper {
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "selectAuthorViaOutParams",
         new StaticSqlSource(config, "{call selectAuthorViaOutParams(?,?,?,?,?)}"), SqlCommandType.SELECT)
-            .statementType(StatementType.CALLABLE).parameterMap(new ParameterMap.Builder(config, "defaultParameterMap",
-                Author.class, new ArrayList<ParameterMapping>() {
+            .statementType(StatementType.CALLABLE).parameterMap(
+                new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
                   private static final long serialVersionUID = 1L;
                   {
                     add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
@@ -338,10 +360,8 @@ final class ExecutorTestHelper {
   static MappedStatement createInsertAuthorWithIDof99MappedStatement(final Configuration config) {
     return new MappedStatement.Builder(config, "insertAuthor", new StaticSqlSource(config,
         "INSERT INTO author (id,username,password,email,bio) values(99,'someone','******','someone@apache.org',null)"),
-        SqlCommandType.INSERT)
-            .statementType(StatementType.STATEMENT)
-            .parameterMap(
-                new ParameterMap.Builder(config, "defaultParameterMap", Author.class, new ArrayList<>()).build())
+        SqlCommandType.INSERT).statementType(StatementType.STATEMENT)
+            .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>()).build())
             .cache(authorCache).build();
   }
 
@@ -350,8 +370,7 @@ final class ExecutorTestHelper {
     return new MappedStatement.Builder(config, "selectAuthor",
         new StaticSqlSource(config, "SELECT * FROM author WHERE id = 99"), SqlCommandType.SELECT)
             .statementType(StatementType.STATEMENT)
-            .parameterMap(
-                new ParameterMap.Builder(config, "defaultParameterMap", Author.class, new ArrayList<>()).build())
+            .parameterMap(new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<>()).build())
             .resultMaps(new ArrayList<ResultMap>() {
               private static final long serialVersionUID = 1L;
               {
@@ -386,7 +405,7 @@ final class ExecutorTestHelper {
          INNER JOIN author a ON b.author_id = a.id\
          WHERE b.id = ?\
         """);
-    final ParameterMap parameterMap = new ParameterMap.Builder(config, "defaultParameterMap", int.class,
+    final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", int.class,
         new ArrayList<ParameterMapping>() {
           private static final long serialVersionUID = 1L;
           {
@@ -442,7 +461,7 @@ final class ExecutorTestHelper {
          INNER JOIN author a ON b.author_id = a.id\
          WHERE b.id = ? and a.id = ?\
          """);
-    final ParameterMap parameterMap = new ParameterMap.Builder(config, "defaultParameterMap", Map.class,
+    final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", Map.class,
         new ArrayList<ParameterMapping>() {
           private static final long serialVersionUID = 1L;
           {
@@ -506,7 +525,7 @@ final class ExecutorTestHelper {
          LEFT OUTER JOIN comment c ON c.post_id = p.id\
          WHERE p.blog_id = ?\
         """);
-    final ParameterMap parameterMap = new ParameterMap.Builder(config, "defaultParameterMap", Author.class,
+    final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", Author.class,
         new ArrayList<ParameterMapping>() {
           private static final long serialVersionUID = 1L;
           {
@@ -597,7 +616,7 @@ final class ExecutorTestHelper {
           LEFT OUTER JOIN comment c ON c.post_id = p.id\
          WHERE p.id = ?\
          """);
-    final ParameterMap parameterMap = new ParameterMap.Builder(config, "defaultParameterMap", Author.class,
+    final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", Author.class,
         new ArrayList<ParameterMapping>() {
           private static final long serialVersionUID = 1L;
           {
@@ -687,7 +706,7 @@ final class ExecutorTestHelper {
           LEFT OUTER JOIN comment c ON c.post_id = p.id\
          WHERE p.id = ?\
          """);
-    final ParameterMap parameterMap = new ParameterMap.Builder(config, "defaultParameterMap", Author.class,
+    final ParameterMap parameterMap = new ParameterMap.Builder("defaultParameterMap", Author.class,
         new ArrayList<ParameterMapping>() {
           private static final long serialVersionUID = 1L;
           {
@@ -783,20 +802,24 @@ final class ExecutorTestHelper {
     config.addMappedStatement(kms);
     return new MappedStatement.Builder(config, "insertAuthor", new DynamicSqlSource(config, new TextSqlNode(
         "INSERT INTO author (id,username,password,email,bio,favourite_section) values(#{id},#{username},#{password},#{email},#{bio:VARCHAR},#{favouriteSection})")),
-        SqlCommandType.INSERT).parameterMap(
-            new ParameterMap.Builder(config, "defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
-              private static final long serialVersionUID = 1L;
-              {
-                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(Integer.class)).build());
-                add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
-                add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
-                    .jdbcType(JdbcType.VARCHAR).build());
-                add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
-                    .jdbcType(JdbcType.VARCHAR).build());
-              }
-            }).build()).cache(authorCache).keyGenerator(new SelectKeyGenerator(kms, true)).keyProperty("id").build();
+        SqlCommandType.INSERT)
+            .parameterMap(
+                new ParameterMap.Builder("defaultParameterMap", Author.class, new ArrayList<ParameterMapping>() {
+                  private static final long serialVersionUID = 1L;
+                  {
+                    add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(Integer.class)).build());
+                    add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class))
+                        .build());
+                    add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class))
+                        .build());
+                    add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
+                    add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
+                        .jdbcType(JdbcType.VARCHAR).build());
+                    add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
+                        .jdbcType(JdbcType.VARCHAR).build());
+                  }
+                }).build())
+            .cache(authorCache).keyGenerator(new SelectKeyGenerator(kms, true)).keyProperty("id").build();
   }
 
   private ExecutorTestHelper() {
