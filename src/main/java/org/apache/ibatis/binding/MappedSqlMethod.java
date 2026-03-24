@@ -66,19 +66,20 @@ class MappedSqlMethod implements MapperMethod {
 
   public Object execute(SqlSession sqlSession, Object[] args) {
     Object result;
+    Configuration configuration = sqlSession.getConfiguration();
     switch (command.getType()) {
       case INSERT: {
-        Object param = method.convertArgsToSqlCommandParam(args);
+        Object param = method.convertArgsToSqlCommandParam(args, configuration.isNullValueWhenKeyNotFoundInParamMap());
         result = rowCountResult(sqlSession.insert(command.getName(), param));
         break;
       }
       case UPDATE: {
-        Object param = method.convertArgsToSqlCommandParam(args);
+        Object param = method.convertArgsToSqlCommandParam(args, configuration.isNullValueWhenKeyNotFoundInParamMap());
         result = rowCountResult(sqlSession.update(command.getName(), param));
         break;
       }
       case DELETE: {
-        Object param = method.convertArgsToSqlCommandParam(args);
+        Object param = method.convertArgsToSqlCommandParam(args, configuration.isNullValueWhenKeyNotFoundInParamMap());
         result = rowCountResult(sqlSession.delete(command.getName(), param));
         break;
       }
@@ -97,7 +98,8 @@ class MappedSqlMethod implements MapperMethod {
         } else if (method.returnsStream()) {
           result = executeForStream(sqlSession, args);
         } else {
-          Object param = method.convertArgsToSqlCommandParam(args);
+          Object param = method.convertArgsToSqlCommandParam(args,
+              configuration.isNullValueWhenKeyNotFoundInParamMap());
           result = sqlSession.selectOne(command.getName(), param);
           if (method.returnsOptional() && (result == null || !method.getReturnType().equals(result.getClass()))) {
             result = Optional.ofNullable(result);
@@ -139,7 +141,8 @@ class MappedSqlMethod implements MapperMethod {
           "method " + command.getName() + " needs either a @ResultMap annotation, a @ResultType annotation,"
               + " or a resultType attribute in XML so a ResultHandler can be used as a parameter.");
     }
-    Object param = method.convertArgsToSqlCommandParam(args);
+    Configuration configuration = sqlSession.getConfiguration();
+    Object param = method.convertArgsToSqlCommandParam(args, configuration.isNullValueWhenKeyNotFoundInParamMap());
     if (method.hasRowBounds()) {
       RowBounds rowBounds = method.extractRowBounds(args);
       sqlSession.select(command.getName(), param, rowBounds, method.extractResultHandler(args));
@@ -150,7 +153,8 @@ class MappedSqlMethod implements MapperMethod {
 
   private <E> Object executeForMany(SqlSession sqlSession, Object[] args) {
     List<E> result;
-    Object param = method.convertArgsToSqlCommandParam(args);
+    Configuration configuration = sqlSession.getConfiguration();
+    Object param = method.convertArgsToSqlCommandParam(args, configuration.isNullValueWhenKeyNotFoundInParamMap());
     if (method.hasRowBounds()) {
       RowBounds rowBounds = method.extractRowBounds(args);
       result = sqlSession.selectList(command.getName(), param, rowBounds);
@@ -179,7 +183,8 @@ class MappedSqlMethod implements MapperMethod {
 
   private <T> Cursor<T> executeForCursor(SqlSession sqlSession, Object[] args) {
     Cursor<T> result;
-    Object param = method.convertArgsToSqlCommandParam(args);
+    Configuration configuration = sqlSession.getConfiguration();
+    Object param = method.convertArgsToSqlCommandParam(args, configuration.isNullValueWhenKeyNotFoundInParamMap());
     if (method.hasRowBounds()) {
       RowBounds rowBounds = method.extractRowBounds(args);
       result = sqlSession.selectCursor(command.getName(), param, rowBounds);
@@ -211,7 +216,8 @@ class MappedSqlMethod implements MapperMethod {
 
   private <K, V> Map<K, V> executeForMap(SqlSession sqlSession, Object[] args) {
     Map<K, V> result;
-    Object param = method.convertArgsToSqlCommandParam(args);
+    Configuration configuration = sqlSession.getConfiguration();
+    Object param = method.convertArgsToSqlCommandParam(args, configuration.isNullValueWhenKeyNotFoundInParamMap());
     if (method.hasRowBounds()) {
       RowBounds rowBounds = method.extractRowBounds(args);
       result = sqlSession.selectMap(command.getName(), param, method.getMapKey(), rowBounds);

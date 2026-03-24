@@ -114,6 +114,13 @@ public class Configuration {
   protected boolean nullableOnForEach;
   protected boolean argNameBasedConstructorAutoMapping;
 
+  /**
+   * whether view the value of parameter as null when the parameter name is not found in the parameter map.
+   *
+   * @see org.apache.ibatis.binding.ParamMap
+   */
+  protected boolean nullValueWhenKeyNotFoundInParamMap;
+
   protected String logPrefix;
   protected Class<? extends Log> logImpl;
   protected Class<? extends VFS> vfsImpl;
@@ -342,6 +349,14 @@ public class Configuration {
 
   public void setArgNameBasedConstructorAutoMapping(boolean argNameBasedConstructorAutoMapping) {
     this.argNameBasedConstructorAutoMapping = argNameBasedConstructorAutoMapping;
+  }
+
+  public void setNullValueWhenKeyNotFoundInParamMap(boolean nullValueWhenKeyNotFoundInParamMap) {
+    this.nullValueWhenKeyNotFoundInParamMap = nullValueWhenKeyNotFoundInParamMap;
+  }
+
+  public boolean isNullValueWhenKeyNotFoundInParamMap() {
+    return nullValueWhenKeyNotFoundInParamMap;
   }
 
   public String getDatabaseId() {

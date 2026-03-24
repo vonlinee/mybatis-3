@@ -68,8 +68,8 @@ public class MethodSignature {
     this.paramNameResolver = new ParamNameResolver(mapperInterface, method, configuration.isUseActualParamName());
   }
 
-  public Object convertArgsToSqlCommandParam(Object[] args) {
-    return paramNameResolver.getNamedParams(args);
+  public Object convertArgsToSqlCommandParam(Object[] args, boolean nullValueWhenKeyNotFoundInParamMap) {
+    return paramNameResolver.getNamedParams(args, nullValueWhenKeyNotFoundInParamMap);
   }
 
   public boolean hasRowBounds() {

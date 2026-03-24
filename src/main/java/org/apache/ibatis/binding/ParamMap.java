@@ -21,9 +21,23 @@ public class ParamMap extends HashMap<String, Object> {
 
   private static final long serialVersionUID = -2212268410512043556L;
 
+  private final boolean nullValueWhenKeyNotFound;
+
+  public ParamMap() {
+    this(false);
+  }
+
+  public ParamMap(boolean nullValueWhenKeyNotFound) {
+    super();
+    this.nullValueWhenKeyNotFound = nullValueWhenKeyNotFound;
+  }
+
   @Override
   public Object get(Object key) {
     if (!super.containsKey(key)) {
+      if (nullValueWhenKeyNotFound) {
+        return null;
+      }
       throw new BindingException("Parameter '" + key + "' not found. Available parameters are " + keySet());
     }
     return super.get(key);

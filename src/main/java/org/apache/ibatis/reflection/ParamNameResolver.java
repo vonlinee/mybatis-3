@@ -153,16 +153,17 @@ public class ParamNameResolver {
    *
    * @return the named params
    */
-  public Object getNamedParams(Object[] args) {
+  public Object getNamedParams(Object[] args, boolean nullValueWhenKeyNotFoundInParamMap) {
     final int paramCount = names.size();
     if (args == null || paramCount == 0) {
       return null;
     }
     if (!hasParamAnnotation && paramCount == 1) {
       Object value = args[names.firstKey()];
-      return wrapToMapIfCollection(value, useActualParamName ? names.get(names.firstKey()) : null);
+      return wrapToMapIfCollection(value, useActualParamName ? names.get(names.firstKey()) : null,
+          nullValueWhenKeyNotFoundInParamMap);
     } else {
-      final Map<String, Object> param = new ParamMap();
+      final Map<String, Object> param = new ParamMap(nullValueWhenKeyNotFoundInParamMap);
       int i = 0;
       for (Map.Entry<Integer, String> entry : names.entrySet()) {
         param.put(entry.getValue(), args[entry.getKey()]);
@@ -218,9 +219,10 @@ public class ParamNameResolver {
    *
    * @since 3.5.5
    */
-  public static Object wrapToMapIfCollection(Object object, String actualParamName) {
+  public static Object wrapToMapIfCollection(Object object, String actualParamName,
+      boolean nullValueWhenKeyNotFoundInParamMap) {
     if (object instanceof Collection) {
-      ParamMap map = new ParamMap();
+      ParamMap map = new ParamMap(nullValueWhenKeyNotFoundInParamMap);
       map.put("collection", object);
       if (object instanceof List) {
         map.put("list", object);
@@ -229,7 +231,7 @@ public class ParamNameResolver {
       return map;
     }
     if (object != null && object.getClass().isArray()) {
-      ParamMap map = new ParamMap();
+      ParamMap map = new ParamMap(nullValueWhenKeyNotFoundInParamMap);
       map.put("array", object);
       Optional.ofNullable(actualParamName).ifPresent(name -> map.put(name, object));
       return map;
