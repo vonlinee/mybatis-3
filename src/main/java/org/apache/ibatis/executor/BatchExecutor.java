@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -88,9 +88,7 @@ public class BatchExecutor extends BaseExecutor {
       Configuration configuration = ms.getConfiguration();
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameterObject, rowBounds,
           resultHandler, boundSql);
-      Connection connection = getConnection(ms.getStatementLog());
-      stmt = handler.prepare(connection, transaction.getTimeout());
-      handler.parameterize(stmt);
+      stmt = prepareStatement(handler, ms);
       return handler.query(stmt, resultHandler);
     } finally {
       closeStatement(stmt);
@@ -103,9 +101,7 @@ public class BatchExecutor extends BaseExecutor {
     flushStatements();
     Configuration configuration = ms.getConfiguration();
     StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
-    Connection connection = getConnection(ms.getStatementLog());
-    Statement stmt = handler.prepare(connection, transaction.getTimeout());
-    handler.parameterize(stmt);
+    Statement stmt = prepareStatement(handler, ms);
     Cursor<E> cursor = handler.queryCursor(stmt);
     stmt.closeOnCompletion();
     return cursor;

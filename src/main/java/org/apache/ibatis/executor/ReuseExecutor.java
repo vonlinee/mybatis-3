@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.statement.StatementHandler;
-import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.Configuration;
@@ -48,7 +47,7 @@ public class ReuseExecutor extends BaseExecutor {
   public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
     Configuration configuration = ms.getConfiguration();
     StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
-    Statement stmt = prepareStatement(handler, ms.getStatementLog());
+    Statement stmt = prepareStatement(handler, ms);
     return handler.update(stmt);
   }
 
@@ -58,7 +57,7 @@ public class ReuseExecutor extends BaseExecutor {
     Configuration configuration = ms.getConfiguration();
     StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler,
         boundSql);
-    Statement stmt = prepareStatement(handler, ms.getStatementLog());
+    Statement stmt = prepareStatement(handler, ms);
     return handler.query(stmt, resultHandler);
   }
 
@@ -67,7 +66,7 @@ public class ReuseExecutor extends BaseExecutor {
       throws SQLException {
     Configuration configuration = ms.getConfiguration();
     StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
-    Statement stmt = prepareStatement(handler, ms.getStatementLog());
+    Statement stmt = prepareStatement(handler, ms);
     return handler.queryCursor(stmt);
   }
 
@@ -80,7 +79,8 @@ public class ReuseExecutor extends BaseExecutor {
     return Collections.emptyList();
   }
 
-  private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
+  @Override
+  protected Statement prepareStatement(StatementHandler handler, MappedStatement ms) throws SQLException {
     Statement stmt;
     BoundSql boundSql = handler.getBoundSql();
     String sql = boundSql.getSql();
@@ -88,7 +88,7 @@ public class ReuseExecutor extends BaseExecutor {
       stmt = getStatement(sql);
       applyTransactionTimeout(stmt);
     } else {
-      Connection connection = getConnection(statementLog);
+      Connection connection = getConnection(ms.getStatementLog());
       stmt = handler.prepare(connection, transaction.getTimeout());
       putStatement(sql, stmt);
     }

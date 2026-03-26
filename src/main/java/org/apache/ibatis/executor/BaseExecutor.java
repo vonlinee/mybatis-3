@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.executor.statement.StatementUtil;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
@@ -299,6 +300,13 @@ public abstract class BaseExecutor implements Executor {
         // ignore
       }
     }
+  }
+
+  protected Statement prepareStatement(StatementHandler handler, MappedStatement ms) throws SQLException {
+    Connection connection = getConnection(ms.getStatementLog());
+    Statement stmt = handler.prepare(connection, transaction.getTimeout());
+    handler.parameterize(stmt);
+    return stmt;
   }
 
   /**
