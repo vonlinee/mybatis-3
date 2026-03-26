@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2022 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@
  */
 package org.apache.ibatis.session;
 
+import org.apache.ibatis.internal.util.JdbcUtils;
+
 /**
  * @author Clinton Begin
  */
 public class RowBounds {
 
-  public static final int NO_ROW_OFFSET = 0;
-  public static final int NO_ROW_LIMIT = Integer.MAX_VALUE;
+  public static final int NO_ROW_OFFSET = JdbcUtils.NO_ROW_OFFSET;
+  public static final int NO_ROW_LIMIT = JdbcUtils.NO_ROW_LIMIT;
   public static final RowBounds DEFAULT = new RowBounds();
 
   private final int offset;
@@ -45,4 +47,7 @@ public class RowBounds {
     return limit;
   }
 
+  public boolean isBounded() {
+    return limit < RowBounds.NO_ROW_LIMIT || offset > RowBounds.NO_ROW_OFFSET;
+  }
 }

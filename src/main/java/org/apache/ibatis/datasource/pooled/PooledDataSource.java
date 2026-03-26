@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
+import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
@@ -588,11 +589,7 @@ public class PooledDataSource implements DataSource {
         }
       } catch (Exception e) {
         log.warn("Execution of ping query '" + poolPingQuery + "' failed: " + e.getMessage());
-        try {
-          conn.getRealConnection().close();
-        } catch (Exception e2) {
-          // ignore
-        }
+        JdbcUtils.closeQuietly(conn.getRealConnection());
         result = false;
         if (log.isDebugEnabled()) {
           log.debug("Connection " + conn.getRealHashCode() + " is BAD: " + e.getMessage());

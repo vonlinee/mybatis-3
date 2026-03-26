@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.apache.ibatis.cursor.defaults;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -23,6 +22,7 @@ import java.util.NoSuchElementException;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
 import org.apache.ibatis.executor.resultset.ResultSetWrapper;
+import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
@@ -109,16 +109,8 @@ public class DefaultCursor<T> implements Cursor<T> {
       return;
     }
 
-    ResultSet rs = rsw.getResultSet();
-    try {
-      if (rs != null) {
-        rs.close();
-      }
-    } catch (SQLException e) {
-      // ignore
-    } finally {
-      status = CursorStatus.CLOSED;
-    }
+    JdbcUtils.closeQuietly(rsw.getResultSet());
+    status = CursorStatus.CLOSED;
   }
 
   protected T fetchNextUsingRowBound() {

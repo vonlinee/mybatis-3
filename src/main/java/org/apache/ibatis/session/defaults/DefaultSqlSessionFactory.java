@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import org.apache.ibatis.exceptions.ExceptionFactory;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ExecutorType;
@@ -138,13 +139,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
   }
 
   private void closeTransaction(Transaction tx) {
-    if (tx != null) {
-      try {
-        tx.close();
-      } catch (SQLException ignore) {
-        // Intentionally ignore. Prefer previous error.
-      }
-    }
+    JdbcUtils.closeQuietly(tx);
   }
 
 }

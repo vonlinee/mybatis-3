@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.type.ObjectTypeHandler;
 import org.apache.ibatis.type.TypeHandler;
@@ -141,11 +142,7 @@ public class SqlRunner {
       }
       return NO_GENERATED_KEY;
     } finally {
-      try {
-        ps.close();
-      } catch (SQLException e) {
-        // ignore
-      }
+      JdbcUtils.closeQuietly(ps);
     }
   }
 
@@ -206,11 +203,7 @@ public class SqlRunner {
    */
   @Deprecated
   public void closeConnection() {
-    try {
-      connection.close();
-    } catch (SQLException e) {
-      // ignore
-    }
+    JdbcUtils.closeQuietly(connection);
   }
 
   private void setParameters(PreparedStatement ps, Object... args) throws SQLException {

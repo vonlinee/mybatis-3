@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.apache.ibatis.session;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Properties;
@@ -23,6 +22,7 @@ import java.util.Properties;
 import org.apache.ibatis.builder.xml.XMLConfigBuilder;
 import org.apache.ibatis.exceptions.ExceptionFactory;
 import org.apache.ibatis.executor.ErrorContext;
+import org.apache.ibatis.internal.util.IOUtils;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 
 /**
@@ -52,13 +52,7 @@ public class SqlSessionFactoryBuilder {
       throw ExceptionFactory.wrapException("Error building SqlSession.", e);
     } finally {
       ErrorContext.instance().reset();
-      try {
-        if (reader != null) {
-          reader.close();
-        }
-      } catch (IOException e) {
-        // Intentionally ignore. Prefer previous error.
-      }
+      IOUtils.closeQuietly(reader);
     }
   }
 
@@ -82,13 +76,7 @@ public class SqlSessionFactoryBuilder {
       throw ExceptionFactory.wrapException("Error building SqlSession.", e);
     } finally {
       ErrorContext.instance().reset();
-      try {
-        if (inputStream != null) {
-          inputStream.close();
-        }
-      } catch (IOException e) {
-        // Intentionally ignore. Prefer previous error.
-      }
+      IOUtils.closeQuietly(inputStream);
     }
   }
 

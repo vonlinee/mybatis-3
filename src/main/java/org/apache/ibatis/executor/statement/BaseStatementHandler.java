@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
+import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
@@ -128,13 +129,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
   }
 
   protected void closeStatement(Statement statement) {
-    try {
-      if (statement != null) {
-        statement.close();
-      }
-    } catch (SQLException e) {
-      // ignore
-    }
+    JdbcUtils.closeQuietly(statement);
   }
 
   protected void generateKeys(Object parameter) {

@@ -50,6 +50,7 @@ import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.result.DefaultResultContext;
 import org.apache.ibatis.executor.result.DefaultResultHandler;
 import org.apache.ibatis.executor.result.ResultMapException;
+import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -200,7 +201,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       }
     } finally {
       // issue #228 (close resultSets)
-      closeResultSet(rs);
+      JdbcUtils.closeQuietly(rs);
     }
   }
 
@@ -264,65 +265,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private ResultSetWrapper getFirstResultSet(Statement stmt) throws SQLException {
-    ResultSet rs = null;
-    SQLException e1 = null;
-
-    try {
-      rs = stmt.getResultSet();
-    } catch (SQLException e) {
-      // Oracle throws ORA-17283 for implicit cursor
-      e1 = e;
-    }
-
-    try {
-      while (rs == null) {
-        // move forward to get the first resultSet in case the driver
-        // doesn't return the resultSet as the first result (HSQLDB)
-        if (stmt.getMoreResults()) {
-          rs = stmt.getResultSet();
-        } else if (stmt.getUpdateCount() == -1) {
-          // no more results. Must be no resultSet
-          break;
-        }
-      }
-    } catch (SQLException e) {
-      throw e1 != null ? e1 : e;
-    }
-
+    ResultSet rs = JdbcUtils.getFirstResultSet(stmt);
     return rs != null ? new ResultSetWrapper(rs, configuration) : null;
   }
 
-  private ResultSetWrapper getNextResultSet(Statement stmt) {
-    // Making this method tolerant of bad JDBC drivers
-    try {
-      // We stopped checking DatabaseMetaData#supportsMultipleResultSets()
-      // because Oracle driver (incorrectly) returns false
-
-      // Crazy Standard JDBC way of determining if there are more results
-      // DO NOT try to 'improve' the condition even if IDE tells you to!
-      // It's important that getUpdateCount() is called here.
-      if (!(!stmt.getMoreResults() && stmt.getUpdateCount() == -1)) {
-        ResultSet rs = stmt.getResultSet();
-        if (rs == null) {
-          return getNextResultSet(stmt);
-        } else {
-          return new ResultSetWrapper(rs, configuration);
-        }
-      }
-    } catch (Exception e) {
-      // Intentionally ignored.
-    }
-    return null;
-  }
-
-  private void closeResultSet(ResultSet rs) {
-    try {
-      if (rs != null) {
-        rs.close();
-      }
-    } catch (SQLException e) {
-      // ignore
-    }
+  private ResultSetWrapper getNextResultSet(Statement stmt) throws SQLException {
+    ResultSet rs = JdbcUtils.getNextResultSet(stmt);
+    return rs != null ? new ResultSetWrapper(rs, configuration) : null;
   }
 
   private void cleanUpAfterHandlingResultSet() {
@@ -351,7 +300,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       }
     } finally {
       // issue #228 (close resultSets)
-      closeResultSet(rsw.getResultSet());
+      JdbcUtils.closeQuietly(rsw.getResultSet());
     }
   }
 
@@ -376,8 +325,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private void ensureNoRowBounds() {
-    if (configuration.isSafeRowBoundsEnabled() && rowBounds != null
-        && (rowBounds.getLimit() < RowBounds.NO_ROW_LIMIT || rowBounds.getOffset() > RowBounds.NO_ROW_OFFSET)) {
+    if (configuration.isSafeRowBoundsEnabled() && rowBounds != null && (rowBounds.isBounded())) {
       throw new ExecutorException(
           "Mapped Statements with nested result mappings cannot be safely constrained by RowBounds. "
               + "Use safeRowBoundsEnabled=false setting to bypass this check.");
@@ -441,17 +389,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private void skipRows(ResultSet rs, RowBounds rowBounds) throws SQLException {
-    if (rs.getType() != ResultSet.TYPE_FORWARD_ONLY) {
-      if (rowBounds.getOffset() != RowBounds.NO_ROW_OFFSET) {
-        rs.absolute(rowBounds.getOffset());
-      }
-    } else {
-      for (int i = 0; i < rowBounds.getOffset(); i++) {
-        if (!rs.next()) {
-          break;
-        }
-      }
-    }
+    JdbcUtils.absolute(rs, rowBounds.getOffset());
   }
 
   //

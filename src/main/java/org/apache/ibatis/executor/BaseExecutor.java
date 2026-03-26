@@ -28,6 +28,7 @@ import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.executor.statement.StatementUtil;
+import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.logging.jdbc.ConnectionLogger;
@@ -293,13 +294,7 @@ public abstract class BaseExecutor implements Executor {
       BoundSql boundSql) throws SQLException;
 
   protected void closeStatement(Statement statement) {
-    if (statement != null) {
-      try {
-        statement.close();
-      } catch (SQLException e) {
-        // ignore
-      }
-    }
+    JdbcUtils.closeQuietly(statement);
   }
 
   protected Statement prepareStatement(StatementHandler handler, MappedStatement ms) throws SQLException {
