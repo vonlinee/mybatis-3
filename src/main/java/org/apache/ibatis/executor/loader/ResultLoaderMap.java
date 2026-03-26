@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,23 +23,16 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.ibatis.cursor.Cursor;
-import org.apache.ibatis.executor.BaseExecutor;
-import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
-import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
 
 /**
  * @author Clinton Begin
@@ -205,7 +198,7 @@ public class ResultLoaderMap {
         }
 
         this.metaResultObject = config.newMetaObject(userObject);
-        this.resultLoader = new ResultLoader(config, new ClosedExecutor(), ms, this.mappedParameter,
+        this.resultLoader = new ResultLoader(config, null, ms, this.mappedParameter,
             metaResultObject.getSetterType(this.property), null, null);
       }
 
@@ -215,8 +208,8 @@ public class ResultLoaderMap {
        */
       if (this.serializationCheck == null) {
         final ResultLoader old = this.resultLoader;
-        this.resultLoader = new ResultLoader(old.configuration, new ClosedExecutor(), old.mappedStatement,
-            old.parameterObject, old.targetType, old.cacheKey, old.boundSql);
+        this.resultLoader = new ResultLoader(old.configuration, null, old.mappedStatement, old.parameterObject,
+            old.targetType, old.cacheKey, old.boundSql);
       }
 
       this.metaResultObject.setValue(property, this.resultLoader.loadResult());
@@ -274,40 +267,6 @@ public class ResultLoaderMap {
         this.log = LogFactory.getLog(this.getClass());
       }
       return this.log;
-    }
-  }
-
-  private static final class ClosedExecutor extends BaseExecutor {
-
-    public ClosedExecutor() {
-      super(null, null);
-    }
-
-    @Override
-    public boolean isClosed() {
-      return true;
-    }
-
-    @Override
-    protected int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
-      throw new UnsupportedOperationException("Not supported.");
-    }
-
-    @Override
-    protected List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException {
-      throw new UnsupportedOperationException("Not supported.");
-    }
-
-    @Override
-    protected <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds,
-        ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
-      throw new UnsupportedOperationException("Not supported.");
-    }
-
-    @Override
-    protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
-        throws SQLException {
-      throw new UnsupportedOperationException("Not supported.");
     }
   }
 }
