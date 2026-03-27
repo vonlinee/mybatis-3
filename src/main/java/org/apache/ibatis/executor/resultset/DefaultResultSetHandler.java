@@ -407,7 +407,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         foundValues = applyAutomaticMappings(rsw, resultMap, metaObject, columnPrefix) || foundValues;
       }
       foundValues = applyPropertyMappings(rsw, resultMap, metaObject, lazyLoader, columnPrefix) || foundValues;
-      foundValues = lazyLoader.size() > 0 || foundValues;
+      foundValues = !lazyLoader.isEmpty() || foundValues;
       rowValue = foundValues || configuration.isReturnInstanceForEmptyRow() ? rowValue : null;
     }
 
@@ -451,7 +451,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         foundValues = applyNestedResultMappings(rsw, resultMap, metaObject, columnPrefix, combinedKey, true)
             || foundValues;
         ancestorObjects.remove(resultMapId);
-        foundValues = lazyLoader.size() > 0 || foundValues;
+        foundValues = !lazyLoader.isEmpty() || foundValues;
         rowValue = foundValues || configuration.isReturnInstanceForEmptyRow() ? rowValue : null;
       }
       if (combinedKey != CacheKey.NULL_CACHE_KEY) {

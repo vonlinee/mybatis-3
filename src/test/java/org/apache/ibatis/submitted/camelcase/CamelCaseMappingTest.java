@@ -46,7 +46,7 @@ class CamelCaseMappingTest {
   void list() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       List<Camel> list = sqlSession.selectList("org.apache.ibatis.submitted.camel.doSelect");
-      Assertions.assertTrue(list.size() > 0);
+      Assertions.assertFalse(list.isEmpty());
       Assertions.assertNotNull(list.get(0).getFirstName());
       Assertions.assertNull(list.get(0).getLAST_NAME());
     }
@@ -56,7 +56,7 @@ class CamelCaseMappingTest {
   void map() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       List<Map<String, Object>> list = sqlSession.selectList("org.apache.ibatis.submitted.camel.doSelectMap");
-      Assertions.assertTrue(list.size() > 0);
+      Assertions.assertFalse(list.isEmpty());
       Assertions.assertTrue(list.get(0).containsKey("LAST_NAME"));
     }
   }

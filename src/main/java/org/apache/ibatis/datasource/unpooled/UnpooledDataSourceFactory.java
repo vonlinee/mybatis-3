@@ -55,7 +55,7 @@ public class UnpooledDataSourceFactory implements DataSourceFactory {
         throw new DataSourceException("Unknown DataSource property: " + propertyName);
       }
     }
-    if (driverProperties.size() > 0) {
+    if (!driverProperties.isEmpty()) {
       metaDataSource.setValue("driverProperties", driverProperties);
     }
   }
