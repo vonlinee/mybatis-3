@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -188,22 +188,6 @@ public final class MappedStatement {
       return this;
     }
 
-    /**
-     * Resul sets.
-     *
-     * @param resultSet
-     *          the result set
-     *
-     * @return the builder
-     *
-     * @deprecated Use {@link #resultSets}
-     */
-    @Deprecated
-    public Builder resulSets(String resultSet) {
-      mappedStatement.resultSets = delimitedStringToArray(resultSet);
-      return this;
-    }
-
     public MappedStatement build() {
       assert mappedStatement.configuration != null;
       assert mappedStatement.id != null;
@@ -302,6 +286,11 @@ public final class MappedStatement {
     return lang;
   }
 
+  /**
+   * Gets the result sets.
+   *
+   * @return the result sets
+   */
   public String[] getResultSets() {
     return resultSets;
   }
@@ -312,18 +301,6 @@ public final class MappedStatement {
 
   public ParamNameResolver getParamNameResolver() {
     return paramNameResolver;
-  }
-
-  /**
-   * Gets the resul sets.
-   *
-   * @return the resul sets
-   *
-   * @deprecated Use {@link #getResultSets()}
-   */
-  @Deprecated
-  public String[] getResulSets() {
-    return resultSets;
   }
 
   public BoundSql getBoundSql(Object parameterObject) {

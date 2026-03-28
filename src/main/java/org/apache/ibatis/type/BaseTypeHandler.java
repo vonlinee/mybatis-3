@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,39 +21,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.ibatis.executor.result.ResultMapException;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * The base {@link TypeHandler} for references a generic type.
  * <p>
  * Important: Since 3.5.0, This class never call the {@link ResultSet#wasNull()} and {@link CallableStatement#wasNull()}
  * method for handling the SQL {@code NULL} value. In other words, {@code null} value handling should be performed on
- * subclass.
+ * subclass. See <a href="https://github.com/mybatis/mybatis-3/issues/1203">...</a>. This property will remove future.
  *
  * @author Clinton Begin
  * @author Simone Tripodi
  * @author Kzuki Shimizu
  */
 public abstract class BaseTypeHandler<T> implements TypeHandler<T> {
-
-  /**
-   * @deprecated Since 3.5.0 - See https://github.com/mybatis/mybatis-3/issues/1203. This field will remove future.
-   */
-  @Deprecated
-  protected Configuration configuration;
-
-  /**
-   * Sets the configuration.
-   *
-   * @param c
-   *          the new configuration
-   *
-   * @deprecated Since 3.5.0 - See https://github.com/mybatis/mybatis-3/issues/1203. This property will remove future.
-   */
-  @Deprecated
-  public void setConfiguration(Configuration c) {
-    this.configuration = c;
-  }
 
   @Override
   public void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException {
