@@ -45,7 +45,7 @@ class EntitySqlProviderTest extends BaseDataTest {
   }
 
   @Test
-  void crudMapper_shouldInsertAndSelectById() throws SQLException, IOException {
+  void shouldOkWhenRunSomeEntityOperation() throws SQLException, IOException {
     SqlSessionFactory sqlSessionFactory = createDefaultHsqlDbSqlSessionFactory("entity_sql_provider");
     sqlSessionFactory.getConfiguration().setLogImpl(StdOutImpl.class);
     // populate in-memory database
