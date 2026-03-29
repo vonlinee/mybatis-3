@@ -25,6 +25,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.extension.pagination.Page;
+import org.apache.ibatis.extension.pagination.Pageable;
+import org.apache.ibatis.extension.pagination.PaginationHandler;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.mapping.StatementType;
@@ -97,6 +100,8 @@ class MappedSqlMethod implements MapperMethod {
           result = executeForIterator(sqlSession, args);
         } else if (method.returnsStream()) {
           result = executeForStream(sqlSession, args);
+        } else if (method.returnsPage()) {
+          result = executeForPage(sqlSession, args);
         } else {
           Object param = method.convertArgsToSqlCommandParam(args,
               configuration.isNullValueWhenKeyNotFoundInParamMap());
@@ -192,6 +197,37 @@ class MappedSqlMethod implements MapperMethod {
       result = sqlSession.selectCursor(command.getName(), param);
     }
     return result;
+  }
+
+  private <T> Page<T> executeForPage(SqlSession sqlSession, Object[] args) {
+    final Configuration configuration = sqlSession.getConfiguration();
+    final MappedStatement ms = configuration.getMappedStatement(command.getName());
+    final Object param = method.convertArgsToSqlCommandParam(args,
+        configuration.isNullValueWhenKeyNotFoundInParamMap());
+    long total = Integer.MAX_VALUE;
+    if (ms.getCountStatement() != null) {
+      Object countResult = sqlSession.selectOne(ms.getCountStatement(), param);
+      if (!(countResult instanceof Number)) {
+        throw new BindingException("Mapper method '" + command.getName() + "' resultType="
+            + ms.getResultMaps().get(0).getType() + " is not a valid collection type");
+      }
+      total = ((Number) countResult).longValue();
+    }
+
+    final PaginationHandler paginationHandler = configuration.getPaginationHandler();
+    if (total == 0) {
+      return paginationHandler.createEmptyPage();
+    }
+    // query list
+    final List<T> list = sqlSession.selectList(command.getName(), param);
+    if (total == Integer.MAX_VALUE) {
+      total = -1;
+    }
+    if (!(param instanceof Pageable)) {
+      throw new BindingException("Parameter object is not a sub-type of " + Pageable.class);
+    }
+    Pageable pageable = (Pageable) param;
+    return paginationHandler.createPage(pageable.getPageNum(), pageable.getPageSize(), total, list);
   }
 
   private <E> Object convertToDeclaredCollection(Configuration config, List<E> list) {

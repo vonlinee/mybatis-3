@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.extension.pagination.Page;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.reflection.TypeParameterResolver;
 import org.apache.ibatis.session.Configuration;
@@ -40,6 +41,7 @@ public class MethodSignature {
   private final boolean returnsIterator;
   private final boolean returnsStream;
   private final boolean returnsOptional;
+  private final boolean returnsPage;
   private final Class<?> returnType;
   private final String mapKey;
   private final Integer resultHandlerIndex;
@@ -61,6 +63,7 @@ public class MethodSignature {
     this.returnsIterator = Iterator.class.equals(this.returnType);
     this.returnsStream = Stream.class.equals(this.returnType);
     this.returnsOptional = Optional.class.equals(this.returnType);
+    this.returnsPage = Page.class.isAssignableFrom(this.returnType);
     this.mapKey = getMapKey(method);
     this.returnsMap = this.mapKey != null;
     this.rowBoundsIndex = getUniqueParamIndex(method, RowBounds.class);
@@ -114,6 +117,10 @@ public class MethodSignature {
 
   public boolean returnsStream() {
     return returnsStream;
+  }
+
+  public boolean returnsPage() {
+    return returnsPage;
   }
 
   /**

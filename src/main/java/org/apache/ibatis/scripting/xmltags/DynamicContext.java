@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import ognl.OgnlRuntime;
 import ognl.PropertyAccessor;
 
 import org.apache.ibatis.builder.ParameterMappingTokenHandler;
+import org.apache.ibatis.dialect.Dialect;
+import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.reflection.MetaObject;
@@ -130,6 +132,14 @@ public class DynamicContext {
 
   public Configuration getConfiguration() {
     return configuration;
+  }
+
+  public Environment getEnvironment() {
+    return configuration.getEnvironment();
+  }
+
+  public Dialect getDialect() {
+    return configuration.getEnvironment().getDialect();
   }
 
   static class ContextMap extends HashMap<String, Object> {

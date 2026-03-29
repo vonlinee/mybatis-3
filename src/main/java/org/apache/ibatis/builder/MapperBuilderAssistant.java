@@ -203,7 +203,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
       SqlCommandType sqlCommandType, Integer fetchSize, Integer timeout, String parameterMap, Class<?> parameterType,
       String resultMap, Class<?> resultType, ResultSetType resultSetType, boolean flushCache, boolean useCache,
       boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId,
-      LanguageDriver lang, String resultSets, boolean dirtySelect, ParamNameResolver paramNameResolver) {
+      LanguageDriver lang, String resultSets, boolean dirtySelect, ParamNameResolver paramNameResolver,
+      String countStatement) {
 
     if (unresolvedCacheRef) {
       throw new IncompleteElementException("Cache-ref not yet resolved");
@@ -217,7 +218,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         .resultOrdered(resultOrdered).resultSets(resultSets)
         .resultMaps(getStatementResultMaps(resultMap, resultType, id)).resultSetType(resultSetType)
         .flushCacheRequired(flushCache).useCache(useCache).cache(currentCache).dirtySelect(dirtySelect)
-        .paramNameResolver(paramNameResolver);
+        .paramNameResolver(paramNameResolver).countStatement(countStatement);
 
     ParameterMap statementParameterMap = getStatementParameterMap(parameterMap, parameterType, id);
     if (statementParameterMap != null) {
@@ -280,7 +281,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
       LanguageDriver lang, String resultSets) {
     return addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
         parameterType, resultMap, resultType, resultSetType, flushCache, useCache, resultOrdered, keyGenerator,
-        keyProperty, keyColumn, databaseId, lang, null, false, null);
+        keyProperty, keyColumn, databaseId, lang, null, false, null, null);
   }
 
   public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType,

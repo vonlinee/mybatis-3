@@ -405,7 +405,7 @@ public class MapperAnnotationBuilder {
           isResultOrdered, keyGenerator, keyProperty, keyColumn, statementAnnotation.getDatabaseId(), languageDriver,
           // ResultSets
           options != null ? nullOrEmpty(options.resultSets()) : null, statementAnnotation.isDirtySelect(),
-          paramNameResolver);
+          paramNameResolver, null);
     });
   }
 
@@ -625,7 +625,7 @@ public class MapperAnnotationBuilder {
 
     assistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
         parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, false, keyGenerator,
-        keyProperty, keyColumn, databaseId, languageDriver, null, false, paramNameResolver);
+        keyProperty, keyColumn, databaseId, languageDriver, null, false, paramNameResolver, null);
 
     id = assistant.applyCurrentNamespace(id, false);
 

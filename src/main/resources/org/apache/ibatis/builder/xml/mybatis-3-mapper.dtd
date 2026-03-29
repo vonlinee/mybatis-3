@@ -167,7 +167,7 @@ alias CDATA #REQUIRED
 type CDATA #REQUIRED
 >
 
-<!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 <!ATTLIST select
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -185,9 +185,10 @@ lang CDATA #IMPLIED
 resultOrdered (true|false) #IMPLIED
 resultSets CDATA #IMPLIED 
 affectData (true|false) #IMPLIED
+countStatement CDATA #IMPLIED
 >
 
-<!ELEMENT insert (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT insert (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 <!ATTLIST insert
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -202,7 +203,7 @@ databaseId CDATA #IMPLIED
 lang CDATA #IMPLIED
 >
 
-<!ELEMENT selectKey (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT selectKey (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 <!ATTLIST selectKey
 resultType CDATA #IMPLIED
 statementType (STATEMENT|PREPARED|CALLABLE) #IMPLIED
@@ -212,7 +213,7 @@ order (BEFORE|AFTER) #IMPLIED
 databaseId CDATA #IMPLIED
 >
 
-<!ELEMENT update (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT update (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 <!ATTLIST update
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -227,7 +228,7 @@ databaseId CDATA #IMPLIED
 lang CDATA #IMPLIED
 >
 
-<!ELEMENT delete (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT delete (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 <!ATTLIST delete
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -252,24 +253,24 @@ refid CDATA #REQUIRED
  value CDATA #REQUIRED
 >
 
-<!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 <!ATTLIST sql
 id CDATA #REQUIRED
 lang CDATA #IMPLIED
 databaseId CDATA #IMPLIED
 >
 
-<!ELEMENT trim (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT trim (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 <!ATTLIST trim
 prefix CDATA #IMPLIED
 prefixOverrides CDATA #IMPLIED
 suffix CDATA #IMPLIED
 suffixOverrides CDATA #IMPLIED
 >
-<!ELEMENT where (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
-<!ELEMENT set (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT where (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
+<!ELEMENT set (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 
-<!ELEMENT foreach (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT foreach (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 <!ATTLIST foreach
 collection CDATA #REQUIRED
 nullable (true|false) #IMPLIED
@@ -280,7 +281,7 @@ close CDATA #IMPLIED
 separator CDATA #IMPLIED
 >
 
-<!ELEMENT in (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT in (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 <!ATTLIST in
 collection CDATA #REQUIRED
 nullable (true|false) #IMPLIED
@@ -288,14 +289,18 @@ item CDATA #IMPLIED
 index CDATA #IMPLIED
 >
 
+<!ELEMENT pagination EMPTY>
+<!ATTLIST pagination
+>
+
 <!ELEMENT choose (when* , otherwise?)>
-<!ELEMENT when (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT when (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 <!ATTLIST when
 test CDATA #REQUIRED
 >
-<!ELEMENT otherwise (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT otherwise (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 
-<!ELEMENT if (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT if (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
 <!ATTLIST if
 test CDATA #REQUIRED
 >

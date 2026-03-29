@@ -54,6 +54,8 @@ import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.executor.statement.RoutingStatementHandler;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.extension.TableInfoRegistry;
+import org.apache.ibatis.extension.pagination.DefaultPaginationHandler;
+import org.apache.ibatis.extension.pagination.PaginationHandler;
 import org.apache.ibatis.io.VFS;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
@@ -157,6 +159,7 @@ public class Configuration {
   protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this);
   protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
   protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
+  protected final PaginationHandler paginationHandler = new DefaultPaginationHandler();
 
   protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>(
       "Mapped Statements collection")
@@ -819,6 +822,10 @@ public class Configuration {
 
   public ParameterMap getParameterMap(String id) {
     return parameterMaps.get(id);
+  }
+
+  public PaginationHandler getPaginationHandler() {
+    return paginationHandler;
   }
 
   public boolean hasParameterMap(String id) {

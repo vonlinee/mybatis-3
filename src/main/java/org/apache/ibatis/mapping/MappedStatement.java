@@ -59,6 +59,7 @@ public final class MappedStatement {
   private String[] resultSets;
   private ParamNameResolver paramNameResolver;
   private boolean dirtySelect;
+  private String countStatement;
 
   MappedStatement() {
     // constructor disabled
@@ -188,6 +189,11 @@ public final class MappedStatement {
       return this;
     }
 
+    public Builder countStatement(String countStatement) {
+      mappedStatement.countStatement = countStatement;
+      return this;
+    }
+
     public MappedStatement build() {
       assert mappedStatement.configuration != null;
       assert mappedStatement.id != null;
@@ -297,6 +303,10 @@ public final class MappedStatement {
 
   public boolean isDirtySelect() {
     return dirtySelect;
+  }
+
+  public String getCountStatement() {
+    return countStatement;
   }
 
   public ParamNameResolver getParamNameResolver() {

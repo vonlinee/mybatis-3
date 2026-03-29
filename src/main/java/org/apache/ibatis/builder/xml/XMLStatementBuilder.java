@@ -150,9 +150,12 @@ public class XMLStatementBuilder extends BaseBuilder {
     String resultSets = context.getStringAttribute("resultSets");
     boolean dirtySelect = context.getBooleanAttribute("affectData", Boolean.FALSE);
 
+    final String countStatement = context.getStringAttribute("countStatement");
+
     builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
         parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, resultOrdered,
-        keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect, paramNameResolver);
+        keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect, paramNameResolver,
+        countStatement);
   }
 
   private void processSelectKeyNodes(String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {
@@ -201,7 +204,7 @@ public class XMLStatementBuilder extends BaseBuilder {
 
     builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
         parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, resultOrdered,
-        keyGenerator, keyProperty, keyColumn, databaseId, langDriver, null, false, null);
+        keyGenerator, keyProperty, keyColumn, databaseId, langDriver, null, false, null, null);
 
     id = builderAssistant.applyCurrentNamespace(id, false);
 

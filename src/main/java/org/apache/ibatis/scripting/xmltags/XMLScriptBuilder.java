@@ -71,6 +71,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     nodeHandlerMap.put("otherwise", new OtherwiseHandler());
     nodeHandlerMap.put("bind", new BindHandler());
     nodeHandlerMap.put("in", new InHandler());
+    nodeHandlerMap.put("pagination", new PaginationHandler());
   }
 
   public SqlSource parseScriptNode() {
@@ -130,6 +131,14 @@ public class XMLScriptBuilder extends BaseBuilder {
       final String expression = nodeToHandle.getStringAttribute("value");
       final VarDeclSqlNode node = new VarDeclSqlNode(name, expression);
       targetContents.add(node);
+    }
+  }
+
+  private static class PaginationHandler implements NodeHandler {
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      targetContents.add(new PaginationSqlNode());
     }
   }
 

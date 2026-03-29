@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2022 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.apache.ibatis.mapping;
 
 import javax.sql.DataSource;
 
+import org.apache.ibatis.dialect.Dialect;
 import org.apache.ibatis.transaction.TransactionFactory;
 
 /**
@@ -26,6 +27,7 @@ public final class Environment {
   private final String id;
   private final TransactionFactory transactionFactory;
   private final DataSource dataSource;
+  private final Dialect dialect;
 
   public Environment(String id, TransactionFactory transactionFactory, DataSource dataSource) {
     if (id == null) {
@@ -40,12 +42,30 @@ public final class Environment {
     }
     this.transactionFactory = transactionFactory;
     this.dataSource = dataSource;
+    this.dialect = Dialect.fromDataSource(dataSource);
+  }
+
+  public Environment(String id, TransactionFactory transactionFactory, DataSource dataSource, Dialect dialect) {
+    if (id == null) {
+      throw new IllegalArgumentException("Parameter 'id' must not be null");
+    }
+    if (transactionFactory == null) {
+      throw new IllegalArgumentException("Parameter 'transactionFactory' must not be null");
+    }
+    this.id = id;
+    if (dataSource == null) {
+      throw new IllegalArgumentException("Parameter 'dataSource' must not be null");
+    }
+    this.transactionFactory = transactionFactory;
+    this.dataSource = dataSource;
+    this.dialect = dialect == null ? Dialect.fromDataSource(dataSource) : dialect;
   }
 
   public static class Builder {
     private final String id;
     private TransactionFactory transactionFactory;
     private DataSource dataSource;
+    private Dialect dialect;
 
     public Builder(String id) {
       this.id = id;
@@ -61,12 +81,17 @@ public final class Environment {
       return this;
     }
 
+    public Builder dialect(Dialect dialect) {
+      this.dialect = dialect;
+      return this;
+    }
+
     public String id() {
       return this.id;
     }
 
     public Environment build() {
-      return new Environment(this.id, this.transactionFactory, this.dataSource);
+      return new Environment(this.id, this.transactionFactory, this.dataSource, this.dialect);
     }
 
   }
@@ -81,6 +106,10 @@ public final class Environment {
 
   public DataSource getDataSource() {
     return this.dataSource;
+  }
+
+  public Dialect getDialect() {
+    return this.dialect;
   }
 
 }

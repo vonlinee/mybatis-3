@@ -282,6 +282,7 @@
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
         <xs:element ref="in"/>
+        <xs:element ref="pagination"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -351,6 +352,7 @@
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
         <xs:element ref="in"/>
+        <xs:element ref="pagination"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -399,6 +401,7 @@
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
         <xs:element ref="in"/>
+        <xs:element ref="pagination"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -436,6 +439,7 @@
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
         <xs:element ref="in"/>
+        <xs:element ref="pagination"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -484,6 +488,7 @@
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
         <xs:element ref="in"/>
+        <xs:element ref="pagination"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -537,6 +542,7 @@
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
         <xs:element ref="in"/>
+        <xs:element ref="pagination"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -555,6 +561,7 @@
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
         <xs:element ref="in"/>
+        <xs:element ref="pagination"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -623,6 +630,7 @@
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
         <xs:element ref="in"/>
+        <xs:element ref="pagination"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -631,6 +639,12 @@
       <xs:attribute name="nullable" type="xs:boolean"/>
       <xs:attribute name="item"/>
       <xs:attribute name="index"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="pagination">
+    <xs:complexType>
+      <xs:attribute name="pageNum"/>
+      <xs:attribute name="pageSize"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="choose">
@@ -650,6 +664,7 @@
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
         <xs:element ref="in"/>
+        <xs:element ref="pagination"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -666,6 +681,7 @@
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
         <xs:element ref="in"/>
+        <xs:element ref="pagination"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -681,6 +697,7 @@
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
         <xs:element ref="in"/>
+        <xs:element ref="pagination"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
