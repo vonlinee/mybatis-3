@@ -128,6 +128,10 @@ public class DynamicContext {
     return paramExists;
   }
 
+  public Configuration getConfiguration() {
+    return configuration;
+  }
+
   static class ContextMap extends HashMap<String, Object> {
     private static final long serialVersionUID = 2977601501966151582L;
     private final MetaObject parameterMetaObject;
