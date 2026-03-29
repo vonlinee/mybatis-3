@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     nodeHandlerMap.put("when", new IfHandler());
     nodeHandlerMap.put("otherwise", new OtherwiseHandler());
     nodeHandlerMap.put("bind", new BindHandler());
+    nodeHandlerMap.put("in", new InHandler());
   }
 
   public SqlSource parseScriptNode() {
@@ -207,6 +208,61 @@ public class XMLScriptBuilder extends BaseBuilder {
       String test = nodeToHandle.getStringAttribute("test");
       IfSqlNode ifSqlNode = new IfSqlNode(mixedSqlNode, test);
       targetContents.add(ifSqlNode);
+    }
+  }
+
+  /**
+   * Node handler for the &lt;in&gt; element.
+   * <p>
+   * Acts as syntactic sugar for &lt;foreach&gt; tailored for generating SQL `IN ( ... )` clauses. <br>
+   * Usage Example 1 (Standard):
+   *
+   * <pre>
+   *   &lt;select id="selectUsersByIds" resultType="User"&gt;
+   *     SELECT * FROM users
+   *     WHERE id &lt;in collection="list" item="item"&gt;#{item.id}&lt;/in&gt;
+   *   &lt;/select&gt;
+   * </pre>
+   *
+   * Usage Example 2 (Implicit Item and Body support):
+   * <p>
+   * If the tag has no children, it evaluates to `#{item}` automatically. If `item` is omitted, it defaults to `"item"`.
+   * This is highly useful for collections of primitives:
+   *
+   * <pre>
+   *   &lt;select id="selectUsersByIds" resultType="User"&gt;
+   *     SELECT * FROM users
+   *     WHERE id &lt;in collection="ids" /&gt;
+   *   &lt;/select&gt;
+   * </pre>
+   *
+   * The above evaluates precisely to `IN (#{item_0}, #{item_1}, ...)` at runtime.
+   */
+  private class InHandler implements NodeHandler {
+    public InHandler() {
+      // Prevent Synthetic Access
+    }
+
+    @Override
+    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+      String collection = nodeToHandle.getStringAttribute("collection");
+      Boolean nullable = nodeToHandle.getBooleanAttribute("nullable");
+      String item = nodeToHandle.getStringAttribute("item", "item");
+      String index = nodeToHandle.getStringAttribute("index");
+      String open = "IN (";
+      String close = ")";
+      String separator = ",";
+
+      SqlNode contents = mixedSqlNode;
+      if (nodeToHandle.getChildren().isEmpty() && nodeToHandle.getStringBody("").trim().isEmpty()) {
+        contents = new TextSqlNode("#{" + item + "}");
+      }
+
+      // Syntactic sugar for IN (?). We delegate to ForEachSqlNode which handles collection iteration.
+      ForEachSqlNode forEachSqlNode = new ForEachSqlNode(configuration, contents, collection, nullable, index, item,
+          open, close, separator);
+      targetContents.add(forEachSqlNode);
     }
   }
 

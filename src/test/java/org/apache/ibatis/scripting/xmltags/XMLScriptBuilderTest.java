@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
 package org.apache.ibatis.scripting.xmltags;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,5 +55,37 @@ class XMLScriptBuilderTest {
     XMLScriptBuilder parser = new XMLScriptBuilder(new Configuration(), new XPathParser(xml).evalNode("/script"));
     assertThatThrownBy(parser::parseScriptNode).isInstanceOf(BuilderException.class)
         .hasMessage("Unknown element <otherwize> in SQL statement.");
+  }
+
+  @Test
+  void shouldFormatInTagWithDefaultItem() throws Exception {
+    String xml = """
+        <script>
+        SELECT * FROM users
+        WHERE id <in collection="ids"/>
+        </script>
+        """;
+    SqlSource sqlSource = new XMLScriptBuilder(new Configuration(), new XPathParser(xml).evalNode("/script"))
+        .parseScriptNode();
+    java.util.Map<String, Object> params = new java.util.HashMap<>();
+    params.put("ids", java.util.Arrays.asList(1, 2, 3));
+    assertThat(sqlSource.getBoundSql(params).getSql()).containsPattern(
+        "(?m)^\\s*SELECT \\* FROM users\\s+WHERE id\\s+IN\\s*\\(\\s*\\?\\s*,\\s*\\?\\s*,\\s*\\?\\s*\\)\\s*$");
+  }
+
+  @Test
+  void shouldFormatInTagWithBody() throws Exception {
+    String xml = """
+        <script>
+        SELECT * FROM users
+        WHERE id <in collection="ids" item="id">#{id}</in>
+        </script>
+        """;
+    SqlSource sqlSource = new XMLScriptBuilder(new Configuration(), new XPathParser(xml).evalNode("/script"))
+        .parseScriptNode();
+    java.util.Map<String, Object> params = new java.util.HashMap<>();
+    params.put("ids", java.util.Arrays.asList(1, 2, 3));
+    assertThat(sqlSource.getBoundSql(params).getSql()).containsPattern(
+        "(?m)^\\s*SELECT \\* FROM users\\s+WHERE id\\s+IN\\s*\\(\\s*\\?\\s*,\\s*\\?\\s*,\\s*\\?\\s*\\)\\s*$");
   }
 }

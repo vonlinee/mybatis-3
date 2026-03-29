@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
 
-       Copyright 2009-2022 the original author or authors.
+       Copyright 2009-2026 the original author or authors.
 
        Licensed under the Apache License, Version 2.0 (the "License");
        you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ alias CDATA #REQUIRED
 type CDATA #REQUIRED
 >
 
-<!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
 <!ATTLIST select
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -187,7 +187,7 @@ resultSets CDATA #IMPLIED
 affectData (true|false) #IMPLIED
 >
 
-<!ELEMENT insert (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT insert (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind | in)*>
 <!ATTLIST insert
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -202,7 +202,7 @@ databaseId CDATA #IMPLIED
 lang CDATA #IMPLIED
 >
 
-<!ELEMENT selectKey (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT selectKey (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
 <!ATTLIST selectKey
 resultType CDATA #IMPLIED
 statementType (STATEMENT|PREPARED|CALLABLE) #IMPLIED
@@ -212,7 +212,7 @@ order (BEFORE|AFTER) #IMPLIED
 databaseId CDATA #IMPLIED
 >
 
-<!ELEMENT update (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT update (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind | in)*>
 <!ATTLIST update
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -227,7 +227,7 @@ databaseId CDATA #IMPLIED
 lang CDATA #IMPLIED
 >
 
-<!ELEMENT delete (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT delete (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
 <!ATTLIST delete
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -252,24 +252,24 @@ refid CDATA #REQUIRED
  value CDATA #REQUIRED
 >
 
-<!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
 <!ATTLIST sql
 id CDATA #REQUIRED
 lang CDATA #IMPLIED
 databaseId CDATA #IMPLIED
 >
 
-<!ELEMENT trim (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT trim (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
 <!ATTLIST trim
 prefix CDATA #IMPLIED
 prefixOverrides CDATA #IMPLIED
 suffix CDATA #IMPLIED
 suffixOverrides CDATA #IMPLIED
 >
-<!ELEMENT where (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
-<!ELEMENT set (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT where (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ELEMENT set (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
 
-<!ELEMENT foreach (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT foreach (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
 <!ATTLIST foreach
 collection CDATA #REQUIRED
 nullable (true|false) #IMPLIED
@@ -280,14 +280,22 @@ close CDATA #IMPLIED
 separator CDATA #IMPLIED
 >
 
+<!ELEMENT in (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
+<!ATTLIST in
+collection CDATA #REQUIRED
+nullable (true|false) #IMPLIED
+item CDATA #IMPLIED
+index CDATA #IMPLIED
+>
+
 <!ELEMENT choose (when* , otherwise?)>
-<!ELEMENT when (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT when (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
 <!ATTLIST when
 test CDATA #REQUIRED
 >
-<!ELEMENT otherwise (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT otherwise (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
 
-<!ELEMENT if (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT if (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in)*>
 <!ATTLIST if
 test CDATA #REQUIRED
 >

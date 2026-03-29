@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-       Copyright 2009-2022 the original author or authors.
+       Copyright 2009-2026 the original author or authors.
 
        Licensed under the Apache License, Version 2.0 (the "License");
        you may not use this file except in compliance with the License.
@@ -281,6 +281,7 @@
         <xs:element ref="where"/>
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
+        <xs:element ref="in"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -349,6 +350,7 @@
         <xs:element ref="where"/>
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
+        <xs:element ref="in"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -396,6 +398,7 @@
         <xs:element ref="where"/>
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
+        <xs:element ref="in"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -432,6 +435,7 @@
         <xs:element ref="where"/>
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
+        <xs:element ref="in"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -479,6 +483,7 @@
         <xs:element ref="where"/>
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
+        <xs:element ref="in"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -531,6 +536,7 @@
         <xs:element ref="where"/>
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
+        <xs:element ref="in"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -548,6 +554,7 @@
         <xs:element ref="where"/>
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
+        <xs:element ref="in"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -607,6 +614,25 @@
       <xs:attribute name="separator"/>
     </xs:complexType>
   </xs:element>
+  <xs:element name="in">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="include"/>
+        <xs:element ref="trim"/>
+        <xs:element ref="where"/>
+        <xs:element ref="set"/>
+        <xs:element ref="foreach"/>
+        <xs:element ref="in"/>
+        <xs:element ref="choose"/>
+        <xs:element ref="if"/>
+        <xs:element ref="bind"/>
+      </xs:choice>
+      <xs:attribute name="collection" use="required"/>
+      <xs:attribute name="nullable" type="xs:boolean"/>
+      <xs:attribute name="item"/>
+      <xs:attribute name="index"/>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="choose">
     <xs:complexType>
       <xs:sequence>
@@ -623,6 +649,7 @@
         <xs:element ref="where"/>
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
+        <xs:element ref="in"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -638,6 +665,7 @@
         <xs:element ref="where"/>
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
+        <xs:element ref="in"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
@@ -652,6 +680,7 @@
         <xs:element ref="where"/>
         <xs:element ref="set"/>
         <xs:element ref="foreach"/>
+        <xs:element ref="in"/>
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
