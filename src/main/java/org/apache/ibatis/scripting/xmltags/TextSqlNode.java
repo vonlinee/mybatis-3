@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.TokenHandler;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**
@@ -63,7 +64,8 @@ public class TextSqlNode implements SqlNode {
       } else if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
         context.getBindings().put("value", parameter);
       }
-      Object value = OgnlCache.getValue(content, context.getBindings());
+      ExpressionEvaluator evaluator = context.getExpressionEvaluator();
+      Object value = evaluator.getValue(content, context.getBindings());
       // issue #274 return "" instead of "null"
       return value == null ? "" : String.valueOf(value);
     }

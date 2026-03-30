@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2022 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  *    limitations under the License.
  */
 package org.apache.ibatis.scripting.xmltags;
+
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 
 /**
  * @author Frank D. Martinez [mnesarco]
@@ -30,7 +32,8 @@ public class VarDeclSqlNode implements SqlNode {
 
   @Override
   public boolean apply(DynamicContext context) {
-    final Object value = OgnlCache.getValue(expression, context.getBindings());
+    ExpressionEvaluator evaluator = context.getExpressionEvaluator();
+    final Object value = evaluator.getValue(expression, context.getBindings());
     context.bind(name, value);
     return true;
   }

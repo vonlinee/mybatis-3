@@ -13,30 +13,27 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting.expression;
 
-import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.apache.ibatis.scripting.expression.ognl.OgnlExpressionEvaluator;
 
 /**
  * @author Clinton Begin
  */
-public class IfSqlNode implements SqlNode {
-  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
-  private final String test;
-  private final SqlNode contents;
+public interface ExpressionEvaluator {
 
-  public IfSqlNode(SqlNode contents, String test) {
-    this.test = test;
-    this.contents = contents;
+  ExpressionEvaluator INSTANCE = OgnlExpressionEvaluator.INSTANCE;
+
+  Object getValue(String expression, Object root);
+
+  boolean evaluateBoolean(String expression, Object parameterObject);
+
+  default Iterable<?> evaluateIterable(String expression, Object parameterObject) {
+    return evaluateIterable(expression, parameterObject, false);
   }
 
-  @Override
-  public boolean apply(DynamicContext context) {
-    if (evaluator.evaluateBoolean(test, context.getBindings())) {
-      contents.apply(context);
-      return true;
-    }
-    return false;
-  }
-
+  /**
+   * @since 3.5.9
+   */
+  Iterable<?> evaluateIterable(String expression, Object parameterObject, boolean nullable);
 }

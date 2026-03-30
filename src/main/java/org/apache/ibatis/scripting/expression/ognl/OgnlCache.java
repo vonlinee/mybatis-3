@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting.expression.ognl;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +31,7 @@ import org.apache.ibatis.builder.BuilderException;
  *
  * @see <a href='https://github.com/mybatis/old-google-code-issues/issues/342'>Issue 342</a>
  */
-public final class OgnlCache {
+final class OgnlCache {
 
   private static final OgnlMemberAccess MEMBER_ACCESS = new OgnlMemberAccess();
   private static final OgnlClassResolver CLASS_RESOLVER = new OgnlClassResolver();

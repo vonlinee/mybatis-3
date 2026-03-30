@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,20 +15,18 @@
  */
 package org.apache.ibatis.builder.xml.dynamic;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.domain.blog.Section;
-import org.apache.ibatis.scripting.xmltags.ExpressionEvaluator;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.junit.jupiter.api.Test;
 
 class ExpressionEvaluatorTest {
 
-  private final ExpressionEvaluator evaluator = new ExpressionEvaluator();
+  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
 
   @Test
   void shouldCompareStringsReturnTrue() {
@@ -76,7 +74,7 @@ class ExpressionEvaluatorTest {
   void shouldReturnFalseIfZeroWithScale() {
     class Bean {
       @SuppressWarnings("unused")
-      public double d = 0.0D;
+      public final double d = 0.0D;
     }
     assertFalse(evaluator.evaluateBoolean("d", new Bean()));
   }
@@ -84,7 +82,6 @@ class ExpressionEvaluatorTest {
   @Test
   void shouldIterateOverIterable() {
     final HashMap<String, String[]> parameterObject = new HashMap<>() {
-      private static final long serialVersionUID = 1L;
       {
         put("array", new String[] { "1", "2", "3" });
       }

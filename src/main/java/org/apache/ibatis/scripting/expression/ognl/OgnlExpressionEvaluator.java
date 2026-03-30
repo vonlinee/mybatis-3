@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting.expression.ognl;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -21,15 +21,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import ognl.OgnlContext;
+import ognl.OgnlRuntime;
+import ognl.PropertyAccessor;
+
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.scripting.ContextMap;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.apache.ibatis.scripting.xmltags.DynamicContext;
 
 /**
  * @author Clinton Begin
  */
-public class ExpressionEvaluator {
+public class OgnlExpressionEvaluator implements ExpressionEvaluator {
 
-  public static final ExpressionEvaluator INSTANCE = new ExpressionEvaluator();
+  public static final OgnlExpressionEvaluator INSTANCE = new OgnlExpressionEvaluator();
 
+  @Override
+  public Object getValue(String expression, Object root) {
+    return OgnlCache.getValue(expression, root);
+  }
+
+  @Override
   public boolean evaluateBoolean(String expression, Object parameterObject) {
     Object value = OgnlCache.getValue(expression, parameterObject);
     if (value instanceof Boolean) {
@@ -42,16 +55,9 @@ public class ExpressionEvaluator {
   }
 
   /**
-   * @deprecated Since 3.5.9, use the {@link #evaluateIterable(String, Object, boolean)}.
-   */
-  @Deprecated
-  public Iterable<?> evaluateIterable(String expression, Object parameterObject) {
-    return evaluateIterable(expression, parameterObject, false);
-  }
-
-  /**
    * @since 3.5.9
    */
+  @Override
   public Iterable<?> evaluateIterable(String expression, Object parameterObject, boolean nullable) {
     Object value = OgnlCache.getValue(expression, parameterObject);
     if (value == null) {
@@ -82,4 +88,43 @@ public class ExpressionEvaluator {
         "Error evaluating expression '" + expression + "'.  Return value (" + value + ") was not iterable.");
   }
 
+  static {
+    OgnlRuntime.setPropertyAccessor(ContextMap.class, new ContextAccessor());
+  }
+
+  static class ContextAccessor implements PropertyAccessor {
+
+    @Override
+    public Object getProperty(OgnlContext context, Object target, Object name) {
+      Map map = (Map) target;
+
+      Object result = map.get(name);
+      if (map.containsKey(name) || result != null) {
+        return result;
+      }
+
+      Object parameterObject = map.get(DynamicContext.PARAMETER_OBJECT_KEY);
+      if (parameterObject instanceof Map) {
+        return ((Map) parameterObject).get(name);
+      }
+
+      return null;
+    }
+
+    @Override
+    public void setProperty(OgnlContext context, Object target, Object name, Object value) {
+      Map<Object, Object> map = (Map<Object, Object>) target;
+      map.put(name, value);
+    }
+
+    @Override
+    public String getSourceAccessor(OgnlContext arg0, Object arg1, Object arg2) {
+      return null;
+    }
+
+    @Override
+    public String getSourceSetter(OgnlContext arg0, Object arg1, Object arg2) {
+      return null;
+    }
+  }
 }

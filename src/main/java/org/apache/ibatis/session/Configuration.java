@@ -86,6 +86,7 @@ import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.LanguageDriverRegistry;
 import org.apache.ibatis.scripting.defaults.RawLanguageDriver;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
@@ -190,6 +191,8 @@ public class Configuration {
 
   private final CompositeMethodLookup methodLookup = new CompositeMethodLookup();
   protected final TableInfoRegistry tableInfoRegistry = new TableInfoRegistry();
+
+  protected final ExpressionEvaluator expressionEvaluator = ExpressionEvaluator.INSTANCE;
 
   protected final Map<Class<?>, SqlProviderFactory> sqlProviderFactories = new ConcurrentHashMap<>();
 
@@ -1091,6 +1094,10 @@ public class Configuration {
 
   public SqlProviderFactory getSqlProviderFactory(Class<?> providerType) {
     return sqlProviderFactories.get(providerType);
+  }
+
+  public ExpressionEvaluator getExpressionEvaluator() {
+    return expressionEvaluator;
   }
 
   public TableInfoRegistry getTableInfoRegistry() {

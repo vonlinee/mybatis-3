@@ -16,14 +16,9 @@
 package org.apache.ibatis.scripting.xmltags;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-
-import ognl.OgnlContext;
-import ognl.OgnlRuntime;
-import ognl.PropertyAccessor;
 
 import org.apache.ibatis.builder.ParameterMappingTokenHandler;
 import org.apache.ibatis.dialect.Dialect;
@@ -32,6 +27,8 @@ import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
+import org.apache.ibatis.scripting.ContextMap;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.session.Configuration;
 
 /**
@@ -41,10 +38,6 @@ public class DynamicContext {
 
   public static final String PARAMETER_OBJECT_KEY = "_parameter";
   public static final String DATABASE_ID_KEY = "_databaseId";
-
-  static {
-    OgnlRuntime.setPropertyAccessor(ContextMap.class, new ContextAccessor());
-  }
 
   protected final ContextMap bindings;
   private final StringJoiner sqlBuilder = new StringJoiner(" ");
@@ -142,68 +135,7 @@ public class DynamicContext {
     return configuration.getEnvironment().getDialect();
   }
 
-  static class ContextMap extends HashMap<String, Object> {
-    private static final long serialVersionUID = 2977601501966151582L;
-    private final MetaObject parameterMetaObject;
-    private final boolean fallbackParameterObject;
-
-    public ContextMap(MetaObject parameterMetaObject, boolean fallbackParameterObject) {
-      this.parameterMetaObject = parameterMetaObject;
-      this.fallbackParameterObject = fallbackParameterObject;
-    }
-
-    @Override
-    public Object get(Object key) {
-      String strKey = (String) key;
-      if (super.containsKey(strKey)) {
-        return super.get(strKey);
-      }
-
-      if (parameterMetaObject == null) {
-        return null;
-      }
-
-      if (fallbackParameterObject && !parameterMetaObject.hasGetter(strKey)) {
-        return parameterMetaObject.getOriginalObject();
-      }
-      // issue #61 do not modify the context when reading
-      return parameterMetaObject.getValue(strKey);
-    }
-  }
-
-  static class ContextAccessor implements PropertyAccessor {
-
-    @Override
-    public Object getProperty(OgnlContext context, Object target, Object name) {
-      Map map = (Map) target;
-
-      Object result = map.get(name);
-      if (map.containsKey(name) || result != null) {
-        return result;
-      }
-
-      Object parameterObject = map.get(PARAMETER_OBJECT_KEY);
-      if (parameterObject instanceof Map) {
-        return ((Map) parameterObject).get(name);
-      }
-
-      return null;
-    }
-
-    @Override
-    public void setProperty(OgnlContext context, Object target, Object name, Object value) {
-      Map<Object, Object> map = (Map<Object, Object>) target;
-      map.put(name, value);
-    }
-
-    @Override
-    public String getSourceAccessor(OgnlContext arg0, Object arg1, Object arg2) {
-      return null;
-    }
-
-    @Override
-    public String getSourceSetter(OgnlContext arg0, Object arg1, Object arg2) {
-      return null;
-    }
+  public ExpressionEvaluator getExpressionEvaluator() {
+    return configuration.getExpressionEvaluator();
   }
 }
