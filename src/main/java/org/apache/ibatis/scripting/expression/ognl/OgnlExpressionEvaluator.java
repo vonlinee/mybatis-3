@@ -82,7 +82,7 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
       return answer;
     }
     if (value instanceof Map) {
-      return ((Map) value).entrySet();
+      return ((Map<?, ?>) value).entrySet();
     }
     throw new BuilderException(
         "Error evaluating expression '" + expression + "'.  Return value (" + value + ") was not iterable.");
@@ -96,7 +96,7 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
 
     @Override
     public Object getProperty(OgnlContext context, Object target, Object name) {
-      Map map = (Map) target;
+      Map<?, ?> map = (Map<?, ?>) target;
 
       Object result = map.get(name);
       if (map.containsKey(name) || result != null) {
@@ -105,7 +105,7 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
 
       Object parameterObject = map.get(DynamicContext.PARAMETER_OBJECT_KEY);
       if (parameterObject instanceof Map) {
-        return ((Map) parameterObject).get(name);
+        return ((Map<?, ?>) parameterObject).get(name);
       }
 
       return null;
@@ -113,6 +113,7 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
 
     @Override
     public void setProperty(OgnlContext context, Object target, Object name, Object value) {
+      @SuppressWarnings("unchecked")
       Map<Object, Object> map = (Map<Object, Object>) target;
       map.put(name, value);
     }

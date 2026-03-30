@@ -155,7 +155,7 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
     }
     if (paramNameResolver != null && ParamMap.class.equals(parameterType)) {
       Type actualParamType = paramNameResolver.getType(property);
-      if (actualParamType instanceof Type) {
+      if (actualParamType != null) {
         MetaClass metaClass = MetaClass.forClass(actualParamType, configuration.getReflectorFactory());
         String multiParamsPropertyName;
         if (propertyTokenizer.hasNext()) {
