@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -71,8 +71,7 @@ class DefaultParameterHandlerTest {
     TypeHandler<Object> typeHandler = mock(TypeHandler.class);
     doThrow(new SQLException("foo")).when(typeHandler).setParameter(any(PreparedStatement.class), anyInt(), any(),
         any(JdbcType.class));
-    ParameterMapping parameterMapping = new ParameterMapping.Builder(mappedStatement.getConfiguration(), "prop",
-        typeHandler).build();
+    ParameterMapping parameterMapping = new ParameterMapping.Builder("prop", typeHandler).build();
     List<ParameterMapping> parameterMappings = List.of(parameterMapping);
     when(boundSql.getParameterMappings()).thenReturn(parameterMappings);
 
@@ -95,11 +94,11 @@ class DefaultParameterHandlerTest {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource(config, "some select statement"),
-        SqlCommandType.SELECT).resultMaps(new ArrayList<ResultMap>() {
+        SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
           private static final long serialVersionUID = 1L;
 
           {
-            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<ResultMapping>() {
+            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<>() {
               private static final long serialVersionUID = 1L;
 
               {
@@ -121,11 +120,11 @@ class DefaultParameterHandlerTest {
 
     Object parameterObject = 1;
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<>() {
       private static final long serialVersionUID = 1L;
 
       {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
     }, parameterObject) {
       {
@@ -156,11 +155,11 @@ class DefaultParameterHandlerTest {
 
     Object parameterObject = null;
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<>() {
       private static final long serialVersionUID = 1L;
 
       {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
     }, parameterObject);
 
@@ -185,13 +184,11 @@ class DefaultParameterHandlerTest {
     MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
         new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
 
-    Object parameterObject = 1;
+    Integer parameterObject = 1;
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
-      private static final long serialVersionUID = 1L;
-
+    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<>() {
       {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
     }, parameterObject);
 
@@ -205,7 +202,7 @@ class DefaultParameterHandlerTest {
 
     defaultParameterHandler.setParameters(ps);
 
-    verify(ps).setInt(1, (Integer) parameterObject);
+    verify(ps).setInt(1, parameterObject);
   }
 
   @Test
@@ -218,17 +215,15 @@ class DefaultParameterHandlerTest {
 
     Author parameterObject = new Author(-1, "cbegin", "******", "cbegin@nowhere.com", "N/A", Section.NEWS);
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
-      private static final long serialVersionUID = 1L;
-
+    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<>() {
       {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-        add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-        add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-        add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
-        add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-        add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
+        add(new ParameterMapping.Builder("username", registry.getTypeHandler(String.class)).build());
+        add(new ParameterMapping.Builder("password", registry.getTypeHandler(String.class)).build());
+        add(new ParameterMapping.Builder("email", registry.getTypeHandler(String.class)).build());
+        add(new ParameterMapping.Builder("bio", registry.getTypeHandler(String.class)).jdbcType(JdbcType.VARCHAR)
+            .build());
+        add(new ParameterMapping.Builder("favouriteSection", registry.getTypeHandler(Section.class))
             .jdbcType(JdbcType.VARCHAR).build());
       }
     }, parameterObject);
@@ -271,21 +266,18 @@ class DefaultParameterHandlerTest {
     MappedStatement mappedStatement = new MappedStatement.Builder(mockConfig, "testSelect",
         new StaticSqlSource(mockConfig, "some select statement"), SqlCommandType.SELECT).build();
 
-    BoundSql boundSql = new BoundSql(mockConfig, "some select statement", new ArrayList<ParameterMapping>() {
-      private static final long serialVersionUID = 1L;
-
+    BoundSql boundSql = new BoundSql(mockConfig, "some select statement", new ArrayList<>() {
       {
-        add(new ParameterMapping.Builder(mockConfig, "id", registry.getTypeHandler(int.class))
-            .jdbcType(JdbcType.INTEGER).build());
-        add(new ParameterMapping.Builder(mockConfig, "username", registry.getTypeHandler(String.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-        add(new ParameterMapping.Builder(mockConfig, "password", registry.getTypeHandler(String.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-        add(new ParameterMapping.Builder(mockConfig, "email", registry.getTypeHandler(String.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-        add(new ParameterMapping.Builder(mockConfig, "bio", registry.getTypeHandler(String.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-        add(new ParameterMapping.Builder(mockConfig, "favouriteSection", registry.getTypeHandler(Section.class))
+        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).jdbcType(JdbcType.INTEGER).build());
+        add(new ParameterMapping.Builder("username", registry.getTypeHandler(String.class)).jdbcType(JdbcType.VARCHAR)
+            .build());
+        add(new ParameterMapping.Builder("password", registry.getTypeHandler(String.class)).jdbcType(JdbcType.VARCHAR)
+            .build());
+        add(new ParameterMapping.Builder("email", registry.getTypeHandler(String.class)).jdbcType(JdbcType.VARCHAR)
+            .build());
+        add(new ParameterMapping.Builder("bio", registry.getTypeHandler(String.class)).jdbcType(JdbcType.VARCHAR)
+            .build());
+        add(new ParameterMapping.Builder("favouriteSection", registry.getTypeHandler(Section.class))
             .jdbcType(JdbcType.VARCHAR).build());
       }
     }, parameterObject);
