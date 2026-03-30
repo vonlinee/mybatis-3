@@ -17,7 +17,6 @@ package org.apache.ibatis.scripting.xmltags;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
@@ -58,8 +57,9 @@ public class ForEachSqlNode implements SqlNode {
   @Override
   public boolean apply(DynamicContext context) {
     Map<String, Object> bindings = context.getBindings();
-    final Iterable<?> iterable = evaluator.evaluateIterable(collectionExpression, bindings,
-        Optional.ofNullable(nullable).orElseGet(configuration::isNullableOnForEach));
+
+    final boolean nullableOnForEach = this.nullable == null ? configuration.isNullableOnForEach() : this.nullable;
+    final Iterable<?> iterable = evaluator.evaluateIterable(collectionExpression, bindings, nullableOnForEach);
     if (iterable == null || !iterable.iterator().hasNext()) {
       return true;
     }
