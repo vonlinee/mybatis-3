@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -277,8 +277,8 @@ class DynamicSqlSourceTest extends BaseDataTest {
     };
     final String expected = "SELECT * FROM BLOG WHERE ID in (  one = ? AND two = ? AND three = ? )";
     DynamicSqlSource source = createDynamicSqlSource(new TextSqlNode("SELECT * FROM BLOG WHERE ID in"),
-        new ForEachSqlNode(new Configuration(), mixedContents(new TextSqlNode("${item} = #{item}")), "array", "index",
-            "item", "(", ")", "AND"));
+        new ForEachSqlNode(new Configuration(), mixedContents(new TextSqlNode("${item} = #{item}")), "array", null,
+            "index", "item", "(", ")", "AND"));
     BoundSql boundSql = source.getBoundSql(parameterObject);
     assertEquals(expected, boundSql.getSql());
     assertEquals(3, boundSql.getParameterMappings().size());
@@ -312,7 +312,7 @@ class DynamicSqlSourceTest extends BaseDataTest {
     };
     final String expected = "SELECT * FROM BLOG";
     DynamicSqlSource source = createDynamicSqlSource(new TextSqlNode("SELECT * FROM BLOG"),
-        new ForEachSqlNode(new Configuration(), mixedContents(new TextSqlNode("#{item}")), "array", null, "item",
+        new ForEachSqlNode(new Configuration(), mixedContents(new TextSqlNode("#{item}")), "array", null, null, "item",
             "WHERE id in (", ")", ","));
     BoundSql boundSql = source.getBoundSql(parameterObject);
     assertEquals(expected, boundSql.getSql());
@@ -334,7 +334,7 @@ class DynamicSqlSourceTest extends BaseDataTest {
             mixedContents(
                 new TextSqlNode("#{uuu.u}, #{u.id}, #{ u,typeHandler=org.apache.ibatis.type.StringTypeHandler},"
                     + " #{u:VARCHAR,typeHandler=org.apache.ibatis.type.StringTypeHandler}")),
-            "uuuu", "uu", "u", "(", ")", ","));
+            "uuuu", null, "uu", "u", "(", ")", ","));
     BoundSql boundSql = source.getBoundSql(param);
     assertEquals(4, boundSql.getParameterMappings().size());
     assertEquals("uuu.u", boundSql.getParameterMappings().get(0).getProperty());

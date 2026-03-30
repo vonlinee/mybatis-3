@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package org.apache.ibatis.builder.xml;
 
 import java.io.InputStream;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,20 +58,6 @@ public class XMLMapperBuilder extends BaseBuilder {
   private final Map<String, XNode> sqlFragments;
   private final String resource;
   private Class<?> mapperClass;
-
-  @Deprecated(since = "3.6.0", forRemoval = true)
-  public XMLMapperBuilder(Reader reader, Configuration configuration, String resource, Map<String, XNode> sqlFragments,
-      String namespace) {
-    this(reader, configuration, resource, sqlFragments);
-    this.builderAssistant.setCurrentNamespace(namespace);
-  }
-
-  @Deprecated
-  public XMLMapperBuilder(Reader reader, Configuration configuration, String resource,
-      Map<String, XNode> sqlFragments) {
-    this(new XPathParser(reader, true, configuration.getVariables(), new XMLMapperEntityResolver()), configuration,
-        resource, sqlFragments);
-  }
 
   public XMLMapperBuilder(InputStream inputStream, Configuration configuration, String resource,
       Map<String, XNode> sqlFragments, Class<?> mapperClass) {

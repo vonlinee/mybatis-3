@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -247,18 +247,8 @@ public class ResultMapping {
     return foreignColumn;
   }
 
-  @Deprecated
-  public void setForeignColumn(String foreignColumn) {
-    this.foreignColumn = foreignColumn;
-  }
-
   public boolean isLazy() {
     return lazy;
-  }
-
-  @Deprecated
-  public void setLazy(boolean lazy) {
-    this.lazy = lazy;
   }
 
   public boolean isSimple() {

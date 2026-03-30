@@ -40,16 +40,6 @@ public class ForEachSqlNode implements SqlNode {
   private final Configuration configuration;
 
   /**
-   * @deprecated Since 3.5.9, use the
-   *             {@link #ForEachSqlNode(Configuration, SqlNode, String, Boolean, String, String, String, String, String)}.
-   */
-  @Deprecated
-  public ForEachSqlNode(Configuration configuration, SqlNode contents, String collectionExpression, String index,
-      String item, String open, String close, String separator) {
-    this(configuration, contents, collectionExpression, null, index, item, open, close, separator);
-  }
-
-  /**
    * @since 3.5.9
    */
   public ForEachSqlNode(Configuration configuration, SqlNode contents, String collectionExpression, Boolean nullable,
