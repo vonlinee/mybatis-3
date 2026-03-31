@@ -16,18 +16,20 @@
 package org.apache.ibatis.scripting.expression.ognl;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ognl.OgnlContext;
-import ognl.OgnlRuntime;
-import ognl.PropertyAccessor;
+import ognl.*;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.scripting.ContextMap;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.apache.ibatis.scripting.expression.ExtensionFunction;
 import org.apache.ibatis.scripting.xmltags.DynamicContext;
 
 /**
@@ -36,6 +38,12 @@ import org.apache.ibatis.scripting.xmltags.DynamicContext;
 public class OgnlExpressionEvaluator implements ExpressionEvaluator {
 
   public static final OgnlExpressionEvaluator INSTANCE = new OgnlExpressionEvaluator();
+
+  private final Map<String, ExtensionFunction> functionMap = new HashMap<>();
+
+  public OgnlExpressionEvaluator() {
+    OgnlRuntime.setMethodAccessor(Object.class, new ObjectMethodAccessor(functionMap));
+  }
 
   @Override
   public Object getValue(String expression, Object root) {
@@ -88,6 +96,11 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
         "Error evaluating expression '" + expression + "'.  Return value (" + value + ") was not iterable.");
   }
 
+  @Override
+  public void registerFunction(ExtensionFunction function) {
+    functionMap.put(function.getName(), function);
+  }
+
   static {
     OgnlRuntime.setPropertyAccessor(ContextMap.class, new ContextAccessor());
   }
@@ -126,6 +139,82 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
     @Override
     public String getSourceSetter(OgnlContext arg0, Object arg1, Object arg2) {
       return null;
+    }
+  }
+
+  /**
+   * @see ognl.ObjectMethodAccessor
+   */
+  static class ObjectMethodAccessor implements MethodAccessor {
+
+    private final MethodAccessor objectMethodAccessor;
+
+    private final Map<String, ExtensionFunction> functionMap;
+
+    ObjectMethodAccessor(Map<String, ExtensionFunction> functionMap) {
+      this.functionMap = functionMap;
+      try {
+        this.objectMethodAccessor = OgnlRuntime.getMethodAccessor(Object.class);
+      } catch (OgnlException e) {
+        throw new BuilderException("Error setting internal method accessor for type: " + Object.class.getName(), e);
+      }
+    }
+
+    @Override
+    public Object callStaticMethod(OgnlContext context, Class<?> targetClass, String methodName, Object[] args)
+        throws MethodFailedException {
+      return objectMethodAccessor.callStaticMethod(context, targetClass, methodName, args);
+    }
+
+    @Override
+    public Object callMethod(OgnlContext context, Object target, String methodName, Object[] args)
+        throws MethodFailedException {
+      Class<?> targetClass = (target == null) ? null : target.getClass();
+      List<Method> methods = OgnlRuntime.getMethods(targetClass, methodName, false);
+      if (CollectionUtils.isEmpty(methods)) {
+        // static methods
+        methods = OgnlRuntime.getMethods(targetClass, methodName, true);
+      }
+      final ExtensionFunction function = functionMap.get(methodName);
+      if (function != null && function.supports(target)) {
+        boolean callMethodOnTarget = false;
+        if (CollectionUtils.isNotEmpty(methods)) {
+          final Class<?>[] functionParameterTypes = function.getParameterTypes();
+          for (Method method : methods) {
+            if (method.getParameterCount() == function.getParameterCount()) {
+              if (isCompatible(functionParameterTypes, method.getParameterTypes())) {
+                callMethodOnTarget = true;
+                break;
+              }
+            }
+          }
+        }
+        if (!callMethodOnTarget) {
+          return function.execute(args);
+        }
+      }
+      // fallback to method already defined in the class
+      return OgnlRuntime.callAppropriateMethod(context, target, target, methodName, null, methods, args);
+    }
+
+    private static boolean isCompatible(Class<?>[] parameterTypes, Class<?>[] targetParameterTypes) {
+      if (parameterTypes.length != targetParameterTypes.length) {
+        return false;
+      }
+      for (int i = 0; i < parameterTypes.length; i++) {
+        if (!isAssignableFrom(parameterTypes[i], targetParameterTypes[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    private static boolean isAssignableFrom(Class<?> type1, Class<?> type2) {
+      if (type1 == type2) {
+        return true;
+      }
+      // TODO consider primitive types ?
+      return type1.isAssignableFrom(type2);
     }
   }
 }

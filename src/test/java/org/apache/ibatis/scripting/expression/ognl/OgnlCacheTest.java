@@ -15,8 +15,7 @@
  */
 package org.apache.ibatis.scripting.expression.ognl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -28,6 +27,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
+import org.apache.ibatis.internal.util.ObjectUtils;
+import org.apache.ibatis.internal.util.StringUtils;
+import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.apache.ibatis.scripting.expression.ExtensionFunction;
 import org.junit.jupiter.api.Test;
 
 class OgnlCacheTest {
@@ -55,5 +58,172 @@ class OgnlCacheTest {
     context.put("d1", Date.valueOf("2022-01-01"));
     context.put("d2", Date.valueOf("2022-01-02"));
     assertEquals(-1, OgnlCache.getValue("d1.compareTo(d2)", context));
+  }
+
+  static class Param {
+
+    private String field1;
+    private String field2;
+
+    public String getField1() {
+      return field1;
+    }
+
+    public void setField1(String field1) {
+      this.field1 = field1;
+    }
+
+    public String getField2() {
+      return field2;
+    }
+
+    public void setField2(String field2) {
+      this.field2 = field2;
+    }
+  }
+
+  @Test
+  void staticMethodCallInOgnlExpression() {
+    final ExpressionEvaluator evaluator = new OgnlExpressionEvaluator();
+
+    Map<String, Object> context = new HashMap<>();
+    Param param = new Param();
+    param.setField1("xxx");
+    param.setField2("  ");
+    context.put("param", param);
+
+    assertFalse(evaluator.evaluateBoolean(getStaticMethodCallExpression(ObjectUtils.class, "isEmpty", "param.field1"),
+        context));
+    assertFalse(evaluator.evaluateBoolean(getStaticMethodCallExpression(StringUtils.class, "isEmpty", "param.field2"),
+        context));
+    assertFalse(evaluator.evaluateBoolean(getStaticMethodCallExpression(StringUtils.class, "isBlank", "param.field1"),
+        context));
+    assertTrue(evaluator.evaluateBoolean(getStaticMethodCallExpression(StringUtils.class, "isNotBlank", "param.field1"),
+        context));
+    assertFalse(evaluator.evaluateBoolean(
+        getStaticMethodCallExpression(StringUtils.class, "isAllBlank", "param.field1", "param.field2"), context));
+    assertTrue(evaluator.evaluateBoolean(
+        getStaticMethodCallExpression(StringUtils.class, "isAnyBlank", "param.field1", "param.field2"), context));
+  }
+
+  static String getStaticMethodCallExpression(Class<?> type, String method, String... argExpressions) {
+    return "@" + type.getName() + "@" + method + "(" + String.join(",", argExpressions) + ")";
+  }
+
+  enum BultinExtensionFunction implements ExtensionFunction {
+
+    isEmpty {
+      @Override
+      public String getName() {
+        return "isEmpty";
+      }
+
+      @Override
+      public int getParameterCount() {
+        return 1;
+      }
+
+      @Override
+      public Class<?>[] getParameterTypes() {
+        return new Class[] { Object.class };
+      }
+
+      @Override
+      public Object execute(Object[] args) {
+        return ObjectUtils.isEmpty(args[0]);
+      }
+    },
+
+    isNotEmpty {
+      @Override
+      public String getName() {
+        return "isNotEmpty";
+      }
+
+      @Override
+      public int getParameterCount() {
+        return 1;
+      }
+
+      @Override
+      public Class<?>[] getParameterTypes() {
+        return new Class[] { Object.class };
+      }
+
+      @Override
+      public Object execute(Object[] args) {
+        return !ObjectUtils.isEmpty(args[0]);
+      }
+    },
+
+    isBlank {
+      @Override
+      public String getName() {
+        return "isBlank";
+      }
+
+      @Override
+      public int getParameterCount() {
+        return 1;
+      }
+
+      @Override
+      public Class<?>[] getParameterTypes() {
+        return new Class[] { String.class };
+      }
+
+      @Override
+      public Object execute(Object[] args) {
+        if (!(args[0] instanceof String)) {
+          throw new IllegalArgumentException("args[0] must be String");
+        }
+        return StringUtils.isBlank((String) args[0]);
+      }
+    },
+
+    isNotBlank {
+      @Override
+      public String getName() {
+        return "isNotBlank";
+      }
+
+      @Override
+      public int getParameterCount() {
+        return 1;
+      }
+
+      @Override
+      public Class<?>[] getParameterTypes() {
+        return new Class[] { String.class };
+      }
+
+      @Override
+      public Object execute(Object[] args) {
+        if (!(args[0] instanceof String)) {
+          throw new IllegalArgumentException("args[0] must be String");
+        }
+        return StringUtils.isNotBlank((String) args[0]);
+      }
+    },
+  }
+
+  @Test
+  void customExtensionFunctionInExpression() {
+    final ExpressionEvaluator evaluator = new OgnlExpressionEvaluator();
+    evaluator.registerFunction(BultinExtensionFunction.isEmpty);
+    evaluator.registerFunction(BultinExtensionFunction.isNotEmpty);
+    evaluator.registerFunction(BultinExtensionFunction.isBlank);
+    evaluator.registerFunction(BultinExtensionFunction.isNotBlank);
+
+    Map<String, Object> context = new HashMap<>();
+    Param param = new Param();
+    param.setField1("xxx");
+    param.setField2("  ");
+    context.put("param", param);
+
+    assertFalse(evaluator.evaluateBoolean("isEmpty(param.field1)", context));
+    assertFalse(evaluator.evaluateBoolean("isEmpty(param.field1)", context));
+    assertTrue(evaluator.evaluateBoolean("isNotEmpty(param.field1)", context));
+    assertTrue(evaluator.evaluateBoolean("isNotBlank(param.field1)", context));
   }
 }

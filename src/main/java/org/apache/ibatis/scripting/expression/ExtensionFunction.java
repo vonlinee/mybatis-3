@@ -15,27 +15,17 @@
  */
 package org.apache.ibatis.scripting.expression;
 
-import org.apache.ibatis.scripting.expression.ognl.OgnlExpressionEvaluator;
+public interface ExtensionFunction {
 
-/**
- * @author Clinton Begin
- */
-public interface ExpressionEvaluator {
+  String getName();
 
-  ExpressionEvaluator INSTANCE = OgnlExpressionEvaluator.INSTANCE;
-
-  Object getValue(String expression, Object root);
-
-  boolean evaluateBoolean(String expression, Object parameterObject);
-
-  default Iterable<?> evaluateIterable(String expression, Object parameterObject) {
-    return evaluateIterable(expression, parameterObject, false);
+  default boolean supports(Object targetType) {
+    return true;
   }
 
-  /**
-   * @since 3.5.9
-   */
-  Iterable<?> evaluateIterable(String expression, Object parameterObject, boolean nullable);
+  int getParameterCount();
 
-  void registerFunction(ExtensionFunction function);
+  Class<?>[] getParameterTypes();
+
+  Object execute(Object[] args);
 }
