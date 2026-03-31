@@ -41,7 +41,7 @@ public interface CrudMapper<T> {
    *
    * @return the number of affected rows
    */
-  @InsertProvider(type = EntitySqlProvider.class, method = SqlMethod.INSERT_ONE)
+  @InsertProvider(type = EntitySqlProviderFactory.class, method = SqlMethod.INSERT_ONE)
   int insert(T entity);
 
   /**
@@ -52,7 +52,7 @@ public interface CrudMapper<T> {
    *
    * @return the number of affected rows
    */
-  @InsertProvider(type = EntitySqlProvider.class, method = SqlMethod.INSERT_BATCH)
+  @InsertProvider(type = EntitySqlProviderFactory.class, method = SqlMethod.INSERT_BATCH)
   int insertBatch(@Param("collection") Collection<T> entities);
 
   /**
@@ -64,7 +64,7 @@ public interface CrudMapper<T> {
    *
    * @return the number of affected rows
    */
-  @UpdateProvider(type = EntitySqlProvider.class, method = SqlMethod.UPDATE_BY_ID)
+  @UpdateProvider(type = EntitySqlProviderFactory.class, method = SqlMethod.UPDATE_BY_ID)
   int updateById(T entity);
 
   /**
@@ -75,7 +75,7 @@ public interface CrudMapper<T> {
    *
    * @return the number of affected rows
    */
-  @DeleteProvider(type = EntitySqlProvider.class, method = SqlMethod.DELETE_BY_ID)
+  @DeleteProvider(type = EntitySqlProviderFactory.class, method = SqlMethod.DELETE_BY_ID)
   int deleteById(Object id);
 
   /**
@@ -86,7 +86,7 @@ public interface CrudMapper<T> {
    *
    * @return the number of affected rows
    */
-  @DeleteProvider(type = EntitySqlProvider.class, method = SqlMethod.DELETE_BY_IDS)
+  @DeleteProvider(type = EntitySqlProviderFactory.class, method = SqlMethod.DELETE_BY_IDS)
   int deleteByIds(@Param("collection") Collection<?> ids);
 
   /**
@@ -97,7 +97,7 @@ public interface CrudMapper<T> {
    *
    * @return the entity, or null if not found
    */
-  @SelectProvider(type = EntitySqlProvider.class, method = SqlMethod.SELECT_BY_ID)
+  @SelectProvider(type = EntitySqlProviderFactory.class, method = SqlMethod.SELECT_BY_ID)
   T selectById(Object id);
 
   /**
@@ -108,7 +108,7 @@ public interface CrudMapper<T> {
    *
    * @return a list of entities matching the primary keys
    */
-  @SelectProvider(type = EntitySqlProvider.class, method = SqlMethod.SELECT_BY_IDS)
+  @SelectProvider(type = EntitySqlProviderFactory.class, method = SqlMethod.SELECT_BY_IDS)
   List<T> selectByIds(@Param("collection") Collection<?> ids);
 
   /**
@@ -116,7 +116,7 @@ public interface CrudMapper<T> {
    *
    * @return a list of all entities
    */
-  @SelectProvider(type = EntitySqlProvider.class, method = SqlMethod.SELECT_ALL)
+  @SelectProvider(type = EntitySqlProviderFactory.class, method = SqlMethod.SELECT_ALL)
   List<T> selectAll();
 
   /**
@@ -124,7 +124,7 @@ public interface CrudMapper<T> {
    *
    * @return the total count of entities
    */
-  @SelectProvider(type = EntitySqlProvider.class, method = SqlMethod.COUNT_ALL)
+  @SelectProvider(type = EntitySqlProviderFactory.class, method = SqlMethod.COUNT_ALL)
   long countAll();
 
   /**
@@ -135,7 +135,7 @@ public interface CrudMapper<T> {
    *
    * @return true if the entity exists, false otherwise
    */
-  @SelectProvider(type = EntitySqlProvider.class, method = SqlMethod.EXISTS_BY_ID)
+  @SelectProvider(type = EntitySqlProviderFactory.class, method = SqlMethod.EXISTS_BY_ID)
   boolean existsById(Object id);
 
   /**
@@ -143,7 +143,7 @@ public interface CrudMapper<T> {
    *
    * @return the number of affected rows
    */
-  @DeleteProvider(type = EntitySqlProvider.class, method = SqlMethod.DELETE_ALL)
+  @DeleteProvider(type = EntitySqlProviderFactory.class, method = SqlMethod.DELETE_ALL)
   int deleteAll();
 
   /**
@@ -157,6 +157,6 @@ public interface CrudMapper<T> {
    *
    * @return the number of affected rows
    */
-  @UpdateProvider(type = EntitySqlProvider.class, method = SqlMethod.UPDATE_SELECTIVE)
+  @UpdateProvider(type = EntitySqlProviderFactory.class, method = SqlMethod.UPDATE_SELECTIVE)
   int updateSelective(@Param("entity") T entity, @Param("fields") Collection<String> fields);
 }
