@@ -15,6 +15,8 @@
  */
 package org.apache.ibatis.session;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,11 +26,10 @@ import org.apache.ibatis.binding.CompositeMethodLookup;
 import org.apache.ibatis.binding.MappedStatementMethodLookup;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.binding.MapperRegistry;
-import org.apache.ibatis.builder.CacheRefResolver;
-import org.apache.ibatis.builder.IncompleteElementException;
-import org.apache.ibatis.builder.ResultMapResolver;
+import org.apache.ibatis.builder.*;
 import org.apache.ibatis.builder.annotation.MethodResolver;
 import org.apache.ibatis.builder.annotation.SqlProviderFactory;
+import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.builder.xml.XMLStatementBuilder;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.decorators.FifoCache;
@@ -56,6 +57,7 @@ import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.extension.TableInfoRegistry;
 import org.apache.ibatis.extension.pagination.DefaultPaginationHandler;
 import org.apache.ibatis.extension.pagination.PaginationHandler;
+import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.io.VFS;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
@@ -922,6 +924,15 @@ public class Configuration {
 
   public boolean hasMapper(Class<?> type) {
     return mapperRegistry.hasMapper(type);
+  }
+
+  public void addXmlResource(String resource) {
+    Objects.requireNonNull(resource, "resource cannot be null");
+    try (InputStream stream = Resources.getResourceAsStream(resource)) {
+      new XMLMapperBuilder(stream, this, resource, sqlFragments).parse();
+    } catch (IOException e) {
+      throw new BuilderException(e);
+    }
   }
 
   public boolean hasStatement(String statementName) {

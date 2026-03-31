@@ -375,4 +375,16 @@ class XmlConfigBuilderTest {
     }
   }
 
+  @Test
+  void shouldAddXmlMapperWithMultipleMappers() {
+    Configuration configuration = new Configuration();
+    Assertions.assertDoesNotThrow(() -> configuration.addXmlResource("org/apache/ibatis/builder/PostMapper.xml"));
+
+    Assertions.assertTrue(configuration.hasStatement("selectPostLite"));
+    Assertions
+        .assertTrue(configuration.hasStatement("org.apache.ibatis.domain.blog.mappers.PostMapper.selectPostLite"));
+
+    Assertions.assertTrue(configuration.hasResultMap("org.apache.ibatis.domain.blog.mappers.PostMapper.postLiteIdMap"));
+    Assertions.assertTrue(configuration.hasResultMap("postLiteIdMap"));
+  }
 }
