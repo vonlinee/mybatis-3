@@ -142,7 +142,7 @@ public class ForEachSqlNode implements SqlNode {
 
     @Override
     public void appendSql(String sql) {
-      if (!prefixApplied && sql != null && sql.trim().length() > 0) {
+      if (!prefixApplied && sql != null && !sql.trim().isEmpty()) {
         delegate.appendSql(prefix);
         prefixApplied = true;
       }

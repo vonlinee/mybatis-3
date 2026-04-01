@@ -305,7 +305,7 @@ public class XNode {
           new XNode(xpathParser, node, variables).buildToString(builder, indentLevel + 1);
         } else {
           String text = getBodyData(node).trim();
-          if (text.length() > 0) {
+          if (!text.isEmpty()) {
             indent(builder, indentLevel + 1).append(text).append("\n");
           }
         }
