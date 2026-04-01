@@ -127,8 +127,12 @@ public class TrimSqlNode implements SqlNode {
       }
       prefixApplied = true;
       if (prefixesToOverride != null) {
-        prefixesToOverride.stream().filter(trimmedUppercaseSql::startsWith).findFirst()
-            .ifPresent(toRemove -> sql.delete(0, toRemove.trim().length()));
+        for (String prefix : prefixesToOverride) {
+          if (trimmedUppercaseSql.startsWith(prefix)) {
+            sql.delete(0, prefix.trim().length());
+            break;
+          }
+        }
       }
       if (prefix != null) {
         sql.insert(0, " ").insert(0, prefix);
@@ -141,13 +145,13 @@ public class TrimSqlNode implements SqlNode {
       }
       suffixApplied = true;
       if (suffixesToOverride != null) {
-        suffixesToOverride.stream()
-            .filter(toRemove -> trimmedUppercaseSql.endsWith(toRemove) || trimmedUppercaseSql.endsWith(toRemove.trim()))
-            .findFirst().ifPresent(toRemove -> {
-              int start = sql.length() - toRemove.trim().length();
-              int end = sql.length();
-              sql.delete(start, end);
-            });
+
+        for (String suffix : suffixesToOverride) {
+          if (trimmedUppercaseSql.endsWith(suffix) || trimmedUppercaseSql.endsWith(suffix.trim())) {
+            sql.delete(sql.length() - suffix.trim().length(), sql.length());
+            break;
+          }
+        }
       }
       if (suffix != null) {
         sql.append(" ").append(suffix);
