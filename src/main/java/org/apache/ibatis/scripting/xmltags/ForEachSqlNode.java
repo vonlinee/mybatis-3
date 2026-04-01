@@ -55,6 +55,11 @@ public class ForEachSqlNode implements SqlNode {
   }
 
   @Override
+  public boolean isDynamic() {
+    return true;
+  }
+
+  @Override
   public boolean apply(DynamicContext context) {
     Map<String, Object> bindings = context.getBindings();
 

@@ -38,4 +38,8 @@ public class VarDeclSqlNode implements SqlNode {
     return true;
   }
 
+  @Override
+  public boolean isDynamic() {
+    return true;
+  }
 }

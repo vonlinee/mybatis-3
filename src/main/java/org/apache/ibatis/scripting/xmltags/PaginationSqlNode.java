@@ -21,6 +21,11 @@ import org.apache.ibatis.extension.pagination.Pageable;
 public class PaginationSqlNode implements SqlNode {
 
   @Override
+  public boolean isDynamic() {
+    return true;
+  }
+
+  @Override
   public boolean apply(DynamicContext context) {
     final Object parameterObject = context.getParameterObject();
     if (!(parameterObject instanceof Pageable)) {

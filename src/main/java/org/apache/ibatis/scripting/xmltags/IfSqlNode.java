@@ -31,6 +31,11 @@ public class IfSqlNode implements SqlNode {
   }
 
   @Override
+  public boolean isDynamic() {
+    return true;
+  }
+
+  @Override
   public boolean apply(DynamicContext context) {
     if (evaluator.evaluateBoolean(test, context.getBindings())) {
       contents.apply(context);

@@ -30,6 +30,7 @@ public class TextSqlNode implements SqlNode {
     this.text = text;
   }
 
+  @Override
   public boolean isDynamic() {
     DynamicCheckerTokenParser checker = new DynamicCheckerTokenParser();
     GenericTokenParser parser = createParser(checker);

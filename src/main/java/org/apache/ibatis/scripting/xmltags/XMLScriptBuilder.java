@@ -37,7 +37,6 @@ import org.w3c.dom.NodeList;
 public class XMLScriptBuilder extends BaseBuilder {
 
   private final XNode context;
-  private boolean isDynamic;
   private final Class<?> parameterType;
   private final ParamNameResolver paramNameResolver;
   private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
@@ -77,7 +76,7 @@ public class XMLScriptBuilder extends BaseBuilder {
   public SqlSource parseScriptNode() {
     MixedSqlNode rootSqlNode = parseDynamicTags(context);
     SqlSource sqlSource;
-    if (isDynamic) {
+    if (rootSqlNode.isDynamic()) {
       sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
     } else {
       sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType, paramNameResolver);
@@ -99,7 +98,6 @@ public class XMLScriptBuilder extends BaseBuilder {
         TextSqlNode textSqlNode = new TextSqlNode(data);
         if (textSqlNode.isDynamic()) {
           contents.add(textSqlNode);
-          isDynamic = true;
         } else {
           contents.add(new StaticTextSqlNode(data));
         }
@@ -110,7 +108,6 @@ public class XMLScriptBuilder extends BaseBuilder {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
         }
         handler.handleNode(child, contents);
-        isDynamic = true;
       }
     }
     return new MixedSqlNode(contents);
@@ -335,6 +332,11 @@ public class XMLScriptBuilder extends BaseBuilder {
     public EmptySqlNode(String whitespaces) {
       super();
       this.whitespaces = whitespaces;
+    }
+
+    @Override
+    public boolean isDynamic() {
+      return false;
     }
 
     @Override
