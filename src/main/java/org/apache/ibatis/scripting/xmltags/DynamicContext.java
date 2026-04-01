@@ -73,6 +73,11 @@ public class DynamicContext {
     this.paramNameResolver = paramNameResolver;
   }
 
+  public DynamicContext(DynamicContext delegate) {
+    this(delegate.getConfiguration(), delegate.getParameterObject(), delegate.getParameterType(),
+        delegate.getParamNameResolver(), delegate.isParamExists());
+  }
+
   public Map<String, Object> getBindings() {
     return bindings;
   }
