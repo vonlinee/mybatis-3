@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.ibatis.builder.SqlSourceBuilder;
+import org.apache.ibatis.internal.util.ObjectUtils;
 import org.apache.ibatis.logging.Log;
-import org.apache.ibatis.reflection.ArrayUtil;
 
 /**
  * Base class for proxies to do logging.
@@ -100,7 +100,7 @@ public abstract class BaseJdbcLogger {
   protected String objectValueString(Object value) {
     if (value instanceof Array) {
       try {
-        return ArrayUtil.toString(((Array) value).getArray());
+        return ObjectUtils.toString(((Array) value).getArray());
       } catch (SQLException e) {
         // Intentionally fall through to return value.toString()
       }
