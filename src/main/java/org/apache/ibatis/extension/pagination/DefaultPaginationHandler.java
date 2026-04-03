@@ -82,5 +82,10 @@ public class DefaultPaginationHandler implements PaginationHandler {
     public List<T> getRows() {
       return list;
     }
+
+    @Override
+    public boolean isEmpty() {
+      return list.isEmpty();
+    }
   }
 }

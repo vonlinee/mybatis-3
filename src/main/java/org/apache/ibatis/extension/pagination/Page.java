@@ -35,8 +35,5 @@ public interface Page<T> {
 
   List<T> getRows();
 
-  default boolean isEmpty() {
-    final List<T> rows = getRows();
-    return rows == null || rows.isEmpty();
-  }
+  boolean isEmpty();
 }
