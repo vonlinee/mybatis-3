@@ -53,7 +53,7 @@ public class EntitySqlProvider {
         }
       }
       throw new IllegalArgumentException("Cannot extract entity type from " + mapperType.getName()
-          + " because it does not directly extend BaseMapper<T>");
+          + ", because it does not directly extend CrudMapper<T> or generic definition is missing.");
     });
   }
 

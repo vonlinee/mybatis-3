@@ -15,6 +15,9 @@
  */
 package org.apache.ibatis.extension;
 
+import static com.googlecode.catchexception.apis.BDDCatchException.caughtException;
+import static com.googlecode.catchexception.apis.BDDCatchException.when;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
@@ -25,6 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.ibatis.BaseDataTest;
+import org.apache.ibatis.annotations.SelectProvider;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
@@ -44,14 +48,56 @@ class EntitySqlProviderTest extends BaseDataTest {
   public interface UserMapper extends CrudMapper<User> {
   }
 
+  public interface WrongUserMapper extends CrudMapper {
+  }
+
   @Test
-  void shouldOkWhenRunSomeEntityOperation() throws SQLException, IOException {
-    SqlSessionFactory sqlSessionFactory = createDefaultHsqlDbSqlSessionFactory("entity_sql_provider");
+  void shouldFailWithWrongMapperDefinition() throws SQLException, IOException {
+    SqlSessionFactory sqlSessionFactory = buildSqlSessionFactory("wrong_entity_sql_provider");
+    sqlSessionFactory.getConfiguration().addSqlProviderFactory(new EntitySqlProviderFactory());
+    sqlSessionFactory.getConfiguration().addMapper(WrongUserMapper.class);
+
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+      WrongUserMapper mapper = sqlSession.getMapper(WrongUserMapper.class);
+      when(() -> mapper.selectById(1));
+      then(caughtException()).hasRootCauseInstanceOf(IllegalArgumentException.class)
+          .hasRootCauseMessage("Cannot extract entity type from " + WrongUserMapper.class.getName()
+              + ", because it does not directly extend CrudMapper<T> or generic definition is missing.");
+    }
+  }
+
+  interface UnsupportedUserMapper {
+
+    @SelectProvider(type = EntitySqlProvider.class, method = SqlMethod.SELECT_BY_ID)
+    User selectById(Integer id);
+  }
+
+  @Test
+  void shouldFailNotSupportedByEntitySqlProvider() throws SQLException, IOException {
+    SqlSessionFactory sqlSessionFactory = buildSqlSessionFactory("unsupported_entity_sql_provider");
+    sqlSessionFactory.getConfiguration().addMapper(UnsupportedUserMapper.class);
+
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+      UnsupportedUserMapper mapper1 = sqlSession.getMapper(UnsupportedUserMapper.class);
+      when(() -> mapper1.selectById(1));
+      then(caughtException()).hasRootCauseInstanceOf(IllegalArgumentException.class)
+          .hasRootCauseMessage("Cannot extract entity type from " + UnsupportedUserMapper.class.getName()
+              + ", because it does not directly extend CrudMapper<T> or generic definition is missing.");
+    }
+  }
+
+  private static SqlSessionFactory buildSqlSessionFactory(String name) throws IOException, SQLException {
+    SqlSessionFactory sqlSessionFactory = createDefaultHsqlDbSqlSessionFactory(name);
     sqlSessionFactory.getConfiguration().setLogImpl(StdOutImpl.class);
     // populate in-memory database
     runScriptSql(sqlSessionFactory, "drop table users if exists;");
     runScriptSql(sqlSessionFactory, "create table users (id int, name varchar(20), email varchar(100));");
+    return sqlSessionFactory;
+  }
 
+  @Test
+  void shouldOkWhenRunSomeEntityOperation() throws SQLException, IOException {
+    SqlSessionFactory sqlSessionFactory = buildSqlSessionFactory("entity_sql_provider");
     Configuration configuration = sqlSessionFactory.getConfiguration();
     configuration.addSqlProviderFactory(new EntitySqlProviderFactory());
     configuration.addMapper(UserMapper.class);
