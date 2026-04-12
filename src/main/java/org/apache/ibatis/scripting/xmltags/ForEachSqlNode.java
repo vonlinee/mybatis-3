@@ -27,7 +27,6 @@ import org.apache.ibatis.session.Configuration;
  */
 public class ForEachSqlNode implements SqlNode {
 
-  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
   private final String collectionExpression;
   private final Boolean nullable;
   private final SqlNode contents;
@@ -61,9 +60,9 @@ public class ForEachSqlNode implements SqlNode {
 
   @Override
   public boolean apply(DynamicContext context) {
-    Map<String, Object> bindings = context.getBindings();
-
+    final Map<String, Object> bindings = context.getBindings();
     final boolean nullableOnForEach = this.nullable == null ? configuration.isNullableOnForEach() : this.nullable;
+    final ExpressionEvaluator evaluator = context.getExpressionEvaluator();
     final Iterable<?> iterable = evaluator.evaluateIterable(collectionExpression, bindings, nullableOnForEach);
     if (iterable == null || !iterable.iterator().hasNext()) {
       return true;

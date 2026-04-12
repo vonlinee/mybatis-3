@@ -21,7 +21,6 @@ import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
  * @author Clinton Begin
  */
 public class IfSqlNode implements SqlNode {
-  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
   private final String test;
   private final SqlNode contents;
 
@@ -37,6 +36,7 @@ public class IfSqlNode implements SqlNode {
 
   @Override
   public boolean apply(DynamicContext context) {
+    ExpressionEvaluator evaluator = context.getExpressionEvaluator();
     if (evaluator.evaluateBoolean(test, context.getBindings())) {
       contents.apply(context);
       return true;
