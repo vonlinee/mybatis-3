@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-import org.apache.ibatis.reflection.ExceptionUtil;
+import org.apache.ibatis.reflection.ExceptionUtils;
 import org.apache.ibatis.session.SqlSession;
 
 /**
@@ -52,7 +52,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
       }
       return mapperMethod.invoke(proxy, method, args, sqlSession);
     } catch (Throwable t) {
-      throw ExceptionUtil.unwrapThrowable(t);
+      throw ExceptionUtils.unwrapThrowable(t);
     }
   }
 }

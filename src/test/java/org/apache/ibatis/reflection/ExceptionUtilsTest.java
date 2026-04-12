@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,17 +22,17 @@ import java.lang.reflect.UndeclaredThrowableException;
 
 import org.junit.jupiter.api.Test;
 
-class ExceptionUtilTest {
+class ExceptionUtilsTest {
 
   @Test
   void shouldUnwrapThrowable() {
     Exception exception = new Exception();
-    assertEquals(exception, ExceptionUtil.unwrapThrowable(exception));
-    assertEquals(exception, ExceptionUtil.unwrapThrowable(new InvocationTargetException(exception, "test")));
-    assertEquals(exception, ExceptionUtil.unwrapThrowable(new UndeclaredThrowableException(exception, "test")));
-    assertEquals(exception, ExceptionUtil
+    assertEquals(exception, ExceptionUtils.unwrapThrowable(exception));
+    assertEquals(exception, ExceptionUtils.unwrapThrowable(new InvocationTargetException(exception, "test")));
+    assertEquals(exception, ExceptionUtils.unwrapThrowable(new UndeclaredThrowableException(exception, "test")));
+    assertEquals(exception, ExceptionUtils
         .unwrapThrowable(new InvocationTargetException(new InvocationTargetException(exception, "test"), "test")));
-    assertEquals(exception, ExceptionUtil
+    assertEquals(exception, ExceptionUtils
         .unwrapThrowable(new InvocationTargetException(new UndeclaredThrowableException(exception, "test"), "test")));
   }
 

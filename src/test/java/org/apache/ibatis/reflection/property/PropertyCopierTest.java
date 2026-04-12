@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.apache.ibatis.reflection.property;
 
 import java.util.Arrays;
 
+import org.apache.ibatis.reflection.BeanUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,7 @@ class PropertyCopierTest {
     sourceBeanCopierData.setMyInteger(0);
     sourceBeanCopierData.setMyList(Arrays.asList(1, 2, 3));
     SourceBeanCopierData destinationBeanTestClass = new SourceBeanCopierData();
-    PropertyCopier.copyBeanProperties(sourceBeanCopierData.getClass(), sourceBeanCopierData, destinationBeanTestClass);
+    BeanUtils.copyBeanProperties(sourceBeanCopierData.getClass(), sourceBeanCopierData, destinationBeanTestClass);
     Assertions.assertEquals(sourceBeanCopierData.getMyString(), destinationBeanTestClass.getMyString());
     Assertions.assertEquals(sourceBeanCopierData.getMyInteger(), destinationBeanTestClass.getMyInteger());
     Assertions.assertEquals(sourceBeanCopierData.getMyList(), destinationBeanTestClass.getMyList());

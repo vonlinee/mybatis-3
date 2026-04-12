@@ -18,6 +18,7 @@ package org.apache.ibatis.binding;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import org.apache.ibatis.reflection.ExceptionUtils;
 import org.apache.ibatis.session.SqlSession;
 
 public class CachedMethodLookup implements MapperMethod.Lookup {
@@ -46,8 +47,7 @@ public class CachedMethodLookup implements MapperMethod.Lookup {
         }
       });
     } catch (RuntimeException re) {
-      Throwable cause = re.getCause();
-      throw cause == null ? re : cause;
+      throw ExceptionUtils.getCause(re);
     }
   }
 }

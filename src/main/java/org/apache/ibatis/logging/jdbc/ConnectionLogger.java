@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 
 import org.apache.ibatis.logging.Log;
-import org.apache.ibatis.reflection.ExceptionUtil;
+import org.apache.ibatis.reflection.ExceptionUtils;
 
 /**
  * Connection proxy to add logging.
@@ -59,7 +59,7 @@ public final class ConnectionLogger extends BaseJdbcLogger implements Invocation
       }
       return method.invoke(connection, params);
     } catch (Throwable t) {
-      throw ExceptionUtil.unwrapThrowable(t);
+      throw ExceptionUtils.unwrapThrowable(t);
     }
   }
 

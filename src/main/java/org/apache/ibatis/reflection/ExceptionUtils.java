@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2022 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,10 +21,21 @@ import java.lang.reflect.UndeclaredThrowableException;
 /**
  * @author Clinton Begin
  */
-public class ExceptionUtil {
+public final class ExceptionUtils {
 
-  private ExceptionUtil() {
+  private ExceptionUtils() {
     // Prevent Instantiation
+  }
+
+  public static Throwable getRootCause(Exception e) {
+    if (e == null) {
+      return null;
+    }
+    Throwable cause = e;
+    while (cause.getCause() != null) {
+      cause = cause.getCause();
+    }
+    return cause;
   }
 
   public static Throwable unwrapThrowable(Throwable wrapped) {
@@ -40,4 +51,8 @@ public class ExceptionUtil {
     }
   }
 
+  public static Throwable getCause(Throwable throwable) {
+    Throwable cause = throwable.getCause();
+    return cause == null ? throwable : cause;
+  }
 }

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.reflection.ExceptionUtils;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.session.Configuration;
 
@@ -148,7 +149,8 @@ public class MethodDelegationSqlProvider implements SqlProvider {
       throw e;
     } catch (Exception e) {
       throw new BuilderException("Error invoking SqlProvider method '" + providerMethod + "' with specify parameter '"
-          + (parameterObject == null ? null : parameterObject.getClass()) + "'.  Cause: " + extractRootCause(e), e);
+          + (parameterObject == null ? null : parameterObject.getClass()) + "'.  Cause: "
+          + ExceptionUtils.getRootCause(e), e);
     }
   }
 
@@ -182,13 +184,5 @@ public class MethodDelegationSqlProvider implements SqlProvider {
     }
     CharSequence sql = (CharSequence) providerMethod.invoke(targetObject, args);
     return sql != null ? sql.toString() : null;
-  }
-
-  private Throwable extractRootCause(Exception e) {
-    Throwable cause = e;
-    while (cause.getCause() != null) {
-      cause = cause.getCause();
-    }
-    return cause;
   }
 }

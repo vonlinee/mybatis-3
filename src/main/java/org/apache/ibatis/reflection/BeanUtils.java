@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,19 +13,15 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.reflection.property;
+package org.apache.ibatis.reflection;
 
 import java.lang.reflect.Field;
+import java.util.Locale;
 
-import org.apache.ibatis.reflection.Reflector;
+public final class BeanUtils {
 
-/**
- * @author Clinton Begin
- */
-public final class PropertyCopier {
-
-  private PropertyCopier() {
-    // Prevent Instantiation of Static Class
+  private BeanUtils() {
+    // Prevent Instantiation
   }
 
   public static void copyBeanProperties(Class<?> type, Object sourceBean, Object destinationBean) {
@@ -49,6 +45,35 @@ public final class PropertyCopier {
       }
       parent = parent.getSuperclass();
     }
+  }
+
+  public static String methodToProperty(String name) {
+    if (name.startsWith("is")) {
+      name = name.substring(2);
+    } else if (name.startsWith("get") || name.startsWith("set")) {
+      name = name.substring(3);
+    } else {
+      throw new ReflectionException(
+          "Error parsing property name '" + name + "'.  Didn't start with 'is', 'get' or 'set'.");
+    }
+
+    if (name.length() == 1 || name.length() > 1 && !Character.isUpperCase(name.charAt(1))) {
+      name = name.substring(0, 1).toLowerCase(Locale.ENGLISH) + name.substring(1);
+    }
+
+    return name;
+  }
+
+  public static boolean isProperty(String name) {
+    return isGetter(name) || isSetter(name);
+  }
+
+  public static boolean isGetter(String name) {
+    return name.startsWith("get") && name.length() > 3 || name.startsWith("is") && name.length() > 2;
+  }
+
+  public static boolean isSetter(String name) {
+    return name.startsWith("set") && name.length() > 3;
   }
 
 }

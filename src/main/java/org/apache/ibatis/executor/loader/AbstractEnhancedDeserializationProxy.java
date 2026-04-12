@@ -23,10 +23,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.ExecutorException;
-import org.apache.ibatis.reflection.ExceptionUtil;
+import org.apache.ibatis.reflection.BeanUtils;
+import org.apache.ibatis.reflection.ExceptionUtils;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.reflection.property.PropertyCopier;
-import org.apache.ibatis.reflection.property.PropertyNamer;
 
 /**
  * @author Clinton Begin
@@ -65,14 +64,14 @@ public abstract class AbstractEnhancedDeserializationProxy {
           original = objectFactory.create(type, constructorArgTypes, constructorArgs);
         }
 
-        PropertyCopier.copyBeanProperties(type, enhanced, original);
+        BeanUtils.copyBeanProperties(type, enhanced, original);
         return this.newSerialStateHolder(original, unloadedProperties, objectFactory, constructorArgTypes,
             constructorArgs);
       }
       lock.lock();
       try {
-        if (!FINALIZE_METHOD.equals(methodName) && PropertyNamer.isProperty(methodName) && !reloadingProperty) {
-          final String property = PropertyNamer.methodToProperty(methodName);
+        if (!FINALIZE_METHOD.equals(methodName) && BeanUtils.isProperty(methodName) && !reloadingProperty) {
+          final String property = BeanUtils.methodToProperty(methodName);
           final String propertyKey = property.toUpperCase(Locale.ENGLISH);
           if (unloadedProperties.containsKey(propertyKey)) {
             final ResultLoaderMap.LoadPair loadPair = unloadedProperties.remove(propertyKey);
@@ -100,7 +99,7 @@ public abstract class AbstractEnhancedDeserializationProxy {
         lock.unlock();
       }
     } catch (Throwable t) {
-      throw ExceptionUtil.unwrapThrowable(t);
+      throw ExceptionUtils.unwrapThrowable(t);
     }
   }
 

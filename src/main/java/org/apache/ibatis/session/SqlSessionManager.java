@@ -27,7 +27,7 @@ import java.util.Properties;
 
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BatchResult;
-import org.apache.ibatis.reflection.ExceptionUtil;
+import org.apache.ibatis.reflection.ExceptionUtils;
 
 /**
  * @author Larry Meadors
@@ -347,7 +347,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
         try {
           return method.invoke(sqlSession, args);
         } catch (Throwable t) {
-          throw ExceptionUtil.unwrapThrowable(t);
+          throw ExceptionUtils.unwrapThrowable(t);
         }
       }
       try (SqlSession autoSqlSession = openSession()) {
@@ -357,7 +357,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
           return result;
         } catch (Throwable t) {
           autoSqlSession.rollback();
-          throw ExceptionUtil.unwrapThrowable(t);
+          throw ExceptionUtils.unwrapThrowable(t);
         }
       }
     }

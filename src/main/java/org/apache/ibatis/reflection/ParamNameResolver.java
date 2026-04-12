@@ -30,7 +30,6 @@ import java.util.TreeMap;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.binding.ParamMap;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
@@ -127,7 +126,7 @@ public class ParamNameResolver {
   }
 
   private String getActualParamName(Method method, int paramIndex) {
-    return ParamNameUtil.getParamNames(method).get(paramIndex);
+    return ReflectionUtils.getParamNames(method).get(paramIndex);
   }
 
   private static boolean isSpecialParameter(Class<?> clazz) {

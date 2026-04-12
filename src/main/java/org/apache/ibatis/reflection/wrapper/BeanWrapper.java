@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.ibatis.reflection.ExceptionUtil;
+import org.apache.ibatis.reflection.ExceptionUtils;
 import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.invoker.Invoker;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
@@ -189,7 +189,7 @@ public class BeanWrapper extends BaseWrapper {
       try {
         return method.invoke(object, NO_ARGUMENTS);
       } catch (Throwable t) {
-        throw ExceptionUtil.unwrapThrowable(t);
+        throw ExceptionUtils.unwrapThrowable(t);
       }
     } catch (RuntimeException e) {
       throw e;
@@ -206,7 +206,7 @@ public class BeanWrapper extends BaseWrapper {
       try {
         method.invoke(object, params);
       } catch (Throwable t) {
-        throw ExceptionUtil.unwrapThrowable(t);
+        throw ExceptionUtils.unwrapThrowable(t);
       }
     } catch (Throwable t) {
       throw new ReflectionException("Could not set property '" + prop.getName() + "' of '" + object.getClass()

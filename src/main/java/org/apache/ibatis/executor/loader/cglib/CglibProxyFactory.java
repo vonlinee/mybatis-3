@@ -35,10 +35,9 @@ import org.apache.ibatis.executor.loader.WriteReplaceInterface;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
-import org.apache.ibatis.reflection.ExceptionUtil;
+import org.apache.ibatis.reflection.BeanUtils;
+import org.apache.ibatis.reflection.ExceptionUtils;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.reflection.property.PropertyCopier;
-import org.apache.ibatis.reflection.property.PropertyNamer;
 import org.apache.ibatis.session.Configuration;
 
 /**
@@ -130,7 +129,7 @@ public class CglibProxyFactory implements ProxyFactory {
       EnhancedResultObjectProxyImpl callback = new EnhancedResultObjectProxyImpl(type, lazyLoader, configuration,
           objectFactory, constructorArgTypes, constructorArgs);
       Object enhanced = createStaticProxy(type, callback, constructorArgTypes, constructorArgs);
-      PropertyCopier.copyBeanProperties(type, target, enhanced);
+      BeanUtils.copyBeanProperties(type, target, enhanced);
       return enhanced;
     }
 
@@ -146,7 +145,7 @@ public class CglibProxyFactory implements ProxyFactory {
           } else {
             original = objectFactory.create(type, constructorArgTypes, constructorArgs);
           }
-          PropertyCopier.copyBeanProperties(type, enhanced, original);
+          BeanUtils.copyBeanProperties(type, enhanced, original);
           if (!lazyLoader.isEmpty()) {
             return new CglibSerialStateHolder(original, lazyLoader.getProperties(), objectFactory, constructorArgTypes,
                 constructorArgs);
@@ -157,11 +156,11 @@ public class CglibProxyFactory implements ProxyFactory {
         if (!lazyLoader.isEmpty() && !FINALIZE_METHOD.equals(methodName)) {
           if (aggressive || lazyLoadTriggerMethods.contains(methodName)) {
             lazyLoader.loadAll();
-          } else if (PropertyNamer.isSetter(methodName)) {
-            final String property = PropertyNamer.methodToProperty(methodName);
+          } else if (BeanUtils.isSetter(methodName)) {
+            final String property = BeanUtils.methodToProperty(methodName);
             lazyLoader.remove(property);
-          } else if (PropertyNamer.isGetter(methodName)) {
-            final String property = PropertyNamer.methodToProperty(methodName);
+          } else if (BeanUtils.isGetter(methodName)) {
+            final String property = BeanUtils.methodToProperty(methodName);
             if (lazyLoader.hasLoader(property)) {
               lazyLoader.load(property);
             }
@@ -169,7 +168,7 @@ public class CglibProxyFactory implements ProxyFactory {
         }
         return methodProxy.invokeSuper(enhanced, args);
       } catch (Throwable t) {
-        throw ExceptionUtil.unwrapThrowable(t);
+        throw ExceptionUtils.unwrapThrowable(t);
       } finally {
         lock.unlock();
         ErrorContext.instance().reset();
@@ -191,7 +190,7 @@ public class CglibProxyFactory implements ProxyFactory {
       EnhancedDeserializationProxyImpl callback = new EnhancedDeserializationProxyImpl(type, unloadedProperties,
           objectFactory, constructorArgTypes, constructorArgs);
       Object enhanced = createStaticProxy(type, callback, constructorArgTypes, constructorArgs);
-      PropertyCopier.copyBeanProperties(type, target, enhanced);
+      BeanUtils.copyBeanProperties(type, target, enhanced);
       return enhanced;
     }
 
