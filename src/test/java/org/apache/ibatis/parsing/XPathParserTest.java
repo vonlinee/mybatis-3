@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.io.Resources;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -231,4 +232,19 @@ class XPathParserTest {
     assertEquals("employee[${id_var}]_height", node.getValueBasedIdentifier());
   }
 
+  @Test
+  void shouldEvalRootNode() throws IOException {
+    try (Reader reader = Resources.getResourceAsReader(resource)) {
+      XPathParser parser = new XPathParser(reader);
+
+      XNode rootNode = parser.evalRootNode();
+      Assertions.assertEquals("#document", rootNode.getName());
+
+      XNode rootElement = parser.evalRootElement();
+      Assertions.assertEquals("employee", rootElement.getName());
+
+      XNode rootElementByName = parser.evalRootElement("employee");
+      Assertions.assertEquals("employee", rootElementByName.getName());
+    }
+  }
 }

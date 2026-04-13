@@ -28,8 +28,6 @@ import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.defaults.RawSqlSource;
 import org.apache.ibatis.session.Configuration;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * @author Clinton Begin
@@ -85,11 +83,10 @@ public class XMLScriptBuilder extends BaseBuilder {
   }
 
   protected MixedSqlNode parseDynamicTags(XNode node) {
-    List<SqlNode> contents = new ArrayList<>();
-    NodeList children = node.getNode().getChildNodes();
-    for (int i = 0; i < children.getLength(); i++) {
-      XNode child = node.newXNode(children.item(i));
-      if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
+    final List<SqlNode> contents = new ArrayList<>();
+    List<XNode> childNodes = node.getChildNodes();
+    for (XNode child : childNodes) {
+      if (child.isTextualNode()) {
         String data = child.getStringBody("");
         if (data.trim().isEmpty()) {
           contents.add(emptyNodeCache.computeIfAbsent(data, EmptySqlNode::new));
@@ -101,7 +98,7 @@ public class XMLScriptBuilder extends BaseBuilder {
         } else {
           contents.add(new StaticTextSqlNode(data));
         }
-      } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
+      } else if (child.isElementNode()) { // issue #628
         String nodeName = child.getNode().getNodeName();
         NodeHandler handler = nodeHandlerMap.get(nodeName);
         if (handler == null) {
@@ -261,7 +258,7 @@ public class XMLScriptBuilder extends BaseBuilder {
       String separator = ",";
 
       SqlNode contents = mixedSqlNode;
-      if (nodeToHandle.getChildren().isEmpty() && nodeToHandle.getStringBody("").trim().isEmpty()) {
+      if (!nodeToHandle.hasElementChildNodes() && nodeToHandle.isBodyBlank()) {
         contents = new TextSqlNode("#{" + item + "}");
       }
 
@@ -301,7 +298,7 @@ public class XMLScriptBuilder extends BaseBuilder {
 
     private void handleWhenOtherwiseNodes(XNode chooseSqlNode, List<SqlNode> ifSqlNodes,
         List<SqlNode> defaultSqlNodes) {
-      List<XNode> children = chooseSqlNode.getChildren();
+      List<XNode> children = chooseSqlNode.getChildElements();
       for (XNode child : children) {
         String nodeName = child.getNode().getNodeName();
         NodeHandler handler = nodeHandlerMap.get(nodeName);

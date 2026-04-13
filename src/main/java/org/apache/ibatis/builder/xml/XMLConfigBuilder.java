@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -174,7 +174,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context == null) {
       return;
     }
-    for (XNode child : context.getChildren()) {
+    for (XNode child : context.getChildElements()) {
       if ("package".equals(child.getName())) {
         String typeAliasPackage = child.getStringAttribute("name");
         configuration.getTypeAliasRegistry().registerAliases(typeAliasPackage);
@@ -197,7 +197,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private void pluginsElement(XNode context) throws Exception {
     if (context != null) {
-      for (XNode child : context.getChildren()) {
+      for (XNode child : context.getChildElements()) {
         String interceptor = child.getStringAttribute("interceptor");
         Properties properties = child.getChildrenAsProperties();
         Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).getDeclaredConstructor()
@@ -301,7 +301,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (environment == null) {
       environment = context.getStringAttribute("default");
     }
-    for (XNode child : context.getChildren()) {
+    for (XNode child : context.getChildElements()) {
       String id = child.getStringAttribute("id");
       if (isSpecifiedEnvironment(id)) {
         TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
@@ -361,7 +361,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context == null) {
       return;
     }
-    for (XNode child : context.getChildren()) {
+    for (XNode child : context.getChildElements()) {
       if ("package".equals(child.getName())) {
         String typeHandlerPackage = child.getStringAttribute("name");
         typeHandlerRegistry.register(typeHandlerPackage);
@@ -389,7 +389,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context == null) {
       return;
     }
-    for (XNode child : context.getChildren()) {
+    for (XNode child : context.getChildElements()) {
       if ("package".equals(child.getName())) {
         String mapperPackage = child.getStringAttribute("name");
         configuration.addMappers(mapperPackage);

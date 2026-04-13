@@ -223,7 +223,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
     Discriminator discriminator = null;
     List<ResultMapping> resultMappings = new ArrayList<>(additionalResultMappings);
-    List<XNode> resultChildren = resultMapNode.getChildren();
+    List<XNode> resultChildren = resultMapNode.getChildElements();
     for (XNode resultChild : resultChildren) {
       if ("constructor".equals(resultChild.getName())) {
         processConstructorElement(resultChild, typeClass, resultMappings, id);
@@ -263,7 +263,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private void processConstructorElement(XNode resultChild, Class<?> resultType, List<ResultMapping> resultMappings,
       String id) {
-    List<XNode> argChildren = resultChild.getChildren();
+    List<XNode> argChildren = resultChild.getChildElements();
 
     final List<ResultMapping> mappings = new ArrayList<>();
     for (XNode argChild : argChildren) {
@@ -291,7 +291,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     Class<? extends TypeHandler<?>> typeHandlerClass = resolveClass(typeHandler);
     JdbcType jdbcTypeEnum = resolveJdbcType(jdbcType);
     Map<String, String> discriminatorMap = new HashMap<>();
-    for (XNode caseChild : context.getChildren()) {
+    for (XNode caseChild : context.getChildElements()) {
       String value = caseChild.getStringAttribute("value");
       String resultMap = caseChild.getStringAttribute("resultMap",
           () -> processNestedResultMappings(caseChild, resultMappings, resultType));

@@ -252,23 +252,72 @@ public class XNode {
     return value == null ? def : Float.valueOf(value);
   }
 
+  /**
+   * Return children elements.
+   *
+   * @return children elements
+   *
+   * @deprecated use {@link #getChildElements()} instead
+   */
+  @Deprecated
   public List<XNode> getChildren() {
+    return getChildElements();
+  }
+
+  /**
+   * Return children elements.
+   *
+   * @return children elements
+   */
+  public List<XNode> getChildElements() {
     List<XNode> children = new ArrayList<>();
     NodeList nodeList = node.getChildNodes();
-    if (nodeList != null) {
-      for (int i = 0, n = nodeList.getLength(); i < n; i++) {
-        Node node = nodeList.item(i);
-        if (node.getNodeType() == Node.ELEMENT_NODE) {
-          children.add(new XNode(xpathParser, node, variables));
-        }
+    for (int i = 0, n = nodeList.getLength(); i < n; i++) {
+      Node node = nodeList.item(i);
+      if (node.getNodeType() == Node.ELEMENT_NODE) {
+        children.add(new XNode(xpathParser, node, variables));
       }
     }
     return children;
   }
 
+  public boolean hasElementChildNodes() {
+    NodeList nodeList = node.getChildNodes();
+    for (int i = 0, n = nodeList.getLength(); i < n; i++) {
+      Node node = nodeList.item(i);
+      if (node.getNodeType() == Node.ELEMENT_NODE) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public List<XNode> getTextualChildNodes() {
+    List<XNode> children = new ArrayList<>();
+    NodeList nodeList = node.getChildNodes();
+    for (int i = 0, n = nodeList.getLength(); i < n; i++) {
+      Node node = nodeList.item(i);
+      if (node.getNodeType() == Node.TEXT_NODE || node.getNodeType() == Node.CDATA_SECTION_NODE) {
+        children.add(new XNode(xpathParser, node, variables));
+      }
+    }
+    return children;
+  }
+
+  public boolean hasTextualChildNodes() {
+    NodeList nodeList = node.getChildNodes();
+    for (int i = 0, n = nodeList.getLength(); i < n; i++) {
+      Node node = nodeList.item(i);
+      if (node.getNodeType() == Node.TEXT_NODE || node.getNodeType() == Node.CDATA_SECTION_NODE) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public Properties getChildrenAsProperties() {
     Properties properties = new Properties();
-    for (XNode child : getChildren()) {
+    for (XNode child : getChildElements()) {
       String name = child.getStringAttribute("name");
       String value = child.getStringAttribute("value");
       if (name != null && value != null) {
@@ -276,6 +325,18 @@ public class XNode {
       }
     }
     return properties;
+  }
+
+  /**
+   * Return true if body is blank.
+   *
+   * @return true if body is blank
+   */
+  public boolean isBodyBlank() {
+    if (body == null) {
+      return true;
+    }
+    return body.trim().isEmpty();
   }
 
   @Override
@@ -359,4 +420,24 @@ public class XNode {
     return null;
   }
 
+  public boolean isElementNode() {
+    return node.getNodeType() == Node.ELEMENT_NODE;
+  }
+
+  public boolean isTextualNode() {
+    return node.getNodeType() == Node.TEXT_NODE || node.getNodeType() == Node.CDATA_SECTION_NODE;
+  }
+
+  /**
+   * @see XNode#getChildren()
+   */
+  public List<XNode> getChildNodes() {
+    NodeList children = node.getChildNodes();
+    List<XNode> childNodes = new ArrayList<>(children.getLength());
+    for (int i = 0; i < children.getLength(); i++) {
+      XNode child = newXNode(children.item(i));
+      childNodes.add(child);
+    }
+    return childNodes;
+  }
 }

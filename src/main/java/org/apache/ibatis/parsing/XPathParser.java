@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -271,4 +271,34 @@ public class XPathParser {
     this.xpath = factory.newXPath();
   }
 
+  /**
+   * Single Forward Slash. Selects the root node (document node) itself. It is the starting point for all absolute
+   * paths.
+   *
+   * @return the document itself
+   */
+  public XNode evalRootNode() {
+    return evalNode("/");
+  }
+
+  /**
+   * Selects the root element (the topmost named tag, such as <html> in a web page), regardless of its name.
+   *
+   * @return the root element
+   */
+  public XNode evalRootElement() {
+    return evalNode("/*");
+  }
+
+  /**
+   * Selects the root element with a specific name.
+   *
+   * @param name
+   *          the name of the root element
+   *
+   * @return the root element
+   */
+  public XNode evalRootElement(String name) {
+    return evalNode("/" + name);
+  }
 }
