@@ -32,10 +32,7 @@ public class TextSqlNode implements SqlNode {
 
   @Override
   public boolean isDynamic() {
-    DynamicCheckerTokenParser checker = new DynamicCheckerTokenParser();
-    GenericTokenParser parser = createParser(checker);
-    parser.parse(text);
-    return checker.isDynamic();
+    return GenericTokenParser.containsToken(text, "${", "}");
   }
 
   @Override
@@ -71,24 +68,4 @@ public class TextSqlNode implements SqlNode {
       return value == null ? "" : String.valueOf(value);
     }
   }
-
-  private static class DynamicCheckerTokenParser implements TokenHandler {
-
-    private boolean isDynamic;
-
-    public DynamicCheckerTokenParser() {
-      // Prevent Synthetic Access
-    }
-
-    public boolean isDynamic() {
-      return isDynamic;
-    }
-
-    @Override
-    public String handleToken(String content) {
-      this.isDynamic = true;
-      return null;
-    }
-  }
-
 }

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -125,6 +125,49 @@ class GenericTokenParserTest {
       }
       assertEquals(expected.toString(), parser.parse(input.toString()));
     });
+  }
+
+  @Test
+  void shouldReturnEmptyStringWhenTextIsNull() {
+    GenericTokenParser parser = new GenericTokenParser("${", "}", new VariableTokenHandler(new HashMap<>()));
+    assertEquals("", parser.parse(null));
+    assertEquals("", parser.parse(""));
+  }
+
+  @ParameterizedTest
+  @MethodSource("shouldDemonstrateGenericTokenParserContainsTokenProvider")
+  void shouldDemonstrateGenericTokenParserContainsToken(boolean expected, String text) {
+    assertEquals(expected, GenericTokenParser.containsToken(text, "${", "}"));
+  }
+
+  static Stream<Arguments> shouldDemonstrateGenericTokenParserContainsTokenProvider() {
+    return Stream.of(arguments(true, "${first_name} ${initial} ${last_name} reporting."),
+        arguments(true, "Hello captain ${first_name} ${initial} ${last_name}"),
+        arguments(true, "${first_name} ${initial} ${last_name}"),
+        arguments(true, "${first_name}${initial}${last_name}"),
+        arguments(true, "{}${first_name}${initial}${last_name}"),
+        arguments(true, "}${first_name}${initial}${last_name}"),
+
+        arguments(true, "}${first_name}{{${initial}}}${last_name}"),
+        arguments(true, "}${first_name}}${initial}{${last_name}"),
+        arguments(true, "}${first_name}}${initial}{${last_name}{{}}"),
+
+        arguments(true, "{$$something}${first_name}${initial}${last_name}"), arguments(false, "${"),
+        arguments(false, "${\\}"), arguments(true, "${var{with\\}brace}"), arguments(true, "${}"),
+        arguments(false, "}"), arguments(false, "Hello ${ this is a test."),
+        arguments(false, "Hello } this is a test."), arguments(false, "Hello } ${ this is a test."),
+
+        arguments(false, "\\${skipped} variable"), arguments(false, "This is a \\${skipped} variable"),
+        arguments(true, "${skipped} \\${skipped} variable"),
+        arguments(true, "The ${skipped} is \\${skipped} variable"));
+  }
+
+  @Test
+  void shouldReturnFalseWhenContainsTokenWithNullOrEmptyInputs() {
+    Assertions.assertFalse(GenericTokenParser.containsToken(null, "${", "}"));
+    Assertions.assertFalse(GenericTokenParser.containsToken("", "${", "}"));
+    Assertions.assertFalse(GenericTokenParser.containsToken("text", null, "}"));
+    Assertions.assertFalse(GenericTokenParser.containsToken("text", "${", null));
   }
 
 }
