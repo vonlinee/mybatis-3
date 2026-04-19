@@ -36,22 +36,6 @@ public interface NamingStrategy {
   // ======================================= utility methods =============================================
 
   @Nullable
-  static String toUpperCamelCase(@Nullable String input) {
-    if (input == null || input.isEmpty()) {
-      return input;
-    }
-    // Replace first lower-case letter with upper-case equivalent
-    char c = input.charAt(0);
-    char uc = Character.toUpperCase(c);
-    if (c == uc) {
-      return input;
-    }
-    StringBuilder sb = new StringBuilder(input);
-    sb.setCharAt(0, uc);
-    return sb.toString();
-  }
-
-  @Nullable
   static String toSnakeCase(@Nullable String input) {
     if (input == null) {
       return null;
@@ -105,6 +89,45 @@ public interface NamingStrategy {
   @Nullable
   static String toLowerDotCase(@Nullable String input) {
     return toLowerCaseWithSeparator(input, '.');
+  }
+
+  /**
+   * Converts a string that uses a single-character word separator (e.g. {@code _}, {@code -}, {@code .}, {@code  })
+   * into lower camel case (lowerCamelCase).
+   * <p>
+   * Examples (separator {@code '_'}):
+   * <ul>
+   * <li>{@code my_field_name} &rarr; {@code myFieldName}</li>
+   * <li>{@code MY_FIELD_NAME} &rarr; {@code myFieldName}</li>
+   * </ul>
+   *
+   * @param input
+   *          the string to convert; may be {@code null}
+   * @param separator
+   *          the word separator character used in {@code input}
+   *
+   * @return the lower-camel-case equivalent, or {@code null} / empty string when {@code input} is {@code null} / empty
+   */
+  @Nullable
+  static String toLowerCamelCase(@Nullable String input, char separator) {
+    if (input == null || input.isEmpty()) {
+      return input;
+    }
+    final int length = input.length();
+    final StringBuilder result = new StringBuilder(length);
+    boolean capitalizeNext = false;
+    for (int i = 0; i < length; i++) {
+      char c = input.charAt(i);
+      if (c == separator) {
+        capitalizeNext = true;
+      } else if (capitalizeNext) {
+        result.append(Character.toUpperCase(c));
+        capitalizeNext = false;
+      } else {
+        result.append(Character.toLowerCase(c));
+      }
+    }
+    return result.toString();
   }
 
   /**

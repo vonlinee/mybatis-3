@@ -21,9 +21,6 @@ import java.util.Objects;
 
 /**
  * Miscellaneous utility methods for number conversion and parsing.
- * <p>
- * Mainly for internal use within the framework; consider Apache's Commons Lang for a more comprehensive suite of number
- * utilities.
  */
 public final class NumberUtils {
 
@@ -93,7 +90,7 @@ public final class NumberUtils {
       return (T) Double.valueOf(number.doubleValue());
     } else if (BigDecimal.class == targetClass) {
       // always use BigDecimal(String) here to avoid unpredictability of BigDecimal(double)
-      // (see BigDecimal javadoc for details)
+      // (see BigDecimal Javadoc for details)
       return (T) new BigDecimal(number.toString());
     } else {
       throw new IllegalArgumentException("Could not convert number [" + number + "] of type ["
