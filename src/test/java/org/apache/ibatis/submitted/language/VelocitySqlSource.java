@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -100,8 +100,7 @@ public class VelocitySqlSource implements SqlSource {
     }
 
     public String next(Object prop) {
-      StringBuilder sb = new StringBuilder();
-      String name = sb.append(PREFIX).append("_ITEM").append("_").append(count++).toString();
+      String name = PREFIX + "_ITEM" + "_" + count++;
       bindings.put(name, prop);
       return name;
     }

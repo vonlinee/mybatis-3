@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -136,4 +136,39 @@ public class ParameterExpression extends HashMap<String, String> {
     return start >= end ? "" : str.substring(start, end);
   }
 
+  public String getProperty() {
+    return get("property");
+  }
+
+  public String getExpression() {
+    return get("expression");
+  }
+
+  public String getJdbcType() {
+    return get("jdbcType");
+  }
+
+  public String getTypeHandlerAlias() {
+    return get("typeHandler");
+  }
+
+  public String getJdbcTypeName() {
+    return get("jdbcTypeName");
+  }
+
+  public String getMode() {
+    return get("mode");
+  }
+
+  public Integer getNumericScale() {
+    return get("numericScale") != null ? Integer.valueOf(get("numericScale")) : null;
+  }
+
+  public String getResultMapId() {
+    return get("resultMap");
+  }
+
+  public String getJavaType() {
+    return get("javaType");
+  }
 }

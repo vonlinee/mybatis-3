@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.apache.ibatis.builder.SqlSourceBuilder;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
-import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
@@ -60,12 +59,10 @@ public class RawSqlSource implements SqlSource {
 
   public RawSqlSource(Configuration configuration, String sql, Class<?> parameterType,
       ParamNameResolver paramNameResolver) {
-    Class<?> clazz = parameterType == null ? Object.class : parameterType;
     List<ParameterMapping> parameterMappings = new ArrayList<>();
-    ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration,
-        clazz, new HashMap<>(), paramNameResolver);
-    GenericTokenParser parser = new GenericTokenParser("#{", "}", tokenHandler);
-    sqlSource = SqlSourceBuilder.buildSqlSource(configuration, parser.parse(sql), parameterMappings);
+    ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration, null,
+        parameterType, new HashMap<>(), paramNameResolver, false);
+    sqlSource = SqlSourceBuilder.buildSqlSource(configuration, tokenHandler.parse(sql), parameterMappings);
   }
 
   @Override

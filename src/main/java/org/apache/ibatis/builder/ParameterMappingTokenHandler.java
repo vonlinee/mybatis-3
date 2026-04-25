@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.ParameterMode;
+import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.TokenHandler;
 import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.reflection.MetaObject;
@@ -33,15 +34,15 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
-public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHandler {
+public class ParameterMappingTokenHandler extends ParameterMappingParser implements TokenHandler {
 
-  private static final String PARAMETER_PROPERTIES = "javaType,jdbcType,mode,numericScale,resultMap,typeHandler,jdbcTypeName";
   private final List<ParameterMapping> parameterMappings;
   private final Class<?> parameterType;
   private final MetaObject metaParameters;
   private final Object parameterObject;
   private final boolean paramExists;
   private final ParamNameResolver paramNameResolver;
+  private final GenericTokenParser tokenParser;
 
   private Type genericType = null;
   private TypeHandler<?> typeHandler = null;
@@ -57,17 +58,7 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
     this.paramExists = paramExists;
     this.parameterMappings = parameterMappings;
     this.paramNameResolver = paramNameResolver;
-  }
-
-  public ParameterMappingTokenHandler(List<ParameterMapping> parameterMappings, Configuration configuration,
-      Class<?> parameterType, Map<String, Object> additionalParameters, ParamNameResolver paramNameResolver) {
-    super(configuration);
-    this.parameterType = parameterType;
-    this.metaParameters = configuration.newMetaObject(additionalParameters);
-    this.parameterObject = null;
-    this.paramExists = false;
-    this.parameterMappings = parameterMappings;
-    this.paramNameResolver = paramNameResolver;
+    this.tokenParser = new GenericTokenParser(getOpenToken(), getCloseToken(), this);
   }
 
   public List<ParameterMapping> getParameterMappings() {
@@ -82,70 +73,63 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
     return "?";
   }
 
+  public String parse(String content) {
+    return tokenParser.parse(content);
+  }
+
+  @Override
+  protected ParameterMapping.Builder parseParameterMappingBuilder(String content) {
+    ParameterMapping.Builder builder = super.parseParameterMappingBuilder(content);
+    if (builder.getExpression() != null) {
+      throw new BuilderException("Expression based parameters are not supported yet");
+    }
+    return builder;
+  }
+
   private ParameterMapping buildParameterMapping(String content) {
-    Map<String, String> propertiesMap = parseParameterMapping(content);
-
-    final String property = propertiesMap.remove("property");
-    final JdbcType jdbcType = resolveJdbcType(propertiesMap.remove("jdbcType"));
-    final String typeHandlerAlias = propertiesMap.remove("typeHandler");
-
-    ParameterMapping.Builder builder = new ParameterMapping.Builder(property, (Class<?>) null);
-    PropertyTokenizer propertyTokenizer = new PropertyTokenizer(property);
-    builder.jdbcType(jdbcType);
-    final Class<?> javaType = figureOutJavaType(propertiesMap, property, propertyTokenizer, jdbcType);
+    ParameterMapping.Builder builder = parseParameterMappingBuilder(content);
+    final Class<?> javaType = figureOutJavaType(builder);
     builder.javaType(javaType);
     if (genericType == null) {
       genericType = javaType;
     }
-    if (typeHandler == null || typeHandlerAlias != null) {
-      typeHandler = resolveTypeHandler(genericType, jdbcType, typeHandlerAlias);
+    if (typeHandler == null || builder.getTypeHandlerAlias() != null) {
+      typeHandler = resolveTypeHandler(genericType, builder.getJdbcType(), builder.getTypeHandlerAlias());
     }
     builder.typeHandler(typeHandler);
 
-    ParameterMode mode = null;
-    for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
-      String name = entry.getKey();
-      String value = entry.getValue();
-      if ("mode".equals(name)) {
-        mode = resolveParameterMode(value);
-        builder.mode(mode);
-      } else if ("numericScale".equals(name)) {
-        builder.numericScale(Integer.valueOf(value));
-      } else if ("resultMap".equals(name)) {
-        builder.resultMapId(value);
-      } else if ("jdbcTypeName".equals(name)) {
-        builder.jdbcTypeName(value);
-      } else if ("expression".equals(name)) {
-        throw new BuilderException("Expression based parameters are not supported yet");
-      } else {
-        throw new BuilderException("An invalid property '" + name + "' was found in mapping #{" + content
-            + "}.  Valid properties are " + PARAMETER_PROPERTIES);
-      }
-    }
-    if (!ParameterMode.OUT.equals(mode) && paramExists) {
-      if (metaParameters.hasGetter(propertyTokenizer.getName())) {
-        builder.value(metaParameters.getValue(property));
-      } else if (parameterObject == null) {
-        builder.value(null);
-      } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
-        builder.value(parameterObject);
-      } else {
-        MetaObject metaObject = configuration.newMetaObject(parameterObject);
-        builder.value(metaObject.getValue(property));
-      }
+    if (paramExists && !ParameterMode.OUT.equals(builder.getParameterMode())) {
+      builder.value(getParameterValue(builder.getProperty()));
     }
     return builder.build();
   }
 
-  private Class<?> figureOutJavaType(Map<String, String> propertiesMap, String property,
-      PropertyTokenizer propertyTokenizer, JdbcType jdbcType) {
-    Class<?> javaType = resolveClass(propertiesMap.remove("javaType"));
-    if (javaType != null) {
-      return javaType;
+  private Object getParameterValue(String property) {
+    PropertyTokenizer propertyTokenizer = new PropertyTokenizer(property);
+    Object value;
+    if (metaParameters.hasGetter(propertyTokenizer.getName())) {
+      value = metaParameters.getValue(property);
+    } else if (parameterObject == null) {
+      value = null;
+    } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
+      value = parameterObject;
+    } else {
+      MetaObject metaObject = configuration.newMetaObject(parameterObject);
+      value = metaObject.getValue(property);
     }
+    return value;
+  }
+
+  private Class<?> figureOutJavaType(ParameterMapping.Builder builder) {
+    if (builder.getJavaType() != null) {
+      return builder.getJavaType();
+    }
+    String property = builder.getProperty();
+    PropertyTokenizer propertyTokenizer = new PropertyTokenizer(property);
     if (metaParameters.hasGetter(propertyTokenizer.getName())) { // issue #448 get type from additional params
       return metaParameters.getGetterType(property);
     }
+    JdbcType jdbcType = builder.getJdbcType();
     typeHandler = resolveTypeHandler(parameterType, jdbcType, (Class<? extends TypeHandler<?>>) null);
     if (typeHandler != null) {
       return parameterType;
@@ -183,14 +167,4 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
     return Object.class;
   }
 
-  private Map<String, String> parseParameterMapping(String content) {
-    try {
-      return new ParameterExpression(content);
-    } catch (BuilderException ex) {
-      throw ex;
-    } catch (Exception ex) {
-      throw new BuilderException("Parsing error was found in mapping #{" + content
-          + "}.  Check syntax #{property|(expression), var1=value1, var2=value2, ...} ", ex);
-    }
-  }
 }

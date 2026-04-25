@@ -38,11 +38,21 @@ public class ParameterMapping {
   private String expression;
   private Object value = UNSET;
 
+  public static Builder builder(String property) {
+    return new Builder(property, (Class<?>) null);
+  }
+
+  public static Builder builder(String property, JdbcType jdbcType) {
+    return new Builder(property, (Class<?>) null).jdbcType(jdbcType);
+  }
+
   private ParameterMapping() {
   }
 
   public static class Builder {
     private final ParameterMapping parameterMapping = new ParameterMapping();
+
+    private String typeHandlerAlias;
 
     public Builder(String property) {
       parameterMapping.property = property;
@@ -84,6 +94,11 @@ public class ParameterMapping {
       return this;
     }
 
+    public Builder typeHandler(String typeHandlerAlias) {
+      this.typeHandlerAlias = typeHandlerAlias;
+      return this;
+    }
+
     public Builder typeHandler(TypeHandler<?> typeHandler) {
       parameterMapping.typeHandler = typeHandler;
       return this;
@@ -114,6 +129,46 @@ public class ParameterMapping {
         throw new IllegalStateException("Missing resultMap in property '" + parameterMapping.property + "'.  "
             + "Parameters of type java.sql.ResultSet require a resultMap.");
       }
+    }
+
+    public String getTypeHandlerAlias() {
+      return this.typeHandlerAlias;
+    }
+
+    public ParameterMode getParameterMode() {
+      return parameterMapping.mode;
+    }
+
+    public JdbcType getJdbcType() {
+      return parameterMapping.jdbcType;
+    }
+
+    public String getProperty() {
+      return parameterMapping.property;
+    }
+
+    public Class<?> getJavaType() {
+      return parameterMapping.javaType;
+    }
+
+    public TypeHandler<?> getTypeHandler() {
+      return parameterMapping.typeHandler;
+    }
+
+    public String getJdbcTypeName() {
+      return parameterMapping.jdbcTypeName;
+    }
+
+    public String getResultMapId() {
+      return parameterMapping.resultMapId;
+    }
+
+    public String getExpression() {
+      return parameterMapping.expression;
+    }
+
+    public Object getValue() {
+      return parameterMapping.value;
     }
   }
 

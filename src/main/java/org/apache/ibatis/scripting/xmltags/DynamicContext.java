@@ -24,7 +24,6 @@ import org.apache.ibatis.builder.ParameterMappingTokenHandler;
 import org.apache.ibatis.dialect.Dialect;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.ContextMap;
@@ -48,7 +47,6 @@ public class DynamicContext {
   private final ParamNameResolver paramNameResolver;
   private final boolean paramExists;
 
-  private GenericTokenParser tokenParser;
   private ParameterMappingTokenHandler tokenHandler;
 
   public DynamicContext(Configuration configuration, Class<?> parameterType, ParamNameResolver paramNameResolver) {
@@ -95,10 +93,9 @@ public class DynamicContext {
   }
 
   private void initTokenParser(List<ParameterMapping> parameterMappings) {
-    if (tokenParser == null) {
+    if (tokenHandler == null) {
       tokenHandler = new ParameterMappingTokenHandler(parameterMappings != null ? parameterMappings : new ArrayList<>(),
           configuration, parameterObject, parameterType, bindings, paramNameResolver, paramExists);
-      tokenParser = new GenericTokenParser("#{", "}", tokenHandler);
     }
   }
 
@@ -109,7 +106,7 @@ public class DynamicContext {
 
   protected String parseParam(String sql) {
     initTokenParser(getParameterMappings());
-    return tokenParser.parse(sql);
+    return tokenHandler.parse(sql);
   }
 
   protected Object getParameterObject() {
