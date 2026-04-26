@@ -26,6 +26,9 @@ import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.ParamNameResolver;
+import org.apache.ibatis.scripting.StaticTextSqlNode;
+import org.apache.ibatis.scripting.TextSqlNode;
+import org.apache.ibatis.scripting.WhitespaceSqlNode;
 import org.apache.ibatis.scripting.defaults.RawSqlSource;
 import org.apache.ibatis.session.Configuration;
 
@@ -89,7 +92,7 @@ public class XMLScriptBuilder extends BaseBuilder {
       if (child.isTextualNode()) {
         String data = child.getStringBody("");
         if (data.trim().isEmpty()) {
-          contents.add(emptyNodeCache.computeIfAbsent(data, EmptySqlNode::new));
+          contents.add(emptyNodeCache.computeIfAbsent(data, WhitespaceSqlNode::new));
           continue;
         }
         TextSqlNode textSqlNode = new TextSqlNode(data);
@@ -323,23 +326,4 @@ public class XMLScriptBuilder extends BaseBuilder {
     }
   }
 
-  private static class EmptySqlNode implements SqlNode {
-    private final String whitespaces;
-
-    public EmptySqlNode(String whitespaces) {
-      super();
-      this.whitespaces = whitespaces;
-    }
-
-    @Override
-    public boolean isDynamic() {
-      return false;
-    }
-
-    @Override
-    public boolean apply(DynamicContext context) {
-      context.appendSql(whitespaces);
-      return true;
-    }
-  }
 }

@@ -13,11 +13,13 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting;
 
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.TokenHandler;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.apache.ibatis.scripting.xmltags.DynamicContext;
+import org.apache.ibatis.scripting.xmltags.SqlNode;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**

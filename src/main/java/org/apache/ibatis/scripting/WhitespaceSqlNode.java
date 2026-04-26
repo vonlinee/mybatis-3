@@ -13,16 +13,17 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting;
 
-/**
- * @author Clinton Begin
- */
-public class StaticTextSqlNode implements SqlNode {
-  private final String text;
+import org.apache.ibatis.scripting.xmltags.DynamicContext;
+import org.apache.ibatis.scripting.xmltags.SqlNode;
 
-  public StaticTextSqlNode(String text) {
-    this.text = text;
+public class WhitespaceSqlNode implements SqlNode {
+  private final String whitespaces;
+
+  public WhitespaceSqlNode(String whitespaces) {
+    super();
+    this.whitespaces = whitespaces;
   }
 
   @Override
@@ -32,8 +33,7 @@ public class StaticTextSqlNode implements SqlNode {
 
   @Override
   public boolean apply(DynamicContext context) {
-    context.appendSql(context.parseParam(text));
+    context.appendSql(whitespaces);
     return true;
   }
-
 }

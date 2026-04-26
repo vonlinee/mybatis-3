@@ -104,7 +104,7 @@ public class DynamicContext {
     return tokenHandler.getParameterMappings();
   }
 
-  protected String parseParam(String sql) {
+  public String parseParam(String sql) {
     initTokenParser(getParameterMappings());
     return tokenHandler.parse(sql);
   }
