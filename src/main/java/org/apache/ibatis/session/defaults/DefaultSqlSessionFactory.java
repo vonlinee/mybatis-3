@@ -16,7 +16,6 @@
 package org.apache.ibatis.session.defaults;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import org.apache.ibatis.exceptions.ExceptionFactory;
 import org.apache.ibatis.executor.ErrorContext;
@@ -111,19 +110,11 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
   private SqlSession openSessionFromConnection(ExecutorType execType, Connection connection) {
     try {
-      boolean autoCommit;
-      try {
-        autoCommit = connection.getAutoCommit();
-      } catch (SQLException e) {
-        // Failover to true, as most poor drivers
-        // or databases won't support transactions
-        autoCommit = true;
-      }
       final Environment environment = configuration.getEnvironment();
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
       final Transaction tx = transactionFactory.newTransaction(connection);
       final Executor executor = configuration.newExecutor(tx, execType);
-      return createSqlSession(configuration, executor, autoCommit);
+      return createSqlSession(configuration, executor, JdbcUtils.isAutoCommit(connection));
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
     } finally {
