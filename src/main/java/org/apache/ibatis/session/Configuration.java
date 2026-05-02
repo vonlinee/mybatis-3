@@ -91,6 +91,7 @@ import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.scripting.LanguageDriverRegistry;
 import org.apache.ibatis.scripting.defaults.RawLanguageDriver;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.apache.ibatis.scripting.expression.ognl.OgnlExpressionEvaluator;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
@@ -120,6 +121,13 @@ public class Configuration {
   protected boolean shrinkWhitespacesInSql;
   protected boolean nullableOnForEach;
   protected boolean argNameBasedConstructorAutoMapping;
+
+  /**
+   * whether extension method is supported in expression.
+   *
+   * @see org.apache.ibatis.scripting.expression.ExtensionMethod
+   */
+  protected boolean supportExtensionMethods;
 
   /**
    * whether view the value of parameter as null when the parameter name is not found in the parameter map.
@@ -188,7 +196,7 @@ public class Configuration {
   private final CompositeMethodLookup methodLookup = new CompositeMethodLookup();
   protected final TableInfoRegistry tableInfoRegistry = new TableInfoRegistry();
 
-  protected final ExpressionEvaluator expressionEvaluator = ExpressionEvaluator.INSTANCE;
+  protected final ExpressionEvaluator expressionEvaluator = new OgnlExpressionEvaluator();
 
   protected final Map<Class<?>, SqlProviderFactory> sqlProviderFactories = new ConcurrentHashMap<>();
 
@@ -318,6 +326,15 @@ public class Configuration {
 
   public void setShrinkWhitespacesInSql(boolean shrinkWhitespacesInSql) {
     this.shrinkWhitespacesInSql = shrinkWhitespacesInSql;
+  }
+
+  public boolean isExtensionMethodsSupported() {
+    return supportExtensionMethods;
+  }
+
+  public void setSupportExtensionMethods(boolean supportExtensionMethods) {
+    this.supportExtensionMethods = supportExtensionMethods;
+    expressionEvaluator.setSupportExtensionMethods(supportExtensionMethods);
   }
 
   /**

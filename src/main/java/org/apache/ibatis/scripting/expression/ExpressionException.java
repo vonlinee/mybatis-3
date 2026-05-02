@@ -15,27 +15,19 @@
  */
 package org.apache.ibatis.scripting.expression;
 
-/**
- * @author Clinton Begin
- */
-public interface ExpressionEvaluator {
+public class ExpressionException extends RuntimeException {
 
-  Object getValue(String expression, Object root);
+  private static final long serialVersionUID = -1837087969290844265L;
 
-  boolean evaluateBoolean(String expression, Object parameterObject);
-
-  default Iterable<?> evaluateIterable(String expression, Object parameterObject) {
-    return evaluateIterable(expression, parameterObject, false);
+  public ExpressionException() {
+    super();
   }
 
-  void setSupportExtensionMethods(boolean enabled);
+  public ExpressionException(String message) {
+    super(message);
+  }
 
-  boolean isExtensionMethodSupportEnabled();
-
-  /**
-   * @since 3.5.9
-   */
-  Iterable<?> evaluateIterable(String expression, Object parameterObject, boolean nullable);
-
-  void registerMethod(ExtensionMethod method);
+  public ExpressionException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

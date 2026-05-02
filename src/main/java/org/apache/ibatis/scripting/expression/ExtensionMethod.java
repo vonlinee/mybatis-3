@@ -15,11 +15,11 @@
  */
 package org.apache.ibatis.scripting.expression;
 
-public interface ExtensionFunction {
+public interface ExtensionMethod {
 
   String getName();
 
-  default boolean supports(Object targetType) {
+  default boolean supports(Object target) {
     return true;
   }
 
@@ -27,5 +27,5 @@ public interface ExtensionFunction {
 
   Class<?>[] getParameterTypes();
 
-  Object execute(Object[] args);
+  Object invoke(Object target, Object[] args);
 }

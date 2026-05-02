@@ -27,23 +27,29 @@ import ognl.*;
 
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.internal.util.CollectionUtils;
+import org.apache.ibatis.logging.Log;
+import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.scripting.ContextMap;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
-import org.apache.ibatis.scripting.expression.ExtensionFunction;
+import org.apache.ibatis.scripting.expression.ExpressionException;
+import org.apache.ibatis.scripting.expression.ExtensionMethod;
 import org.apache.ibatis.scripting.xmltags.DynamicContext;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
  */
 public class OgnlExpressionEvaluator implements ExpressionEvaluator {
 
-  public static final OgnlExpressionEvaluator INSTANCE = new OgnlExpressionEvaluator();
+  private final Log log = LogFactory.getLog(OgnlExpressionEvaluator.class);
 
-  private final Map<String, ExtensionFunction> functionMap = new HashMap<>();
+  private final Map<String, ExtensionMethod> extensionMethodMap = new HashMap<>();
 
-  public OgnlExpressionEvaluator() {
-    OgnlRuntime.setMethodAccessor(Object.class, new ObjectMethodAccessor(functionMap));
-  }
+  /**
+   * the original object method accessor without modified by this class.
+   */
+  @Nullable
+  private MethodAccessor originalObjectMethodAccessor;
 
   @Override
   public Object getValue(String expression, Object root) {
@@ -60,6 +66,37 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
       return new BigDecimal(String.valueOf(value)).compareTo(BigDecimal.ZERO) != 0;
     }
     return value != null;
+  }
+
+  @Override
+  public void setSupportExtensionMethods(boolean enabled) {
+    if (enabled) {
+      if (isExtensionMethodSupportEnabled()) {
+        return;
+      }
+      this.originalObjectMethodAccessor = getOgnlObjectMethodAccessor();
+      log.warn(
+          "extension method support is enabled, Note that it will override the default global method accessor existed for "
+              + Object.class + " in OGNL.");
+      OgnlRuntime.setMethodAccessor(Object.class, new MethodAccessorInterceptor(extensionMethodMap));
+    } else {
+      if (this.originalObjectMethodAccessor != null) {
+        OgnlRuntime.setMethodAccessor(Object.class, this.originalObjectMethodAccessor);
+      }
+    }
+  }
+
+  @Override
+  public boolean isExtensionMethodSupportEnabled() {
+    return getOgnlObjectMethodAccessor() instanceof MethodAccessorInterceptor;
+  }
+
+  private static MethodAccessor getOgnlObjectMethodAccessor() {
+    try {
+      return OgnlRuntime.getMethodAccessor(Object.class);
+    } catch (OgnlException e) {
+      throw new ExpressionException("error get the existed method accessor for type " + Object.class);
+    }
   }
 
   /**
@@ -97,8 +134,8 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
   }
 
   @Override
-  public void registerFunction(ExtensionFunction function) {
-    functionMap.put(function.getName(), function);
+  public void registerMethod(ExtensionMethod method) {
+    extensionMethodMap.put(method.getName(), method);
   }
 
   static {
@@ -143,27 +180,23 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
   }
 
   /**
+   * to support extension method
+   *
    * @see ognl.ObjectMethodAccessor
    */
-  static class ObjectMethodAccessor implements MethodAccessor {
+  private static class MethodAccessorInterceptor implements MethodAccessor {
 
-    private final MethodAccessor objectMethodAccessor;
+    private final Map<String, ExtensionMethod> methodMap;
 
-    private final Map<String, ExtensionFunction> functionMap;
-
-    ObjectMethodAccessor(Map<String, ExtensionFunction> functionMap) {
-      this.functionMap = functionMap;
-      try {
-        this.objectMethodAccessor = OgnlRuntime.getMethodAccessor(Object.class);
-      } catch (OgnlException e) {
-        throw new BuilderException("Error setting internal method accessor for type: " + Object.class.getName(), e);
-      }
+    MethodAccessorInterceptor(Map<String, ExtensionMethod> methodMap) {
+      this.methodMap = methodMap;
     }
 
     @Override
     public Object callStaticMethod(OgnlContext context, Class<?> targetClass, String methodName, Object[] args)
         throws MethodFailedException {
-      return objectMethodAccessor.callStaticMethod(context, targetClass, methodName, args);
+      List<Method> methods = OgnlRuntime.getMethods(targetClass, methodName, true);
+      return OgnlRuntime.callAppropriateMethod(context, targetClass, null, methodName, null, methods, args);
     }
 
     @Override
@@ -175,14 +208,14 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
         // static methods
         methods = OgnlRuntime.getMethods(targetClass, methodName, true);
       }
-      final ExtensionFunction function = functionMap.get(methodName);
-      if (function != null && function.supports(target)) {
+      final ExtensionMethod extensionMethod = methodMap.get(methodName);
+      if (extensionMethod != null && extensionMethod.supports(target)) {
         boolean callMethodOnTarget = false;
         if (CollectionUtils.isNotEmpty(methods)) {
-          final Class<?>[] functionParameterTypes = function.getParameterTypes();
+          final Class<?>[] methodParameterTypes = extensionMethod.getParameterTypes();
           for (Method method : methods) {
-            if (method.getParameterCount() == function.getParameterCount()) {
-              if (isCompatible(functionParameterTypes, method.getParameterTypes())) {
+            if (method.getParameterCount() == extensionMethod.getParameterCount()) {
+              if (isCompatible(methodParameterTypes, method.getParameterTypes())) {
                 callMethodOnTarget = true;
                 break;
               }
@@ -190,7 +223,7 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
           }
         }
         if (!callMethodOnTarget) {
-          return function.execute(args);
+          return extensionMethod.invoke(target, args);
         }
       }
       // fallback to method already defined in the class

@@ -30,7 +30,7 @@ import java.util.stream.IntStream;
 import org.apache.ibatis.internal.util.ObjectUtils;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
-import org.apache.ibatis.scripting.expression.ExtensionFunction;
+import org.apache.ibatis.scripting.expression.ExtensionMethod;
 import org.junit.jupiter.api.Test;
 
 class OgnlCacheTest {
@@ -110,7 +110,7 @@ class OgnlCacheTest {
     return "@" + type.getName() + "@" + method + "(" + String.join(",", argExpressions) + ")";
   }
 
-  enum BultinExtensionFunction implements ExtensionFunction {
+  enum BultinExtensionMethod implements ExtensionMethod {
 
     isEmpty {
       @Override
@@ -129,7 +129,7 @@ class OgnlCacheTest {
       }
 
       @Override
-      public Object execute(Object[] args) {
+      public Object invoke(Object target, Object[] args) {
         return ObjectUtils.isEmpty(args[0]);
       }
     },
@@ -151,7 +151,7 @@ class OgnlCacheTest {
       }
 
       @Override
-      public Object execute(Object[] args) {
+      public Object invoke(Object target, Object[] args) {
         return !ObjectUtils.isEmpty(args[0]);
       }
     },
@@ -173,7 +173,7 @@ class OgnlCacheTest {
       }
 
       @Override
-      public Object execute(Object[] args) {
+      public Object invoke(Object target, Object[] args) {
         if (!(args[0] instanceof String)) {
           throw new IllegalArgumentException("args[0] must be String");
         }
@@ -198,7 +198,7 @@ class OgnlCacheTest {
       }
 
       @Override
-      public Object execute(Object[] args) {
+      public Object invoke(Object target, Object[] args) {
         if (!(args[0] instanceof String)) {
           throw new IllegalArgumentException("args[0] must be String");
         }
@@ -208,12 +208,15 @@ class OgnlCacheTest {
   }
 
   @Test
-  void customExtensionFunctionInExpression() {
+  void customExtensionMethodInExpression() {
     final ExpressionEvaluator evaluator = new OgnlExpressionEvaluator();
-    evaluator.registerFunction(BultinExtensionFunction.isEmpty);
-    evaluator.registerFunction(BultinExtensionFunction.isNotEmpty);
-    evaluator.registerFunction(BultinExtensionFunction.isBlank);
-    evaluator.registerFunction(BultinExtensionFunction.isNotBlank);
+
+    evaluator.setSupportExtensionMethods(true);
+
+    evaluator.registerMethod(BultinExtensionMethod.isEmpty);
+    evaluator.registerMethod(BultinExtensionMethod.isNotEmpty);
+    evaluator.registerMethod(BultinExtensionMethod.isBlank);
+    evaluator.registerMethod(BultinExtensionMethod.isNotBlank);
 
     Map<String, Object> context = new HashMap<>();
     Param param = new Param();

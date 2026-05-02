@@ -22,11 +22,12 @@ import java.util.HashMap;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.domain.blog.Section;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.apache.ibatis.scripting.expression.ognl.OgnlExpressionEvaluator;
 import org.junit.jupiter.api.Test;
 
 class ExpressionEvaluatorTest {
 
-  private final ExpressionEvaluator evaluator = ExpressionEvaluator.INSTANCE;
+  private final ExpressionEvaluator evaluator = new OgnlExpressionEvaluator();
 
   @Test
   void shouldCompareStringsReturnTrue() {
