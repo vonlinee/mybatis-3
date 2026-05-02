@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
@@ -35,13 +34,12 @@ public class ForEachSqlNode implements SqlNode {
   private final String separator;
   private final String item;
   private final String index;
-  private final Configuration configuration;
 
   /**
    * @since 3.5.9
    */
-  public ForEachSqlNode(Configuration configuration, SqlNode contents, String collectionExpression, Boolean nullable,
-      String index, String item, String open, String close, String separator) {
+  public ForEachSqlNode(SqlNode contents, String collectionExpression, Boolean nullable, String index, String item,
+      String open, String close, String separator) {
     this.collectionExpression = collectionExpression;
     this.nullable = nullable;
     this.contents = contents;
@@ -50,7 +48,6 @@ public class ForEachSqlNode implements SqlNode {
     this.separator = separator;
     this.index = index;
     this.item = item;
-    this.configuration = configuration;
   }
 
   @Override
@@ -61,7 +58,8 @@ public class ForEachSqlNode implements SqlNode {
   @Override
   public boolean apply(DynamicContext context) {
     final Map<String, Object> bindings = context.getBindings();
-    final boolean nullableOnForEach = this.nullable == null ? configuration.isNullableOnForEach() : this.nullable;
+    final boolean nullableOnForEach = this.nullable == null ? context.getConfiguration().isNullableOnForEach()
+        : this.nullable;
     final ExpressionEvaluator evaluator = context.getExpressionEvaluator();
     final Iterable<?> iterable = evaluator.evaluateIterable(collectionExpression, bindings, nullableOnForEach);
     if (iterable == null || !iterable.iterator().hasNext()) {

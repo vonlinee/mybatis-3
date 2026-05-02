@@ -151,7 +151,7 @@ public class XMLScriptBuilder extends BaseBuilder {
       String prefixOverrides = nodeToHandle.getStringAttribute("prefixOverrides");
       String suffix = nodeToHandle.getStringAttribute("suffix");
       String suffixOverrides = nodeToHandle.getStringAttribute("suffixOverrides");
-      TrimSqlNode trim = new TrimSqlNode(configuration, mixedSqlNode, prefix, prefixOverrides, suffix, suffixOverrides);
+      TrimSqlNode trim = new TrimSqlNode(mixedSqlNode, prefix, prefixOverrides, suffix, suffixOverrides);
       targetContents.add(trim);
     }
   }
@@ -164,7 +164,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
       MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
-      WhereSqlNode where = new WhereSqlNode(configuration, mixedSqlNode);
+      WhereSqlNode where = new WhereSqlNode(mixedSqlNode);
       targetContents.add(where);
     }
   }
@@ -177,7 +177,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
       MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
-      SetSqlNode set = new SetSqlNode(configuration, mixedSqlNode);
+      SetSqlNode set = new SetSqlNode(mixedSqlNode);
       targetContents.add(set);
     }
   }
@@ -197,8 +197,8 @@ public class XMLScriptBuilder extends BaseBuilder {
       String open = nodeToHandle.getStringAttribute("open");
       String close = nodeToHandle.getStringAttribute("close");
       String separator = nodeToHandle.getStringAttribute("separator");
-      ForEachSqlNode forEachSqlNode = new ForEachSqlNode(configuration, mixedSqlNode, collection, nullable, index, item,
-          open, close, separator);
+      ForEachSqlNode forEachSqlNode = new ForEachSqlNode(mixedSqlNode, collection, nullable, index, item, open, close,
+          separator);
       targetContents.add(forEachSqlNode);
     }
   }
@@ -266,8 +266,8 @@ public class XMLScriptBuilder extends BaseBuilder {
       }
 
       // Syntactic sugar for IN (?). We delegate to ForEachSqlNode which handles collection iteration.
-      ForEachSqlNode forEachSqlNode = new ForEachSqlNode(configuration, contents, collection, nullable, index, item,
-          open, close, separator);
+      ForEachSqlNode forEachSqlNode = new ForEachSqlNode(contents, collection, nullable, index, item, open, close,
+          separator);
       targetContents.add(forEachSqlNode);
     }
   }
