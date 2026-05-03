@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.ibatis.binding.ParamMap;
+import org.apache.ibatis.extension.ParamType;
+import org.apache.ibatis.extension.SqlValueFormatter;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.parsing.GenericTokenParser;
@@ -43,13 +45,14 @@ public class ParameterMappingTokenHandler extends ParameterMappingParser impleme
   private final boolean paramExists;
   private final ParamNameResolver paramNameResolver;
   private final GenericTokenParser tokenParser;
+  private final ParamType paramType;
 
   private Type genericType = null;
   private TypeHandler<?> typeHandler = null;
 
   public ParameterMappingTokenHandler(List<ParameterMapping> parameterMappings, Configuration configuration,
       Object parameterObject, Class<?> parameterType, Map<String, Object> additionalParameters,
-      ParamNameResolver paramNameResolver, boolean paramExists) {
+      ParamNameResolver paramNameResolver, boolean paramExists, ParamType paramType) {
     super(configuration);
     this.parameterType = parameterObject == null ? (parameterType == null ? Object.class : parameterType)
         : parameterObject.getClass();
@@ -58,6 +61,7 @@ public class ParameterMappingTokenHandler extends ParameterMappingParser impleme
     this.paramExists = paramExists;
     this.parameterMappings = parameterMappings;
     this.paramNameResolver = paramNameResolver;
+    this.paramType = paramType;
     this.tokenParser = new GenericTokenParser(getOpenToken(), getCloseToken(), this);
   }
 
@@ -69,7 +73,21 @@ public class ParameterMappingTokenHandler extends ParameterMappingParser impleme
   public String handleToken(String content) {
     genericType = null;
     typeHandler = null;
-    parameterMappings.add(buildParameterMapping(content));
+
+    ParameterMapping parameterMapping = buildParameterMapping(content);
+    // for SQL source at rendering phrase
+    if ((paramType == ParamType.INLINED) && parameterMapping.hasValue()) {
+      SqlValueFormatter formatter = configuration.getSqlValueFormatter();
+      if (formatter == null) {
+        throw new BuilderException("No SqlValueFormatter found for type " + parameterMapping.getJavaType());
+      }
+      return formatter.format(parameterMapping.getValue());
+    }
+    parameterMappings.add(parameterMapping);
+    if (paramType == ParamType.NAMED) {
+      // for raw SQL source at scripting phrase
+      return asParameterExpression(content);
+    }
     return "?";
   }
 

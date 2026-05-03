@@ -18,6 +18,7 @@ package org.apache.ibatis.builder.annotation;
 import java.lang.reflect.Method;
 
 import org.apache.ibatis.annotations.Lang;
+import org.apache.ibatis.extension.ParamType;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.reflection.ParamNameResolver;
@@ -61,13 +62,13 @@ public class ProviderSqlSource implements SqlSource {
   }
 
   @Override
-  public BoundSql getBoundSql(Object parameterObject) {
+  public BoundSql getBoundSql(Object parameterObject, ParamType paramType) {
     ProviderContext providerContext = new ProviderContext(configuration, mapperType, mapperMethod,
-        configuration.getDatabaseId(), paramNameResolver, parameterObject);
+        configuration.getDatabaseId(), paramNameResolver, parameterObject, paramType);
     String sql = sqlProvider.provideSql(providerContext);
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
     SqlSource sqlSource = languageDriver.createSqlSource(configuration, sql, parameterType, paramNameResolver);
-    return sqlSource.getBoundSql(parameterObject);
+    return sqlSource.getBoundSql(parameterObject, paramType);
   }
 
 }

@@ -22,6 +22,7 @@ import java.util.StringJoiner;
 
 import org.apache.ibatis.builder.ParameterMappingTokenHandler;
 import org.apache.ibatis.dialect.Dialect;
+import org.apache.ibatis.extension.ParamType;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.reflection.MetaObject;
@@ -46,15 +47,17 @@ public class DynamicContext {
   private final Class<?> parameterType;
   private final ParamNameResolver paramNameResolver;
   private final boolean paramExists;
+  private final ParamType paramType;
 
   private ParameterMappingTokenHandler tokenHandler;
 
-  public DynamicContext(Configuration configuration, Class<?> parameterType, ParamNameResolver paramNameResolver) {
-    this(configuration, null, parameterType, paramNameResolver, false);
+  public DynamicContext(Configuration configuration, Class<?> parameterType, ParamNameResolver paramNameResolver,
+      ParamType paramType) {
+    this(configuration, null, parameterType, paramNameResolver, false, paramType);
   }
 
   public DynamicContext(Configuration configuration, Object parameterObject, Class<?> parameterType,
-      ParamNameResolver paramNameResolver, boolean paramExists) {
+      ParamNameResolver paramNameResolver, boolean paramExists, ParamType paramType) {
     if (parameterObject == null || parameterObject instanceof Map) {
       bindings = new ContextMap(null, false);
     } else {
@@ -69,11 +72,16 @@ public class DynamicContext {
     this.paramExists = paramExists;
     this.parameterType = parameterType;
     this.paramNameResolver = paramNameResolver;
+    this.paramType = paramType;
   }
 
   public DynamicContext(DynamicContext delegate) {
     this(delegate.getConfiguration(), delegate.getParameterObject(), delegate.getParameterType(),
-        delegate.getParamNameResolver(), delegate.isParamExists());
+        delegate.getParamNameResolver(), delegate.isParamExists(), delegate.getParamType());
+  }
+
+  public ParamType getParamType() {
+    return paramType;
   }
 
   public Map<String, Object> getBindings() {
@@ -95,7 +103,7 @@ public class DynamicContext {
   private void initTokenParser(List<ParameterMapping> parameterMappings) {
     if (tokenHandler == null) {
       tokenHandler = new ParameterMappingTokenHandler(parameterMappings != null ? parameterMappings : new ArrayList<>(),
-          configuration, parameterObject, parameterType, bindings, paramNameResolver, paramExists);
+          configuration, parameterObject, parameterType, bindings, paramNameResolver, paramExists, paramType);
     }
   }
 

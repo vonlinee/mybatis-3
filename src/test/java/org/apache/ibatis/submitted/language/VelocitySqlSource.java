@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.extension.ParamType;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.scripting.xmltags.DynamicContext;
@@ -63,7 +64,7 @@ public class VelocitySqlSource implements SqlSource {
   }
 
   @Override
-  public BoundSql getBoundSql(Object parameterObject) {
+  public BoundSql getBoundSql(Object parameterObject, ParamType paramType) {
     Map<String, Object> bindings = createBindings(parameterObject, configuration);
     VelocityContext context = new VelocityContext(bindings);
     StringWriter sw = new StringWriter();

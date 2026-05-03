@@ -17,6 +17,7 @@ package org.apache.ibatis.builder.annotation;
 
 import java.lang.reflect.Method;
 
+import org.apache.ibatis.extension.ParamType;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.session.Configuration;
 
@@ -37,6 +38,16 @@ public final class ProviderContext {
   private final Object parameterObject;
 
   /**
+   * the param type expected by the provider
+   */
+  private final ParamType paramType;
+
+  ProviderContext(Configuration configuration, Class<?> mapperType, Method mapperMethod, String databaseId,
+      ParamNameResolver paramNameResolver, Object parameterObject) {
+    this(configuration, mapperType, mapperMethod, databaseId, paramNameResolver, parameterObject, ParamType.INDEXED);
+  }
+
+  /**
    * Constructor.
    *
    * @param mapperType
@@ -47,13 +58,14 @@ public final class ProviderContext {
    *          A database id
    */
   ProviderContext(Configuration configuration, Class<?> mapperType, Method mapperMethod, String databaseId,
-      ParamNameResolver paramNameResolver, Object parameterObject) {
+      ParamNameResolver paramNameResolver, Object parameterObject, ParamType paramType) {
     this.mapperType = mapperType;
     this.mapperMethod = mapperMethod;
     this.databaseId = databaseId;
     this.configuration = configuration;
     this.paramNameResolver = paramNameResolver;
     this.parameterObject = parameterObject;
+    this.paramType = paramType;
   }
 
   /**
@@ -95,5 +107,9 @@ public final class ProviderContext {
 
   public ParamNameResolver getParamNameResolver() {
     return paramNameResolver;
+  }
+
+  public ParamType getParamType() {
+    return paramType;
   }
 }

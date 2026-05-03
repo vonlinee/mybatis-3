@@ -56,6 +56,9 @@ import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.executor.statement.RoutingStatementHandler;
 import org.apache.ibatis.executor.statement.StatementHandler;
+import org.apache.ibatis.extension.ParamType;
+import org.apache.ibatis.extension.SqlValueFormatter;
+import org.apache.ibatis.extension.SqlValueFormatterRegistry;
 import org.apache.ibatis.extension.TableInfoRegistry;
 import org.apache.ibatis.extension.pagination.DefaultPaginationHandler;
 import org.apache.ibatis.extension.pagination.PaginationHandler;
@@ -157,6 +160,7 @@ public class Configuration {
   protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
 
   protected boolean lazyLoadingEnabled;
+  protected ParamType defaultParamType = ParamType.INDEXED;
   protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL
 
   protected String databaseId;
@@ -198,6 +202,7 @@ public class Configuration {
 
   protected final ExpressionEvaluator expressionEvaluator = new OgnlExpressionEvaluator();
 
+  protected final SqlValueFormatter sqlValueFormatter = new SqlValueFormatterRegistry();
   protected final Map<Class<?>, SqlProviderFactory> sqlProviderFactories = new ConcurrentHashMap<>();
 
   public Configuration(Environment environment) {
@@ -968,6 +973,14 @@ public class Configuration {
     incompleteResolvers.parsePendingResultMaps(reportUnresolved);
   }
 
+  public void setDefaultParamType(ParamType paramType) {
+    this.defaultParamType = paramType;
+  }
+
+  public ParamType getDefaultParamType() {
+    return defaultParamType;
+  }
+
   /**
    * Extracts namespace from fully qualified statement id.
    *
@@ -1028,6 +1041,10 @@ public class Configuration {
 
   public SqlProviderFactory getSqlProviderFactory(Class<?> providerType) {
     return sqlProviderFactories.get(providerType);
+  }
+
+  public SqlValueFormatter getSqlValueFormatter() {
+    return sqlValueFormatter;
   }
 
   public ExpressionEvaluator getExpressionEvaluator() {

@@ -13,21 +13,11 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.mapping;
+package org.apache.ibatis.extension;
 
-import org.apache.ibatis.extension.ParamType;
+import org.jetbrains.annotations.Nullable;
 
-/**
- * Represents the content of a mapped statement read from an XML file or an annotation. It creates the SQL that will be
- * passed to the database out of the input parameter received from the user.
- *
- * @author Clinton Begin
- */
-public interface SqlSource {
+public interface SqlValueFormatter {
 
-  default BoundSql getBoundSql(Object parameterObject) {
-    return getBoundSql(parameterObject, ParamType.INDEXED);
-  }
-
-  BoundSql getBoundSql(Object parameterObject, ParamType paramType);
+  String format(@Nullable Object value);
 }

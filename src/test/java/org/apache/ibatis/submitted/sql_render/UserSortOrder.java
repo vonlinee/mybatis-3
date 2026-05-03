@@ -13,21 +13,8 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.mapping;
+package org.apache.ibatis.submitted.sql_render;
 
-import org.apache.ibatis.extension.ParamType;
-
-/**
- * Represents the content of a mapped statement read from an XML file or an annotation. It creates the SQL that will be
- * passed to the database out of the input parameter received from the user.
- *
- * @author Clinton Begin
- */
-public interface SqlSource {
-
-  default BoundSql getBoundSql(Object parameterObject) {
-    return getBoundSql(parameterObject, ParamType.INDEXED);
-  }
-
-  BoundSql getBoundSql(Object parameterObject, ParamType paramType);
+public enum UserSortOrder {
+  NAME_ASC, AGE_DESC, NEWEST, DEFAULT_ID_ASC
 }

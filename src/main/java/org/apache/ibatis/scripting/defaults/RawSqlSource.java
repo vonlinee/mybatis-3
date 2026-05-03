@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.apache.ibatis.builder.ParameterMappingTokenHandler;
 import org.apache.ibatis.builder.SqlSourceBuilder;
+import org.apache.ibatis.extension.ParamType;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
@@ -47,7 +48,8 @@ public class RawSqlSource implements SqlSource {
 
   public RawSqlSource(Configuration configuration, SqlNode rootSqlNode, Class<?> parameterType,
       ParamNameResolver paramNameResolver) {
-    DynamicContext context = new DynamicContext(configuration, parameterType, paramNameResolver);
+    DynamicContext context = new DynamicContext(configuration, parameterType, paramNameResolver,
+        configuration.getDefaultParamType());
     rootSqlNode.apply(context);
     String sql = context.getSql();
     sqlSource = SqlSourceBuilder.buildSqlSource(configuration, sql, context.getParameterMappings());
@@ -61,13 +63,16 @@ public class RawSqlSource implements SqlSource {
       ParamNameResolver paramNameResolver) {
     List<ParameterMapping> parameterMappings = new ArrayList<>();
     ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration, null,
-        parameterType, new HashMap<>(), paramNameResolver, false);
+        parameterType, new HashMap<>(), paramNameResolver, false, configuration.getDefaultParamType());
     sqlSource = SqlSourceBuilder.buildSqlSource(configuration, tokenHandler.parse(sql), parameterMappings);
   }
 
   @Override
-  public BoundSql getBoundSql(Object parameterObject) {
-    return sqlSource.getBoundSql(parameterObject);
+  public BoundSql getBoundSql(Object parameterObject, ParamType paramType) {
+    if (paramType == ParamType.NAMED) {
+      throw new IllegalArgumentException("Named parameter type is not supported.");
+    }
+    return sqlSource.getBoundSql(parameterObject, paramType);
   }
 
 }

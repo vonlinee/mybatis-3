@@ -23,6 +23,7 @@ import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
+import org.apache.ibatis.extension.ParamType;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.reflection.ParamNameResolver;
@@ -313,8 +314,20 @@ public final class MappedStatement {
     return paramNameResolver;
   }
 
+  public String getSql(Object parameterObject) {
+    return getBoundSql(parameterObject).getSql();
+  }
+
+  public String getSql(Object parameterObject, ParamType paramType) {
+    return getBoundSql(parameterObject, paramType).getSql();
+  }
+
   public BoundSql getBoundSql(Object parameterObject) {
-    BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
+    return getBoundSql(parameterObject, configuration.getDefaultParamType());
+  }
+
+  public BoundSql getBoundSql(Object parameterObject, ParamType paramType) {
+    BoundSql boundSql = sqlSource.getBoundSql(parameterObject, paramType);
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     if (parameterMappings == null || parameterMappings.isEmpty()) {
       boundSql = new BoundSql(configuration, boundSql.getSql(), parameterMap.getParameterMappings(), parameterObject);

@@ -22,6 +22,8 @@ import org.apache.ibatis.extension.metadata.ColumnInfo;
 import org.apache.ibatis.extension.metadata.ColumnMetadata;
 import org.apache.ibatis.extension.metadata.TableInfo;
 import org.apache.ibatis.extension.metadata.TableMetadata;
+import org.apache.ibatis.parsing.GenericTokenParser;
+import org.apache.ibatis.reflection.MetaObject;
 
 /**
  * Utility class for generating SQL statements for common database operations. This class provides methods to generate
@@ -32,7 +34,7 @@ import org.apache.ibatis.extension.metadata.TableMetadata;
  * @see TableMetadata
  * @see ColumnMetadata
  */
-final class SqlUtils {
+public final class SqlUtils {
 
   private SqlUtils() {
   }
@@ -466,5 +468,77 @@ final class SqlUtils {
     }
     sql.append("</script>");
     return sql.toString();
+  }
+
+  /**
+   * Replaces indexed placeholders (?) in a SQL string with formatted values. It intelligently ignores '?' characters
+   * that are inside SQL string literals or quoted identifiers.
+   *
+   * @param sql
+   *          The raw SQL string with ? placeholders.
+   * @param args
+   *          The array of arguments to inline.
+   * @param formatter
+   *          The formatter to convert objects to SQL string literals.
+   *
+   * @return The fully inlined SQL string.
+   */
+  public static String inlineParams(String sql, Object[] args, SqlValueFormatter formatter) {
+    if (sql == null) {
+      return null;
+    }
+    Object[] safeArgs = args == null ? new Object[0] : args;
+    StringBuilder result = new StringBuilder(sql.length() + 50);
+
+    boolean inSingleQuote = false;
+    boolean inDoubleQuote = false;
+    boolean inBacktick = false;
+
+    int paramIndex = 0;
+    char[] chars = sql.toCharArray();
+
+    for (char c : chars) {
+      // Toggle state for single quotes (string literals)
+      if (c == '\'' && !inDoubleQuote && !inBacktick) {
+        inSingleQuote = !inSingleQuote;
+        result.append(c);
+      } else if (c == '"' && !inSingleQuote && !inBacktick) { // Toggle state for double quotes (identifiers in
+        // Postgres/Oracle)
+        inDoubleQuote = !inDoubleQuote;
+        result.append(c);
+      } // Toggle state for backticks (identifiers in MySQL)
+      else if (c == '`' && !inSingleQuote && !inDoubleQuote) {
+        inBacktick = !inBacktick;
+        result.append(c);
+      } else if (c == '?' && !inSingleQuote && !inDoubleQuote && !inBacktick) { // Handle placeholder
+        if (paramIndex >= safeArgs.length) {
+          throw new IllegalArgumentException(
+              "Not enough parameters provided. Expected more than " + paramIndex + " for the given SQL.");
+        }
+        String formattedValue = formatter.format(safeArgs[paramIndex]);
+        result.append(formattedValue);
+        paramIndex++;
+      } else { // Regular character
+        result.append(c);
+      }
+    }
+
+    // Final verification
+    if (paramIndex < safeArgs.length) {
+      throw new IllegalArgumentException(
+          "Too many parameters provided. SQL expected " + paramIndex + " but got " + safeArgs.length + ".");
+    }
+
+    return result.toString();
+  }
+
+  public static String inlineParams(String sql, MetaObject parameter, SqlValueFormatter formatter) {
+    GenericTokenParser tokenParser = new GenericTokenParser("#{", "}", content -> {
+      if (parameter.hasProperty(content)) {
+        return formatter.format(parameter.getValue(content));
+      }
+      return null;
+    });
+    return tokenParser.parse(sql);
   }
 }
