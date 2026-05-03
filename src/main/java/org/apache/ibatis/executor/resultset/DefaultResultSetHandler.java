@@ -1071,7 +1071,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private String prependPrefix(String columnName, String prefix) {
-    if (columnName == null || columnName.length() == 0 || prefix == null || prefix.length() == 0) {
+    if (columnName == null || columnName.isEmpty() || prefix == null || prefix.isEmpty()) {
       return columnName;
     }
     return prefix + columnName;

@@ -47,14 +47,13 @@ public class MethodDelegationSqlProvider implements SqlProvider {
       this.providerType = Objects.requireNonNull(providerType, "providerType is null");
       candidateProviderMethodName = (String) provider.annotationType().getMethod("method").invoke(provider);
 
-      if (candidateProviderMethodName.length() == 0
-          && ProviderMethodResolver.class.isAssignableFrom(this.providerType)) {
+      if (candidateProviderMethodName.isEmpty() && ProviderMethodResolver.class.isAssignableFrom(this.providerType)) {
         candidateProviderMethod = ((ProviderMethodResolver) this.providerType.getDeclaredConstructor().newInstance())
             .resolveMethod(new ProviderContext(configuration, mapperType, mapperMethod, configuration.getDatabaseId(),
                 null, null));
       }
       if (candidateProviderMethod == null) {
-        candidateProviderMethodName = candidateProviderMethodName.length() == 0 ? "provideSql"
+        candidateProviderMethodName = candidateProviderMethodName.isEmpty() ? "provideSql"
             : candidateProviderMethodName;
         for (Method m : this.providerType.getMethods()) {
           if (candidateProviderMethodName.equals(m.getName())
