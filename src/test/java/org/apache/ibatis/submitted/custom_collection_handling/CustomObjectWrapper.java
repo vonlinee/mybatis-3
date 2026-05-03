@@ -18,7 +18,6 @@ package org.apache.ibatis.submitted.custom_collection_handling;
 import java.util.List;
 
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapper;
 
@@ -31,13 +30,13 @@ public class CustomObjectWrapper implements ObjectWrapper {
   }
 
   @Override
-  public Object get(PropertyTokenizer prop) {
+  public Object get(String name) {
     // Not Implemented
     return null;
   }
 
   @Override
-  public void set(PropertyTokenizer prop, Object value) {
+  public void set(String prop, Object value) {
     // Not Implemented
   }
 
@@ -84,7 +83,7 @@ public class CustomObjectWrapper implements ObjectWrapper {
   }
 
   @Override
-  public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
+  public MetaObject instantiatePropertyValue(String name, String prop, ObjectFactory objectFactory) {
     // Not Implemented
     return null;
   }

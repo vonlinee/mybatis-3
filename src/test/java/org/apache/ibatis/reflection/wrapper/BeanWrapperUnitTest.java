@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.domain.misc.RichType;
-import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +56,7 @@ class BeanWrapperUnitTest extends ObjectWrapperBase {
   void shouldGet() {
     richType.setRichProperty("mybatis");
 
-    Object value = wrapper.get(new PropertyTokenizer("richProperty"));
+    Object value = wrapper.get("richProperty");
 
     assertEquals("mybatis", value);
   }
@@ -68,7 +67,7 @@ class BeanWrapperUnitTest extends ObjectWrapperBase {
     nested.setRichProperty("mybatis");
     richType.setRichType(nested);
 
-    Object value = wrapper.get(new PropertyTokenizer("richType.richProperty"));
+    Object value = wrapper.get("richType.richProperty");
 
     assertEquals("mybatis", value);
   }
@@ -85,22 +84,22 @@ class BeanWrapperUnitTest extends ObjectWrapperBase {
       }
     });
 
-    assertEquals("abc", wrapper.get(new PropertyTokenizer("richList[1]")));
-    assertEquals("value2", wrapper.get(new PropertyTokenizer("richMap[key2]")));
+    assertEquals("abc", wrapper.get("richList[1]"));
+    assertEquals("value2", wrapper.get("richMap[key2]"));
 
   }
 
   @Test
   @Override
   void shouldSet() {
-    wrapper.set(new PropertyTokenizer("richProperty"), "mybatis");
+    wrapper.set("richProperty", "mybatis");
 
     assertEquals("mybatis", richType.getRichProperty());
   }
 
   @Test
   void shouldSetWhichContainsDelim() {
-    wrapper.set(new PropertyTokenizer("richType.richProperty"), "mybatis");
+    wrapper.set("richType.richProperty", "mybatis");
 
     assertEquals("mybatis", richType.getRichType().getRichProperty());
   }
@@ -110,7 +109,7 @@ class BeanWrapperUnitTest extends ObjectWrapperBase {
     List<Object> list = Arrays.asList(1L, 2L);
     richType.setRichList(list);
 
-    wrapper.set(new PropertyTokenizer("richList[0]"), "mybatis");
+    wrapper.set("richList[0]", "mybatis");
 
     assertEquals("mybatis", list.get(0));
   }

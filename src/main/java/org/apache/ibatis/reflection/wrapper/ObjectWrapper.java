@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 
 /**
@@ -28,9 +27,9 @@ import org.apache.ibatis.reflection.factory.ObjectFactory;
  */
 public interface ObjectWrapper {
 
-  Object get(PropertyTokenizer prop);
+  Object get(String name);
 
-  void set(PropertyTokenizer prop, Object value);
+  void set(String prop, Object value);
 
   String findProperty(String name, boolean useCamelCaseMapping);
 
@@ -56,7 +55,7 @@ public interface ObjectWrapper {
 
   boolean hasGetter(String name);
 
-  MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory);
+  MetaObject instantiatePropertyValue(String name, String prop, ObjectFactory objectFactory);
 
   boolean isCollection();
 

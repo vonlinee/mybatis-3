@@ -120,12 +120,11 @@ public class MetaObject {
   }
 
   public Object getValue(String name) {
-    PropertyTokenizer prop = new PropertyTokenizer(name);
-    return objectWrapper.get(prop);
+    return objectWrapper.get(name);
   }
 
   public void setValue(String name, Object value) {
-    objectWrapper.set(new PropertyTokenizer(name), value);
+    objectWrapper.set(name, value);
   }
 
   public MetaObject metaObjectForProperty(String name) {

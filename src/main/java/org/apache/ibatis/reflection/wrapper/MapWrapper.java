@@ -39,6 +39,10 @@ public class MapWrapper extends BaseWrapper {
   }
 
   @Override
+  public Object get(String name) {
+    return get(new PropertyTokenizer(name));
+  }
+
   public Object get(PropertyTokenizer prop) {
     if (prop.hasNext()) {
       return getChildValue(prop);
@@ -50,6 +54,10 @@ public class MapWrapper extends BaseWrapper {
   }
 
   @Override
+  public void set(String prop, Object value) {
+    set(new PropertyTokenizer(prop), value);
+  }
+
   public void set(PropertyTokenizer prop, Object value) {
     if (prop.hasNext()) {
       setChildValue(prop, value);
@@ -147,9 +155,9 @@ public class MapWrapper extends BaseWrapper {
   }
 
   @Override
-  public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
+  public MetaObject instantiatePropertyValue(String name, String property, ObjectFactory objectFactory) {
     HashMap<String, Object> map = new HashMap<>();
-    set(prop, map);
+    set(new PropertyTokenizer(property), map);
     return MetaObject.forObject(map, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory(),
         metaObject.getReflectorFactory());
   }

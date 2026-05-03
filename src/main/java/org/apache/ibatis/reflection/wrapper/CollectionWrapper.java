@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 
 /**
@@ -34,12 +33,12 @@ public class CollectionWrapper implements ObjectWrapper {
   }
 
   @Override
-  public Object get(PropertyTokenizer prop) {
+  public Object get(String property) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public void set(PropertyTokenizer prop, Object value) {
+  public void set(String prop, Object value) {
     throw new UnsupportedOperationException();
   }
 
@@ -79,7 +78,7 @@ public class CollectionWrapper implements ObjectWrapper {
   }
 
   @Override
-  public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
+  public MetaObject instantiatePropertyValue(String name, String prop, ObjectFactory objectFactory) {
     throw new UnsupportedOperationException();
   }
 
