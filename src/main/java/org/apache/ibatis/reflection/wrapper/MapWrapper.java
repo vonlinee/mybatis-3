@@ -169,4 +169,9 @@ public class MapWrapper extends BaseWrapper {
     throw new UnsupportedOperationException();
   }
 
+  @Override
+  public boolean hasProperty(String name) {
+    return map.containsKey(new PropertyTokenizer(name).getName());
+  }
+
 }

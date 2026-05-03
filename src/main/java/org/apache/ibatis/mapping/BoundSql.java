@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.session.Configuration;
 
 /**
@@ -62,8 +61,7 @@ public class BoundSql {
   }
 
   public boolean hasAdditionalParameter(String name) {
-    String paramName = new PropertyTokenizer(name).getName();
-    return additionalParameters.containsKey(paramName);
+    return metaParameters.hasProperty(name);
   }
 
   public void setAdditionalParameter(String name, Object value) {

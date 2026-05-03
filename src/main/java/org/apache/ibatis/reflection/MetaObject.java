@@ -149,4 +149,7 @@ public class MetaObject {
     objectWrapper.addAll(list);
   }
 
+  public boolean hasProperty(String name) {
+    return objectWrapper.hasProperty(name);
+  }
 }

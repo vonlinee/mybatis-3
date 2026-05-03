@@ -34,6 +34,8 @@ import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.reflection.SystemMetaObject;
+import org.apache.ibatis.session.Configuration;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -252,5 +254,19 @@ class MapWrapperUnitTest extends ObjectWrapperBase {
   @Override
   void shouldAddAll() {
     assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> wrapper.addAll(new ArrayList<>()));
+  }
+
+  @Test
+  @Override
+  void shouldHasProperty() {
+    Configuration config = new Configuration();
+
+    HashMap<Object, Object> map = new HashMap<>();
+    MetaObject mo = config.newMetaObject(map);
+    mo.setValue("user.name", "zs");
+    Assertions.assertTrue(mo.hasProperty("user"));
+    Assertions.assertTrue(mo.hasProperty("user.name"));
+    Assertions.assertFalse(mo.hasProperty("name"));
+
   }
 }

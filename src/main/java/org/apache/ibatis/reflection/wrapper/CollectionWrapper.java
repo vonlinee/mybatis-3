@@ -98,4 +98,9 @@ public class CollectionWrapper implements ObjectWrapper {
     object.addAll(element);
   }
 
+  @Override
+  public boolean hasProperty(String name) {
+    return false;
+  }
+
 }

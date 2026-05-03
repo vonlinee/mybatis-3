@@ -31,6 +31,7 @@ import java.util.Map;
 import org.apache.ibatis.domain.misc.RichType;
 import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.reflection.SystemMetaObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -214,6 +215,25 @@ class BeanWrapperUnitTest extends ObjectWrapperBase {
   @Override
   void shouldAddAll() {
     assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> wrapper.addAll(new ArrayList<>()));
+  }
+
+  /**
+   * @see RichType
+   */
+  @Override
+  void shouldHasProperty() {
+    Assertions.assertTrue(wrapper.hasProperty("richType"));
+    Assertions.assertTrue(wrapper.hasProperty("richField"));
+    Assertions.assertTrue(wrapper.hasProperty("richProperty"));
+    Assertions.assertTrue(wrapper.hasProperty("richMap"));
+    Assertions.assertTrue(wrapper.hasProperty("richList"));
+
+    // nested property
+    Assertions.assertFalse(wrapper.hasProperty("richType.richType"));
+    Assertions.assertFalse(wrapper.hasProperty("richType.richField"));
+    Assertions.assertFalse(wrapper.hasProperty("richType.richProperty"));
+    Assertions.assertFalse(wrapper.hasProperty("richType.richMap"));
+    Assertions.assertFalse(wrapper.hasProperty("richType.richList"));
   }
 
 }

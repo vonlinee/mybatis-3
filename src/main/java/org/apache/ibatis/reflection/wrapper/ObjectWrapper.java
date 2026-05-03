@@ -64,4 +64,5 @@ public interface ObjectWrapper {
 
   <E> void addAll(List<E> element);
 
+  boolean hasProperty(String name);
 }

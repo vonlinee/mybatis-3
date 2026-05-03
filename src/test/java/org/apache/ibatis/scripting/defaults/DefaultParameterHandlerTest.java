@@ -29,6 +29,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.domain.blog.Author;
@@ -54,6 +55,8 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.stubbing.Answer;
 
 /**
  * DefaultParameterHandlerTest
@@ -260,6 +263,11 @@ class DefaultParameterHandlerTest {
     when(mockConfig.getDefaultScriptingLanguageInstance()).thenReturn(new XMLLanguageDriver());
     when(mockConfig.newMetaObject(parameterObject))
         .thenReturn(MetaObject.forObject(parameterObject, objectFactory, objectWrapperFactory, reflectorFactory));
+
+    when(mockConfig.newMetaObject(ArgumentMatchers.anyMap())).thenAnswer((Answer<MetaObject>) invocation -> {
+      Map<?, ?> map = invocation.getArgument(0);
+      return MetaObject.forObject(map, objectFactory, objectWrapperFactory, reflectorFactory);
+    });
 
     TypeHandlerRegistry registry = mockConfig.getTypeHandlerRegistry();
 

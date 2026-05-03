@@ -104,4 +104,9 @@ public class CustomObjectWrapper implements ObjectWrapper {
     ((CustomCollection<Object>) collection).addAll(element);
   }
 
+  @Override
+  public boolean hasProperty(String name) {
+    return false;
+  }
+
 }

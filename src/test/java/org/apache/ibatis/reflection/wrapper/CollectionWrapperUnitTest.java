@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.reflection.SystemMetaObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -144,5 +145,12 @@ class CollectionWrapperUnitTest extends ObjectWrapperBase {
     wrapper.addAll(list);
 
     verify(collection).addAll(list);
+  }
+
+  @Override
+  void shouldHasProperty() {
+    // always return false
+    Assertions.assertFalse(wrapper.hasProperty("xxx"));
+    Assertions.assertFalse(wrapper.hasProperty("size"));
   }
 }

@@ -229,4 +229,9 @@ public class BeanWrapper extends BaseWrapper {
     throw new UnsupportedOperationException();
   }
 
+  @Override
+  public boolean hasProperty(String name) {
+    return findProperty(new PropertyTokenizer(name).getName(), true) != null;
+  }
+
 }
