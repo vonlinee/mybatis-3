@@ -20,18 +20,13 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.jetbrains.annotations.Nullable;
 
 public class ParamNameResolver {
 
@@ -205,6 +200,25 @@ public class ParamNameResolver {
     return type;
   }
 
+  public static ParamNameResolver resolve(Method method, boolean useActualParamName) {
+    Objects.requireNonNull(method, "method is null");
+    return new ParamNameResolver(method.getDeclaringClass(), method, useActualParamName);
+  }
+
+  public static ParamNameResolver resolve(Class<?> mapperClass, Method method, boolean useActualParamName) {
+    Objects.requireNonNull(mapperClass, "mapperClass is null");
+    Objects.requireNonNull(method, "method is null");
+    return new ParamNameResolver(mapperClass, method, useActualParamName);
+  }
+
+  public static Object wrapToMapIfCollection(@Nullable Object object) {
+    return wrapToMapIfCollection(object, null, false);
+  }
+
+  public static Object wrapToMapIfCollection(@Nullable Object object, boolean nullValueWhenKeyNotFoundInParamMap) {
+    return wrapToMapIfCollection(object, null, nullValueWhenKeyNotFoundInParamMap);
+  }
+
   /**
    * Wrap to a {@link ParamMap} if object is {@link Collection} or array.
    *
@@ -217,7 +231,7 @@ public class ParamNameResolver {
    *
    * @since 3.5.5
    */
-  public static Object wrapToMapIfCollection(Object object, String actualParamName,
+  public static Object wrapToMapIfCollection(@Nullable Object object, String actualParamName,
       boolean nullValueWhenKeyNotFoundInParamMap) {
     if (object instanceof Collection) {
       ParamMap map = new ParamMap(nullValueWhenKeyNotFoundInParamMap);
