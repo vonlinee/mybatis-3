@@ -137,7 +137,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
   public ParameterMap addParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
     id = applyCurrentNamespace(id, false);
-    ParameterMap parameterMap = new ParameterMap.Builder(id, parameterClass, parameterMappings).build();
+    ParameterMap parameterMap = ParameterMap.create(id, parameterClass, parameterMappings);
     configuration.addParameterMap(parameterMap);
     return parameterMap;
   }

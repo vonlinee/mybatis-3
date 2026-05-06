@@ -39,12 +39,10 @@ import org.apache.ibatis.executor.resultset.ResultSetWrapper;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
-import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
-import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -101,26 +99,15 @@ class DefaultCursorTest {
 
   private MappedStatement getNestedAndOrderedMappedStatement() {
     final Configuration config = new Configuration();
-    final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
-    ResultMap nestedResultMap = new ResultMap.Builder(config, "roleMap", HashMap.class, new ArrayList<>() {
-      {
-        add(new ResultMapping.Builder(config, "role", "role", registry.getTypeHandler(String.class)).build());
-      }
-    }).build();
+    ResultMap nestedResultMap = ResultMap.builder(config, "roleMap", HashMap.class)
+        .addMapping("role", "role", String.class).build();
     config.addResultMap(nestedResultMap);
-
     return new MappedStatement.Builder(config, "selectPerson", new StaticSqlSource(config, "select person..."),
-        SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
-          {
-            add(new ResultMap.Builder(config, "personMap", HashMap.class, new ArrayList<>() {
-              {
-                add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(Integer.class)).build());
-                add(new ResultMapping.Builder(config, "roles").nestedResultMapId("roleMap").build());
-              }
-            }).build());
-          }
-        }).resultOrdered(true).build();
+        SqlCommandType.SELECT)
+            .resultMap(ResultMap.builder(config, "personMap", HashMap.class).addMapping("id", "id", Integer.class)
+                .addNestedMapping("roles", "roleMap").build())
+            .resultOrdered(true).build();
   }
 
   /*

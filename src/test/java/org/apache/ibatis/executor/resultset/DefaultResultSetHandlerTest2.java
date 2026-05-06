@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,13 +18,7 @@ package org.apache.ibatis.executor.resultset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +30,6 @@ import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
-import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
@@ -65,20 +58,11 @@ class DefaultResultSetHandlerTest2 {
   @Test
   void shouldNotCallNextOnClosedResultSet_SimpleResult() throws Exception {
     final Configuration config = new Configuration();
-    final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     final MappedStatement ms = new MappedStatement.Builder(config, "testSelect",
         new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT)
-            .resultMaps(new ArrayList<ResultMap>() {
-              private static final long serialVersionUID = 1L;
-              {
-                add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<ResultMapping>() {
-                  private static final long serialVersionUID = 1L;
-                  {
-                    add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(Integer.class)).build());
-                  }
-                }).build());
-              }
-            }).build();
+            .resultMap(
+                ResultMap.builder(config, "testMap", HashMap.class).addMapping("id", "id", Integer.class).build())
+            .build();
 
     final Executor executor = null;
     final ParameterHandler parameterHandler = null;
@@ -102,27 +86,16 @@ class DefaultResultSetHandlerTest2 {
   void shouldNotCallNextOnClosedResultSet_NestedResult() throws Exception {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
-    final ResultMap nestedResultMap = new ResultMap.Builder(config, "roleMap", HashMap.class,
-        new ArrayList<ResultMapping>() {
-          private static final long serialVersionUID = 1L;
-          {
-            add(new ResultMapping.Builder(config, "role", "role", registry.getTypeHandler(String.class)).build());
-          }
-        }).build();
+
+    final ResultMap nestedResultMap = ResultMap.builder(config, "roleMap", HashMap.class)
+        .addMapping("role", "role", String.class).build();
+
     config.addResultMap(nestedResultMap);
     final MappedStatement ms = new MappedStatement.Builder(config, "selectPerson",
-        new StaticSqlSource(config, "select person..."), SqlCommandType.SELECT).resultMaps(new ArrayList<ResultMap>() {
-          private static final long serialVersionUID = 1L;
-          {
-            add(new ResultMap.Builder(config, "personMap", HashMap.class, new ArrayList<ResultMapping>() {
-              private static final long serialVersionUID = 1L;
-              {
-                add(new ResultMapping.Builder(config, "id", "id", registry.getTypeHandler(Integer.class)).build());
-                add(new ResultMapping.Builder(config, "roles").nestedResultMapId("roleMap").build());
-              }
-            }).build());
-          }
-        }).resultOrdered(true).build();
+        new StaticSqlSource(config, "select person..."), SqlCommandType.SELECT)
+            .resultMap(ResultMap.builder(config, "personMap", HashMap.class).addMapping("id", "id", Integer.class)
+                .addNestedMapping("roles", "roleMap").build())
+            .resultOrdered(true).build();
 
     final Executor executor = null;
     final ParameterHandler parameterHandler = null;
@@ -147,7 +120,7 @@ class DefaultResultSetHandlerTest2 {
    */
   protected abstract class ImpatientResultSet implements ResultSet {
     private int rowIndex = -1;
-    private List<Map<String, Object>> rows = new ArrayList<>();
+    private final List<Map<String, Object>> rows = new ArrayList<>();
 
     protected ImpatientResultSet() {
       Map<String, Object> row = new HashMap<>();

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,15 +15,13 @@
  */
 package org.apache.ibatis.mapping;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.lang.reflect.Type;
+import java.util.*;
 
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.TypeHandler;
+import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
@@ -48,6 +46,14 @@ public class ResultMap {
   private ResultMap() {
   }
 
+  public static ResultMap create(String id, Class<?> resultType) {
+    ResultMap resultMap = new ResultMap();
+    resultMap.id = id;
+    resultMap.type = resultType;
+    resultMap.resultMappings = Collections.emptyList();
+    return resultMap;
+  }
+
   public static ResultMap buildEmpty(Configuration configuration, String statementId, Class<?> resultType) {
     ResultMap emptyResultMap = new ResultMap();
     emptyResultMap.configuration = configuration;
@@ -62,25 +68,152 @@ public class ResultMap {
     return emptyResultMap;
   }
 
+  public static ResultMap.Builder builder(Configuration config, String id, Class<?> parameterType) {
+    return new Builder(config, id, parameterType);
+  }
+
   public static class Builder {
     private final ResultMap resultMap = new ResultMap();
+    private final TypeHandlerRegistry registry;
+    private final Configuration config;
 
     public Builder(Configuration configuration, String id, Class<?> type, List<ResultMapping> resultMappings) {
       this(configuration, id, type, resultMappings, null);
     }
 
+    public Builder(Configuration configuration, String id, Class<?> type) {
+      this(configuration, id, type, new ArrayList<>(), null);
+    }
+
     public Builder(Configuration configuration, String id, Class<?> type, List<ResultMapping> resultMappings,
         Boolean autoMapping) {
-      resultMap.configuration = configuration;
+      this.registry = configuration.getTypeHandlerRegistry();
+      this.config = resultMap.configuration = configuration;
       resultMap.id = id;
       resultMap.type = type;
       resultMap.resultMappings = resultMappings;
       resultMap.autoMapping = autoMapping;
     }
 
+    /**
+     * Appends a pre-built {@link ResultMapping} directly. Use this for complex cases such as nested queries, nested
+     * result maps, constructor mappings, or composite columns that require the full {@link ResultMapping.Builder} API.
+     *
+     * @param resultMapping
+     *          the mapping to add
+     *
+     * @return this builder
+     */
+    public Builder addMapping(ResultMapping resultMapping) {
+      resultMap.resultMappings.add(resultMapping);
+      return this;
+    }
+
+    public Builder addNestedMapping(String property, String nestedResultMapId) {
+      resultMap.resultMappings
+          .add(new ResultMapping.Builder(config, property).nestedResultMapId(nestedResultMapId).build());
+      return this;
+    }
+
+    public Builder addNestedMapping(String property, String column, Type type, Class<?> javaType, String nestQueryId) {
+      resultMap.resultMappings.add(new ResultMapping.Builder(config, property, column, registry.getTypeHandler(type))
+          .javaType(javaType).nestedQueryId(nestQueryId).build());
+      return this;
+    }
+
+    public Builder addMapping(String property, String column, Type type, Class<?> javaType, ResultFlag... flags) {
+      ResultMapping.Builder rm = new ResultMapping.Builder(config, property, column, registry.getTypeHandler(type));
+      if (flags.length > 0) {
+        rm.flags(new ArrayList<>(Arrays.asList(flags)));
+      }
+      rm.javaType(javaType);
+      resultMap.resultMappings.add(rm.build());
+      return this;
+    }
+
+    /**
+     * Appends a simple property-to-column mapping using the supplied {@link TypeHandler}.
+     *
+     * @param property
+     *          the Java property name; may be {@code null} for constructor-arg mappings
+     * @param column
+     *          the result-set column name
+     * @param typeHandler
+     *          the type handler for this mapping
+     * @param flags
+     *          zero or more {@link ResultFlag}s (e.g. {@link ResultFlag#ID}, {@link ResultFlag#CONSTRUCTOR})
+     *
+     * @return this builder
+     */
+    public Builder addMapping(String property, String column, TypeHandler<?> typeHandler, ResultFlag... flags) {
+      ResultMapping.Builder rm = new ResultMapping.Builder(config, property, column, typeHandler);
+      if (flags.length > 0) {
+        rm.flags(new ArrayList<>(Arrays.asList(flags)));
+      }
+      resultMap.resultMappings.add(rm.build());
+      return this;
+    }
+
+    /**
+     * Appends a simple property-to-column mapping whose {@link TypeHandler} is resolved from the
+     * {@link TypeHandlerRegistry} by the given Java {@link Type}. This mirrors the behaviour of
+     * {@code registry.getTypeHandler(type)} and is the preferred overload when the exact type is known at compile-time
+     * (e.g. {@code int.class}, {@code String.class}).
+     *
+     * @param property
+     *          the Java property name; may be {@code null} for constructor-arg mappings
+     * @param column
+     *          the result-set column name
+     * @param type
+     *          the Java type used to look up the {@link TypeHandler} from the registry
+     * @param flags
+     *          zero or more {@link ResultFlag}s (e.g. {@link ResultFlag#ID}, {@link ResultFlag#CONSTRUCTOR})
+     *
+     * @return this builder
+     */
+    public Builder addMapping(String property, String column, Type type, ResultFlag... flags) {
+      ResultMapping.Builder rm = new ResultMapping.Builder(config, property, column, registry.getTypeHandler(type));
+      if (flags.length > 0) {
+        rm.flags(new ArrayList<>(Arrays.asList(flags)));
+      }
+      resultMap.resultMappings.add(rm.build());
+      return this;
+    }
+
+    /**
+     * Appends a simple property-to-column mapping resolved by Java type (stored as {@code javaType} on the mapping, not
+     * resolved to a {@link TypeHandler} immediately). Use this overload when the column type is unknown at build time
+     * or when auto-mapping resolution is preferred.
+     *
+     * @param property
+     *          the Java property name
+     * @param column
+     *          the result-set column name
+     * @param javaType
+     *          the Java type stored directly as {@code javaType} on the mapping
+     * @param flags
+     *          zero or more {@link ResultFlag}s
+     *
+     * @return this builder
+     */
+    public Builder addMapping(String property, String column, Class<?> javaType, ResultFlag... flags) {
+      ResultMapping.Builder rm = new ResultMapping.Builder(config, property, column, javaType);
+      if (flags.length > 0) {
+        rm.flags(new ArrayList<>(Arrays.asList(flags)));
+      }
+      resultMap.resultMappings.add(rm.build());
+      return this;
+    }
+
     public Builder discriminator(Discriminator discriminator) {
       resultMap.discriminator = discriminator;
       return this;
+    }
+
+    public Builder discriminator(String property, String column, Class<?> javaType,
+        Map<String, String> discriminatorMap) {
+      return discriminator(new Discriminator.Builder(config,
+          new ResultMapping.Builder(config, property, column, javaType).build(), discriminatorMap).build());
     }
 
     public Class<?> type() {

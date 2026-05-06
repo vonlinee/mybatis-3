@@ -34,12 +34,7 @@ import java.util.Map;
 import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.domain.blog.Section;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.mapping.ResultMap;
-import org.apache.ibatis.mapping.ResultMapping;
-import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.reflection.DefaultReflectorFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ReflectorFactory;
@@ -95,22 +90,11 @@ class DefaultParameterHandlerTest {
 
   MappedStatement getMappedStatement() {
     final Configuration config = new Configuration();
-    final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
     return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource(config, "some select statement"),
-        SqlCommandType.SELECT).resultMaps(new ArrayList<>() {
-          private static final long serialVersionUID = 1L;
+        SqlCommandType.SELECT).resultMap(
+            ResultMap.builder(config, "testMap", HashMap.class).addMapping("cOlUmN1", "CoLuMn1", Integer.class).build())
+            .build();
 
-          {
-            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<>() {
-              private static final long serialVersionUID = 1L;
-
-              {
-                add(new ResultMapping.Builder(config, "cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class))
-                    .build());
-              }
-            }).build());
-          }
-        }).build();
   }
 
   @Test
@@ -124,8 +108,6 @@ class DefaultParameterHandlerTest {
     Object parameterObject = 1;
 
     BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<>() {
-      private static final long serialVersionUID = 1L;
-
       {
         add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
@@ -159,8 +141,6 @@ class DefaultParameterHandlerTest {
     Object parameterObject = null;
 
     BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<>() {
-      private static final long serialVersionUID = 1L;
-
       {
         add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
       }
@@ -211,25 +191,24 @@ class DefaultParameterHandlerTest {
   @Test
   void parameterObjectGetPropertyValueWithMetaObject() throws SQLException {
     Configuration config = new Configuration();
-    TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
     MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
         new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
 
     Author parameterObject = new Author(-1, "cbegin", "******", "cbegin@nowhere.com", "N/A", Section.NEWS);
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<>() {
-      {
-        add(new ParameterMapping.Builder("id", registry.getTypeHandler(int.class)).build());
-        add(new ParameterMapping.Builder("username", registry.getTypeHandler(String.class)).build());
-        add(new ParameterMapping.Builder("password", registry.getTypeHandler(String.class)).build());
-        add(new ParameterMapping.Builder("email", registry.getTypeHandler(String.class)).build());
-        add(new ParameterMapping.Builder("bio", registry.getTypeHandler(String.class)).jdbcType(JdbcType.VARCHAR)
-            .build());
-        add(new ParameterMapping.Builder("favouriteSection", registry.getTypeHandler(Section.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-      }
-    }, parameterObject);
+    // @formatter:off
+    ParameterMap parameterMap = ParameterMap.builder(config, "default", HashMap.class)
+      .addMapping("id", int.class)
+      .addMapping("username", String.class)
+      .addMapping("password", String.class)
+      .addMapping("email", String.class)
+      .addMapping("bio", String.class, JdbcType.VARCHAR)
+      .addMapping("favouriteSection", Section.class, JdbcType.VARCHAR)
+      .build();
+    // @formatter:on
+    BoundSql boundSql = new BoundSql(config, "some select statement", parameterMap.getParameterMappings(),
+        parameterObject);
 
     DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
         boundSql);

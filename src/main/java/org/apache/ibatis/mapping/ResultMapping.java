@@ -50,6 +50,7 @@ public class ResultMapping {
 
   public static class Builder {
     private final ResultMapping resultMapping = new ResultMapping();
+    private final Configuration config;
 
     public Builder(Configuration configuration, String property, String column, TypeHandler<?> typeHandler) {
       this(configuration, property);
@@ -64,7 +65,7 @@ public class ResultMapping {
     }
 
     public Builder(Configuration configuration, String property) {
-      resultMapping.configuration = configuration;
+      this.config = resultMapping.configuration = configuration;
       resultMapping.property = property;
       resultMapping.flags = new ArrayList<>();
       resultMapping.composites = new ArrayList<>();
@@ -142,6 +143,11 @@ public class ResultMapping {
 
     public Builder composites(List<ResultMapping> composites) {
       resultMapping.composites = composites;
+      return this;
+    }
+
+    public Builder composite(String property, String column, Class<?> javaType) {
+      resultMapping.composites.add(new ResultMapping.Builder(config, property, column, javaType).build());
       return this;
     }
 

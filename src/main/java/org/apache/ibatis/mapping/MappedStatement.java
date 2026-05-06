@@ -24,6 +24,7 @@ import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.extension.ParamType;
+import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.reflection.ParamNameResolver;
@@ -108,6 +109,10 @@ public final class MappedStatement {
         mappedStatement.hasNestedResultMaps = mappedStatement.hasNestedResultMaps || resultMap.hasNestedResultMaps();
       }
       return this;
+    }
+
+    public Builder resultMap(ResultMap resultMap) {
+      return resultMaps(CollectionUtils.asArrayList(resultMap));
     }
 
     public Builder fetchSize(Integer fetchSize) {
