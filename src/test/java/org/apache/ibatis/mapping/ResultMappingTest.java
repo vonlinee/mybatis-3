@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,10 @@ package org.apache.ibatis.mapping;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
@@ -60,4 +64,35 @@ class ResultMappingTest {
         .nestedResultMapId("bookRM").column("books").build());
   }
 
+  @Test
+  void shouldUseEmptyCollection() {
+    {
+      // @formatter:off
+      ResultMap resultMap = ResultMap.builder(new Configuration(), "", HashMap.class)
+        .addMapping("id", "id", int.class)
+        .build();
+      // @formatter:on
+
+      List<Integer> singletonList = Collections.singletonList(1);
+
+      Assertions.assertSame(resultMap.getIdResultMappings().getClass(), singletonList.getClass());
+      Assertions.assertSame(resultMap.getResultMappings().getClass(), singletonList.getClass());
+      Assertions.assertSame(resultMap.getPropertyResultMappings().getClass(), singletonList.getClass());
+      Assertions.assertSame(resultMap.getConstructorResultMappings(), Collections.emptyList());
+
+      Assertions.assertSame(resultMap.getMappedColumns().getClass(), Collections.singleton(1).getClass());
+      Assertions.assertSame(resultMap.getMappedProperties().getClass(), Collections.singleton(1).getClass());
+    }
+
+    {
+      // @formatter:off
+      ResultMap resultMap = ResultMap.create("", HashMap.class);
+      Assertions.assertSame(resultMap.getIdResultMappings(), Collections.emptyList());
+      Assertions.assertSame(resultMap.getResultMappings(), Collections.emptyList());
+      Assertions.assertSame(resultMap.getPropertyResultMappings(), Collections.emptyList());
+      Assertions.assertSame(resultMap.getConstructorResultMappings(), Collections.emptyList());
+      Assertions.assertSame(resultMap.getMappedColumns(), Collections.emptySet());
+      Assertions.assertSame(resultMap.getMappedProperties(), Collections.emptySet());
+    }
+  }
 }

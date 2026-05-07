@@ -18,6 +18,7 @@ package org.apache.ibatis.mapping;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
@@ -45,12 +46,11 @@ public class ResultMap {
   private ResultMap() {
   }
 
+  /**
+   * for inlined result map
+   */
   public static ResultMap create(String id, Class<?> resultType) {
-    ResultMap resultMap = new ResultMap();
-    resultMap.id = id;
-    resultMap.type = resultType;
-    resultMap.resultMappings = Collections.emptyList();
-    return resultMap;
+    return buildEmpty(id, resultType);
   }
 
   public static ResultMap buildEmpty(String statementId, Class<?> resultType) {
@@ -272,12 +272,12 @@ public class ResultMap {
       }
 
       // lock down collections
-      resultMap.resultMappings = Collections.unmodifiableList(resultMap.resultMappings);
-      resultMap.idResultMappings = Collections.unmodifiableList(resultMap.idResultMappings);
-      resultMap.constructorResultMappings = Collections.unmodifiableList(resultMap.constructorResultMappings);
-      resultMap.propertyResultMappings = Collections.unmodifiableList(resultMap.propertyResultMappings);
-      resultMap.mappedColumns = Collections.unmodifiableSet(resultMap.mappedColumns);
-      resultMap.mappedProperties = Collections.unmodifiableSet(resultMap.mappedProperties);
+      resultMap.resultMappings = CollectionUtils.immutableList(resultMap.resultMappings);
+      resultMap.idResultMappings = CollectionUtils.immutableList(resultMap.idResultMappings);
+      resultMap.constructorResultMappings = CollectionUtils.immutableList(resultMap.constructorResultMappings);
+      resultMap.propertyResultMappings = CollectionUtils.immutableList(resultMap.propertyResultMappings);
+      resultMap.mappedColumns = CollectionUtils.immutableSet(resultMap.mappedColumns);
+      resultMap.mappedProperties = CollectionUtils.immutableSet(resultMap.mappedProperties);
 
       return resultMap;
     }
