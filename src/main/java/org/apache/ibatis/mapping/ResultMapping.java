@@ -29,7 +29,6 @@ import org.apache.ibatis.type.TypeHandler;
  */
 public class ResultMapping {
 
-  private Configuration configuration;
   private String property;
   private String column;
   private Class<?> javaType;
@@ -50,7 +49,7 @@ public class ResultMapping {
 
   public static class Builder {
     private final ResultMapping resultMapping = new ResultMapping();
-    private final Configuration config;
+    private Configuration config;
 
     public Builder(Configuration configuration, String property, String column, TypeHandler<?> typeHandler) {
       this(configuration, property);
@@ -65,15 +64,19 @@ public class ResultMapping {
     }
 
     public Builder(Configuration configuration, String property) {
-      this.config = resultMapping.configuration = configuration;
+      this(property, configuration.isLazyLoadingEnabled());
+      this.config = configuration;
+    }
+
+    public Builder(String property, boolean lazy) {
       resultMapping.property = property;
       resultMapping.flags = new ArrayList<>();
       resultMapping.composites = new ArrayList<>();
-      resultMapping.lazy = configuration.isLazyLoadingEnabled();
+      resultMapping.lazy = lazy;
     }
 
     public Builder(ResultMapping otherMapping) {
-      this(otherMapping.configuration, otherMapping.property);
+      this(otherMapping.property, otherMapping.lazy);
 
       resultMapping.flags.addAll(otherMapping.flags);
       resultMapping.composites.addAll(otherMapping.composites);

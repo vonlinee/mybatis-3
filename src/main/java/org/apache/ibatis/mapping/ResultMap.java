@@ -27,7 +27,6 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  * @author Clinton Begin
  */
 public class ResultMap {
-  private Configuration configuration;
 
   private String id;
   private Class<?> type;
@@ -54,9 +53,8 @@ public class ResultMap {
     return resultMap;
   }
 
-  public static ResultMap buildEmpty(Configuration configuration, String statementId, Class<?> resultType) {
+  public static ResultMap buildEmpty(String statementId, Class<?> resultType) {
     ResultMap emptyResultMap = new ResultMap();
-    emptyResultMap.configuration = configuration;
     emptyResultMap.id = statementId;
     emptyResultMap.type = resultType;
     emptyResultMap.resultMappings = Collections.emptyList();
@@ -88,7 +86,7 @@ public class ResultMap {
     public Builder(Configuration configuration, String id, Class<?> type, List<ResultMapping> resultMappings,
         Boolean autoMapping) {
       this.registry = configuration.getTypeHandlerRegistry();
-      this.config = resultMap.configuration = configuration;
+      this.config = configuration;
       resultMap.id = id;
       resultMap.type = type;
       resultMap.resultMappings = resultMappings;
@@ -259,7 +257,7 @@ public class ResultMap {
           Class<?> javaType = resultMapping.getJavaType();
           resultMap.hasResultMapsUsingConstructorCollection = resultMap.hasResultMapsUsingConstructorCollection
               || (resultMapping.getNestedQueryId() == null && resultMapping.getTypeHandler() == null && javaType != null
-                  && resultMap.configuration.getObjectFactory().isCollection(javaType));
+                  && config.getObjectFactory().isCollection(javaType));
         } else {
           resultMap.propertyResultMappings.add(resultMapping);
         }

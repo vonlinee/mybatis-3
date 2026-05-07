@@ -329,7 +329,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         }
       }
     } else if (resultType != null) {
-      resultMaps.add(ResultMap.buildEmpty(configuration, statementId + "-Inline", resultType));
+      resultMaps.add(ResultMap.buildEmpty(statementId + "-Inline", resultType));
     }
     return resultMaps;
   }
