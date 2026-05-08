@@ -15,7 +15,6 @@
  */
 package org.apache.ibatis.builder.xml;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 
@@ -74,13 +73,12 @@ public class XMLMapperEntityResolver implements EntityResolver {
   private InputSource getInputSource(String path, String publicId, String systemId) {
     InputSource source = null;
     if (path != null) {
-      try {
-        InputStream in = Resources.getResourceAsStream(path);
+      InputStream in = Resources.getResourceAsStreamOrElseNull(path);
+      // ignore, null is ok
+      if (in != null) {
         source = new InputSource(in);
         source.setPublicId(publicId);
         source.setSystemId(systemId);
-      } catch (IOException e) {
-        // ignore, null is ok
       }
     }
     return source;

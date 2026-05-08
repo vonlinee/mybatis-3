@@ -15,7 +15,6 @@
  */
 package org.apache.ibatis.builder.annotation;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -162,11 +161,8 @@ public class MapperAnnotationBuilder {
       InputStream inputStream = type.getResourceAsStream("/" + xmlResource);
       if (inputStream == null) {
         // Search XML mapper that is not in the module but in the classpath.
-        try {
-          inputStream = Resources.getResourceAsStream(type.getClassLoader(), xmlResource);
-        } catch (IOException e2) {
-          // ignore, resource is not required
-        }
+        // Note: resource is not required
+        inputStream = Resources.getResourceAsStreamOrElseNull(type.getClassLoader(), xmlResource);
       }
       if (inputStream != null) {
         XMLMapperBuilder xmlParser = new XMLMapperBuilder(inputStream, assistant.getConfiguration(), xmlResource,
@@ -336,7 +332,7 @@ public class MapperAnnotationBuilder {
           .orElse(null);
       final ResultOrdered resultOrderedAnnotation = getAnnotationWrapper(method, false, ResultOrdered.class)
           .map(x -> (ResultOrdered) x.getAnnotation()).orElse(null);
-      final String mappedStatementId = namespace + "." + method.getName();
+      final String mappedStatementId = getQualifiedStatementId(namespace, method.getName());
 
       final KeyGenerator keyGenerator;
       String keyProperty = null;
@@ -696,15 +692,15 @@ public class MapperAnnotationBuilder {
     if (mapperFqn == null || localStatementId == null) {
       return null;
     }
-    try {
-      Class<?> mapperClass = Resources.classForName(mapperFqn);
-      for (Method method : mapperClass.getMethods()) {
-        if (method.getName().equals(localStatementId) && canHaveStatement(method)) {
-          return getReturnType(method, mapperClass);
-        }
+    // No corresponding mapper interface which is OK
+    Class<?> mapperClass = Resources.classForNameOrElseNull(mapperFqn);
+    if (mapperClass == null) {
+      return null;
+    }
+    for (Method method : mapperClass.getMethods()) {
+      if (method.getName().equals(localStatementId) && canHaveStatement(method)) {
+        return getReturnType(method, mapperClass);
       }
-    } catch (ClassNotFoundException e) {
-      // No corresponding mapper interface which is OK
     }
     return null;
   }

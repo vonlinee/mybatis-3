@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -115,6 +115,17 @@ public class Resources {
     return getResourceAsStream(null, resource);
   }
 
+  public static InputStream getResourceAsStreamOrElseNull(String resource) {
+    if (resource == null) {
+      return null;
+    }
+    try {
+      return getResourceAsStream(null, resource);
+    } catch (Throwable throwable) {
+      return null;
+    }
+  }
+
   /**
    * Returns a resource on the classpath as a Stream object
    *
@@ -134,6 +145,14 @@ public class Resources {
       throw new IOException("Could not find resource " + resource);
     }
     return in;
+  }
+
+  public static InputStream getResourceAsStreamOrElseNull(ClassLoader loader, String resource) {
+    try {
+      return getResourceAsStream(loader, resource);
+    } catch (IOException e) {
+      return null;
+    }
   }
 
   /**
@@ -326,6 +345,22 @@ public class Resources {
    */
   public static Class<?> classForName(String className) throws ClassNotFoundException {
     return classLoaderWrapper.classForName(className);
+  }
+
+  /**
+   * it will catch potential {@link ClassNotFoundException} the just return null.
+   *
+   * @param className
+   *          class name
+   *
+   * @return null if {@link ClassNotFoundException}
+   */
+  public static Class<?> classForNameOrElseNull(String className) {
+    try {
+      return classForName(className);
+    } catch (ClassNotFoundException e) {
+      return null;
+    }
   }
 
   public static Charset getCharset() {

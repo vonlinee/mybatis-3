@@ -387,12 +387,8 @@ public class XMLMapperBuilder extends BaseBuilder {
   private void bindMapperForNamespace() {
     String namespace = builderAssistant.getCurrentNamespace();
     if (namespace != null) {
-      Class<?> boundType = null;
-      try {
-        boundType = Resources.classForName(namespace);
-      } catch (ClassNotFoundException e) {
-        // ignore, bound type is not required
-      }
+      // ignore, bound type is not required
+      Class<?> boundType = Resources.classForNameOrElseNull(namespace);
       if (boundType != null && !configuration.hasMapper(boundType)) {
         // Spring may not know the real resource name so we set a flag
         // to prevent loading again this resource from the mapper interface

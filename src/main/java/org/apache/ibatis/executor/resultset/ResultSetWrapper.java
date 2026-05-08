@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -122,13 +122,9 @@ public class ResultSetWrapper {
   }
 
   static Class<?> resolveClass(String className) {
-    try {
-      // #699 className could be null
-      if (className != null) {
-        return Resources.classForName(className);
-      }
-    } catch (ClassNotFoundException e) {
-      // ignore
+    // #699 className could be null
+    if (className != null) {
+      return Resources.classForNameOrElseNull(className);
     }
     return null;
   }
