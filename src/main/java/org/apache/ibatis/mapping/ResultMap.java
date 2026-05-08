@@ -210,7 +210,7 @@ public class ResultMap {
 
     public Builder discriminator(String property, String column, Class<?> javaType,
         Map<String, String> discriminatorMap) {
-      return discriminator(new Discriminator.Builder(config,
+      return discriminator(new Discriminator.Builder(
           new ResultMapping.Builder(config, property, column, javaType).build(), discriminatorMap).build());
     }
 

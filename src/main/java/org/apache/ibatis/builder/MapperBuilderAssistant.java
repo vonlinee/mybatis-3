@@ -196,7 +196,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
       resultMap = applyCurrentNamespace(resultMap, true);
       namespaceDiscriminatorMap.put(e.getKey(), resultMap);
     }
-    return new Discriminator.Builder(configuration, resultMapping, namespaceDiscriminatorMap).build();
+    return new Discriminator.Builder(resultMapping, namespaceDiscriminatorMap).build();
   }
 
   public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType,

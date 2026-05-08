@@ -18,8 +18,6 @@ package org.apache.ibatis.mapping;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.ibatis.session.Configuration;
-
 /**
  * @author Clinton Begin
  */
@@ -34,7 +32,7 @@ public class Discriminator {
   public static class Builder {
     private final Discriminator discriminator = new Discriminator();
 
-    public Builder(Configuration configuration, ResultMapping resultMapping, Map<String, String> discriminatorMap) {
+    public Builder(ResultMapping resultMapping, Map<String, String> discriminatorMap) {
       discriminator.resultMapping = resultMapping;
       discriminator.discriminatorMap = discriminatorMap;
     }
