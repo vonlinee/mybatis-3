@@ -23,9 +23,11 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ParamNameResolver {
@@ -104,12 +106,7 @@ public class ParamNameResolver {
       if (soleParamType instanceof GenericArrayType) {
         typeMap.put("array", soleParamType);
       } else {
-        Class<?> soleParamClass = null;
-        if (soleParamType instanceof ParameterizedType) {
-          soleParamClass = (Class<?>) ((ParameterizedType) soleParamType).getRawType();
-        } else if (soleParamType instanceof Class) {
-          soleParamClass = (Class<?>) soleParamType;
-        }
+        Class<?> soleParamClass = resolveSingleParameterClass(method, soleParamType);
         if (Collection.class.isAssignableFrom(soleParamClass)) {
           typeMap.put("collection", soleParamType);
           if (List.class.isAssignableFrom(soleParamClass)) {
@@ -118,6 +115,22 @@ public class ParamNameResolver {
         }
       }
     }
+  }
+
+  public static @NotNull Class<?> resolveSingleParameterClass(Method method, Type soleParamType) {
+    Class<?> soleParamClass = null;
+    if (soleParamType instanceof ParameterizedType) {
+      soleParamClass = (Class<?>) ((ParameterizedType) soleParamType).getRawType();
+    } else if (soleParamType instanceof Class) {
+      soleParamClass = (Class<?>) soleParamType;
+    }
+    if (soleParamClass == null) {
+      throw new BindingException("Unable to resolve the class of the sole parameter for method " + method
+          + ". This usually happens when the parameter type cannot be "
+          + "determined (e.g., due to missing generic type information or the "
+          + "`-parameters` compiler flag). Verify the method signature and that the " + "parameter type is concrete.");
+    }
+    return soleParamClass;
   }
 
   private String getActualParamName(Method method, int paramIndex) {
