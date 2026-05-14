@@ -19,7 +19,5 @@ import java.util.List;
 
 public interface PaginationHandler {
 
-  <T> Page<T> createEmptyPage();
-
   <T> Page<T> createPage(Integer pageNum, Integer pageSize, long total, List<T> list);
 }

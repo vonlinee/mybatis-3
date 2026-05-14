@@ -15,15 +15,9 @@
  */
 package org.apache.ibatis.extension.pagination;
 
-import java.util.Collections;
 import java.util.List;
 
 public class DefaultPaginationHandler implements PaginationHandler {
-
-  @Override
-  public <T> Page<T> createEmptyPage() {
-    return new PageImpl<>(-1, -1, -1L, Collections.emptyList());
-  }
 
   @Override
   public <T> Page<T> createPage(Integer pageNum, Integer pageSize, long total, List<T> list) {

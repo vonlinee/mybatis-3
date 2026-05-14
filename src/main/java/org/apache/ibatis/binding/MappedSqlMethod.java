@@ -204,7 +204,7 @@ class MappedSqlMethod implements MapperMethod {
     final MappedStatement ms = configuration.getMappedStatement(command.getName());
     final Object param = method.convertArgsToSqlCommandParam(args,
         configuration.isNullValueWhenKeyNotFoundInParamMap());
-    long total = Integer.MAX_VALUE;
+    long total = -1;
     if (ms.getCountStatement() != null) {
       Object countResult = sqlSession.selectOne(ms.getCountStatement(), param);
       if (!(countResult instanceof Number)) {
@@ -215,14 +215,9 @@ class MappedSqlMethod implements MapperMethod {
     }
 
     final PaginationHandler paginationHandler = configuration.getPaginationHandler();
-    if (total == 0) {
-      return paginationHandler.createEmptyPage();
-    }
+
     // query list
     final List<T> list = sqlSession.selectList(command.getName(), param);
-    if (total == Integer.MAX_VALUE) {
-      total = -1;
-    }
     if (!(param instanceof Pageable)) {
       throw new BindingException("Parameter object is not a sub-type of " + Pageable.class);
     }
