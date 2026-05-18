@@ -192,7 +192,7 @@ public class ParamNameResolver {
 
     if (type == null && unindexed.startsWith(GENERIC_NAME_PREFIX)) {
       try {
-        Integer paramIndex = Integer.valueOf(unindexed.substring(GENERIC_NAME_PREFIX.length())) - 1;
+        int paramIndex = Integer.parseInt(unindexed.substring(GENERIC_NAME_PREFIX.length())) - 1;
         unindexed = names.get(paramIndex);
         if (unindexed != null) {
           type = typeMap.get(unindexed);
