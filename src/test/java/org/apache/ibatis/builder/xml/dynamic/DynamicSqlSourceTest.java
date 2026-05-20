@@ -18,7 +18,6 @@ package org.apache.ibatis.builder.xml.dynamic;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +27,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.ibatis.BaseDataTest;
-import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.scripting.StaticTextSqlNode;
 import org.apache.ibatis.scripting.TextSqlNode;
@@ -342,9 +340,8 @@ class DynamicSqlSourceTest extends BaseDataTest {
 
   private DynamicSqlSource createDynamicSqlSource(SqlNode... contents) throws IOException, SQLException {
     createBlogDataSource();
-    final String resource = "org/apache/ibatis/builder/MapperConfig.xml";
-    final Reader reader = Resources.getResourceAsReader(resource);
-    SqlSessionFactory sqlMapper = new SqlSessionFactoryBuilder().build(reader);
+    SqlSessionFactory sqlMapper = SqlSessionFactoryBuilder
+        .buildFromResource("org/apache/ibatis/builder/MapperConfig.xml");
     Configuration configuration = sqlMapper.getConfiguration();
     MixedSqlNode sqlNode = mixedContents(contents);
     return new DynamicSqlSource(configuration, sqlNode);

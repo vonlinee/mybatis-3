@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.session;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Properties;
@@ -23,6 +24,7 @@ import org.apache.ibatis.builder.xml.XMLConfigBuilder;
 import org.apache.ibatis.exceptions.ExceptionFactory;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.internal.util.IOUtils;
+import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 
 /**
@@ -84,4 +86,50 @@ public class SqlSessionFactoryBuilder {
     return new DefaultSqlSessionFactory(config);
   }
 
+  /**
+   * Builds a {@link SqlSessionFactory} from a MyBatis XML configuration file located on the classpath.
+   * <p>
+   * This is a convenience static factory method that:
+   * <ol>
+   * <li>Resolves the given classpath {@code resource} via {@link Resources#getResourceAsReader(String)}, using the
+   * default {@link ClassLoader} chain.</li>
+   * <li>Creates a new {@link SqlSessionFactoryBuilder} and delegates to {@link #build(Reader)} to parse the XML
+   * configuration into a {@link Configuration} instance.</li>
+   * <li>Returns the resulting {@link SqlSessionFactory}, which can then be used to obtain {@link SqlSession}
+   * instances.</li>
+   * </ol>
+   * <p>
+   * The underlying {@link Reader} is closed automatically by {@link #build(Reader, String, Properties)} once parsing
+   * completes (whether it succeeds or fails), so callers do not need to manage the reader lifecycle.
+   * <p>
+   * The configuration is parsed using the default environment declared in the XML (via the {@code <environments
+   * default="...">;} attribute) and without any externally supplied {@link Properties}. To override the active
+   * environment or supply additional properties, use {@link #build(Reader, String)}, {@link #build(Reader, Properties)}
+   * or {@link #build(Reader, String, Properties)} directly instead.
+   * <p>
+   * Example usage:
+   *
+   * <pre>
+   * SqlSessionFactory factory = SqlSessionFactoryBuilder.buildFromResource(&quot;mybatis-config.xml&quot;);
+   * </pre>
+   *
+   * @param resource
+   *          the classpath location of the MyBatis XML configuration file (for example,
+   *          {@code "org/apache/ibatis/mybatis-config.xml"}); must not be {@code null}
+   *
+   * @return a fully built {@link SqlSessionFactory} ready to open {@link SqlSession} instances
+   *
+   * @throws IOException
+   *           if the resource cannot be located on the classpath or cannot be read
+   * @throws org.apache.ibatis.exceptions.PersistenceException
+   *           if the XML configuration is malformed or otherwise fails to parse; the underlying cause is wrapped via
+   *           {@link ExceptionFactory#wrapException(String, Exception)}
+   *
+   * @see Resources#getResourceAsReader(String)
+   * @see #build(Reader)
+   * @see #build(Reader, String, Properties)
+   */
+  public static SqlSessionFactory buildFromResource(String resource) throws IOException {
+    return new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource));
+  }
 }
