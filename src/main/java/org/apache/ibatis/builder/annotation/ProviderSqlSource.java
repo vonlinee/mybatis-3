@@ -31,7 +31,6 @@ import org.apache.ibatis.session.Configuration;
  */
 public class ProviderSqlSource implements SqlSource {
 
-  private final Configuration configuration;
   private final Class<?> mapperType;
   private final LanguageDriver languageDriver;
   private final Method mapperMethod;
@@ -53,7 +52,6 @@ public class ProviderSqlSource implements SqlSource {
   public ProviderSqlSource(Configuration configuration, Class<?> mapperType, Method mapperMethod,
       SqlProvider sqlProvider) {
     this.mapperType = mapperType;
-    this.configuration = configuration;
     this.mapperMethod = mapperMethod;
     Lang lang = mapperMethod == null ? null : mapperMethod.getAnnotation(Lang.class);
     this.languageDriver = configuration.getLanguageDriver(lang == null ? null : lang.value());
@@ -62,13 +60,13 @@ public class ProviderSqlSource implements SqlSource {
   }
 
   @Override
-  public BoundSql getBoundSql(Object parameterObject, ParamType paramType) {
+  public BoundSql getBoundSql(Configuration configuration, Object parameterObject, ParamType paramType) {
     ProviderContext providerContext = new ProviderContext(configuration, mapperType, mapperMethod,
         configuration.getDatabaseId(), paramNameResolver, parameterObject, paramType);
     String sql = sqlProvider.provideSql(providerContext);
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
     SqlSource sqlSource = languageDriver.createSqlSource(configuration, sql, parameterType, paramNameResolver);
-    return sqlSource.getBoundSql(parameterObject, paramType);
+    return sqlSource.getBoundSql(configuration, parameterObject, paramType);
   }
 
 }

@@ -38,7 +38,6 @@ import org.apache.velocity.runtime.parser.node.SimpleNode;
  */
 public class VelocitySqlSource implements SqlSource {
 
-  private final Configuration configuration;
   private final Template script;
 
   static {
@@ -46,8 +45,7 @@ public class VelocitySqlSource implements SqlSource {
     Velocity.init();
   }
 
-  public VelocitySqlSource(Configuration configuration, String scriptText) {
-    this.configuration = configuration;
+  public VelocitySqlSource(String scriptText) {
     try {
       RuntimeServices runtimeServices = RuntimeSingleton.getRuntimeServices();
       StringReader reader = new StringReader(scriptText);
@@ -64,7 +62,7 @@ public class VelocitySqlSource implements SqlSource {
   }
 
   @Override
-  public BoundSql getBoundSql(Object parameterObject, ParamType paramType) {
+  public BoundSql getBoundSql(Configuration configuration, Object parameterObject, ParamType paramType) {
     Map<String, Object> bindings = createBindings(parameterObject, configuration);
     VelocityContext context = new VelocityContext(bindings);
     StringWriter sw = new StringWriter();
@@ -72,7 +70,7 @@ public class VelocitySqlSource implements SqlSource {
     VelocitySqlSourceBuilder sqlSourceParser = new VelocitySqlSourceBuilder(configuration);
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
     SqlSource sqlSource = sqlSourceParser.parse(sw.toString(), parameterType);
-    BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
+    BoundSql boundSql = sqlSource.getBoundSql(configuration, parameterObject);
     for (Map.Entry<String, Object> entry : bindings.entrySet()) {
       boundSql.setAdditionalParameter(entry.getKey(), entry.getValue());
     }

@@ -16,6 +16,7 @@
 package org.apache.ibatis.mapping;
 
 import org.apache.ibatis.extension.ParamType;
+import org.apache.ibatis.session.Configuration;
 
 /**
  * Represents the content of a mapped statement read from an XML file or an annotation. It creates the SQL that will be
@@ -25,9 +26,9 @@ import org.apache.ibatis.extension.ParamType;
  */
 public interface SqlSource {
 
-  default BoundSql getBoundSql(Object parameterObject) {
-    return getBoundSql(parameterObject, ParamType.INDEXED);
+  default BoundSql getBoundSql(Configuration configuration, Object parameterObject) {
+    return getBoundSql(configuration, parameterObject, ParamType.INDEXED);
   }
 
-  BoundSql getBoundSql(Object parameterObject, ParamType paramType);
+  BoundSql getBoundSql(Configuration configuration, Object parameterObject, ParamType paramType);
 }

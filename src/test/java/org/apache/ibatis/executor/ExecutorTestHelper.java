@@ -44,7 +44,7 @@ final class ExecutorTestHelper {
 
   static MappedStatement prepareInsertAuthorMappedStatement(final Configuration config) {
     return new MappedStatement.Builder(config, "insertAuthor",
-        new StaticSqlSource(config,
+        new StaticSqlSource(
             "INSERT INTO author (id,username,password,email,bio,favourite_section) values(?,?,?,?,?,?)"),
         SqlCommandType.INSERT)
     // @formatter:off
@@ -63,8 +63,7 @@ final class ExecutorTestHelper {
 
   static MappedStatement prepareInsertAuthorMappedStatementWithAutoKey(final Configuration config) {
     return new MappedStatement.Builder(config, "insertAuthor",
-        new StaticSqlSource(config,
-            "INSERT INTO author (username,password,email,bio,favourite_section) values(?,?,?,?,?)"),
+        new StaticSqlSource("INSERT INTO author (username,password,email,bio,favourite_section) values(?,?,?,?,?)"),
         SqlCommandType.INSERT)
     // @formatter:off
             .parameterMap(ParameterMap.builder(config, "defaultParameterMap", Author.class)
@@ -82,8 +81,8 @@ final class ExecutorTestHelper {
   }
 
   static MappedStatement prepareInsertAuthorProc(final Configuration config) {
-    return new MappedStatement.Builder(config, "insertAuthorProc",
-        new StaticSqlSource(config, "{call insertAuthor(?,?,?,?)}"), SqlCommandType.INSERT)
+    return new MappedStatement.Builder(config, "insertAuthorProc", new StaticSqlSource("{call insertAuthor(?,?,?,?)}"),
+        SqlCommandType.INSERT)
     // @formatter:off
             .parameterMap(ParameterMap.builder(config, "defaultParameterMap", Author.class)
                 .addMapping("id",        int.class)
@@ -98,7 +97,7 @@ final class ExecutorTestHelper {
 
   static MappedStatement prepareUpdateAuthorMappedStatement(final Configuration config) {
     return new MappedStatement.Builder(config, "updateAuthor",
-        new StaticSqlSource(config, "UPDATE author SET username = ?, password = ?, email = ?, bio = ? WHERE id = ?"),
+        new StaticSqlSource("UPDATE author SET username = ?, password = ?, email = ?, bio = ? WHERE id = ?"),
         SqlCommandType.UPDATE)
     // @formatter:off
             .parameterMap(ParameterMap.builder(config, "defaultParameterMap", Author.class)
@@ -114,8 +113,8 @@ final class ExecutorTestHelper {
   }
 
   static MappedStatement prepareDeleteAuthorMappedStatement(final Configuration config) {
-    return new MappedStatement.Builder(config, "deleteAuthor",
-        new StaticSqlSource(config, "DELETE FROM author WHERE id = ?"), SqlCommandType.DELETE)
+    return new MappedStatement.Builder(config, "deleteAuthor", new StaticSqlSource("DELETE FROM author WHERE id = ?"),
+        SqlCommandType.DELETE)
     // @formatter:off
             .parameterMap(ParameterMap.builder(config, "defaultParameterMap", Author.class)
                 .addMapping("id", int.class)
@@ -137,8 +136,8 @@ final class ExecutorTestHelper {
         .build();
     // @formatter:on
 
-    return new MappedStatement.Builder(config, "selectAuthor",
-        new StaticSqlSource(config, "SELECT * FROM author WHERE id = ?"), SqlCommandType.SELECT)
+    return new MappedStatement.Builder(config, "selectAuthor", new StaticSqlSource("SELECT * FROM author WHERE id = ?"),
+        SqlCommandType.SELECT)
     // @formatter:off
             .parameterMap(ParameterMap.builder(config, "defaultParameterMap", Author.class)
                 .addMapping("id", int.class)
@@ -156,7 +155,7 @@ final class ExecutorTestHelper {
         .addMapping(null,               "not_exists",         Object.class)
         .build();
     return new MappedStatement.Builder(config, "selectAuthorAutoMap",
-        new StaticSqlSource(config, "SELECT * FROM author ORDER BY id"), SqlCommandType.SELECT)
+        new StaticSqlSource("SELECT * FROM author ORDER BY id"), SqlCommandType.SELECT)
             .resultMap(autoMap)
             .fetchSize(1000)
             .timeout(2000)
@@ -175,8 +174,8 @@ final class ExecutorTestHelper {
         .addMapping("favouriteSection",  "favourite_section", Section.class)
         .build();
     // @formatter:on
-    return new MappedStatement.Builder(config, "selectAuthor",
-        new StaticSqlSource(config, "SELECT * FROM author WHERE id = ?"), SqlCommandType.SELECT)
+    return new MappedStatement.Builder(config, "selectAuthor", new StaticSqlSource("SELECT * FROM author WHERE id = ?"),
+        SqlCommandType.SELECT)
     // @formatter:off
             .parameterMap(ParameterMap.builder(config, "defaultParameterMap", Author.class)
                 .addMapping("id", int.class)
@@ -198,7 +197,7 @@ final class ExecutorTestHelper {
         .build();
     // @formatter:on
     return new MappedStatement.Builder(config, "selectTwoSetsOfAuthors",
-        new StaticSqlSource(config, "{call selectTwoSetsOfAuthors(?,?)}"), SqlCommandType.SELECT)
+        new StaticSqlSource("{call selectTwoSetsOfAuthors(?,?)}"), SqlCommandType.SELECT)
             .statementType(StatementType.CALLABLE)
             // @formatter:off
             .parameterMap(ParameterMap.builder(config, "defaultParameterMap", Author.class)
@@ -216,7 +215,7 @@ final class ExecutorTestHelper {
 
   static MappedStatement prepareSelectAuthorViaOutParams(final Configuration config) {
     return new MappedStatement.Builder(config, "selectAuthorViaOutParams",
-        new StaticSqlSource(config, "{call selectAuthorViaOutParams(?,?,?,?,?)}"), SqlCommandType.SELECT)
+        new StaticSqlSource("{call selectAuthorViaOutParams(?,?,?,?,?)}"), SqlCommandType.SELECT)
             .statementType(StatementType.CALLABLE)
             // @formatter:off
             .parameterMap(ParameterMap.builder(config, "defaultParameterMap", Author.class)
@@ -252,12 +251,12 @@ final class ExecutorTestHelper {
         }})
         .build();
     // @formatter:on
-    return new MappedStatement.Builder(config, "selectPosts", new StaticSqlSource(config, "SELECT * FROM post"),
+    return new MappedStatement.Builder(config, "selectPosts", new StaticSqlSource("SELECT * FROM post"),
         SqlCommandType.SELECT).resultMap(postsResultMap).build();
   }
 
   static MappedStatement createInsertAuthorWithIDof99MappedStatement(final Configuration config) {
-    return new MappedStatement.Builder(config, "insertAuthor", new StaticSqlSource(config,
+    return new MappedStatement.Builder(config, "insertAuthor", new StaticSqlSource(
         "INSERT INTO author (id,username,password,email,bio) values(99,'someone','******','someone@apache.org',null)"),
         SqlCommandType.INSERT).statementType(StatementType.STATEMENT)
             .parameterMap(ParameterMap.create("defaultParameterMap", Author.class)).cache(authorCache).build();
@@ -274,13 +273,13 @@ final class ExecutorTestHelper {
         .build();
     // @formatter:on
     return new MappedStatement.Builder(config, "selectAuthor",
-        new StaticSqlSource(config, "SELECT * FROM author WHERE id = 99"), SqlCommandType.SELECT)
+        new StaticSqlSource("SELECT * FROM author WHERE id = 99"), SqlCommandType.SELECT)
             .statementType(StatementType.STATEMENT)
             .parameterMap(ParameterMap.create("defaultParameterMap", Author.class)).resultMap(selectResultMap).build();
   }
 
   static MappedStatement prepareComplexSelectBlogMappedStatement(final Configuration config) {
-    final SqlSource sqlSource = new StaticSqlSource(config, """
+    final SqlSource sqlSource = new StaticSqlSource("""
         SELECT b.id \
              , b.author_id \
              , b.title \
@@ -313,7 +312,7 @@ final class ExecutorTestHelper {
   }
 
   static MappedStatement prepareSelectBlogByIdAndAuthor(final Configuration config) {
-    final SqlSource sqlSource = new StaticSqlSource(config, """
+    final SqlSource sqlSource = new StaticSqlSource("""
         SELECT b.id\
              , b.author_id\
              , b.title\
@@ -347,7 +346,7 @@ final class ExecutorTestHelper {
   }
 
   static MappedStatement prepareSelectPostsForBlogMappedStatement(final Configuration config) {
-    final SqlSource sqlSource = new StaticSqlSource(config, """
+    final SqlSource sqlSource = new StaticSqlSource("""
         SELECT p.id\
              , p.created_on\
              , p.blog_id\
@@ -398,7 +397,7 @@ final class ExecutorTestHelper {
   }
 
   static MappedStatement prepareSelectPostMappedStatement(final Configuration config) {
-    final SqlSource sqlSource = new StaticSqlSource(config, """
+    final SqlSource sqlSource = new StaticSqlSource("""
         SELECT p.id\
              , p.created_on\
              , p.blog_id\
@@ -450,7 +449,7 @@ final class ExecutorTestHelper {
   }
 
   static MappedStatement prepareSelectPostWithBlogByAuthorMappedStatement(final Configuration config) {
-    final SqlSource sqlSource = new StaticSqlSource(config, """
+    final SqlSource sqlSource = new StaticSqlSource("""
         SELECT p.id\
              , p.created_on\
              , p.blog_id\
@@ -509,10 +508,10 @@ final class ExecutorTestHelper {
     final ResultMap rm = ResultMap.create("keyResultMap", Integer.class);
 
     MappedStatement kms = new MappedStatement.Builder(config, "insertAuthor!selectKey",
-        new StaticSqlSource(config, "SELECT 123456 as id FROM SYSIBM.SYSDUMMY1"), SqlCommandType.SELECT)
-            .keyProperty("id").resultMap(rm).build();
+        new StaticSqlSource("SELECT 123456 as id FROM SYSIBM.SYSDUMMY1"), SqlCommandType.SELECT).keyProperty("id")
+            .resultMap(rm).build();
     config.addMappedStatement(kms);
-    return new MappedStatement.Builder(config, "insertAuthor", new DynamicSqlSource(config, new TextSqlNode(
+    return new MappedStatement.Builder(config, "insertAuthor", new DynamicSqlSource(new TextSqlNode(
         "INSERT INTO author (id,username,password,email,bio,favourite_section) values(#{id},#{username},#{password},#{email},#{bio:VARCHAR},#{favouriteSection})")),
         SqlCommandType.INSERT)
     // @formatter:off

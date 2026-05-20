@@ -34,20 +34,18 @@ public class StaticSqlSource implements SqlSource {
 
   private final String sql;
   private final List<ParameterMapping> parameterMappings;
-  private final Configuration configuration;
 
-  public StaticSqlSource(Configuration configuration, String sql) {
-    this(configuration, sql, null);
+  public StaticSqlSource(String sql) {
+    this(sql, null);
   }
 
-  public StaticSqlSource(Configuration configuration, String sql, List<ParameterMapping> parameterMappings) {
+  public StaticSqlSource(String sql, List<ParameterMapping> parameterMappings) {
     this.sql = sql;
     this.parameterMappings = parameterMappings;
-    this.configuration = configuration;
   }
 
   @Override
-  public BoundSql getBoundSql(Object parameterObject, ParamType paramType) {
+  public BoundSql getBoundSql(Configuration configuration, Object parameterObject, ParamType paramType) {
     if (paramType == ParamType.INLINED) {
       if (!parameterMappings.isEmpty()) {
         MetaObject metaObject = configuration.newMetaObject(parameterObject);

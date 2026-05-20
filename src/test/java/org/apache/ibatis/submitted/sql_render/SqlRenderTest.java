@@ -80,7 +80,7 @@ public class SqlRenderTest {
                AND (name LIKE '%example.com%' OR email LIKE '%example.com%')
                ORDER BY id ASC
           """);
-      BoundSql boundSql = sqlSource.getBoundSql(request, ParamType.INLINED);
+      BoundSql boundSql = sqlSource.getBoundSql(configuration, request, ParamType.INLINED);
       Assertions.assertEquals(expected, SqlSourceBuilder.removeExtraWhitespaces(boundSql.getSql()));
     }
 
@@ -99,7 +99,7 @@ public class SqlRenderTest {
                           AND (name LIKE #{searchPattern} OR email LIKE #{searchPattern})
                           ORDER BY id ASC
           """);
-      BoundSql boundSql = sqlSource.getBoundSql(request, ParamType.NAMED);
+      BoundSql boundSql = sqlSource.getBoundSql(configuration, request, ParamType.NAMED);
       Assertions.assertEquals(expected, SqlSourceBuilder.removeExtraWhitespaces(boundSql.getSql()));
       assertParameterMappings(boundSql);
     }
@@ -115,7 +115,7 @@ public class SqlRenderTest {
                           ORDER BY id ASC
           """);
 
-      BoundSql boundSql = sqlSource.getBoundSql(request, ParamType.INDEXED);
+      BoundSql boundSql = sqlSource.getBoundSql(configuration, request, ParamType.INDEXED);
       Assertions.assertEquals(expected, SqlSourceBuilder.removeExtraWhitespaces(boundSql.getSql()));
       assertParameterMappings(boundSql);
     }
@@ -211,13 +211,13 @@ public class SqlRenderTest {
            SELECT * FROM users
            WHERE status = 'INACTIVE'
           """);
-      BoundSql boundSql = sqlSource.getBoundSql(request, ParamType.INLINED);
+      BoundSql boundSql = sqlSource.getBoundSql(configuration, request, ParamType.INLINED);
       Assertions.assertEquals(expected, SqlSourceBuilder.removeExtraWhitespaces(boundSql.getSql()));
     }
 
     // ParamType.NAMED
     {
-      when(() -> sqlSource.getBoundSql(request, ParamType.NAMED));
+      when(() -> sqlSource.getBoundSql(configuration, request, ParamType.NAMED));
       then(caughtException()).isInstanceOf(IllegalArgumentException.class)
           .hasMessageContaining("Named parameter type is not supported.");
     }
@@ -229,7 +229,7 @@ public class SqlRenderTest {
            WHERE status = ?
           """);
 
-      BoundSql boundSql = sqlSource.getBoundSql(request, ParamType.INDEXED);
+      BoundSql boundSql = sqlSource.getBoundSql(configuration, request, ParamType.INDEXED);
       Assertions.assertEquals(expected, SqlSourceBuilder.removeExtraWhitespaces(boundSql.getSql()));
     }
   }

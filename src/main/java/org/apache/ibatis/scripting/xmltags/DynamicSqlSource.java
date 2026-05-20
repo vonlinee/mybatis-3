@@ -27,28 +27,26 @@ import org.apache.ibatis.session.Configuration;
  */
 public class DynamicSqlSource implements SqlSource {
 
-  private final Configuration configuration;
   private final SqlNode rootSqlNode;
   private final ParamNameResolver paramNameResolver;
 
-  public DynamicSqlSource(Configuration configuration, SqlNode rootSqlNode) {
-    this(configuration, rootSqlNode, null);
+  public DynamicSqlSource(SqlNode rootSqlNode) {
+    this(rootSqlNode, null);
   }
 
-  public DynamicSqlSource(Configuration configuration, SqlNode rootSqlNode, ParamNameResolver paramNameResolver) {
-    this.configuration = configuration;
+  public DynamicSqlSource(SqlNode rootSqlNode, ParamNameResolver paramNameResolver) {
     this.rootSqlNode = rootSqlNode;
     this.paramNameResolver = paramNameResolver;
   }
 
   @Override
-  public BoundSql getBoundSql(Object parameterObject, ParamType paramType) {
+  public BoundSql getBoundSql(Configuration configuration, Object parameterObject, ParamType paramType) {
     DynamicContext context = new DynamicContext(configuration, parameterObject, null, paramNameResolver, true,
         paramType);
     rootSqlNode.apply(context);
     String sql = context.getSql();
     SqlSource sqlSource = SqlSourceBuilder.buildSqlSource(configuration, sql, context.getParameterMappings());
-    BoundSql boundSql = sqlSource.getBoundSql(parameterObject, paramType);
+    BoundSql boundSql = sqlSource.getBoundSql(configuration, parameterObject, paramType);
     context.getBindings().forEach(boundSql::setAdditionalParameter);
     return boundSql;
   }

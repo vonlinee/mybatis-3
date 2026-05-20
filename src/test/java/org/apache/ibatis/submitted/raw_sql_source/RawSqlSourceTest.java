@@ -74,7 +74,8 @@ class RawSqlSourceTest {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Assertions.assertEquals(sqlSource,
           sqlSession.getConfiguration().getMappedStatement(statement).getSqlSource().getClass());
-      String sql = sqlSession.getConfiguration().getMappedStatement(statement).getSqlSource().getBoundSql('?').getSql();
+      String sql = sqlSession.getConfiguration().getMappedStatement(statement).getSqlSource()
+          .getBoundSql(sqlSessionFactory.getConfiguration(), '?').getSql();
       Assertions.assertEquals("select * from users where id = ?", sql);
       User user = sqlSession.selectOne(statement, 1);
       Assertions.assertEquals("User1", user.getName());
@@ -86,7 +87,7 @@ class RawSqlSourceTest {
   void testShrinkWhitespacesInSql(String input, boolean shrinkWhitespaces, String expected) {
     Configuration config = new Configuration();
     config.setShrinkWhitespacesInSql(shrinkWhitespaces);
-    String actual = new RawSqlSource(config, input, null).getBoundSql(null).getSql();
+    String actual = new RawSqlSource(config, input, null).getBoundSql(config, null).getSql();
     assertEquals(expected, actual);
   }
 
@@ -103,7 +104,7 @@ class RawSqlSourceTest {
   void testShrinkWhitespacesInSql_SqlNode(SqlNode input, boolean shrinkWhitespaces, String expected) {
     Configuration config = new Configuration();
     config.setShrinkWhitespacesInSql(shrinkWhitespaces);
-    String actual = new RawSqlSource(config, input, null).getBoundSql(null).getSql();
+    String actual = new RawSqlSource(config, input, null).getBoundSql(config, null).getSql();
     assertEquals(expected, actual);
   }
 

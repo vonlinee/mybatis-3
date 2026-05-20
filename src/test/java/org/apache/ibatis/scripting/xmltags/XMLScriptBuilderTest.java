@@ -35,9 +35,11 @@ class XMLScriptBuilderTest {
         <if test="1==1">and id = 1</if><if test="1==1">and id > 0</if>
         </script>
         """;
-    SqlSource sqlSource = new XMLScriptBuilder(new Configuration(), new XPathParser(xml).evalNode("/script"))
+
+    Configuration configuration = new Configuration();
+    SqlSource sqlSource = new XMLScriptBuilder(configuration, new XPathParser(xml).evalNode("/script"))
         .parseScriptNode();
-    assertThat(sqlSource.getBoundSql(1).getSql()).containsPattern(
+    assertThat(sqlSource.getBoundSql(configuration, 1).getSql()).containsPattern(
         "(?m)^\\s*select \\* from user\\s+WHERE\\s+id = 1\\s+and id > 0\\s+and id = 1\\s+and id > 0\\s*$");
   }
 
@@ -65,11 +67,13 @@ class XMLScriptBuilderTest {
         WHERE id <in collection="ids"/>
         </script>
         """;
-    SqlSource sqlSource = new XMLScriptBuilder(new Configuration(), new XPathParser(xml).evalNode("/script"))
+
+    Configuration configuration = new Configuration();
+    SqlSource sqlSource = new XMLScriptBuilder(configuration, new XPathParser(xml).evalNode("/script"))
         .parseScriptNode();
     java.util.Map<String, Object> params = new java.util.HashMap<>();
     params.put("ids", java.util.Arrays.asList(1, 2, 3));
-    assertThat(sqlSource.getBoundSql(params).getSql()).containsPattern(
+    assertThat(sqlSource.getBoundSql(configuration, params).getSql()).containsPattern(
         "(?m)^\\s*SELECT \\* FROM users\\s+WHERE id\\s+IN\\s*\\(\\s*\\?\\s*,\\s*\\?\\s*,\\s*\\?\\s*\\)\\s*$");
   }
 
@@ -81,11 +85,13 @@ class XMLScriptBuilderTest {
         WHERE id <in collection="ids" item="id">#{id}</in>
         </script>
         """;
-    SqlSource sqlSource = new XMLScriptBuilder(new Configuration(), new XPathParser(xml).evalNode("/script"))
+
+    Configuration configuration = new Configuration();
+    SqlSource sqlSource = new XMLScriptBuilder(configuration, new XPathParser(xml).evalNode("/script"))
         .parseScriptNode();
     java.util.Map<String, Object> params = new java.util.HashMap<>();
     params.put("ids", java.util.Arrays.asList(1, 2, 3));
-    assertThat(sqlSource.getBoundSql(params).getSql()).containsPattern(
+    assertThat(sqlSource.getBoundSql(configuration, params).getSql()).containsPattern(
         "(?m)^\\s*SELECT \\* FROM users\\s+WHERE id\\s+IN\\s*\\(\\s*\\?\\s*,\\s*\\?\\s*,\\s*\\?\\s*\\)\\s*$");
   }
 }

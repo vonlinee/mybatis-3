@@ -59,7 +59,7 @@ class DefaultResultSetHandlerTest2 {
   void shouldNotCallNextOnClosedResultSet_SimpleResult() throws Exception {
     final Configuration config = new Configuration();
     final MappedStatement ms = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT)
+        new StaticSqlSource("some select statement"), SqlCommandType.SELECT)
             .resultMap(
                 ResultMap.builder(config, "testMap", HashMap.class).addMapping("id", "id", Integer.class).build())
             .build();
@@ -92,7 +92,7 @@ class DefaultResultSetHandlerTest2 {
 
     config.addResultMap(nestedResultMap);
     final MappedStatement ms = new MappedStatement.Builder(config, "selectPerson",
-        new StaticSqlSource(config, "select person..."), SqlCommandType.SELECT)
+        new StaticSqlSource("select person..."), SqlCommandType.SELECT)
             .resultMap(ResultMap.builder(config, "personMap", HashMap.class).addMapping("id", "id", Integer.class)
                 .addNestedMapping("roles", "roleMap").build())
             .resultOrdered(true).build();

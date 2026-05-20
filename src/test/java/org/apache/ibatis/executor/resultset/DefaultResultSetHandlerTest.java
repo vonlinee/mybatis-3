@@ -127,7 +127,7 @@ class DefaultResultSetHandlerTest {
 
   MappedStatement getMappedStatement() {
     final Configuration config = new Configuration();
-    return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource(config, "some select statement"),
+    return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource("some select statement"),
         SqlCommandType.SELECT).resultMap(
             ResultMap.builder(config, "testMap", HashMap.class).addMapping("cOlUmN1", "CoLuMn1", Integer.class).build())
             .build();

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -88,13 +88,13 @@ class ConfigurationTest {
 
     configuration.addMappedStatement(
         new MappedStatement.Builder(configuration, "org.apache.ibatis.submitted.DemoMapper1.selectById",
-            new StaticSqlSource(configuration, "select * from test where id = 1"), SqlCommandType.SELECT).build());
+            new StaticSqlSource("select * from test where id = 1"), SqlCommandType.SELECT).build());
     configuration
         .addMappedStatement(new MappedStatement.Builder(configuration, "org.apache.ibatis.submitted.DemoMapper1.test",
-            new StaticSqlSource(configuration, "select * from test"), SqlCommandType.SELECT).build());
+            new StaticSqlSource("select * from test"), SqlCommandType.SELECT).build());
     configuration
         .addMappedStatement(new MappedStatement.Builder(configuration, "org.apache.ibatis.submitted.DemoMapper2.test",
-            new StaticSqlSource(configuration, "select * from test"), SqlCommandType.SELECT).build());
+            new StaticSqlSource("select * from test"), SqlCommandType.SELECT).build());
 
     Assertions.assertThat(configuration.getMappedStatement("selectById")).isNotNull();
     Assertions.assertThat(configuration.getMappedStatement("org.apache.ibatis.submitted.DemoMapper1.test")).isNotNull();

@@ -68,11 +68,11 @@ public class RawSqlSource implements SqlSource {
   }
 
   @Override
-  public BoundSql getBoundSql(Object parameterObject, ParamType paramType) {
+  public BoundSql getBoundSql(Configuration configuration, Object parameterObject, ParamType paramType) {
     if (paramType == ParamType.NAMED) {
       throw new IllegalArgumentException("Named parameter type is not supported.");
     }
-    return sqlSource.getBoundSql(parameterObject, paramType);
+    return sqlSource.getBoundSql(configuration, parameterObject, paramType);
   }
 
 }

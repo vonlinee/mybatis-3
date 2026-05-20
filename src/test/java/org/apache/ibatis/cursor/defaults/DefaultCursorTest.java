@@ -103,7 +103,7 @@ class DefaultCursorTest {
     ResultMap nestedResultMap = ResultMap.builder(config, "roleMap", HashMap.class)
         .addMapping("role", "role", String.class).build();
     config.addResultMap(nestedResultMap);
-    return new MappedStatement.Builder(config, "selectPerson", new StaticSqlSource(config, "select person..."),
+    return new MappedStatement.Builder(config, "selectPerson", new StaticSqlSource("select person..."),
         SqlCommandType.SELECT)
             .resultMap(ResultMap.builder(config, "personMap", HashMap.class).addMapping("id", "id", Integer.class)
                 .addNestedMapping("roles", "roleMap").build())
