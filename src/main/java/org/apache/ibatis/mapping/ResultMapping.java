@@ -38,7 +38,8 @@ public class ResultMapping {
   private String nestedQueryId;
   private Set<String> notNullColumns;
   private String columnPrefix;
-  private List<ResultFlag> flags;
+  /** Bit-mask of {@link ResultFlag} values applied to this mapping. */
+  private int flags;
   private List<ResultMapping> composites;
   private String resultSet;
   private String foreignColumn;
@@ -70,7 +71,7 @@ public class ResultMapping {
 
     public Builder(String property, boolean lazy) {
       resultMapping.property = property;
-      resultMapping.flags = new ArrayList<>();
+      resultMapping.flags = ResultFlag.NONE;
       resultMapping.composites = new ArrayList<>();
       resultMapping.lazy = lazy;
     }
@@ -78,7 +79,7 @@ public class ResultMapping {
     public Builder(ResultMapping otherMapping) {
       this(otherMapping.property, otherMapping.lazy);
 
-      resultMapping.flags.addAll(otherMapping.flags);
+      resultMapping.flags = otherMapping.flags;
       resultMapping.composites.addAll(otherMapping.composites);
 
       resultMapping.column = otherMapping.column;
@@ -134,7 +135,15 @@ public class ResultMapping {
       return this;
     }
 
-    public Builder flags(List<ResultFlag> flags) {
+    /**
+     * Sets the flag bit-mask for this mapping.
+     *
+     * @param flags
+     *          a bit-mask built from {@link ResultFlag#mask()} values (or {@link ResultFlag#NONE})
+     *
+     * @return this builder
+     */
+    public Builder flags(int flags) {
       resultMapping.flags = flags;
       return this;
     }
@@ -161,7 +170,6 @@ public class ResultMapping {
 
     public ResultMapping build() {
       // lock down collections
-      resultMapping.flags = CollectionUtils.immutableList(resultMapping.flags);
       resultMapping.composites = CollectionUtils.immutableList(resultMapping.composites);
       validate();
       return resultMapping;
@@ -236,8 +244,23 @@ public class ResultMapping {
     return columnPrefix;
   }
 
-  public List<ResultFlag> getFlags() {
+  /**
+   * @return the bit-mask of {@link ResultFlag} values applied to this mapping; {@link ResultFlag#NONE} if none.
+   */
+  public int getFlags() {
     return flags;
+  }
+
+  /**
+   * Convenience method equivalent to {@link ResultFlag#has(int, ResultFlag)}.
+   *
+   * @param flag
+   *          the flag to test
+   *
+   * @return {@code true} if {@code flag} is set on this mapping
+   */
+  public boolean hasFlag(ResultFlag flag) {
+    return ResultFlag.has(flags, flag);
   }
 
   public List<ResultMapping> getComposites() {

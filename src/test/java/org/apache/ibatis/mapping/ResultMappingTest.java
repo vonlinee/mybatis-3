@@ -16,8 +16,10 @@
 package org.apache.ibatis.mapping;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -94,5 +96,110 @@ class ResultMappingTest {
       Assertions.assertSame(resultMap.getMappedColumns(), Collections.emptySet());
       Assertions.assertSame(resultMap.getMappedProperties(), Collections.emptySet());
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // ResultFlag bit-enum tests
+  // ---------------------------------------------------------------------------
+
+  @Test
+  void shouldDefineUniquePowerOfTwoMasksForEachFlag() {
+    int idMask = ResultFlag.ID.mask();
+    int ctorMask = ResultFlag.CONSTRUCTOR.mask();
+
+    assertEquals(0x1, idMask);
+    assertEquals(0x2, ctorMask);
+    // each mask must be a single bit (power of two)
+    assertEquals(0, idMask & (idMask - 1));
+    assertEquals(0, ctorMask & (ctorMask - 1));
+    // masks must not overlap
+    assertEquals(0, idMask & ctorMask);
+    assertEquals(0, ResultFlag.NONE);
+  }
+
+  @Test
+  void shouldCombineFlagsViaBitwiseOr() {
+    assertEquals(ResultFlag.NONE, ResultFlag.of());
+    assertEquals(ResultFlag.NONE, ResultFlag.of((ResultFlag[]) null));
+    assertEquals(ResultFlag.ID.mask(), ResultFlag.of(ResultFlag.ID));
+    assertEquals(ResultFlag.ID.mask() | ResultFlag.CONSTRUCTOR.mask(),
+        ResultFlag.of(ResultFlag.ID, ResultFlag.CONSTRUCTOR));
+    // idempotent: passing the same flag twice yields the same mask
+    assertEquals(ResultFlag.ID.mask(), ResultFlag.of(ResultFlag.ID, ResultFlag.ID));
+  }
+
+  @Test
+  void shouldSetBitWithoutClearingOthersWhenAddingFlag() {
+    int mask = ResultFlag.NONE;
+    mask = ResultFlag.add(mask, ResultFlag.ID);
+    assertEquals(ResultFlag.ID.mask(), mask);
+
+    mask = ResultFlag.add(mask, ResultFlag.CONSTRUCTOR);
+    assertEquals(ResultFlag.ID.mask() | ResultFlag.CONSTRUCTOR.mask(), mask);
+
+    // adding an already-set flag is a no-op
+    int sameMask = ResultFlag.add(mask, ResultFlag.ID);
+    assertEquals(mask, sameMask);
+  }
+
+  @Test
+  void shouldDetectSetBitsWithHas() {
+    assertFalse(ResultFlag.has(ResultFlag.NONE, ResultFlag.ID));
+    assertFalse(ResultFlag.has(ResultFlag.NONE, ResultFlag.CONSTRUCTOR));
+
+    int idOnly = ResultFlag.ID.mask();
+    assertTrue(ResultFlag.has(idOnly, ResultFlag.ID));
+    assertFalse(ResultFlag.has(idOnly, ResultFlag.CONSTRUCTOR));
+
+    int combined = ResultFlag.of(ResultFlag.ID, ResultFlag.CONSTRUCTOR);
+    assertTrue(ResultFlag.has(combined, ResultFlag.ID));
+    assertTrue(ResultFlag.has(combined, ResultFlag.CONSTRUCTOR));
+  }
+
+  @Test
+  void shouldDefaultFlagsToNoneWhenNotSet() {
+    ResultMapping rm = new ResultMapping.Builder(new Configuration(), "id", "id", int.class).build();
+    assertEquals(ResultFlag.NONE, rm.getFlags());
+    assertFalse(rm.hasFlag(ResultFlag.ID));
+    assertFalse(rm.hasFlag(ResultFlag.CONSTRUCTOR));
+  }
+
+  @Test
+  void shouldStoreIntFlagMaskOnResultMapping() {
+    int mask = ResultFlag.of(ResultFlag.ID, ResultFlag.CONSTRUCTOR);
+    ResultMapping rm = new ResultMapping.Builder(new Configuration(), "id", "id", int.class).flags(mask).build();
+
+    assertEquals(mask, rm.getFlags());
+    assertTrue(rm.hasFlag(ResultFlag.ID));
+    assertTrue(rm.hasFlag(ResultFlag.CONSTRUCTOR));
+  }
+
+  @Test
+  void shouldDelegateHasFlagToStaticHelper() {
+    ResultMapping rm = new ResultMapping.Builder(new Configuration(), "id", "id", int.class)
+        .flags(ResultFlag.ID.mask()).build();
+
+    assertEquals(ResultFlag.has(rm.getFlags(), ResultFlag.ID), rm.hasFlag(ResultFlag.ID));
+    assertEquals(ResultFlag.has(rm.getFlags(), ResultFlag.CONSTRUCTOR), rm.hasFlag(ResultFlag.CONSTRUCTOR));
+  }
+
+  @Test
+  void shouldClassifyResultMappingsByBitMaskFlags() {
+    Configuration config = new Configuration();
+    // @formatter:off
+    ResultMap resultMap = ResultMap.builder(config, "rm", HashMap.class)
+        .addMapping("id",   "id",   int.class,    ResultFlag.ID.mask())
+        .addMapping("name", "name", String.class, ResultFlag.CONSTRUCTOR.mask())
+        .addMapping("pk",   "pk",   int.class,    ResultFlag.of(ResultFlag.ID, ResultFlag.CONSTRUCTOR))
+        .addMapping("note", "note", String.class)
+        .build();
+    // @formatter:on
+
+    // 2 id mappings: "id" and "pk"
+    assertEquals(2, resultMap.getIdResultMappings().size());
+    // 2 constructor mappings: "name" and "pk"
+    assertEquals(2, resultMap.getConstructorResultMappings().size());
+    // remaining property mappings: "id" and "note" (note: "pk" is constructor, not property)
+    assertEquals(2, resultMap.getPropertyResultMappings().size());
   }
 }

@@ -119,14 +119,42 @@ public class ResultMap {
       return this;
     }
 
-    public Builder addMapping(String property, String column, Type type, Class<?> javaType, ResultFlag... flags) {
+    /**
+     * Appends a property-to-column mapping using the given Java {@link Type} (for {@link TypeHandler} lookup) plus a
+     * fixed {@code javaType} stored on the mapping. Equivalent to calling the {@code int flags} overload with
+     * {@link ResultFlag#NONE}.
+     *
+     * @return this builder
+     */
+    public Builder addMapping(String property, String column, Type type, Class<?> javaType) {
+      return addMapping(property, column, type, javaType, ResultFlag.NONE);
+    }
+
+    /**
+     * Appends a property-to-column mapping using the given Java {@link Type} (for {@link TypeHandler} lookup) plus a
+     * fixed {@code javaType} stored on the mapping.
+     *
+     * @param flags
+     *          a bit-mask built from {@link ResultFlag#mask()} values (or {@link ResultFlag#NONE}); combine multiple
+     *          flags via bitwise OR or {@link ResultFlag#of(ResultFlag...)}
+     *
+     * @return this builder
+     */
+    public Builder addMapping(String property, String column, Type type, Class<?> javaType, int flags) {
       ResultMapping.Builder rm = new ResultMapping.Builder(config, property, column, registry.getTypeHandler(type));
-      if (flags.length > 0) {
-        rm.flags(new ArrayList<>(Arrays.asList(flags)));
-      }
+      rm.flags(flags);
       rm.javaType(javaType);
       resultMap.resultMappings.add(rm.build());
       return this;
+    }
+
+    /**
+     * Appends a simple property-to-column mapping using the supplied {@link TypeHandler}, with no flags.
+     *
+     * @return this builder
+     */
+    public Builder addMapping(String property, String column, TypeHandler<?> typeHandler) {
+      return addMapping(property, column, typeHandler, ResultFlag.NONE);
     }
 
     /**
@@ -139,17 +167,25 @@ public class ResultMap {
      * @param typeHandler
      *          the type handler for this mapping
      * @param flags
-     *          zero or more {@link ResultFlag}s (e.g. {@link ResultFlag#ID}, {@link ResultFlag#CONSTRUCTOR})
+     *          a bit-mask built from {@link ResultFlag#mask()} values (or {@link ResultFlag#NONE})
      *
      * @return this builder
      */
-    public Builder addMapping(String property, String column, TypeHandler<?> typeHandler, ResultFlag... flags) {
+    public Builder addMapping(String property, String column, TypeHandler<?> typeHandler, int flags) {
       ResultMapping.Builder rm = new ResultMapping.Builder(config, property, column, typeHandler);
-      if (flags.length > 0) {
-        rm.flags(new ArrayList<>(Arrays.asList(flags)));
-      }
+      rm.flags(flags);
       resultMap.resultMappings.add(rm.build());
       return this;
+    }
+
+    /**
+     * Appends a simple property-to-column mapping whose {@link TypeHandler} is resolved from the
+     * {@link TypeHandlerRegistry} by the given Java {@link Type}, with no flags.
+     *
+     * @return this builder
+     */
+    public Builder addMapping(String property, String column, Type type) {
+      return addMapping(property, column, type, ResultFlag.NONE);
     }
 
     /**
@@ -165,17 +201,25 @@ public class ResultMap {
      * @param type
      *          the Java type used to look up the {@link TypeHandler} from the registry
      * @param flags
-     *          zero or more {@link ResultFlag}s (e.g. {@link ResultFlag#ID}, {@link ResultFlag#CONSTRUCTOR})
+     *          a bit-mask built from {@link ResultFlag#mask()} values (or {@link ResultFlag#NONE})
      *
      * @return this builder
      */
-    public Builder addMapping(String property, String column, Type type, ResultFlag... flags) {
+    public Builder addMapping(String property, String column, Type type, int flags) {
       ResultMapping.Builder rm = new ResultMapping.Builder(config, property, column, registry.getTypeHandler(type));
-      if (flags.length > 0) {
-        rm.flags(new ArrayList<>(Arrays.asList(flags)));
-      }
+      rm.flags(flags);
       resultMap.resultMappings.add(rm.build());
       return this;
+    }
+
+    /**
+     * Appends a simple property-to-column mapping resolved by Java type (stored as {@code javaType} on the mapping),
+     * with no flags.
+     *
+     * @return this builder
+     */
+    public Builder addMapping(String property, String column, Class<?> javaType) {
+      return addMapping(property, column, javaType, ResultFlag.NONE);
     }
 
     /**
@@ -190,15 +234,13 @@ public class ResultMap {
      * @param javaType
      *          the Java type stored directly as {@code javaType} on the mapping
      * @param flags
-     *          zero or more {@link ResultFlag}s
+     *          a bit-mask built from {@link ResultFlag#mask()} values (or {@link ResultFlag#NONE})
      *
      * @return this builder
      */
-    public Builder addMapping(String property, String column, Class<?> javaType, ResultFlag... flags) {
+    public Builder addMapping(String property, String column, Class<?> javaType, int flags) {
       ResultMapping.Builder rm = new ResultMapping.Builder(config, property, column, javaType);
-      if (flags.length > 0) {
-        rm.flags(new ArrayList<>(Arrays.asList(flags)));
-      }
+      rm.flags(flags);
       resultMap.resultMappings.add(rm.build());
       return this;
     }
@@ -250,7 +292,7 @@ public class ResultMap {
           resultMap.mappedProperties.add(property);
         }
 
-        if (resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR)) {
+        if (resultMapping.hasFlag(ResultFlag.CONSTRUCTOR)) {
           resultMap.constructorResultMappings.add(resultMapping);
 
           // #101
@@ -262,7 +304,7 @@ public class ResultMap {
           resultMap.propertyResultMappings.add(resultMapping);
         }
 
-        if (resultMapping.getFlags().contains(ResultFlag.ID)) {
+        if (resultMapping.hasFlag(ResultFlag.ID)) {
           resultMap.idResultMappings.add(resultMapping);
         }
       }

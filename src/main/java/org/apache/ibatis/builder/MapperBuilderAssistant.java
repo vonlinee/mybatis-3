@@ -170,13 +170,13 @@ public class MapperBuilderAssistant extends BaseBuilder {
       // Remove parent constructor if this resultMap declares a constructor.
       boolean declaresConstructor = false;
       for (ResultMapping resultMapping : resultMappings) {
-        if (resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR)) {
+        if (resultMapping.hasFlag(ResultFlag.CONSTRUCTOR)) {
           declaresConstructor = true;
           break;
         }
       }
       if (declaresConstructor) {
-        extendedResultMappings.removeIf(resultMapping -> resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR));
+        extendedResultMappings.removeIf(resultMapping -> resultMapping.hasFlag(ResultFlag.CONSTRUCTOR));
       }
       resultMappings.addAll(extendedResultMappings);
     }
@@ -189,7 +189,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
   public Discriminator buildDiscriminator(Class<?> resultType, String column, Class<?> javaType, JdbcType jdbcType,
       Class<? extends TypeHandler<?>> typeHandler, Map<String, String> discriminatorMap) {
     ResultMapping resultMapping = buildResultMapping(resultType, null, column, javaType, jdbcType, null, null, null,
-        null, typeHandler, new ArrayList<>(), null, null, false);
+        null, typeHandler, ResultFlag.NONE, null, null, false);
     Map<String, String> namespaceDiscriminatorMap = new HashMap<>();
     for (Map.Entry<String, String> e : discriminatorMap.entrySet()) {
       String resultMap = e.getValue();
@@ -271,8 +271,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
   public ResultMapping buildResultMapping(Class<?> resultType, String property, String column, Class<?> javaType,
       JdbcType jdbcType, String nestedSelect, String nestedResultMap, String notNullColumn, String columnPrefix,
-      Class<? extends TypeHandler<?>> typeHandler, List<ResultFlag> flags, String resultSet, String foreignColumn,
-      boolean lazy) {
+      Class<? extends TypeHandler<?>> typeHandler, int flags, String resultSet, String foreignColumn, boolean lazy) {
     Entry<Type, Class<?>> setterType = resolveSetterType(resultType, property, javaType);
     TypeHandler<?> typeHandlerInstance = resolveTypeHandler(setterType.getKey(), jdbcType, typeHandler);
     List<ResultMapping> composites;
@@ -284,7 +283,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return new ResultMapping.Builder(configuration, property, column, setterType.getValue()).jdbcType(jdbcType)
         .nestedQueryId(applyCurrentNamespace(nestedSelect, true))
         .nestedResultMapId(applyCurrentNamespace(nestedResultMap, true)).resultSet(resultSet)
-        .typeHandler(typeHandlerInstance).flags(flags == null ? new ArrayList<>() : flags).composites(composites)
+        .typeHandler(typeHandlerInstance).flags(flags).composites(composites)
         .notNullColumns(parseMultipleColumnNames(notNullColumn)).columnPrefix(columnPrefix).foreignColumn(foreignColumn)
         .lazy(lazy).build();
   }

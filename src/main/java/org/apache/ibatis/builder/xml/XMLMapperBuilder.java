@@ -230,9 +230,9 @@ public class XMLMapperBuilder extends BaseBuilder {
       } else if ("discriminator".equals(resultChild.getName())) {
         discriminator = processDiscriminatorElement(resultChild, typeClass, resultMappings);
       } else {
-        List<ResultFlag> flags = new ArrayList<>();
+        int flags = ResultFlag.NONE;
         if ("id".equals(resultChild.getName())) {
-          flags.add(ResultFlag.ID);
+          flags = ResultFlag.add(flags, ResultFlag.ID);
         }
         resultMappings.add(buildResultMappingFromContext(resultChild, typeClass, flags));
       }
@@ -267,10 +267,9 @@ public class XMLMapperBuilder extends BaseBuilder {
 
     final List<ResultMapping> mappings = new ArrayList<>();
     for (XNode argChild : argChildren) {
-      List<ResultFlag> flags = new ArrayList<>();
-      flags.add(ResultFlag.CONSTRUCTOR);
+      int flags = ResultFlag.CONSTRUCTOR.mask();
       if ("idArg".equals(argChild.getName())) {
-        flags.add(ResultFlag.ID);
+        flags = ResultFlag.add(flags, ResultFlag.ID);
       }
 
       mappings.add(buildResultMappingFromContext(argChild, resultType, flags));
@@ -334,9 +333,9 @@ public class XMLMapperBuilder extends BaseBuilder {
     return context.getStringAttribute("databaseId") == null;
   }
 
-  private ResultMapping buildResultMappingFromContext(XNode context, Class<?> resultType, List<ResultFlag> flags) {
+  private ResultMapping buildResultMappingFromContext(XNode context, Class<?> resultType, int flags) {
     String property;
-    if (flags.contains(ResultFlag.CONSTRUCTOR)) {
+    if (ResultFlag.has(flags, ResultFlag.CONSTRUCTOR)) {
       property = context.getStringAttribute("name");
     } else {
       property = context.getStringAttribute("property");

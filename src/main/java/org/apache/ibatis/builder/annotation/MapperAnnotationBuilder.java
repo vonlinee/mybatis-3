@@ -495,9 +495,9 @@ public class MapperAnnotationBuilder {
 
   private void applyResults(Result[] results, Class<?> resultType, List<ResultMapping> resultMappings) {
     for (Result result : results) {
-      List<ResultFlag> flags = new ArrayList<>();
+      int flags = ResultFlag.NONE;
       if (result.id()) {
-        flags.add(ResultFlag.ID);
+        flags = ResultFlag.add(flags, ResultFlag.ID);
       }
       @SuppressWarnings("unchecked")
       Class<? extends TypeHandler<?>> typeHandler = (Class<? extends TypeHandler<?>>) (result
@@ -571,10 +571,9 @@ public class MapperAnnotationBuilder {
       String resultMapId) {
     final List<ResultMapping> mappings = new ArrayList<>();
     for (Arg arg : args) {
-      List<ResultFlag> flags = new ArrayList<>();
-      flags.add(ResultFlag.CONSTRUCTOR);
+      int flags = ResultFlag.CONSTRUCTOR.mask();
       if (arg.id()) {
-        flags.add(ResultFlag.ID);
+        flags = ResultFlag.add(flags, ResultFlag.ID);
       }
       @SuppressWarnings("unchecked")
       Class<? extends TypeHandler<?>> typeHandler = (Class<? extends TypeHandler<?>>) (arg
