@@ -646,7 +646,8 @@ public class MapperAnnotationBuilder {
     }
 
     SqlProvider sqlProvider = new AnnotationSqlProvider(configuration, annotation, type, method);
-    return new ProviderSqlSource(assistant.getConfiguration(), type, method, sqlProvider);
+    Lang lang = method == null ? null : method.getAnnotation(Lang.class);
+    return new ProviderSqlSource(lang == null ? null : lang.value(), type, method, sqlProvider);
   }
 
   private SqlSource buildSqlSourceFromStrings(String[] strings, Class<?> parameterTypeClass,

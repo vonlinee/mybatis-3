@@ -17,13 +17,14 @@ package org.apache.ibatis.builder.annotation;
 
 import java.lang.reflect.Method;
 
-import org.apache.ibatis.annotations.Lang;
+import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.extension.ParamType;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
@@ -32,7 +33,9 @@ import org.apache.ibatis.session.Configuration;
 public class ProviderSqlSource implements SqlSource {
 
   private final Class<?> mapperType;
-  private final LanguageDriver languageDriver;
+
+  @Nullable
+  private final Class<? extends LanguageDriver> languageDriverClass;
   private final Method mapperMethod;
   private final SqlProvider sqlProvider;
   private final ParamNameResolver paramNameResolver;
@@ -40,8 +43,8 @@ public class ProviderSqlSource implements SqlSource {
   /**
    * Instantiates a new provider sql source.
    *
-   * @param configuration
-   *          the configuration
+   * @param languageDriverClass
+   *          the language driver class {@link LanguageDriver}
    * @param mapperType
    *          the mapper type
    * @param mapperMethod
@@ -49,12 +52,11 @@ public class ProviderSqlSource implements SqlSource {
    *
    * @since 3.5.3
    */
-  public ProviderSqlSource(Configuration configuration, Class<?> mapperType, Method mapperMethod,
-      SqlProvider sqlProvider) {
+  public ProviderSqlSource(@Nullable Class<? extends LanguageDriver> languageDriverClass, Class<?> mapperType,
+      Method mapperMethod, SqlProvider sqlProvider) {
     this.mapperType = mapperType;
     this.mapperMethod = mapperMethod;
-    Lang lang = mapperMethod == null ? null : mapperMethod.getAnnotation(Lang.class);
-    this.languageDriver = configuration.getLanguageDriver(lang == null ? null : lang.value());
+    this.languageDriverClass = languageDriverClass;
     this.sqlProvider = sqlProvider;
     this.paramNameResolver = sqlProvider.resolveParameterNames(mapperType, mapperMethod);
   }
@@ -65,6 +67,13 @@ public class ProviderSqlSource implements SqlSource {
         configuration.getDatabaseId(), paramNameResolver, parameterObject, paramType);
     String sql = sqlProvider.provideSql(providerContext);
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
+
+    LanguageDriver languageDriver = configuration.getLanguageDriver(this.languageDriverClass);
+
+    if (languageDriver == null) {
+      throw new BuilderException("language driver for type " + this.languageDriverClass + " not found.");
+    }
+
     SqlSource sqlSource = languageDriver.createSqlSource(configuration, sql, parameterType, paramNameResolver);
     return sqlSource.getBoundSql(configuration, parameterObject, paramType);
   }

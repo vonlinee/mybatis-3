@@ -265,7 +265,8 @@ class SqlProviderTest {
       Method mapperMethod, Class<? extends Annotation> providerType) {
     SqlProvider sqlProvider = new AnnotationSqlProvider(configuration, mapperMethod.getAnnotation(providerType),
         mapperType, mapperMethod);
-    return new ProviderSqlSource(configuration, mapperType, mapperMethod, sqlProvider);
+    Lang lang = mapperMethod.getAnnotation(Lang.class);
+    return new ProviderSqlSource(lang == null ? null : lang.value(), mapperType, mapperMethod, sqlProvider);
   }
 
   private ProviderSqlSource createProviderSqlSource(Class<?> mapperType, Method mapperMethod,
@@ -304,7 +305,7 @@ class SqlProviderTest {
     Test testAnnotation = getClass().getDeclaredMethod("notSqlProvider").getAnnotation(Test.class);
     try {
       AnnotationSqlProvider sqlProvider = new AnnotationSqlProvider(new Configuration(), testAnnotation, null, null);
-      new ProviderSqlSource(new Configuration(), null, null, sqlProvider);
+      new ProviderSqlSource(null, null, null, sqlProvider);
       fail();
     } catch (BuilderException e) {
       assertTrue(e.getMessage().contains(
