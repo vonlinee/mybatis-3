@@ -487,7 +487,7 @@ final class ExecutorTestHelper {
     // @formatter:off
     final ResultMap postResultMap = ResultMap.builder(config, "postResultMap", Post.class)
         .addMapping("id", "id", int.class, ResultFlag.ID.mask())
-        .addMapping(new ResultMapping.Builder(config, "blog").nestedQueryId("selectBlogByIdAndAuthor")
+        .addMapping(new ResultMapping.Builder("blog", config.isLazyLoadingEnabled()).nestedQueryId("selectBlogByIdAndAuthor")
           .composite("authorId", "author_id", int.class)
           .composite("blogId", "blog_id", int.class)
           .build())

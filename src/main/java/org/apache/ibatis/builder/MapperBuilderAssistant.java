@@ -280,8 +280,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
     } else {
       composites = parseCompositeColumnName(column);
     }
-    return new ResultMapping.Builder(configuration, property, column, setterType.getValue()).jdbcType(jdbcType)
-        .nestedQueryId(applyCurrentNamespace(nestedSelect, true))
+    return new ResultMapping.Builder(property, configuration.isLazyLoadingEnabled(), column, setterType.getValue())
+        .jdbcType(jdbcType).nestedQueryId(applyCurrentNamespace(nestedSelect, true))
         .nestedResultMapId(applyCurrentNamespace(nestedResultMap, true)).resultSet(resultSet)
         .typeHandler(typeHandlerInstance).flags(flags).composites(composites)
         .notNullColumns(parseMultipleColumnNames(notNullColumn)).columnPrefix(columnPrefix).foreignColumn(foreignColumn)
@@ -311,8 +311,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
       while (parser.hasMoreTokens()) {
         String property = parser.nextToken();
         String column = parser.nextToken();
-        ResultMapping complexResultMapping = new ResultMapping.Builder(configuration, property, column,
-            (TypeHandler<?>) null).build();
+        ResultMapping complexResultMapping = new ResultMapping.Builder(property, configuration.isLazyLoadingEnabled(),
+            column, (TypeHandler<?>) null).build();
         composites.add(complexResultMapping);
       }
     }

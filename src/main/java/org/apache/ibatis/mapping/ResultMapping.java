@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.ibatis.internal.util.CollectionUtils;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
@@ -50,23 +49,17 @@ public class ResultMapping {
 
   public static class Builder {
     private final ResultMapping resultMapping = new ResultMapping();
-    private Configuration config;
 
-    public Builder(Configuration configuration, String property, String column, TypeHandler<?> typeHandler) {
-      this(configuration, property);
+    public Builder(String property, boolean lazy, String column, TypeHandler<?> typeHandler) {
+      this(property, lazy);
       resultMapping.column = column;
       resultMapping.typeHandler = typeHandler;
     }
 
-    public Builder(Configuration configuration, String property, String column, Class<?> javaType) {
-      this(configuration, property);
+    public Builder(String property, boolean lazy, String column, Class<?> javaType) {
+      this(property, lazy);
       resultMapping.column = column;
       resultMapping.javaType = javaType;
-    }
-
-    public Builder(Configuration configuration, String property) {
-      this(property, configuration.isLazyLoadingEnabled());
-      this.config = configuration;
     }
 
     public Builder(String property, boolean lazy) {
@@ -159,7 +152,7 @@ public class ResultMapping {
     }
 
     public Builder composite(String property, String column, Class<?> javaType) {
-      resultMapping.composites.add(new ResultMapping.Builder(config, property, column, javaType).build());
+      resultMapping.composites.add(new ResultMapping.Builder(property, false, column, javaType).build());
       return this;
     }
 

@@ -29,19 +29,13 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
 class ResultMappingTest {
-  @Mock
-  private Configuration configuration;
 
   // Issue 697: Association with both a resultMap and a select attribute should throw exception
   @Test
   void shouldThrowErrorWhenBothResultMapAndNestedSelectAreSet() {
-    assertThrows(IllegalStateException.class, () -> new ResultMapping.Builder(configuration, "prop")
+    assertThrows(IllegalStateException.class, () -> new ResultMapping.Builder("prop", false)
         .nestedQueryId("nested query ID").nestedResultMapId("nested resultMap").build());
   }
 
@@ -49,21 +43,21 @@ class ResultMappingTest {
   @Test
   void shouldFailWithAMissingColumnInNestedSelect() {
     assertThrows(IllegalStateException.class,
-        () -> new ResultMapping.Builder(configuration, "prop").nestedQueryId("nested query ID").build());
+        () -> new ResultMapping.Builder("prop", false).nestedQueryId("nested query ID").build());
   }
 
   @Test
   void shouldFailIfSizeOfColumnsAndForeignColumnsDontMatch() {
     IllegalStateException ex = Assertions.assertThrows(IllegalStateException.class,
-        () -> new ResultMapping.Builder(configuration, "books").resultSet("bookRS").column("id,x")
-            .foreignColumn("author_id").nestedResultMapId("bookRM").build());
+        () -> new ResultMapping.Builder("books", false).resultSet("bookRS").column("id,x").foreignColumn("author_id")
+            .nestedResultMapId("bookRM").build());
     assertEquals("There should be the same number of columns and foreignColumns in property books", ex.getMessage());
   }
 
   @Test
   void shouldNestedCursorNotRequireForeignColumns() {
-    assertNotNull(new ResultMapping.Builder(configuration, "books").jdbcType(JdbcType.CURSOR)
-        .nestedResultMapId("bookRM").column("books").build());
+    assertNotNull(new ResultMapping.Builder("books", false).jdbcType(JdbcType.CURSOR).nestedResultMapId("bookRM")
+        .column("books").build());
   }
 
   @Test
@@ -158,7 +152,7 @@ class ResultMappingTest {
 
   @Test
   void shouldDefaultFlagsToNoneWhenNotSet() {
-    ResultMapping rm = new ResultMapping.Builder(new Configuration(), "id", "id", int.class).build();
+    ResultMapping rm = new ResultMapping.Builder("id", false, "id", int.class).build();
     assertEquals(ResultFlag.NONE, rm.getFlags());
     assertFalse(rm.hasFlag(ResultFlag.ID));
     assertFalse(rm.hasFlag(ResultFlag.CONSTRUCTOR));
@@ -167,7 +161,7 @@ class ResultMappingTest {
   @Test
   void shouldStoreIntFlagMaskOnResultMapping() {
     int mask = ResultFlag.of(ResultFlag.ID, ResultFlag.CONSTRUCTOR);
-    ResultMapping rm = new ResultMapping.Builder(new Configuration(), "id", "id", int.class).flags(mask).build();
+    ResultMapping rm = new ResultMapping.Builder("id", false, "id", int.class).flags(mask).build();
 
     assertEquals(mask, rm.getFlags());
     assertTrue(rm.hasFlag(ResultFlag.ID));
@@ -176,7 +170,7 @@ class ResultMappingTest {
 
   @Test
   void shouldDelegateHasFlagToStaticHelper() {
-    ResultMapping rm = new ResultMapping.Builder(new Configuration(), "id", "id", int.class)
+    ResultMapping rm = new ResultMapping.Builder("id", false, "id", int.class)
         .flags(ResultFlag.ID.mask()).build();
 
     assertEquals(ResultFlag.has(rm.getFlags(), ResultFlag.ID), rm.hasFlag(ResultFlag.ID));

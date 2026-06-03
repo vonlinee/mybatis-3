@@ -108,14 +108,15 @@ public class ResultMap {
     }
 
     public Builder addNestedMapping(String property, String nestedResultMapId) {
-      resultMap.resultMappings
-          .add(new ResultMapping.Builder(config, property).nestedResultMapId(nestedResultMapId).build());
+      resultMap.resultMappings.add(new ResultMapping.Builder(property, config.isLazyLoadingEnabled())
+          .nestedResultMapId(nestedResultMapId).build());
       return this;
     }
 
     public Builder addNestedMapping(String property, String column, Type type, Class<?> javaType, String nestQueryId) {
-      resultMap.resultMappings.add(new ResultMapping.Builder(config, property, column, registry.getTypeHandler(type))
-          .javaType(javaType).nestedQueryId(nestQueryId).build());
+      resultMap.resultMappings
+          .add(new ResultMapping.Builder(property, config.isLazyLoadingEnabled(), column, registry.getTypeHandler(type))
+              .javaType(javaType).nestedQueryId(nestQueryId).build());
       return this;
     }
 
@@ -141,7 +142,8 @@ public class ResultMap {
      * @return this builder
      */
     public Builder addMapping(String property, String column, Type type, Class<?> javaType, int flags) {
-      ResultMapping.Builder rm = new ResultMapping.Builder(config, property, column, registry.getTypeHandler(type));
+      ResultMapping.Builder rm = new ResultMapping.Builder(property, config.isLazyLoadingEnabled(), column,
+          registry.getTypeHandler(type));
       rm.flags(flags);
       rm.javaType(javaType);
       resultMap.resultMappings.add(rm.build());
@@ -172,7 +174,8 @@ public class ResultMap {
      * @return this builder
      */
     public Builder addMapping(String property, String column, TypeHandler<?> typeHandler, int flags) {
-      ResultMapping.Builder rm = new ResultMapping.Builder(config, property, column, typeHandler);
+      ResultMapping.Builder rm = new ResultMapping.Builder(property, config.isLazyLoadingEnabled(), column,
+          typeHandler);
       rm.flags(flags);
       resultMap.resultMappings.add(rm.build());
       return this;
@@ -206,7 +209,8 @@ public class ResultMap {
      * @return this builder
      */
     public Builder addMapping(String property, String column, Type type, int flags) {
-      ResultMapping.Builder rm = new ResultMapping.Builder(config, property, column, registry.getTypeHandler(type));
+      ResultMapping.Builder rm = new ResultMapping.Builder(property, config.isLazyLoadingEnabled(), column,
+          registry.getTypeHandler(type));
       rm.flags(flags);
       resultMap.resultMappings.add(rm.build());
       return this;
@@ -239,7 +243,7 @@ public class ResultMap {
      * @return this builder
      */
     public Builder addMapping(String property, String column, Class<?> javaType, int flags) {
-      ResultMapping.Builder rm = new ResultMapping.Builder(config, property, column, javaType);
+      ResultMapping.Builder rm = new ResultMapping.Builder(property, config.isLazyLoadingEnabled(), column, javaType);
       rm.flags(flags);
       resultMap.resultMappings.add(rm.build());
       return this;
@@ -253,7 +257,8 @@ public class ResultMap {
     public Builder discriminator(String property, String column, Class<?> javaType,
         Map<String, String> discriminatorMap) {
       return discriminator(new Discriminator.Builder(
-          new ResultMapping.Builder(config, property, column, javaType).build(), discriminatorMap).build());
+          new ResultMapping.Builder(property, config.isLazyLoadingEnabled(), column, javaType).build(),
+          discriminatorMap).build());
     }
 
     public Class<?> type() {
