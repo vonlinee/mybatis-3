@@ -22,7 +22,6 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.ReflectPermission;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.AbstractMap;
@@ -57,7 +56,7 @@ public class Reflector {
   private final Map<String, Invoker> getMethods = new HashMap<>();
   private final Map<String, Entry<Type, Class<?>>> setTypes = new HashMap<>();
   private final Map<String, Entry<Type, Class<?>>> getTypes = new HashMap<>();
-  private Constructor<?> defaultConstructor;
+  private final Constructor<?> defaultConstructor;
 
   private final Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
@@ -70,7 +69,7 @@ public class Reflector {
     } else {
       this.clazz = (Class<?>) type;
     }
-    addDefaultConstructor(clazz);
+    this.defaultConstructor = ClassUtils.getDefaultConstructor(clazz);
     Method[] classMethods = ClassUtils.getUniqueMethodsInHierarchy(clazz);
     if (ClassUtils.isRecord(clazz)) {
       addRecordGetMethods(classMethods);
@@ -92,12 +91,6 @@ public class Reflector {
   private void addRecordGetMethods(Method[] methods) {
     Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0)
         .forEach(m -> addGetMethod(m.getName(), m, false));
-  }
-
-  private void addDefaultConstructor(Class<?> clazz) {
-    Constructor<?>[] constructors = clazz.getDeclaredConstructors();
-    Arrays.stream(constructors).filter(constructor -> constructor.getParameterTypes().length == 0).findAny()
-        .ifPresent(constructor -> this.defaultConstructor = constructor);
   }
 
   private void addGetMethods(Method[] methods) {
@@ -275,18 +268,6 @@ public class Reflector {
     return !name.startsWith("$") && !"serialVersionUID".equals(name) && !"class".equals(name);
   }
 
-  private String getSignature(Method method) {
-    StringBuilder sb = new StringBuilder();
-    Class<?> returnType = method.getReturnType();
-    sb.append(returnType.getName()).append('#');
-    sb.append(method.getName());
-    Class<?>[] parameters = method.getParameterTypes();
-    for (int i = 0; i < parameters.length; i++) {
-      sb.append(i == 0 ? ':' : ',').append(parameters[i].getName());
-    }
-    return sb.toString();
-  }
-
   /**
    * Checks whether can control member accessible.
    *
@@ -295,15 +276,7 @@ public class Reflector {
    * @since 3.5.0
    */
   public static boolean canControlMemberAccessible() {
-    try {
-      SecurityManager securityManager = System.getSecurityManager();
-      if (null != securityManager) {
-        securityManager.checkPermission(new ReflectPermission("suppressAccessChecks"));
-      }
-    } catch (SecurityException e) {
-      return false;
-    }
-    return true;
+    return ReflectionUtils.checkReflectionPermission();
   }
 
   /**
