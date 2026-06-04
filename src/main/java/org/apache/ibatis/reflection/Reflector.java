@@ -28,7 +28,6 @@ import java.text.MessageFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -72,7 +71,7 @@ public class Reflector {
       this.clazz = (Class<?>) type;
     }
     addDefaultConstructor(clazz);
-    Method[] classMethods = getClassMethods(clazz);
+    Method[] classMethods = ClassUtils.getUniqueMethodsInHierarchy(clazz);
     if (ClassUtils.isRecord(clazz)) {
       addRecordGetMethods(classMethods);
     } else {
@@ -274,50 +273,6 @@ public class Reflector {
 
   private boolean isValidPropertyName(String name) {
     return !name.startsWith("$") && !"serialVersionUID".equals(name) && !"class".equals(name);
-  }
-
-  /**
-   * This method returns an array containing all methods declared in this class and any superclass. We use this method,
-   * instead of the simpler <code>Class.getMethods()</code>, because we want to look for private methods as well.
-   *
-   * @param clazz
-   *          The class
-   *
-   * @return An array containing all methods in this class
-   */
-  private Method[] getClassMethods(Class<?> clazz) {
-    Map<String, Method> uniqueMethods = new HashMap<>();
-    Class<?> currentClass = clazz;
-    while (currentClass != null && currentClass != Object.class) {
-      addUniqueMethods(uniqueMethods, currentClass.getDeclaredMethods());
-
-      // we also need to look for interface methods -
-      // because the class may be abstract
-      Class<?>[] interfaces = currentClass.getInterfaces();
-      for (Class<?> anInterface : interfaces) {
-        addUniqueMethods(uniqueMethods, anInterface.getMethods());
-      }
-
-      currentClass = currentClass.getSuperclass();
-    }
-
-    Collection<Method> methods = uniqueMethods.values();
-
-    return methods.toArray(new Method[0]);
-  }
-
-  private void addUniqueMethods(Map<String, Method> uniqueMethods, Method[] methods) {
-    for (Method currentMethod : methods) {
-      if (!currentMethod.isBridge()) {
-        String signature = getSignature(currentMethod);
-        // check to see if the method is already known
-        // if it is known, then an extended class must have
-        // overridden a method
-        if (!uniqueMethods.containsKey(signature)) {
-          uniqueMethods.put(signature, currentMethod);
-        }
-      }
-    }
   }
 
   private String getSignature(Method method) {
