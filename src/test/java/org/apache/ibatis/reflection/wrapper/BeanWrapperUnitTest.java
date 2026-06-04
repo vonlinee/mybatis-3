@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.domain.misc.RichType;
-import org.apache.ibatis.reflection.SystemMetaObject;
+import org.apache.ibatis.reflection.MetaObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +48,7 @@ class BeanWrapperUnitTest extends ObjectWrapperBase {
   @BeforeEach
   void setup() {
     this.richType = new RichType();
-    this.wrapper = new BeanWrapper(SystemMetaObject.forObject(richType), richType);
+    this.wrapper = new BeanWrapper(MetaObject.forObject(richType), richType);
   }
 
   @Test

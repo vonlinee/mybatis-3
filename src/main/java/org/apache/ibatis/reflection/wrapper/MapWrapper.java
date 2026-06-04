@@ -23,7 +23,6 @@ import java.util.Map.Entry;
 
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.PropertyTokenizer;
-import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 
 /**
@@ -88,7 +87,7 @@ public class MapWrapper extends BaseWrapper {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
       MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
-      if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+      if (metaValue.isNull()) {
         return Object.class;
       } else {
         return metaValue.getSetterType(prop.getChildren());
@@ -112,7 +111,7 @@ public class MapWrapper extends BaseWrapper {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
       MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
-      if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+      if (metaValue.isNull()) {
         return Object.class;
       } else {
         return metaValue.getGetterType(prop.getChildren());
@@ -144,7 +143,7 @@ public class MapWrapper extends BaseWrapper {
     }
     if (map.containsKey(prop.getIndexedName())) {
       MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
-      if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+      if (metaValue.isNull()) {
         return true;
       } else {
         return metaValue.hasGetter(prop.getChildren());

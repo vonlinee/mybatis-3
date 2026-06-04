@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.PropertyTokenizer;
-import org.apache.ibatis.reflection.SystemMetaObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +50,7 @@ class CollectionWrapperUnitTest extends ObjectWrapperBase {
 
   @BeforeEach
   void setup() {
-    MetaObject metaObject = SystemMetaObject.forObject(collection);
+    MetaObject metaObject = MetaObject.forObject(collection);
     this.wrapper = new CollectionWrapper(metaObject, collection);
   }
 

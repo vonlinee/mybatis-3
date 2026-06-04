@@ -32,7 +32,6 @@ import org.apache.ibatis.cache.decorators.SerializedCache;
 import org.apache.ibatis.cache.decorators.SynchronizedCache;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.SystemMetaObject;
 
 /**
  * @author Clinton Begin
@@ -117,7 +116,7 @@ public class CacheBuilder {
 
   private Cache setStandardDecorators(Cache cache) {
     try {
-      MetaObject metaCache = SystemMetaObject.forObject(cache);
+      MetaObject metaCache = MetaObject.forObject(cache);
       if (size != null && metaCache.hasSetter("size")) {
         metaCache.setValue("size", size);
       }
@@ -141,7 +140,7 @@ public class CacheBuilder {
 
   private void setCacheProperties(Cache cache) {
     if (properties != null) {
-      MetaObject metaCache = SystemMetaObject.forObject(cache);
+      MetaObject metaCache = MetaObject.forObject(cache);
       for (Map.Entry<Object, Object> entry : properties.entrySet()) {
         String name = (String) entry.getKey();
         String value = (String) entry.getValue();

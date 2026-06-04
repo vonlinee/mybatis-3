@@ -24,7 +24,6 @@ import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.reflection.ReflectionException;
-import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.invoker.Invoker;
 
@@ -94,7 +93,7 @@ public class BeanWrapper extends BaseWrapper {
       return metaClass.getSetterType(name);
     }
     MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
-    if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+    if (metaValue.isNull()) {
       return metaClass.getSetterType(name);
     }
     return metaValue.getSetterType(prop.getChildren());
@@ -105,7 +104,7 @@ public class BeanWrapper extends BaseWrapper {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
       MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
-      if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+      if (metaValue.isNull()) {
         return metaClass.getGenericSetterType(name);
       } else {
         return metaValue.getGenericSetterType(prop.getChildren());
@@ -122,7 +121,7 @@ public class BeanWrapper extends BaseWrapper {
       return metaClass.getGetterType(name);
     }
     MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
-    if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+    if (metaValue.isNull()) {
       return metaClass.getGetterType(name);
     }
     return metaValue.getGetterType(prop.getChildren());
@@ -133,7 +132,7 @@ public class BeanWrapper extends BaseWrapper {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
       MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
-      if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+      if (metaValue.isNull()) {
         return metaClass.getGenericGetterType(name);
       } else {
         return metaValue.getGenericGetterType(prop.getChildren());
@@ -151,7 +150,7 @@ public class BeanWrapper extends BaseWrapper {
     }
     if (metaClass.hasSetter(prop.getIndexedName())) {
       MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
-      if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+      if (metaValue.isNull()) {
         return metaClass.hasSetter(name);
       }
       return metaValue.hasSetter(prop.getChildren());
@@ -167,7 +166,7 @@ public class BeanWrapper extends BaseWrapper {
     }
     if (metaClass.hasGetter(prop.getIndexedName())) {
       MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
-      if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+      if (metaValue.isNull()) {
         return metaClass.hasGetter(name);
       }
       return metaValue.hasGetter(prop.getChildren());

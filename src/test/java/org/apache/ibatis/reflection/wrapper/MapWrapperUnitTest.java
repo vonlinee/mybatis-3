@@ -32,7 +32,6 @@ import java.util.Set;
 
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +57,7 @@ class MapWrapperUnitTest extends ObjectWrapperBase {
 
   @BeforeEach
   void setup() {
-    this.metaObject = SystemMetaObject.forObject(map);
+    this.metaObject = MetaObject.forObject(map);
     this.wrapper = new MapWrapper(metaObject, map);
   }
 
@@ -237,7 +236,7 @@ class MapWrapperUnitTest extends ObjectWrapperBase {
   @Test
   @Override
   void shouldInstantiatePropertyValue() {
-    MetaObject result = wrapper.instantiatePropertyValue("abc", "key", SystemMetaObject.DEFAULT_OBJECT_FACTORY);
+    MetaObject result = wrapper.instantiatePropertyValue("abc", "key", MetaObject.systemObjectFactory());
 
     assertFalse(result.hasGetter("key"));
   }

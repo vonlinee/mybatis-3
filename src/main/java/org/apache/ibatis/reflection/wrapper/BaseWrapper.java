@@ -21,7 +21,6 @@ import java.util.Map;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.apache.ibatis.reflection.ReflectionException;
-import org.apache.ibatis.reflection.SystemMetaObject;
 
 /**
  * @author Clinton Begin
@@ -115,7 +114,7 @@ public abstract class BaseWrapper implements ObjectWrapper {
 
   protected Object getChildValue(PropertyTokenizer prop) {
     MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
-    if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+    if (metaValue.isNull()) {
       return null;
     }
     return metaValue.getValue(prop.getChildren());
@@ -123,7 +122,7 @@ public abstract class BaseWrapper implements ObjectWrapper {
 
   protected void setChildValue(PropertyTokenizer prop, Object value) {
     MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
-    if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+    if (metaValue.isNull()) {
       if (value == null) {
         // don't instantiate child path if value is null
         return;

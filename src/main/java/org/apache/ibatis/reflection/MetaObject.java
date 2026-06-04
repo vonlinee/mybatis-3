@@ -59,12 +59,29 @@ public class MetaObject {
     }
   }
 
+  /**
+   * Creates a MetaObject for the given object using default system factories.
+   *
+   * @param object
+   *          the object to wrap in a MetaObject
+   *
+   * @return a MetaObject wrapping the given object, or a {@link SystemMetaObject#NULL_META_OBJECT} if the object is
+   *         null
+   */
+  public static MetaObject forObject(Object object) {
+    return SystemMetaObject.forObject(object);
+  }
+
   public static MetaObject forObject(Object object, ObjectFactory objectFactory,
       ObjectWrapperFactory objectWrapperFactory, ReflectorFactory reflectorFactory) {
     if (object == null) {
       return SystemMetaObject.NULL_META_OBJECT;
     }
     return new MetaObject(object, objectFactory, objectWrapperFactory, reflectorFactory);
+  }
+
+  public static ObjectFactory systemObjectFactory() {
+    return SystemMetaObject.DEFAULT_OBJECT_FACTORY;
   }
 
   public ObjectFactory getObjectFactory() {
@@ -150,5 +167,9 @@ public class MetaObject {
 
   public boolean hasProperty(String name) {
     return objectWrapper.hasProperty(name);
+  }
+
+  public boolean isNull() {
+    return this == SystemMetaObject.NULL_META_OBJECT;
   }
 }
