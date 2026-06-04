@@ -15,9 +15,6 @@
  */
 package org.apache.ibatis.reflection;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -38,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.ibatis.internal.util.ClassUtils;
 import org.apache.ibatis.reflection.invoker.AmbiguousMethodInvoker;
 import org.apache.ibatis.reflection.invoker.GetFieldInvoker;
 import org.apache.ibatis.reflection.invoker.Invoker;
@@ -52,7 +50,6 @@ import org.apache.ibatis.reflection.invoker.SetFieldInvoker;
  */
 public class Reflector {
 
-  private static final MethodHandle isRecordMethodHandle = getIsRecordMethodHandle();
   private final Type type;
   private final Class<?> clazz;
   private final String[] readablePropertyNames;
@@ -76,7 +73,7 @@ public class Reflector {
     }
     addDefaultConstructor(clazz);
     Method[] classMethods = getClassMethods(clazz);
-    if (isRecord(clazz)) {
+    if (ClassUtils.isRecord(clazz)) {
       addRecordGetMethods(classMethods);
     } else {
       addGetMethods(classMethods);
@@ -478,26 +475,5 @@ public class Reflector {
 
   public String findPropertyName(String name) {
     return caseInsensitivePropertyMap.get(name.toUpperCase(Locale.ENGLISH));
-  }
-
-  /**
-   * Class.isRecord() alternative for Java 15 and older.
-   */
-  private static boolean isRecord(Class<?> clazz) {
-    try {
-      return isRecordMethodHandle != null && (boolean) isRecordMethodHandle.invokeExact(clazz);
-    } catch (Throwable e) {
-      throw new ReflectionException("Failed to invoke 'Class.isRecord()'.", e);
-    }
-  }
-
-  private static MethodHandle getIsRecordMethodHandle() {
-    MethodHandles.Lookup lookup = MethodHandles.lookup();
-    MethodType mt = MethodType.methodType(boolean.class);
-    try {
-      return lookup.findVirtual(Class.class, "isRecord", mt);
-    } catch (NoSuchMethodException | IllegalAccessException e) {
-      return null;
-    }
   }
 }
