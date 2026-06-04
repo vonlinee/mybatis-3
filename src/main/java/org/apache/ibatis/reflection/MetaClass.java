@@ -58,11 +58,11 @@ public class MetaClass {
   }
 
   public String[] getGetterNames() {
-    return reflector.getGetablePropertyNames();
+    return reflector.getGettablePropertyNames();
   }
 
   public String[] getSetterNames() {
-    return reflector.getSetablePropertyNames();
+    return reflector.getSettablePropertyNames();
   }
 
   public Class<?> getSetterType(String name) {

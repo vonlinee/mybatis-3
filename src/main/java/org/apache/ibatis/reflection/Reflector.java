@@ -326,14 +326,14 @@ public class Reflector {
   public Class<?> getSetterType(String propertyName) {
     Class<?> clazz = setTypes.get(propertyName).getValue();
     if (clazz == null) {
-      throw new ReflectionException("There is no setter for property named '" + propertyName + "' in '" + clazz + "'");
+      throw new ReflectionException("There is no setter for property named '" + propertyName + "' in 'null'");
     }
     return clazz;
   }
 
   public Entry<Type, Class<?>> getGenericSetterType(String propertyName) {
     return setTypes.computeIfAbsent(propertyName, k -> {
-      throw new ReflectionException("There is no setter for property named '" + k + "' in '" + clazz + "'");
+      throw new ReflectionException("There is no setter for property named '" + k + "' in 'null'");
     });
   }
 
@@ -348,7 +348,7 @@ public class Reflector {
   public Class<?> getGetterType(String propertyName) {
     Class<?> clazz = getTypes.getOrDefault(propertyName, nullEntry).getValue();
     if (clazz == null) {
-      throw new ReflectionException("There is no getter for property named '" + propertyName + "' in '" + clazz + "'");
+      throw new ReflectionException("There is no getter for property named '" + propertyName + "' in 'null'");
     }
     return clazz;
   }
@@ -364,7 +364,7 @@ public class Reflector {
    *
    * @return The array
    */
-  public String[] getGetablePropertyNames() {
+  public String[] getGettablePropertyNames() {
     return readablePropertyNames;
   }
 
@@ -373,7 +373,7 @@ public class Reflector {
    *
    * @return The array
    */
-  public String[] getSetablePropertyNames() {
+  public String[] getSettablePropertyNames() {
     return writablePropertyNames;
   }
 

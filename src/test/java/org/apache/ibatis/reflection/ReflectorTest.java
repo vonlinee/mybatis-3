@@ -233,7 +233,7 @@ class ReflectorTest {
     ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
     Reflector reflector = reflectorFactory.findForClass(BeanClass.class);
 
-    List<String> setableProps = Arrays.asList(reflector.getSetablePropertyNames());
+    List<String> setableProps = Arrays.asList(reflector.getSettablePropertyNames());
     assertTrue(setableProps.contains("prop1"));
     assertTrue(setableProps.contains("prop2"));
     assertEquals("prop1", reflector.findPropertyName("PROP1"));
@@ -273,7 +273,7 @@ class ReflectorTest {
     ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
     Reflector reflector = reflectorFactory.findForClass(BeanClass.class);
 
-    List<String> getableProps = Arrays.asList(reflector.getGetablePropertyNames());
+    List<String> getableProps = Arrays.asList(reflector.getGettablePropertyNames());
     assertTrue(getableProps.contains("prop1"));
     assertTrue(getableProps.contains("prop2"));
     assertEquals("prop1", reflector.findPropertyName("PROP1"));
@@ -313,7 +313,7 @@ class ReflectorTest {
     ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
     Reflector reflector = reflectorFactory.findForClass(BeanClass.class);
 
-    List<String> getableProps = Arrays.asList(reflector.getGetablePropertyNames());
+    List<String> getableProps = Arrays.asList(reflector.getGettablePropertyNames());
     assertTrue(getableProps.contains("prop1"));
     assertTrue(getableProps.contains("prop2"));
     assertEquals("prop1", reflector.findPropertyName("PROP1"));
