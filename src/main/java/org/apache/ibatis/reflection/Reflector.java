@@ -150,7 +150,7 @@ public class Reflector {
   }
 
   private void addMethodConflict(Map<String, List<Method>> conflictingMethods, String name, Method method) {
-    if (isValidPropertyName(name)) {
+    if (BeanUtils.isValidPropertyName(name)) {
       List<Method> list = conflictingMethods.computeIfAbsent(name, k -> new ArrayList<>());
       list.add(method);
     }
@@ -249,7 +249,7 @@ public class Reflector {
   }
 
   private void addSetField(Field field) {
-    if (isValidPropertyName(field.getName())) {
+    if (BeanUtils.isValidPropertyName(field.getName())) {
       setMethods.put(field.getName(), new SetFieldInvoker(field));
       Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
       setTypes.put(field.getName(), Map.entry(fieldType, typeToClass(fieldType)));
@@ -257,15 +257,11 @@ public class Reflector {
   }
 
   private void addGetField(Field field) {
-    if (isValidPropertyName(field.getName())) {
+    if (BeanUtils.isValidPropertyName(field.getName())) {
       getMethods.put(field.getName(), new GetFieldInvoker(field));
       Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
       getTypes.put(field.getName(), Map.entry(fieldType, typeToClass(fieldType)));
     }
-  }
-
-  private boolean isValidPropertyName(String name) {
-    return !name.startsWith("$") && !"serialVersionUID".equals(name) && !"class".equals(name);
   }
 
   /**
