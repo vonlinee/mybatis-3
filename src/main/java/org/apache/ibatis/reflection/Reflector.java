@@ -15,395 +15,220 @@
  */
 package org.apache.ibatis.reflection;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.text.MessageFormat;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.ibatis.internal.util.ClassUtils;
-import org.apache.ibatis.reflection.invoker.AmbiguousMethodInvoker;
-import org.apache.ibatis.reflection.invoker.GetFieldInvoker;
 import org.apache.ibatis.reflection.invoker.Invoker;
-import org.apache.ibatis.reflection.invoker.MethodInvoker;
-import org.apache.ibatis.reflection.invoker.SetFieldInvoker;
 
 /**
- * This class represents a cached set of class definition information that allows for easy mapping between property
- * names and getter/setter methods.
+ * Represents a cached snapshot of a class's reflection metadata, providing fast access to property names, getter/setter
+ * invokers, and type information.
+ * <p>
+ * Two implementations exist:
+ * <ul>
+ * <li>{@link BeanReflector} — full implementation for ordinary JavaBeans, records, and classes with properties. Caches
+ * method and field invokers in {@code HashMap}s.</li>
+ * <li>{@link EmptyReflector} — lightweight implementation for primitive types, {@code void}, and other types that carry
+ * no bean properties. Allocates no maps or arrays.</li>
+ * </ul>
+ * <p>
+ * Use {@link ReflectorFactory#findForClass(Type)} to obtain an instance rather than constructing one directly. The
+ * static helper {@link #of(Type)} performs the same routing logic without a factory.
  *
  * @author Clinton Begin
  */
-public class Reflector {
+public interface Reflector {
 
-  private final Type type;
-  private final Class<?> clazz;
-  private final String[] readablePropertyNames;
-  private final String[] writablePropertyNames;
-  private final Map<String, Invoker> setMethods = new HashMap<>();
-  private final Map<String, Invoker> getMethods = new HashMap<>();
-  private final Map<String, Entry<Type, Class<?>>> setTypes = new HashMap<>();
-  private final Map<String, Entry<Type, Class<?>>> getTypes = new HashMap<>();
-  private final Constructor<?> defaultConstructor;
+  /**
+   * Returns the raw {@link Class} that this reflector describes.
+   *
+   * @return the reflected class
+   */
+  Class<?> getType();
 
-  private final Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
+  /**
+   * Returns the no-argument constructor of the reflected class.
+   *
+   * @return the default constructor
+   *
+   * @throws ReflectionException
+   *           if the class has no default constructor
+   */
+  Constructor<?> getDefaultConstructor();
 
-  private static final Entry<Type, Class<?>> nullEntry = new AbstractMap.SimpleImmutableEntry<>(null, null);
+  /**
+   * Returns {@code true} if the reflected class has a no-argument constructor.
+   *
+   * @return whether a default constructor exists
+   */
+  boolean hasDefaultConstructor();
 
-  public Reflector(Type type) {
-    this.type = type;
+  /**
+   * Returns the {@link Invoker} for the setter of the given property.
+   *
+   * @param propertyName
+   *          the property name (case-sensitive)
+   *
+   * @return the setter invoker
+   *
+   * @throws ReflectionException
+   *           if no setter exists for the property
+   */
+  Invoker getSetInvoker(String propertyName);
+
+  /**
+   * Returns the {@link Invoker} for the getter of the given property.
+   *
+   * @param propertyName
+   *          the property name (case-sensitive)
+   *
+   * @return the getter invoker
+   *
+   * @throws ReflectionException
+   *           if no getter exists for the property
+   */
+  Invoker getGetInvoker(String propertyName);
+
+  /**
+   * Returns the erased {@link Class} of the setter parameter for the given property.
+   *
+   * @param propertyName
+   *          the property name
+   *
+   * @return the setter parameter class
+   *
+   * @throws ReflectionException
+   *           if no setter exists for the property
+   */
+  Class<?> getSetterType(String propertyName);
+
+  /**
+   * Returns the generic {@link Type} and erased {@link Class} of the setter parameter.
+   *
+   * @param propertyName
+   *          the property name
+   *
+   * @return a map entry whose key is the generic type and value is the erased class
+   *
+   * @throws ReflectionException
+   *           if no setter exists for the property
+   */
+  Entry<Type, Class<?>> getGenericSetterType(String propertyName);
+
+  /**
+   * Returns the erased {@link Class} of the getter return type for the given property.
+   *
+   * @param propertyName
+   *          the property name
+   *
+   * @return the getter return class
+   *
+   * @throws ReflectionException
+   *           if no getter exists for the property
+   */
+  Class<?> getGetterType(String propertyName);
+
+  /**
+   * Returns the generic {@link Type} and erased {@link Class} of the getter return type.
+   *
+   * @param propertyName
+   *          the property name
+   *
+   * @return a map entry whose key is the generic type and value is the erased class
+   *
+   * @throws ReflectionException
+   *           if no getter exists for the property
+   */
+  Entry<Type, Class<?>> getGenericGetterType(String propertyName);
+
+  /**
+   * Returns all readable property names.
+   *
+   * @return array of readable property names
+   */
+  String[] getGettablePropertyNames();
+
+  /**
+   * Returns all writable property names.
+   *
+   * @return array of writable property names
+   */
+  String[] getSettablePropertyNames();
+
+  /**
+   * Returns {@code true} if the reflected class has a setter for the given property.
+   *
+   * @param propertyName
+   *          the property name
+   *
+   * @return whether a setter exists
+   */
+  boolean hasSetter(String propertyName);
+
+  /**
+   * Returns {@code true} if the reflected class has a getter for the given property.
+   *
+   * @param propertyName
+   *          the property name
+   *
+   * @return whether a getter exists
+   */
+  boolean hasGetter(String propertyName);
+
+  /**
+   * Performs a case-insensitive lookup for the canonical property name.
+   *
+   * @param name
+   *          the property name to look up (any case)
+   *
+   * @return the canonical property name, or {@code null} if not found
+   */
+  String findPropertyName(String name);
+
+  // -----------------------------------------------------------------------
+  // Static factory and utilities
+  // -----------------------------------------------------------------------
+
+  /**
+   * Creates the most appropriate {@link Reflector} implementation for {@code type}.
+   * <ul>
+   * <li>For primitive types, {@code void}, and other non-bean types, returns an {@link EmptyReflector} that allocates
+   * no backing data structures.</li>
+   * <li>For all other types, returns a {@link BeanReflector} with full property metadata.</li>
+   * </ul>
+   *
+   * @param type
+   *          the type to reflect
+   *
+   * @return an appropriate {@link Reflector} instance
+   */
+  static Reflector of(Type type) {
+    Class<?> rawClass;
     if (type instanceof ParameterizedType) {
-      this.clazz = (Class<?>) ((ParameterizedType) type).getRawType();
+      rawClass = (Class<?>) ((ParameterizedType) type).getRawType();
     } else {
-      this.clazz = (Class<?>) type;
+      rawClass = (Class<?>) type;
     }
-    this.defaultConstructor = ClassUtils.getDefaultConstructor(clazz);
-    Method[] classMethods = ClassUtils.getUniqueMethodsInHierarchy(clazz);
-    if (ClassUtils.isRecord(clazz)) {
-      addRecordGetMethods(classMethods);
-    } else {
-      addGetMethods(classMethods);
-      addSetMethods(classMethods);
-      addFields(clazz);
+    if (EmptyReflector.isApplicable(rawClass)) {
+      return new EmptyReflector(rawClass);
     }
-    readablePropertyNames = getMethods.keySet().toArray(new String[0]);
-    writablePropertyNames = setMethods.keySet().toArray(new String[0]);
-    for (String propName : readablePropertyNames) {
-      caseInsensitivePropertyMap.put(propName.toUpperCase(Locale.ENGLISH), propName);
-    }
-    for (String propName : writablePropertyNames) {
-      caseInsensitivePropertyMap.put(propName.toUpperCase(Locale.ENGLISH), propName);
-    }
-  }
-
-  private void addRecordGetMethods(Method[] methods) {
-    Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0)
-        .forEach(m -> addGetMethod(m.getName(), m, false));
-  }
-
-  private void addGetMethods(Method[] methods) {
-    Map<String, List<Method>> conflictingGetters = new HashMap<>();
-    Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && BeanUtils.isGetter(m.getName()))
-        .forEach(m -> addMethodConflict(conflictingGetters, BeanUtils.methodToProperty(m.getName()), m));
-    resolveGetterConflicts(conflictingGetters);
-  }
-
-  private void resolveGetterConflicts(Map<String, List<Method>> conflictingGetters) {
-    for (Entry<String, List<Method>> entry : conflictingGetters.entrySet()) {
-      Method winner = null;
-      String propName = entry.getKey();
-      boolean isAmbiguous = false;
-      for (Method candidate : entry.getValue()) {
-        if (winner == null) {
-          winner = candidate;
-          continue;
-        }
-        Class<?> winnerType = winner.getReturnType();
-        Class<?> candidateType = candidate.getReturnType();
-        if (candidateType.equals(winnerType)) {
-          if (!boolean.class.equals(candidateType)) {
-            isAmbiguous = true;
-            break;
-          }
-          if (candidate.getName().startsWith("is")) {
-            winner = candidate;
-          }
-        } else if (candidateType.isAssignableFrom(winnerType)) {
-          // OK getter type is descendant
-        } else if (winnerType.isAssignableFrom(candidateType)) {
-          winner = candidate;
-        } else {
-          isAmbiguous = true;
-          break;
-        }
-      }
-      addGetMethod(propName, winner, isAmbiguous);
-    }
-  }
-
-  private void addGetMethod(String name, Method method, boolean isAmbiguous) {
-    MethodInvoker invoker = isAmbiguous ? new AmbiguousMethodInvoker(method, MessageFormat.format(
-        "Illegal overloaded getter method with ambiguous type for property ''{0}'' in class ''{1}''. This breaks the JavaBeans specification and can cause unpredictable results.",
-        name, method.getDeclaringClass().getName())) : new MethodInvoker(method);
-    getMethods.put(name, invoker);
-    Type returnType = TypeParameterResolver.resolveReturnType(method, type);
-    getTypes.put(name, Map.entry(returnType, typeToClass(returnType)));
-  }
-
-  private void addSetMethods(Method[] methods) {
-    Map<String, List<Method>> conflictingSetters = new HashMap<>();
-    Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 1 && BeanUtils.isSetter(m.getName()))
-        .forEach(m -> addMethodConflict(conflictingSetters, BeanUtils.methodToProperty(m.getName()), m));
-    resolveSetterConflicts(conflictingSetters);
-  }
-
-  private void addMethodConflict(Map<String, List<Method>> conflictingMethods, String name, Method method) {
-    if (BeanUtils.isValidPropertyName(name)) {
-      List<Method> list = conflictingMethods.computeIfAbsent(name, k -> new ArrayList<>());
-      list.add(method);
-    }
-  }
-
-  private void resolveSetterConflicts(Map<String, List<Method>> conflictingSetters) {
-    for (Entry<String, List<Method>> entry : conflictingSetters.entrySet()) {
-      String propName = entry.getKey();
-      List<Method> setters = entry.getValue();
-      Class<?> getterType = getTypes.getOrDefault(propName, nullEntry).getValue();
-      boolean isGetterAmbiguous = getMethods.get(propName) instanceof AmbiguousMethodInvoker;
-      boolean isSetterAmbiguous = false;
-      Method match = null;
-      for (Method setter : setters) {
-        if (!isGetterAmbiguous && setter.getParameterTypes()[0].equals(getterType)) {
-          // should be the best match
-          match = setter;
-          break;
-        }
-        if (!isSetterAmbiguous) {
-          match = pickBetterSetter(match, setter, propName);
-          isSetterAmbiguous = match == null;
-        }
-      }
-      if (match != null) {
-        addSetMethod(propName, match);
-      }
-    }
-  }
-
-  private Method pickBetterSetter(Method setter1, Method setter2, String property) {
-    if (setter1 == null) {
-      return setter2;
-    }
-    Class<?> paramType1 = setter1.getParameterTypes()[0];
-    Class<?> paramType2 = setter2.getParameterTypes()[0];
-    if (paramType1.isAssignableFrom(paramType2)) {
-      return setter2;
-    }
-    if (paramType2.isAssignableFrom(paramType1)) {
-      return setter1;
-    }
-    MethodInvoker invoker = new AmbiguousMethodInvoker(setter1,
-        MessageFormat.format(
-            "Ambiguous setters defined for property ''{0}'' in class ''{1}'' with types ''{2}'' and ''{3}''.", property,
-            setter2.getDeclaringClass().getName(), paramType1.getName(), paramType2.getName()));
-    setMethods.put(property, invoker);
-    Type[] paramTypes = TypeParameterResolver.resolveParamTypes(setter1, type);
-    setTypes.put(property, Map.entry(paramTypes[0], typeToClass(paramTypes[0])));
-    return null;
-  }
-
-  private void addSetMethod(String name, Method method) {
-    MethodInvoker invoker = new MethodInvoker(method);
-    setMethods.put(name, invoker);
-    Type[] paramTypes = TypeParameterResolver.resolveParamTypes(method, type);
-    setTypes.put(name, Map.entry(paramTypes[0], typeToClass(paramTypes[0])));
-  }
-
-  private Class<?> typeToClass(Type src) {
-    if (src instanceof Class) {
-      return (Class<?>) src;
-    } else if (src instanceof ParameterizedType) {
-      return (Class<?>) ((ParameterizedType) src).getRawType();
-    } else if (src instanceof GenericArrayType) {
-      Type componentType = ((GenericArrayType) src).getGenericComponentType();
-      if (componentType instanceof Class) {
-        return Array.newInstance((Class<?>) componentType, 0).getClass();
-      } else {
-        Class<?> componentClass = typeToClass(componentType);
-        return Array.newInstance(componentClass, 0).getClass();
-      }
-    }
-    return Object.class;
-  }
-
-  private void addFields(Class<?> clazz) {
-    Field[] fields = clazz.getDeclaredFields();
-    for (Field field : fields) {
-      if (!setMethods.containsKey(field.getName())) {
-        // issue #379 - removed the check for final because JDK 1.5 allows
-        // modification of final fields through reflection (JSR-133). (JGB)
-        // pr #16 - final static can only be set by the classloader
-        int modifiers = field.getModifiers();
-        if (!Modifier.isFinal(modifiers) || !Modifier.isStatic(modifiers)) {
-          addSetField(field);
-        }
-      }
-      if (!getMethods.containsKey(field.getName())) {
-        addGetField(field);
-      }
-    }
-    if (clazz.getSuperclass() != null) {
-      addFields(clazz.getSuperclass());
-    }
-  }
-
-  private void addSetField(Field field) {
-    if (BeanUtils.isValidPropertyName(field.getName())) {
-      setMethods.put(field.getName(), new SetFieldInvoker(field));
-      Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
-      setTypes.put(field.getName(), Map.entry(fieldType, typeToClass(fieldType)));
-    }
-  }
-
-  private void addGetField(Field field) {
-    if (BeanUtils.isValidPropertyName(field.getName())) {
-      getMethods.put(field.getName(), new GetFieldInvoker(field));
-      Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
-      getTypes.put(field.getName(), Map.entry(fieldType, typeToClass(fieldType)));
-    }
+    return new BeanReflector(type);
   }
 
   /**
-   * Checks whether can control member accessible.
+   * Checks whether reflective member access (i.e. {@code setAccessible(true)}) is permitted in the current JVM/module
+   * configuration.
+   * <p>
+   * Kept as a static method on the interface so that existing callers ({@code MethodInvoker}, {@code GetFieldInvoker},
+   * {@code DefaultObjectFactory}, etc.) do not need to be updated.
    *
-   * @return If can control member accessible, it return {@literal true}
+   * @return {@code true} if {@code setAccessible} calls are allowed
    *
    * @since 3.5.0
    */
-  public static boolean canControlMemberAccessible() {
+  static boolean canControlMemberAccessible() {
     return ReflectionUtils.checkReflectionPermission();
-  }
-
-  /**
-   * Gets the name of the class the instance provides information for.
-   *
-   * @return The class name
-   */
-  public Class<?> getType() {
-    return clazz;
-  }
-
-  public Constructor<?> getDefaultConstructor() {
-    if (defaultConstructor != null) {
-      return defaultConstructor;
-    }
-    throw new ReflectionException("There is no default constructor for " + clazz);
-  }
-
-  public boolean hasDefaultConstructor() {
-    return defaultConstructor != null;
-  }
-
-  public Invoker getSetInvoker(String propertyName) {
-    Invoker method = setMethods.get(propertyName);
-    if (method == null) {
-      throw new ReflectionException("There is no setter for property named '" + propertyName + "' in '" + clazz + "'");
-    }
-    return method;
-  }
-
-  public Invoker getGetInvoker(String propertyName) {
-    Invoker method = getMethods.get(propertyName);
-    if (method == null) {
-      throw new ReflectionException("There is no getter for property named '" + propertyName + "' in '" + clazz + "'");
-    }
-    return method;
-  }
-
-  /**
-   * Gets the type for a property setter.
-   *
-   * @param propertyName
-   *          - the name of the property
-   *
-   * @return The Class of the property setter
-   */
-  public Class<?> getSetterType(String propertyName) {
-    Class<?> clazz = setTypes.get(propertyName).getValue();
-    if (clazz == null) {
-      throw new ReflectionException(
-          "There is no setter for property named '" + propertyName + "' in '" + this.clazz + "'");
-    }
-    return clazz;
-  }
-
-  public Entry<Type, Class<?>> getGenericSetterType(String propertyName) {
-    Entry<Type, Class<?>> typeClassEntry = setTypes.get(propertyName);
-    if (typeClassEntry == null) {
-      throw new ReflectionException("There is no setter for property named '" + propertyName + "' in '" + clazz + "'");
-    }
-    return typeClassEntry;
-  }
-
-  /**
-   * Gets the type for a property getter.
-   *
-   * @param propertyName
-   *          - the name of the property
-   *
-   * @return The Class of the property getter
-   */
-  public Class<?> getGetterType(String propertyName) {
-    Class<?> clazz = getTypes.getOrDefault(propertyName, nullEntry).getValue();
-    if (clazz == null) {
-      throw new ReflectionException(
-          "There is no getter for property named '" + propertyName + "' in '" + this.clazz + "'");
-    }
-    return clazz;
-  }
-
-  public Entry<Type, Class<?>> getGenericGetterType(String propertyName) {
-    Entry<Type, Class<?>> typeClassEntry = getTypes.get(propertyName);
-    if (typeClassEntry == null) {
-      throw new ReflectionException("There is no getter for property named '" + propertyName + "' in '" + clazz + "'");
-    }
-    return typeClassEntry;
-  }
-
-  /**
-   * Gets an array of the readable properties for an object.
-   *
-   * @return The array
-   */
-  public String[] getGettablePropertyNames() {
-    return readablePropertyNames;
-  }
-
-  /**
-   * Gets an array of the writable properties for an object.
-   *
-   * @return The array
-   */
-  public String[] getSettablePropertyNames() {
-    return writablePropertyNames;
-  }
-
-  /**
-   * Check to see if a class has a writable property by name.
-   *
-   * @param propertyName
-   *          - the name of the property to check
-   *
-   * @return True if the object has a writable property by the name
-   */
-  public boolean hasSetter(String propertyName) {
-    return setMethods.containsKey(propertyName);
-  }
-
-  /**
-   * Check to see if a class has a readable property by name.
-   *
-   * @param propertyName
-   *          - the name of the property to check
-   *
-   * @return True if the object has a readable property by the name
-   */
-  public boolean hasGetter(String propertyName) {
-    return getMethods.containsKey(propertyName);
-  }
-
-  public String findPropertyName(String name) {
-    return caseInsensitivePropertyMap.get(name.toUpperCase(Locale.ENGLISH));
   }
 }
