@@ -15,8 +15,8 @@
  */
 package org.apache.ibatis.scripting;
 
-import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.apache.ibatis.scripting.xmltags.SqlNode;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
@@ -34,7 +34,7 @@ public class StaticTextSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(@NotNull SqlBuildContext context) {
     context.appendSql(context.parseParam(text));
     return true;
   }

@@ -17,6 +17,9 @@ package org.apache.ibatis.scripting.xmltags;
 
 import java.util.List;
 
+import org.apache.ibatis.scripting.SqlBuildContext;
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Clinton Begin
  */
@@ -38,7 +41,7 @@ public class MixedSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(@NotNull SqlBuildContext context) {
     contents.forEach(node -> node.apply(context));
     return true;
   }

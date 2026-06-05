@@ -15,8 +15,8 @@
  */
 package org.apache.ibatis.scripting;
 
-import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.apache.ibatis.scripting.xmltags.SqlNode;
+import org.jetbrains.annotations.NotNull;
 
 public class WhitespaceSqlNode implements SqlNode {
   private final String whitespaces;
@@ -32,7 +32,7 @@ public class WhitespaceSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(@NotNull SqlBuildContext context) {
     context.appendSql(whitespaces);
     return true;
   }

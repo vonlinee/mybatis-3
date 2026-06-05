@@ -30,10 +30,10 @@ import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.scripting.ContextMap;
+import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.scripting.expression.ExpressionException;
 import org.apache.ibatis.scripting.expression.ExtensionMethod;
-import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -153,7 +153,7 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
         return result;
       }
 
-      Object parameterObject = map.get(DynamicContext.PARAMETER_OBJECT_KEY);
+      Object parameterObject = map.get(SqlBuildContext.PARAMETER_OBJECT_KEY);
       if (parameterObject instanceof Map) {
         return ((Map<?, ?>) parameterObject).get(name);
       }

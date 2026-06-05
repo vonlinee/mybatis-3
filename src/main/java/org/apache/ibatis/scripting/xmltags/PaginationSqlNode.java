@@ -17,6 +17,8 @@ package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.dialect.Dialect;
 import org.apache.ibatis.extension.pagination.Pageable;
+import org.apache.ibatis.scripting.SqlBuildContext;
+import org.jetbrains.annotations.NotNull;
 
 public class PaginationSqlNode implements SqlNode {
 
@@ -26,7 +28,7 @@ public class PaginationSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(@NotNull SqlBuildContext context) {
     final Object parameterObject = context.getParameterObject();
     if (!(parameterObject instanceof Pageable)) {
       throw new RuntimeException("Parameter object is not a sub-type of " + Pageable.class);

@@ -15,6 +15,9 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import org.apache.ibatis.scripting.SqlBuildContext;
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Clinton Begin
  */
@@ -22,5 +25,5 @@ public interface SqlNode {
 
   boolean isDynamic();
 
-  boolean apply(DynamicContext context);
+  boolean apply(@NotNull SqlBuildContext context);
 }

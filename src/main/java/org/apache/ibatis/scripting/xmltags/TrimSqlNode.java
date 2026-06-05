@@ -22,6 +22,8 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.scripting.SqlBuildContext;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
@@ -49,7 +51,7 @@ public class TrimSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(@NotNull SqlBuildContext context) {
     FilteredDynamicContext filteredDynamicContext = new FilteredDynamicContext(context);
     boolean result = contents.apply(filteredDynamicContext);
     filteredDynamicContext.applyAll();
@@ -74,12 +76,12 @@ public class TrimSqlNode implements SqlNode {
   }
 
   private class FilteredDynamicContext extends DynamicContext {
-    private final DynamicContext delegate;
+    private final SqlBuildContext delegate;
     private boolean prefixApplied;
     private boolean suffixApplied;
     private StringBuilder sqlBuffer;
 
-    public FilteredDynamicContext(DynamicContext delegate) {
+    public FilteredDynamicContext(SqlBuildContext delegate) {
       super(delegate);
       this.delegate = delegate;
       this.prefixApplied = false;

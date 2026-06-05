@@ -28,16 +28,14 @@ import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.ContextMap;
+import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
  */
-public class DynamicContext {
-
-  public static final String PARAMETER_OBJECT_KEY = "_parameter";
-  public static final String DATABASE_ID_KEY = "_databaseId";
+public class DynamicContext implements SqlBuildContext {
 
   protected final ContextMap bindings;
   private final StringJoiner sqlBuilder = new StringJoiner(" ");
@@ -75,27 +73,32 @@ public class DynamicContext {
     this.paramType = paramType;
   }
 
-  public DynamicContext(DynamicContext delegate) {
+  public DynamicContext(SqlBuildContext delegate) {
     this(delegate.getConfiguration(), delegate.getParameterObject(), delegate.getParameterType(),
         delegate.getParamNameResolver(), delegate.isParamExists(), delegate.getParamType());
   }
 
+  @Override
   public ParamType getParamType() {
     return paramType;
   }
 
+  @Override
   public Map<String, Object> getBindings() {
     return bindings;
   }
 
+  @Override
   public void bind(String name, Object value) {
     bindings.put(name, value);
   }
 
+  @Override
   public void appendSql(String sql) {
     sqlBuilder.add(sql);
   }
 
+  @Override
   public String getSql() {
     return sqlBuilder.toString().trim();
   }
@@ -107,44 +110,54 @@ public class DynamicContext {
     }
   }
 
+  @Override
   public List<ParameterMapping> getParameterMappings() {
     initTokenParser(null);
     return tokenHandler.getParameterMappings();
   }
 
+  @Override
   public String parseParam(String sql) {
     initTokenParser(getParameterMappings());
     return tokenHandler.parse(sql);
   }
 
-  protected Object getParameterObject() {
+  @Override
+  public Object getParameterObject() {
     return parameterObject;
   }
 
-  protected Class<?> getParameterType() {
+  @Override
+  public Class<?> getParameterType() {
     return parameterType;
   }
 
-  protected ParamNameResolver getParamNameResolver() {
+  @Override
+  public ParamNameResolver getParamNameResolver() {
     return paramNameResolver;
   }
 
-  protected boolean isParamExists() {
+  @Override
+  public boolean isParamExists() {
     return paramExists;
   }
 
+  @Override
   public Configuration getConfiguration() {
     return configuration;
   }
 
+  @Override
   public Environment getEnvironment() {
     return configuration.getEnvironment();
   }
 
+  @Override
   public Dialect getDialect() {
     return configuration.getEnvironment().getDialect();
   }
 
+  @Override
   public ExpressionEvaluator getExpressionEvaluator() {
     return configuration.getExpressionEvaluator();
   }

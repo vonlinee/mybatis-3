@@ -15,7 +15,9 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Frank D. Martinez [mnesarco]
@@ -31,7 +33,7 @@ public class VarDeclSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(@NotNull SqlBuildContext context) {
     ExpressionEvaluator evaluator = context.getExpressionEvaluator();
     final Object value = evaluator.getValue(expression, context.getBindings());
     context.bind(name, value);

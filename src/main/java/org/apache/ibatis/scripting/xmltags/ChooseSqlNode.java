@@ -17,6 +17,9 @@ package org.apache.ibatis.scripting.xmltags;
 
 import java.util.List;
 
+import org.apache.ibatis.scripting.SqlBuildContext;
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Clinton Begin
  */
@@ -35,7 +38,7 @@ public class ChooseSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(@NotNull SqlBuildContext context) {
     for (SqlNode sqlNode : ifSqlNodes) {
       if (sqlNode.apply(context)) {
         return true;

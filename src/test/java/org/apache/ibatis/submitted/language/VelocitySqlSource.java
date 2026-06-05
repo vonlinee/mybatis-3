@@ -24,7 +24,7 @@ import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.extension.ParamType;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;
-import org.apache.ibatis.scripting.xmltags.DynamicContext;
+import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.session.Configuration;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -80,8 +80,8 @@ public class VelocitySqlSource implements SqlSource {
 
   public static Map<String, Object> createBindings(Object parameterObject, Configuration configuration) {
     Map<String, Object> bindings = new HashMap<>();
-    bindings.put(DynamicContext.PARAMETER_OBJECT_KEY, parameterObject);
-    bindings.put(DynamicContext.DATABASE_ID_KEY, configuration.getDatabaseId());
+    bindings.put(SqlBuildContext.PARAMETER_OBJECT_KEY, parameterObject);
+    bindings.put(SqlBuildContext.DATABASE_ID_KEY, configuration.getDatabaseId());
     bindings.put("it", new IteratorParameter(bindings));
     return bindings;
   }

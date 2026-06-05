@@ -15,7 +15,9 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
@@ -35,7 +37,7 @@ public class IfSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(@NotNull SqlBuildContext context) {
     ExpressionEvaluator evaluator = context.getExpressionEvaluator();
     if (evaluator.evaluateBoolean(test, context.getBindings())) {
       contents.apply(context);

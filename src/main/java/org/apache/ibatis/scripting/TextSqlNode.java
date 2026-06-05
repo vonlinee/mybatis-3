@@ -18,9 +18,9 @@ package org.apache.ibatis.scripting;
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.TokenHandler;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
-import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.apache.ibatis.scripting.xmltags.SqlNode;
 import org.apache.ibatis.type.SimpleTypeRegistry;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
@@ -38,7 +38,7 @@ public class TextSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(@NotNull SqlBuildContext context) {
     GenericTokenParser parser = createParser(new BindingTokenParser(context));
     context.appendSql(context.parseParam(parser.parse(text)));
     return true;
@@ -50,15 +50,15 @@ public class TextSqlNode implements SqlNode {
 
   private static class BindingTokenParser implements TokenHandler {
 
-    private final DynamicContext context;
+    private final SqlBuildContext context;
 
-    public BindingTokenParser(DynamicContext context) {
+    public BindingTokenParser(SqlBuildContext context) {
       this.context = context;
     }
 
     @Override
     public String handleToken(String content) {
-      Object parameter = context.getBindings().get("_parameter");
+      Object parameter = context.getBindings().get(SqlBuildContext.PARAMETER_OBJECT_KEY);
       if (parameter == null) {
         context.getBindings().put("value", null);
       } else if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {

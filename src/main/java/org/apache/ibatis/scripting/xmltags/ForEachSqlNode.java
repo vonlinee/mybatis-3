@@ -19,7 +19,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
@@ -56,7 +58,7 @@ public class ForEachSqlNode implements SqlNode {
   }
 
   @Override
-  public boolean apply(DynamicContext context) {
+  public boolean apply(@NotNull SqlBuildContext context) {
     final Map<String, Object> bindings = context.getBindings();
     final boolean nullableOnForEach = this.nullable == null ? context.getConfiguration().isNullableOnForEach()
         : this.nullable;
@@ -95,36 +97,36 @@ public class ForEachSqlNode implements SqlNode {
     return true;
   }
 
-  private void applyIndex(DynamicContext context, Object o) {
+  private void applyIndex(SqlBuildContext context, Object o) {
     if (index != null) {
       context.bind(index, o);
     }
   }
 
-  private void applyItem(DynamicContext context, Object o) {
+  private void applyItem(SqlBuildContext context, Object o) {
     if (item != null) {
       context.bind(item, o);
     }
   }
 
-  private void applyOpen(DynamicContext context) {
+  private void applyOpen(SqlBuildContext context) {
     if (open != null) {
       context.appendSql(open);
     }
   }
 
-  private void applyClose(DynamicContext context) {
+  private void applyClose(SqlBuildContext context) {
     if (close != null) {
       context.appendSql(close);
     }
   }
 
   private static class PrefixedContext extends DynamicContext {
-    private final DynamicContext delegate;
+    private final SqlBuildContext delegate;
     private final String prefix;
     private boolean prefixApplied;
 
-    public PrefixedContext(DynamicContext delegate, String prefix) {
+    public PrefixedContext(SqlBuildContext delegate, String prefix) {
       super(delegate);
       this.delegate = delegate;
       this.prefix = prefix;
