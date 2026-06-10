@@ -15,10 +15,8 @@
  */
 package org.apache.ibatis.reflection;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -156,7 +154,15 @@ class BeanReflector implements Reflector {
         name, method.getDeclaringClass().getName())) : new MethodInvoker(method);
     getMethods.put(name, invoker);
     Type returnType = TypeParameterResolver.resolveReturnType(method, type);
-    getTypes.put(name, Map.entry(returnType, typeToClass(returnType)));
+    getTypes.put(name, newTypeClassEntry(returnType));
+  }
+
+  private Entry<Type, Class<?>> newTypeClassEntry(Type type) {
+    Class<?> classOfType = ReflectionUtils.determineClassOfType(type);
+    if (classOfType == null) {
+      throw new ReflectionException("Cannot find class for type " + type + ".");
+    }
+    return Map.entry(type, classOfType);
   }
 
   private void addSetMethods(Method[] methods) {
@@ -216,7 +222,7 @@ class BeanReflector implements Reflector {
             setter2.getDeclaringClass().getName(), paramType1.getName(), paramType2.getName()));
     setMethods.put(property, invoker);
     Type[] paramTypes = TypeParameterResolver.resolveParamTypes(setter1, type);
-    setTypes.put(property, Map.entry(paramTypes[0], typeToClass(paramTypes[0])));
+    setTypes.put(property, newTypeClassEntry(paramTypes[0]));
     return null;
   }
 
@@ -224,24 +230,7 @@ class BeanReflector implements Reflector {
     MethodInvoker invoker = new MethodInvoker(method);
     setMethods.put(name, invoker);
     Type[] paramTypes = TypeParameterResolver.resolveParamTypes(method, type);
-    setTypes.put(name, Map.entry(paramTypes[0], typeToClass(paramTypes[0])));
-  }
-
-  private Class<?> typeToClass(Type src) {
-    if (src instanceof Class) {
-      return (Class<?>) src;
-    } else if (src instanceof ParameterizedType) {
-      return (Class<?>) ((ParameterizedType) src).getRawType();
-    } else if (src instanceof GenericArrayType) {
-      Type componentType = ((GenericArrayType) src).getGenericComponentType();
-      if (componentType instanceof Class) {
-        return Array.newInstance((Class<?>) componentType, 0).getClass();
-      } else {
-        Class<?> componentClass = typeToClass(componentType);
-        return Array.newInstance(componentClass, 0).getClass();
-      }
-    }
-    return Object.class;
+    setTypes.put(name, newTypeClassEntry(paramTypes[0]));
   }
 
   private void addFields(Class<?> clazz) {
@@ -269,7 +258,7 @@ class BeanReflector implements Reflector {
     if (BeanUtils.isValidPropertyName(field.getName())) {
       setMethods.put(field.getName(), new SetFieldInvoker(field));
       Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
-      setTypes.put(field.getName(), Map.entry(fieldType, typeToClass(fieldType)));
+      setTypes.put(field.getName(), newTypeClassEntry(fieldType));
     }
   }
 
@@ -277,7 +266,7 @@ class BeanReflector implements Reflector {
     if (BeanUtils.isValidPropertyName(field.getName())) {
       getMethods.put(field.getName(), new GetFieldInvoker(field));
       Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
-      getTypes.put(field.getName(), Map.entry(fieldType, typeToClass(fieldType)));
+      getTypes.put(field.getName(), newTypeClassEntry(fieldType));
     }
   }
 
