@@ -556,4 +556,15 @@ public final class StringUtils {
     }
     return string;
   }
+
+  public static Set<String> prependPrefixes(Set<String> strings, String prefix) {
+    if (strings == null || strings.isEmpty() || prefix == null || prefix.length() == 0) {
+      return strings;
+    }
+    final Set<String> prefixed = new HashSet<>();
+    for (String columnName : strings) {
+      prefixed.add(prefix + columnName);
+    }
+    return prefixed;
+  }
 }

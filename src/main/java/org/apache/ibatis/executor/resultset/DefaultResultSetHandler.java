@@ -482,7 +482,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   private boolean applyPropertyMappings(ResultSetWrapper rsw, ResultMap resultMap, MetaObject metaObject,
       ResultLoaderMap lazyLoader, String columnPrefix) throws SQLException {
-    final Set<String> mappedColumnNames = rsw.getMappedColumnNames(resultMap, columnPrefix);
+    final String mapKey = getMapKey(resultMap, columnPrefix);
+    final Set<String> mappedColumnNames = rsw.getMappedColumnNames(mapKey,
+        () -> resultMap.getMappedColumns(columnPrefix));
     boolean foundValues = false;
     final List<ResultMapping> propertyMappings = resultMap.getPropertyResultMappings();
     for (ResultMapping propertyMapping : propertyMappings) {
@@ -562,11 +564,12 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   private List<UnMappedColumnAutoMapping> createAutomaticMappings(ResultSetWrapper rsw, ResultMap resultMap,
       MetaObject metaObject, String columnPrefix) throws SQLException {
-    final String mapKey = resultMap.getId() + ":" + columnPrefix;
+    final String mapKey = getMapKey(resultMap, columnPrefix);
     List<UnMappedColumnAutoMapping> autoMapping = autoMappingsCache.get(mapKey);
     if (autoMapping == null) {
       autoMapping = new ArrayList<>();
-      final List<String> unmappedColumnNames = rsw.getUnmappedColumnNames(resultMap, columnPrefix);
+      final List<String> unmappedColumnNames = rsw.getUnmappedColumnNames(mapKey,
+          () -> resultMap.getMappedColumns(columnPrefix));
       // Remove the entry to release the memory
       List<String> mappedInConstructorAutoMapping = constructorAutoMappingColumns.remove(mapKey);
       if (mappedInConstructorAutoMapping != null) {
@@ -1472,11 +1475,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   private void createRowKeyForMappedProperties(ResultMap resultMap, ResultSetWrapper rsw, CacheKey cacheKey,
       List<ResultMapping> resultMappings, String columnPrefix) throws SQLException {
+    final String mapKey = getMapKey(resultMap, columnPrefix);
     for (ResultMapping resultMapping : resultMappings) {
       if (resultMapping.isSimple()) {
         final String column = prependPrefix(resultMapping.getColumn(), columnPrefix);
         TypeHandler<?> th = resultMapping.getTypeHandler();
-        Set<String> mappedColumnNames = rsw.getMappedColumnNames(resultMap, columnPrefix);
+        Set<String> mappedColumnNames = rsw.getMappedColumnNames(mapKey,
+            () -> resultMap.getMappedColumns(columnPrefix));
         // Issue #114
         if (column != null && mappedColumnNames.contains(column.toUpperCase(Locale.ENGLISH))) {
           if (th == null) {
@@ -1498,7 +1503,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   private void createRowKeyForUnmappedProperties(ResultMap resultMap, ResultSetWrapper rsw, CacheKey cacheKey,
       String columnPrefix) throws SQLException {
     final MetaClass metaType = MetaClass.forClass(resultMap.getType(), reflectorFactory);
-    List<String> unmappedColumnNames = rsw.getUnmappedColumnNames(resultMap, columnPrefix);
+    String mapKey = getMapKey(resultMap, columnPrefix);
+    List<String> unmappedColumnNames = rsw.getUnmappedColumnNames(mapKey,
+        () -> resultMap.getMappedColumns(columnPrefix));
     for (String column : unmappedColumnNames) {
       String property = column;
       if (columnPrefix != null && !columnPrefix.isEmpty()) {
@@ -1597,4 +1604,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     return typeHandlerRegistry.hasTypeHandler(resultType);
   }
 
+  private String getMapKey(ResultMap resultMap, String columnPrefix) {
+    return resultMap.getId() + ":" + columnPrefix;
+  }
 }

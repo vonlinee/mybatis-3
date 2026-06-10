@@ -19,6 +19,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 import org.apache.ibatis.internal.util.CollectionUtils;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
@@ -368,6 +369,11 @@ public class ResultMap {
 
   public Set<String> getMappedColumns() {
     return mappedColumns;
+  }
+
+  public Set<String> getMappedColumns(String columnPrefix) {
+    final String upperColumnPrefix = columnPrefix == null ? null : columnPrefix.toUpperCase(Locale.ENGLISH);
+    return StringUtils.prependPrefixes(mappedColumns, upperColumnPrefix);
   }
 
   public Set<String> getMappedProperties() {

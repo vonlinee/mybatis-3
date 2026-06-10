@@ -27,9 +27,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.ObjectTypeHandler;
@@ -138,11 +138,9 @@ public class ResultSetWrapper {
     return -1;
   }
 
-  private void loadMappedAndUnmappedColumnNames(ResultMap resultMap, String columnPrefix) {
+  private void loadMappedAndUnmappedColumnNames(String mapKey, Set<String> mappedColumns) {
     Set<String> mappedColumnNames = new HashSet<>();
     List<String> unmappedColumnNames = new ArrayList<>();
-    final String upperColumnPrefix = columnPrefix == null ? null : columnPrefix.toUpperCase(Locale.ENGLISH);
-    final Set<String> mappedColumns = prependPrefixes(resultMap.getMappedColumns(), upperColumnPrefix);
     for (String columnName : columnNames) {
       final String upperColumnName = columnName.toUpperCase(Locale.ENGLISH);
       if (mappedColumns.contains(upperColumnName)) {
@@ -151,41 +149,25 @@ public class ResultSetWrapper {
         unmappedColumnNames.add(columnName);
       }
     }
-    mappedColumnNamesMap.put(getMapKey(resultMap, columnPrefix), mappedColumnNames);
-    unMappedColumnNamesMap.put(getMapKey(resultMap, columnPrefix), unmappedColumnNames);
+    mappedColumnNamesMap.put(mapKey, mappedColumnNames);
+    unMappedColumnNamesMap.put(mapKey, unmappedColumnNames);
   }
 
-  public Set<String> getMappedColumnNames(ResultMap resultMap, String columnPrefix) {
-    Set<String> mappedColumnNames = mappedColumnNamesMap.get(getMapKey(resultMap, columnPrefix));
+  public Set<String> getMappedColumnNames(String mapKey, Supplier<Set<String>> mappedColumns) {
+    Set<String> mappedColumnNames = mappedColumnNamesMap.get(mapKey);
     if (mappedColumnNames == null) {
-      loadMappedAndUnmappedColumnNames(resultMap, columnPrefix);
-      mappedColumnNames = mappedColumnNamesMap.get(getMapKey(resultMap, columnPrefix));
+      loadMappedAndUnmappedColumnNames(mapKey, mappedColumns.get());
+      mappedColumnNames = mappedColumnNamesMap.get(mapKey);
     }
     return mappedColumnNames;
   }
 
-  public List<String> getUnmappedColumnNames(ResultMap resultMap, String columnPrefix) {
-    List<String> unMappedColumnNames = unMappedColumnNamesMap.get(getMapKey(resultMap, columnPrefix));
+  public List<String> getUnmappedColumnNames(String mapKey, Supplier<Set<String>> mappedColumns) {
+    List<String> unMappedColumnNames = unMappedColumnNamesMap.get(mapKey);
     if (unMappedColumnNames == null) {
-      loadMappedAndUnmappedColumnNames(resultMap, columnPrefix);
-      unMappedColumnNames = unMappedColumnNamesMap.get(getMapKey(resultMap, columnPrefix));
+      loadMappedAndUnmappedColumnNames(mapKey, mappedColumns.get());
+      unMappedColumnNames = unMappedColumnNamesMap.get(mapKey);
     }
     return unMappedColumnNames;
   }
-
-  private String getMapKey(ResultMap resultMap, String columnPrefix) {
-    return resultMap.getId() + ":" + columnPrefix;
-  }
-
-  private Set<String> prependPrefixes(Set<String> columnNames, String prefix) {
-    if (columnNames == null || columnNames.isEmpty() || prefix == null || prefix.length() == 0) {
-      return columnNames;
-    }
-    final Set<String> prefixed = new HashSet<>();
-    for (String columnName : columnNames) {
-      prefixed.add(prefix + columnName);
-    }
-    return prefixed;
-  }
-
 }
