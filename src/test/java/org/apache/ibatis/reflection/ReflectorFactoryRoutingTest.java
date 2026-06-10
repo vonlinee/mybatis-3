@@ -39,7 +39,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * <li>Parameterised types route to {@link BeanReflector} on the raw type.</li>
  * <li>{@link DefaultReflectorFactory} caches results when caching is enabled.</li>
  * <li>{@link DefaultReflectorFactory} creates fresh instances when caching is disabled.</li>
- * <li>{@link Reflector#canControlMemberAccessible()} does not throw.</li>
+ * <li>{@link ReflectionUtils#canControlMemberAccessible()} does not throw.</li>
  * </ul>
  */
 class ReflectorFactoryRoutingTest {
@@ -188,7 +188,7 @@ class ReflectorFactoryRoutingTest {
   @Test
   void shouldCanControlMemberAccessibleDoesNotThrow() {
     // We just verify it runs; the result is JVM-dependent.
-    boolean result = Reflector.canControlMemberAccessible();
+    boolean result = ReflectionUtils.canControlMemberAccessible();
     // boolean is valid either way — just make sure no exception
     assertNotNull(result); // autoboxed; always non-null
   }

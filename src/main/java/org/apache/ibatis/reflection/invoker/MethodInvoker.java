@@ -18,7 +18,7 @@ package org.apache.ibatis.reflection.invoker;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.apache.ibatis.reflection.Reflector;
+import org.apache.ibatis.reflection.ReflectionUtils;
 
 /**
  * @author Clinton Begin
@@ -43,7 +43,7 @@ public class MethodInvoker implements Invoker {
     try {
       return method.invoke(target, args);
     } catch (IllegalAccessException e) {
-      if (Reflector.canControlMemberAccessible()) {
+      if (ReflectionUtils.canControlMemberAccessible()) {
         method.setAccessible(true);
         return method.invoke(target, args);
       }

@@ -235,31 +235,15 @@ public final class ReflectionUtils {
   }
 
   /**
-   * @see Method#toGenericString()
-   * @see Method#toString()
+   * Checks whether reflective member access (i.e. {@code setAccessible(true)}) is permitted in the current JVM/module
+   * configuration.
+   * <p>
+   * Kept as a static method on the interface so that existing callers ({@code MethodInvoker}, {@code GetFieldInvoker},
+   * {@code DefaultObjectFactory}, etc.) do not need to be updated.
    *
-   * @param method
-   *          method
+   * @return {@code true} if {@code setAccessible} calls are allowed
    *
-   * @return method signature as string
-   */
-  public static String getMethodSignatureAsString(Method method) {
-    Objects.requireNonNull(method, "method is null");
-    StringBuilder sb = new StringBuilder();
-    Class<?> returnType = method.getReturnType();
-    sb.append(returnType.getName()).append('#');
-    sb.append(method.getName());
-    Class<?>[] parameters = method.getParameterTypes();
-    for (int i = 0; i < parameters.length; i++) {
-      sb.append(i == 0 ? ':' : ',').append(parameters[i].getName());
-    }
-    return sb.toString();
-  }
-
-  /**
-   * Checks whether you can control member accessible.
-   *
-   * @return If you can control member accessible, it return {@literal true}
+   * @since 3.5.0
    */
   public static boolean checkReflectionPermission() {
     try {

@@ -17,7 +17,7 @@ package org.apache.ibatis.reflection.invoker;
 
 import java.lang.reflect.Field;
 
-import org.apache.ibatis.reflection.Reflector;
+import org.apache.ibatis.reflection.ReflectionUtils;
 
 /**
  * @author Clinton Begin
@@ -34,7 +34,7 @@ public class SetFieldInvoker implements Invoker {
     try {
       field.set(target, args[0]);
     } catch (IllegalAccessException e) {
-      if (!Reflector.canControlMemberAccessible()) {
+      if (!ReflectionUtils.canControlMemberAccessible()) {
         throw e;
       }
       field.setAccessible(true);

@@ -216,19 +216,4 @@ public interface Reflector {
     }
     return new BeanReflector(type);
   }
-
-  /**
-   * Checks whether reflective member access (i.e. {@code setAccessible(true)}) is permitted in the current JVM/module
-   * configuration.
-   * <p>
-   * Kept as a static method on the interface so that existing callers ({@code MethodInvoker}, {@code GetFieldInvoker},
-   * {@code DefaultObjectFactory}, etc.) do not need to be updated.
-   *
-   * @return {@code true} if {@code setAccessible} calls are allowed
-   *
-   * @since 3.5.0
-   */
-  static boolean canControlMemberAccessible() {
-    return ReflectionUtils.checkReflectionPermission();
-  }
 }

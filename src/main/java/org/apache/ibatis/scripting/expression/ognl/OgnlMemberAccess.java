@@ -21,7 +21,7 @@ import java.lang.reflect.Member;
 import ognl.MemberAccess;
 import ognl.OgnlContext;
 
-import org.apache.ibatis.reflection.Reflector;
+import org.apache.ibatis.reflection.ReflectionUtils;
 
 /**
  * The {@link MemberAccess} class that based on <a href=
@@ -40,7 +40,7 @@ class OgnlMemberAccess implements MemberAccess {
   private final boolean canControlMemberAccessible;
 
   OgnlMemberAccess() {
-    this.canControlMemberAccessible = Reflector.canControlMemberAccessible();
+    this.canControlMemberAccessible = ReflectionUtils.canControlMemberAccessible();
   }
 
   @Override

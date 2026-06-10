@@ -40,7 +40,7 @@ public final class BeanUtils {
           try {
             field.set(destinationBean, field.get(sourceBean));
           } catch (IllegalAccessException e) {
-            if (!Reflector.canControlMemberAccessible()) {
+            if (!ReflectionUtils.canControlMemberAccessible()) {
               throw e;
             }
             field.setAccessible(true);
