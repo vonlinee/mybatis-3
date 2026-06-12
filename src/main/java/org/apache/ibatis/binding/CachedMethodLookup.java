@@ -21,7 +21,7 @@ import java.util.Map;
 import org.apache.ibatis.reflection.ExceptionUtils;
 import org.apache.ibatis.session.SqlSession;
 
-public class CachedMethodLookup implements MapperMethod.Lookup {
+class CachedMethodLookup implements MapperMethod.Lookup {
 
   private final Map<Method, MapperMethod> methodCache;
 
