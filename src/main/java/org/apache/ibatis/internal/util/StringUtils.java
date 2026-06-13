@@ -567,4 +567,11 @@ public final class StringUtils {
     }
     return prefixed;
   }
+
+  public static String prependPrefix(String base, String prefix) {
+    if (base == null || base.isEmpty() || prefix == null || prefix.isEmpty()) {
+      return base;
+    }
+    return prefix + base;
+  }
 }

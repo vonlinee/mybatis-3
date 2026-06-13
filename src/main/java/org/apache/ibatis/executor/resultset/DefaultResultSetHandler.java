@@ -15,6 +15,8 @@
  */
 package org.apache.ibatis.executor.resultset;
 
+import static org.apache.ibatis.internal.util.StringUtils.prependPrefix;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
@@ -1068,13 +1070,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       typeHandler = typeHandlerRegistry.getTypeHandler(resultMapping.getJavaType(), rsw.getJdbcType(column));
     }
     return typeHandler.getResult(rsw.getResultSet(), column);
-  }
-
-  private String prependPrefix(String columnName, String prefix) {
-    if (columnName == null || columnName.isEmpty() || prefix == null || prefix.isEmpty()) {
-      return columnName;
-    }
-    return prefix + columnName;
   }
 
   //
