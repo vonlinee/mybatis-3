@@ -25,6 +25,7 @@ import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.extension.ParamType;
 import org.apache.ibatis.internal.util.CollectionUtils;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.reflection.ParamNameResolver;
@@ -161,12 +162,12 @@ public final class MappedStatement {
     }
 
     public Builder keyProperty(String keyProperty) {
-      mappedStatement.keyProperties = delimitedStringToArray(keyProperty);
+      mappedStatement.keyProperties = StringUtils.delimitedStringToArray(keyProperty);
       return this;
     }
 
     public Builder keyColumn(String keyColumn) {
-      mappedStatement.keyColumns = delimitedStringToArray(keyColumn);
+      mappedStatement.keyColumns = StringUtils.delimitedStringToArray(keyColumn);
       return this;
     }
 
@@ -181,7 +182,7 @@ public final class MappedStatement {
     }
 
     public Builder resultSets(String resultSet) {
-      mappedStatement.resultSets = delimitedStringToArray(resultSet);
+      mappedStatement.resultSets = StringUtils.delimitedStringToArray(resultSet);
       return this;
     }
 
@@ -351,12 +352,4 @@ public final class MappedStatement {
 
     return boundSql;
   }
-
-  private static String[] delimitedStringToArray(String in) {
-    if (in == null || in.trim().length() == 0) {
-      return null;
-    }
-    return in.split(",");
-  }
-
 }
