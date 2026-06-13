@@ -355,6 +355,16 @@ public class ResultMap {
     return resultMappings;
   }
 
+  public boolean hasResultMappings() {
+    return !resultMappings.isEmpty();
+  }
+
+  public String getMappedColumn(int columnIndex) {
+    final List<ResultMapping> resultMappingList = resultMappings;
+    final ResultMapping mapping = resultMappingList.get(columnIndex);
+    return mapping.getColumn();
+  }
+
   public List<ResultMapping> getConstructorResultMappings() {
     return constructorResultMappings;
   }

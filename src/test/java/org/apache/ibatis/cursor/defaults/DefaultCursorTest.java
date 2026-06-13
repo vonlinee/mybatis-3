@@ -60,7 +60,7 @@ class DefaultCursorTest {
   @Test
   void shouldCloseImmediatelyIfResultSetIsClosed() throws Exception {
     final MappedStatement ms = getNestedAndOrderedMappedStatement();
-    final ResultMap rm = ms.getResultMaps().get(0);
+    final ResultMap rm = ms.getResultMap(0);
 
     final Executor executor = null;
     final ParameterHandler parameterHandler = null;

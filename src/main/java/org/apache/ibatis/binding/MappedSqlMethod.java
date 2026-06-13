@@ -140,8 +140,7 @@ class MappedSqlMethod implements MapperMethod {
 
   private void executeWithResultHandler(SqlSession sqlSession, Object[] args) {
     MappedStatement ms = sqlSession.getConfiguration().getMappedStatement(command.getName());
-    if (!StatementType.CALLABLE.equals(ms.getStatementType())
-        && void.class.equals(ms.getResultMaps().get(0).getType())) {
+    if (!StatementType.CALLABLE.equals(ms.getStatementType()) && void.class.equals(ms.getMappedResultType(0))) {
       throw new BindingException(
           "method " + command.getName() + " needs either a @ResultMap annotation, a @ResultType annotation,"
               + " or a resultType attribute in XML so a ResultHandler can be used as a parameter.");
@@ -208,8 +207,8 @@ class MappedSqlMethod implements MapperMethod {
     if (ms.getCountStatement() != null) {
       Object countResult = sqlSession.selectOne(ms.getCountStatement(), param);
       if (!(countResult instanceof Number)) {
-        throw new BindingException("Mapper method '" + command.getName() + "' resultType="
-            + ms.getResultMaps().get(0).getType() + " is not a valid collection type");
+        throw new BindingException("Mapper method '" + command.getName() + "' resultType=" + ms.getMappedResultType(0)
+            + " is not a valid collection type");
       }
       total = ((Number) countResult).longValue();
     }

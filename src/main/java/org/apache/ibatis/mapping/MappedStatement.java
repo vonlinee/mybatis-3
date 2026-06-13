@@ -263,6 +263,14 @@ public final class MappedStatement {
     return resultMaps;
   }
 
+  public ResultMap getResultMap(int index) {
+    return resultMaps.get(index);
+  }
+
+  public Class<?> getMappedResultType(int index) {
+    return resultMaps.get(index).getType();
+  }
+
   public Cache getCache() {
     return cache;
   }

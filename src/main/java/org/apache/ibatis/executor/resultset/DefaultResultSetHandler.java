@@ -852,15 +852,15 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       List<Object> constructorArgs, Constructor<?> constructor, boolean foundValues) throws SQLException {
     Class<?>[] parameterTypes = constructor.getParameterTypes();
 
-    if (parameterTypes.length > rsw.getClassNames().size()) {
+    if (parameterTypes.length > rsw.getColumnCount()) {
       throw new ExecutorException(MessageFormat.format(
           "Constructor auto-mapping of ''{0}'' failed. The constructor takes ''{1}'' arguments, but there are only ''{2}'' columns in the result set.",
-          constructor, parameterTypes.length, rsw.getClassNames().size()));
+          constructor, parameterTypes.length, rsw.getColumnCount()));
     }
 
     for (int i = 0; i < parameterTypes.length; i++) {
       Class<?> parameterType = parameterTypes[i];
-      String columnName = rsw.getColumnNames().get(i);
+      String columnName = rsw.getColumnName(i);
       TypeHandler<?> typeHandler = rsw.getTypeHandler(parameterType, columnName);
       Object value = typeHandler.getResult(rsw.getResultSet(), columnName);
       constructorArgTypes.add(parameterType);
@@ -923,16 +923,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   private Object createPrimitiveResultObject(ResultSetWrapper rsw, ResultMap resultMap, String columnPrefix)
       throws SQLException {
-    final Class<?> resultType = resultMap.getType();
     final String columnName;
-    if (!resultMap.getResultMappings().isEmpty()) {
-      final List<ResultMapping> resultMappingList = resultMap.getResultMappings();
-      final ResultMapping mapping = resultMappingList.get(0);
-      columnName = prependPrefix(mapping.getColumn(), columnPrefix);
+    if (resultMap.hasResultMappings()) {
+      columnName = prependPrefix(resultMap.getMappedColumn(0), columnPrefix);
     } else {
-      columnName = rsw.getColumnNames().get(0);
+      columnName = rsw.getColumnName(0);
     }
-    final TypeHandler<?> typeHandler = rsw.getTypeHandler(resultType, columnName);
+    final TypeHandler<?> typeHandler = rsw.getTypeHandler(resultMap.getType(), columnName);
     return typeHandler.getResult(rsw.getResultSet(), columnName);
   }
 
@@ -1087,7 +1084,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   private void handleRowValuesForNestedResultMap(ResultSetWrapper rsw, ResultMap resultMap,
       ResultHandler<?> resultHandler, RowBounds rowBounds, ResultMapping parentMapping) throws SQLException {
     final boolean useCollectionConstructorInjection = resultMap.hasResultMapsUsingConstructorCollection();
-    PendingConstructorCreation lastHandledCreation = null;
     if (useCollectionConstructorInjection) {
       verifyPendingCreationPreconditions(parentMapping);
     }
@@ -1096,6 +1092,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     ResultSet resultSet = rsw.getResultSet();
     skipRows(resultSet, rowBounds);
     Object rowValue = previousRowValue;
+
+    PendingConstructorCreation lastHandledCreation = null;
 
     while (shouldProcessMoreRows(resultContext, rowBounds) && !resultSet.isClosed() && resultSet.next()) {
       final ResultMap discriminatedResultMap = resolveDiscriminatedResultMap(rsw, resultMap, null);
@@ -1526,8 +1524,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private void createRowKeyForMap(ResultSetWrapper rsw, CacheKey cacheKey) throws SQLException {
-    List<String> columnNames = rsw.getColumnNames();
-    for (String columnName : columnNames) {
+    for (String columnName : rsw.getColumnNames()) {
       final String value = rsw.getResultSet().getString(columnName);
       if (value != null) {
         cacheKey.update(columnName);
@@ -1598,8 +1595,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private boolean hasTypeHandlerForResultObject(ResultSetWrapper rsw, Class<?> resultType) {
-    if (rsw.getColumnNames().size() == 1) {
-      return typeHandlerRegistry.hasTypeHandler(resultType, rsw.getJdbcType(rsw.getColumnNames().get(0)));
+    if (rsw.getColumnCount() == 1) {
+      return typeHandlerRegistry.hasTypeHandler(resultType, rsw.getJdbcType(0));
     }
     return typeHandlerRegistry.hasTypeHandler(resultType);
   }

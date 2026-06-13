@@ -66,8 +66,16 @@ public class ResultSetWrapper {
     return resultSet;
   }
 
+  public int getColumnCount() {
+    return columnNames.size();
+  }
+
   public List<String> getColumnNames() {
     return this.columnNames;
+  }
+
+  public String getColumnName(int columnIndex) {
+    return columnNames.get(columnIndex);
   }
 
   public List<String> getClassNames() {
@@ -80,6 +88,10 @@ public class ResultSetWrapper {
 
   public JdbcType getJdbcType(String columnName) {
     int columnIndex = getColumnIndex(columnName);
+    return columnIndex == -1 ? null : jdbcTypes.get(columnIndex);
+  }
+
+  public JdbcType getJdbcType(int columnIndex) {
     return columnIndex == -1 ? null : jdbcTypes.get(columnIndex);
   }
 
@@ -101,13 +113,13 @@ public class ResultSetWrapper {
         return ObjectTypeHandler.INSTANCE;
       }
 
-      JdbcType jdbcType = jdbcTypes.get(index);
+      JdbcType jdbcType = getJdbcType(index);
       TypeHandler<?> handler = typeHandlerRegistry.getTypeHandler(k, jdbcType, null);
       if (handler != null) {
         return handler;
       }
 
-      Class<?> javaType = resolveClass(classNames.get(index));
+      Class<?> javaType = getColumnType(index);
       if (!(k instanceof Class && ((Class<?>) k).isAssignableFrom(javaType))) {
         // Clearly incompatible
         return null;
@@ -119,6 +131,10 @@ public class ResultSetWrapper {
       }
       return handler == null ? ObjectTypeHandler.INSTANCE : handler;
     });
+  }
+
+  public Class<?> getColumnType(int columnIndex) {
+    return resolveClass(classNames.get(columnIndex));
   }
 
   static Class<?> resolveClass(String className) {
