@@ -88,7 +88,7 @@ public class ReuseExecutor extends BaseExecutor {
       stmt = getStatement(sql);
       applyTransactionTimeout(stmt);
     } else {
-      Connection connection = getConnection(ms.getStatementLog());
+      Connection connection = getConnection(ms);
       stmt = handler.prepare(connection, transaction.getTimeout());
       putStatement(sql, stmt);
     }

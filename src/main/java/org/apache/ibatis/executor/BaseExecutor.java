@@ -39,7 +39,6 @@ import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
-import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.session.ResultHandler;
@@ -77,9 +76,7 @@ public abstract class BaseExecutor implements Executor {
 
   @Override
   public Transaction getTransaction() {
-    if (closed) {
-      throw new ExecutorException("Executor was closed.");
-    }
+    assertNotClosed();
     return transaction;
   }
 
@@ -113,9 +110,7 @@ public abstract class BaseExecutor implements Executor {
   @Override
   public int update(MappedStatement ms, Object parameter) throws SQLException {
     ErrorContext.instance().resource(ms.getResource()).activity("executing an update").object(ms.getId());
-    if (closed) {
-      throw new ExecutorException("Executor was closed.");
-    }
+    assertNotClosed();
     clearLocalCache();
     return doUpdate(ms, parameter);
   }
@@ -126,10 +121,14 @@ public abstract class BaseExecutor implements Executor {
   }
 
   public List<BatchResult> flushStatements(boolean isRollBack) throws SQLException {
+    assertNotClosed();
+    return doFlushStatements(isRollBack);
+  }
+
+  private void assertNotClosed() {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
-    return doFlushStatements(isRollBack);
   }
 
   @Override
@@ -145,9 +144,7 @@ public abstract class BaseExecutor implements Executor {
   public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler,
       CacheKey key, BoundSql boundSql) throws SQLException {
     ErrorContext.instance().resource(ms.getResource()).activity("executing a query").object(ms.getId());
-    if (closed) {
-      throw new ExecutorException("Executor was closed.");
-    }
+    assertNotClosed();
     if (queryStack == 0 && ms.isFlushCacheRequired()) {
       clearLocalCache();
     }
@@ -186,9 +183,7 @@ public abstract class BaseExecutor implements Executor {
   @Override
   public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key,
       Class<?> targetType) {
-    if (closed) {
-      throw new ExecutorException("Executor was closed.");
-    }
+    assertNotClosed();
     DeferredLoad deferredLoad = new DeferredLoad(resultObject, property, key, localCache, configuration, targetType);
     if (deferredLoad.canLoad()) {
       deferredLoad.load();
@@ -199,9 +194,7 @@ public abstract class BaseExecutor implements Executor {
 
   @Override
   public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
-    if (closed) {
-      throw new ExecutorException("Executor was closed.");
-    }
+    assertNotClosed();
     CacheKey cacheKey = new CacheKey();
     cacheKey.update(ms.getId());
     cacheKey.update(rowBounds.getOffset());
@@ -298,7 +291,7 @@ public abstract class BaseExecutor implements Executor {
   }
 
   protected Statement prepareStatement(StatementHandler handler, MappedStatement ms) throws SQLException {
-    Connection connection = getConnection(ms.getStatementLog());
+    Connection connection = getConnection(ms);
     Statement stmt = handler.prepare(connection, transaction.getTimeout());
     handler.parameterize(stmt);
     return stmt;
@@ -355,8 +348,9 @@ public abstract class BaseExecutor implements Executor {
     return list;
   }
 
-  protected Connection getConnection(Log statementLog) throws SQLException {
+  protected Connection getConnection(MappedStatement stmt) throws SQLException {
     Connection connection = transaction.getConnection();
+    Log statementLog = stmt.getStatementLog();
     if (statementLog.isDebugEnabled()) {
       return ConnectionLogger.newInstance(connection, statementLog, queryStack);
     }
@@ -375,7 +369,6 @@ public abstract class BaseExecutor implements Executor {
     private final Class<?> targetType;
     private final CacheKey key;
     private final PerpetualCache localCache;
-    private final ObjectFactory objectFactory;
     private final ResultExtractor resultExtractor;
 
     // issue #781
@@ -385,8 +378,7 @@ public abstract class BaseExecutor implements Executor {
       this.property = property;
       this.key = key;
       this.localCache = localCache;
-      this.objectFactory = configuration.getObjectFactory();
-      this.resultExtractor = new ResultExtractor(configuration, objectFactory);
+      this.resultExtractor = new ResultExtractor(configuration, configuration.getObjectFactory());
       this.targetType = targetType;
     }
 
