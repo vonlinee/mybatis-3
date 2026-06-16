@@ -15,12 +15,7 @@
  */
 package org.apache.ibatis.reflection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -296,6 +291,40 @@ class MetaObjectTest {
     assertTrue(meta.hasGetter("filterParams[0]"));
     assertTrue(meta.hasGetter("filterParams[1]"));
     assertTrue(meta.hasGetter("filterParams[2]"));
+  }
+
+  @Test
+  void shouldReturnExistingCollectionFromGetOrCreateCollectionWithExpectedType() {
+    RichType rich = new RichType();
+    MetaObject meta = MetaObject.forObject(rich);
+
+    ArrayList<?> collection = meta.getOrCreateCollection("richList", ArrayList.class);
+
+    assertNotNull(collection);
+    assertSame(rich.getRichList(), collection);
+    assertEquals("bar", collection.get(0));
+  }
+
+  @Test
+  void shouldCreateCollectionFromExpectedType() {
+    Map<String, Object> map = new HashMap<>();
+    MetaObject meta = MetaObject.forObject(map);
+
+    List<?> collection = meta.getOrCreateCollection("items", List.class);
+
+    assertInstanceOf(ArrayList.class, collection);
+    assertSame(collection, map.get("items"));
+  }
+
+  @Test
+  void shouldReturnNullWhenExpectedTypeIsNotCollection() {
+    Map<String, Object> map = new HashMap<>();
+    MetaObject meta = MetaObject.forObject(map);
+
+    String collection = meta.getOrCreateCollection("name", String.class);
+
+    assertNull(collection);
+    assertFalse(map.containsKey("name"));
   }
 
 }

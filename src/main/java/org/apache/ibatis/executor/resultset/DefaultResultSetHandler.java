@@ -1565,28 +1565,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private Object instantiateCollectionPropertyIfAppropriate(ResultMapping resultMapping, MetaObject metaObject) {
-    final String propertyName = resultMapping.getProperty();
-    Object propertyValue = metaObject.getValue(propertyName);
-    if (propertyValue == null) {
-      Class<?> type = resultMapping.getJavaType();
-      if (type == null) {
-        type = metaObject.getSetterType(propertyName);
-      }
-      try {
-        if (objectFactory.isCollection(type)) {
-          propertyValue = objectFactory.create(type);
-          metaObject.setValue(propertyName, propertyValue);
-          return propertyValue;
-        }
-      } catch (Exception e) {
-        throw new ExecutorException(
-            "Error instantiating collection property for result '" + resultMapping.getProperty() + "'.  Cause: " + e,
-            e);
-      }
-    } else if (objectFactory.isCollection(propertyValue.getClass())) {
-      return propertyValue;
-    }
-    return null;
+    return metaObject.getOrCreateCollection(resultMapping.getProperty(), resultMapping.getJavaType());
   }
 
   private boolean hasTypeHandlerForResultObject(ResultSetWrapper rsw, Class<?> resultType) {

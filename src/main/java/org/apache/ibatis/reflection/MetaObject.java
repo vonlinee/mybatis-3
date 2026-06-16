@@ -27,6 +27,7 @@ import org.apache.ibatis.reflection.wrapper.CollectionWrapper;
 import org.apache.ibatis.reflection.wrapper.MapWrapper;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapper;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
@@ -171,5 +172,74 @@ public class MetaObject {
 
   public boolean isNull() {
     return this == SystemMetaObject.NULL_META_OBJECT;
+  }
+
+  /**
+   * @see MetaObject#getOrCreateCollection(String, Class)
+   *
+   * @param property
+   *          property name
+   *
+   * @return the collection value assigned to the specified property
+   */
+  public <T> T getOrCreateCollection(String property) {
+    return getOrCreateCollection(property, null);
+  }
+
+  /**
+   * Returns the collection value assigned to the specified property, creating and assigning one when the current value
+   * is {@code null}.
+   * <p>
+   * If the property already contains a collection, that existing instance is returned. If the property value is
+   * {@code null}, this method determines the collection type from {@code expectedType} when it is specified, or from
+   * the property's setter type otherwise. When the resolved type is a collection type according to the configured
+   * {@link ObjectFactory}, a new collection instance is created, assigned to the property and returned.
+   * </p>
+   * <p>
+   * This method returns {@code null} when the current property value is not a collection, or when the property is
+   * {@code null} and the resolved type is not a collection type.
+   * </p>
+   * <p>
+   * The generic return type is intended to reduce casts at call sites. This method verifies that values are
+   * collections, but it does not enforce that an existing collection value has the exact runtime type represented by
+   * {@code expectedType}.
+   * </p>
+   *
+   * @param <T>
+   *          the expected return type
+   * @param property
+   *          the property name whose collection value should be returned or created
+   * @param expectedType
+   *          the expected collection type to instantiate when the property is {@code null}; if {@code null}, the
+   *          property's setter type is used
+   *
+   * @return the existing or newly created collection, or {@code null} if the property does not represent a collection
+   *
+   * @throws ReflectionException
+   *           if a collection type is resolved but the configured {@link ObjectFactory} cannot instantiate it
+   */
+  @Nullable
+  @SuppressWarnings("unchecked")
+  public <T> T getOrCreateCollection(String property, @Nullable Class<T> expectedType) {
+    Object propertyValue = this.getValue(property);
+    if (propertyValue == null) {
+      Class<?> type = expectedType;
+      if (type == null) {
+        type = this.getSetterType(property);
+      }
+      try {
+        if (objectFactory.isCollection(type)) {
+          propertyValue = objectFactory.create(type);
+          this.setValue(property, propertyValue);
+          return (T) propertyValue;
+        }
+      } catch (Exception e) {
+        throw new ReflectionException(
+            "Error instantiating collection property for result '" + property + "'.  Cause: " + e, e);
+      }
+    } else if (objectFactory.isCollection(propertyValue.getClass())) {
+      return (T) propertyValue;
+    }
+    return null;
   }
 }
