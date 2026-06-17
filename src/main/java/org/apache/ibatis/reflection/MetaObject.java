@@ -60,6 +60,10 @@ public class MetaObject {
     }
   }
 
+  public MetaClass getMetaClass() {
+    return MetaClass.forClass(originalObject.getClass(), this.reflectorFactory);
+  }
+
   /**
    * Creates a MetaObject for the given object using default system factories.
    *
