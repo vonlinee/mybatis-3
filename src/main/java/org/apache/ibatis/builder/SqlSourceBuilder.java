@@ -20,6 +20,10 @@ import java.util.List;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
+import org.apache.ibatis.reflection.ParamNameResolver;
+import org.apache.ibatis.scripting.defaults.RawSqlSource;
+import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
+import org.apache.ibatis.scripting.xmltags.SqlNode;
 import org.apache.ibatis.session.Configuration;
 
 /**
@@ -36,6 +40,21 @@ public class SqlSourceBuilder {
     return new StaticSqlSource(
         configuration.isShrinkWhitespacesInSql() ? SqlSourceBuilder.removeExtraWhitespaces(sql) : sql,
         parameterMappings);
+  }
+
+  public static SqlSource buildSqlSource(Configuration configuration, SqlNode rootSqlNode) {
+    return buildSqlSource(configuration, rootSqlNode, null, null);
+  }
+
+  public static SqlSource buildSqlSource(Configuration configuration, SqlNode rootSqlNode, Class<?> parameterType,
+      ParamNameResolver paramNameResolver) {
+    SqlSource sqlSource;
+    if (rootSqlNode.isDynamic()) {
+      sqlSource = new DynamicSqlSource(rootSqlNode);
+    } else {
+      sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType, paramNameResolver);
+    }
+    return sqlSource;
   }
 
   public static String removeExtraWhitespaces(String original) {

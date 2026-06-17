@@ -21,42 +21,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
-import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
-import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.StaticTextSqlNode;
 import org.apache.ibatis.scripting.TextSqlNode;
 import org.apache.ibatis.scripting.WhitespaceSqlNode;
-import org.apache.ibatis.scripting.defaults.RawSqlSource;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
  */
-public class XMLScriptBuilder extends BaseBuilder {
+public class XMLScriptBuilder {
 
-  private final XNode context;
-  private final Class<?> parameterType;
-  private final ParamNameResolver paramNameResolver;
   private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
   private static final Map<String, SqlNode> emptyNodeCache = new ConcurrentHashMap<>();
 
-  public XMLScriptBuilder(Configuration configuration, XNode context) {
-    this(configuration, context, null);
-  }
-
-  public XMLScriptBuilder(Configuration configuration, XNode context, Class<?> parameterType) {
-    this(configuration, context, parameterType, null);
-  }
-
-  public XMLScriptBuilder(Configuration configuration, XNode context, Class<?> parameterType,
-      ParamNameResolver paramNameResolver) {
-    super(configuration);
-    this.context = context;
-    this.parameterType = parameterType;
-    this.paramNameResolver = paramNameResolver;
+  public XMLScriptBuilder() {
     initNodeHandlerMap();
   }
 
@@ -74,15 +53,8 @@ public class XMLScriptBuilder extends BaseBuilder {
     nodeHandlerMap.put("pagination", new PaginationHandler());
   }
 
-  public SqlSource parseScriptNode() {
-    MixedSqlNode rootSqlNode = parseDynamicTags(context);
-    SqlSource sqlSource;
-    if (rootSqlNode.isDynamic()) {
-      sqlSource = new DynamicSqlSource(rootSqlNode);
-    } else {
-      sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType, paramNameResolver);
-    }
-    return sqlSource;
+  public SqlNode parseSqlNode(XNode context) {
+    return parseDynamicTags(context);
   }
 
   protected MixedSqlNode parseDynamicTags(XNode node) {

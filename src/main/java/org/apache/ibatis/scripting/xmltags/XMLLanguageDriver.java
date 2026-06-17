@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import org.apache.ibatis.builder.SqlSourceBuilder;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -49,8 +50,9 @@ public class XMLLanguageDriver implements LanguageDriver {
   @Override
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType,
       ParamNameResolver paramNameResolver) {
-    XMLScriptBuilder builder = new XMLScriptBuilder(configuration, script, parameterType, paramNameResolver);
-    return builder.parseScriptNode();
+    XMLScriptBuilder builder = new XMLScriptBuilder();
+    SqlNode root = builder.parseSqlNode(script);
+    return SqlSourceBuilder.buildSqlSource(configuration, root, parameterType, paramNameResolver);
   }
 
   @Override
