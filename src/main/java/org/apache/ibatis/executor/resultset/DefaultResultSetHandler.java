@@ -354,7 +354,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     skipRows(resultSet, rowBounds);
     while (shouldProcessMoreRows(resultContext, rowBounds) && !resultSet.isClosed() && resultSet.next()) {
       ResultMap discriminatedResultMap = resolveDiscriminatedResultMap(rsw, resultMap, null);
-      Object rowValue = getRowValue(rsw, discriminatedResultMap, null, null);
+      Object rowValue = getSimpleRowValue(rsw, discriminatedResultMap, null, null);
       if (!useCollectionConstructorInjection) {
         storeObject(resultHandler, resultContext, rowValue, parentMapping, resultSet);
       } else {
@@ -400,8 +400,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   // GET VALUE FROM ROW FOR SIMPLE RESULT MAP
   //
 
-  private Object getRowValue(ResultSetWrapper rsw, ResultMap resultMap, String columnPrefix, CacheKey parentRowKey)
-      throws SQLException {
+  private Object getSimpleRowValue(ResultSetWrapper rsw, ResultMap resultMap, String columnPrefix,
+      CacheKey parentRowKey) throws SQLException {
     final ResultLoaderMap lazyLoader = new ResultLoaderMap();
     Object rowValue = createResultObject(rsw, resultMap, lazyLoader, columnPrefix, parentRowKey);
     if (rowValue != null && !hasTypeHandlerForResultObject(rsw, resultMap.getType())) {
@@ -432,7 +432,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   // GET VALUE FROM ROW FOR NESTED RESULT MAP
   //
 
-  private Object getRowValue(ResultSetWrapper rsw, ResultMap resultMap, CacheKey combinedKey, String columnPrefix,
+  private Object getNestedRowValue(ResultSetWrapper rsw, ResultMap resultMap, CacheKey combinedKey, String columnPrefix,
       Object partialObject) throws SQLException {
     final String resultMapId = resultMap.getId();
     Object rowValue = partialObject;
@@ -763,7 +763,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
           final String constructorColumnPrefix = getColumnPrefix(columnPrefix, constructorMapping);
           final ResultMap resultMap = resolveDiscriminatedResultMap(rsw,
               configuration.getResultMap(constructorMapping.getNestedResultMapId()), constructorColumnPrefix);
-          value = getRowValue(rsw, resultMap, constructorColumnPrefix,
+          value = getSimpleRowValue(rsw, resultMap, constructorColumnPrefix,
               useCollectionConstructorInjection ? parentRowKey : null);
         } else {
           TypeHandler<?> typeHandler = constructorMapping.getTypeHandler();
@@ -1106,7 +1106,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
           lastHandledCreation = null;
         }
 
-        rowValue = getRowValue(rsw, discriminatedResultMap, rowKey, null, partialObject);
+        rowValue = getNestedRowValue(rsw, discriminatedResultMap, rowKey, null, partialObject);
         if (rowValue instanceof PendingConstructorCreation) {
           lastHandledCreation = (PendingConstructorCreation) rowValue;
         }
@@ -1115,9 +1115,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
           nestedResultObjects.clear();
           storeObject(resultHandler, resultContext, rowValue, parentMapping, resultSet);
         }
-        rowValue = getRowValue(rsw, discriminatedResultMap, rowKey, null, partialObject);
+        rowValue = getNestedRowValue(rsw, discriminatedResultMap, rowKey, null, partialObject);
       } else {
-        rowValue = getRowValue(rsw, discriminatedResultMap, rowKey, null, partialObject);
+        rowValue = getNestedRowValue(rsw, discriminatedResultMap, rowKey, null, partialObject);
         if (foundNewUniqueRow) {
           storeObject(resultHandler, resultContext, rowValue, parentMapping, resultSet);
         }
@@ -1251,7 +1251,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
           pendingConstructorCreation = (PendingConstructorCreation) parentObject;
         }
 
-        rowValue = getRowValue(rsw, nestedResultMap, combinedKey, columnPrefix,
+        rowValue = getNestedRowValue(rsw, nestedResultMap, combinedKey, columnPrefix,
             newValueForNestedResultMap ? null : pendingConstructorCreation);
 
         if (rowValue == null) {
@@ -1361,7 +1361,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
           boolean knownValue = rowValue != null;
           instantiateCollectionPropertyIfAppropriate(resultMapping, metaObject); // mandatory
           if (anyNotNullColumnHasValue(resultMapping, columnPrefix, rsw)) {
-            rowValue = getRowValue(rsw, nestedResultMap, combinedKey, columnPrefix, rowValue);
+            rowValue = getNestedRowValue(rsw, nestedResultMap, combinedKey, columnPrefix, rowValue);
             if (rowValue != null && !knownValue) {
               linkObjects(metaObject, resultMapping, rowValue);
               foundValues = true;
