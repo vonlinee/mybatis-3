@@ -211,7 +211,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   // HANDLE RESULT SETS
   //
   @Override
-  public List<Object> handleResultSets(Statement stmt) throws SQLException {
+  public <E> List<E> handleResultSets(Statement stmt) throws SQLException {
     ErrorContext.instance().activity("handling results").object(mappedStatement.getId());
 
     final List<Object> multipleResults = new ArrayList<>();
@@ -245,7 +245,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       }
     }
 
-    return collapseSingleResultList(multipleResults);
+    @SuppressWarnings("unchecked")
+    List<E> result = (List<E>) collapseSingleResultList(multipleResults);
+    return result;
   }
 
   @Override
@@ -565,7 +567,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private List<UnMappedColumnAutoMapping> createAutomaticMappings(ResultSetWrapper rsw, ResultMap resultMap,
-      MetaObject metaObject, String columnPrefix) throws SQLException {
+      MetaObject metaObject, String columnPrefix) {
     final String mapKey = getMapKey(resultMap, columnPrefix);
     List<UnMappedColumnAutoMapping> autoMapping = autoMappingsCache.get(mapKey);
     if (autoMapping == null) {
@@ -1290,6 +1292,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     Object collectionProperty = instantiateCollectionPropertyIfAppropriate(resultMapping, metaObject);
     if (collectionProperty != null) {
       // we expect pending creations now
+      @SuppressWarnings("unchecked")
       final Collection<Object> pendingCreations = (Collection<Object>) collectionProperty;
 
       // remove the link to the old collection
