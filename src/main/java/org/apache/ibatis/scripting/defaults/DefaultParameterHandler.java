@@ -56,20 +56,20 @@ public class DefaultParameterHandler implements ParameterHandler {
 
   private ParameterMetaData paramMetaData;
   private MetaObject paramMetaObject;
-  private HashMap<Class<?>, MetaClass> metaClassCache = new HashMap<>();
+  private final HashMap<Class<?>, MetaClass> metaClassCache = new HashMap<>();
   private static final ParameterMetaData NULL_PARAM_METADATA = new ParameterMetaData() {
     // @formatter:off
-    public <T> T unwrap(Class<T> iface) throws SQLException { return null; }
-    public boolean isWrapperFor(Class<?> iface) throws SQLException { return false; }
-    public boolean isSigned(int param) throws SQLException { return false; }
-    public int isNullable(int param) throws SQLException { return 0; }
-    public int getScale(int param) throws SQLException { return 0; }
-    public int getPrecision(int param) throws SQLException { return 0; }
-    public String getParameterTypeName(int param) throws SQLException { return null; }
-    public int getParameterType(int param) throws SQLException { return 0; }
-    public int getParameterMode(int param) throws SQLException { return 0; }
-    public int getParameterCount() throws SQLException { return 0; }
-    public String getParameterClassName(int param) throws SQLException { return null; }
+    public <T> T unwrap(Class<T> type)  { return null; }
+    public boolean isWrapperFor(Class<?> type)  { return false; }
+    public boolean isSigned(int param)  { return false; }
+    public int isNullable(int param)  { return ParameterMetaData.parameterNoNulls; }
+    public int getScale(int param)  { return 0; }
+    public int getPrecision(int param)  { return 0; }
+    public String getParameterTypeName(int param)  { return null; }
+    public int getParameterType(int param)  { return 0; }
+    public int getParameterMode(int param)  { return ParameterMetaData.parameterModeUnknown; }
+    public int getParameterCount()  { return 0; }
+    public String getParameterClassName(int param)  { return null; }
     // @formatter:on
   };
 
@@ -97,7 +97,7 @@ public class DefaultParameterHandler implements ParameterHandler {
         ParameterMapping parameterMapping = parameterMappings.get(i);
         if (parameterMapping.getMode() != ParameterMode.OUT) {
           Object value;
-          String propertyName = parameterMapping.getProperty();
+          final String propertyName = parameterMapping.getProperty();
           JdbcType jdbcType = parameterMapping.getJdbcType();
           JdbcType actualJdbcType = jdbcType == null ? getParamJdbcType(ps, i + 1) : jdbcType;
           Type propertyGenericType = null;
@@ -109,7 +109,7 @@ public class DefaultParameterHandler implements ParameterHandler {
           } else if (parameterObject == null) {
             value = null;
           } else {
-            Class<? extends Object> parameterClass = parameterObject.getClass();
+            Class<?> parameterClass = parameterObject.getClass();
             TypeHandler paramTypeHandler = typeHandlerRegistry.getTypeHandler(parameterClass, actualJdbcType);
             if (paramTypeHandler != null) {
               value = parameterObject;
@@ -125,9 +125,8 @@ public class DefaultParameterHandler implements ParameterHandler {
                     MetaClass metaClass = metaClassCache.computeIfAbsent(actualParamClass,
                         k -> MetaClass.forClass(k, configuration.getReflectorFactory()));
                     PropertyTokenizer propertyTokenizer = new PropertyTokenizer(propertyName);
-                    String multiParamsPropertyName;
                     if (propertyTokenizer.hasNext()) {
-                      multiParamsPropertyName = propertyTokenizer.getChildren();
+                      String multiParamsPropertyName = propertyTokenizer.getChildren();
                       if (metaClass.hasGetter(multiParamsPropertyName)) {
                         Entry<Type, Class<?>> getterType = metaClass.getGenericGetterType(multiParamsPropertyName);
                         propertyGenericType = getterType.getKey();
