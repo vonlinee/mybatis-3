@@ -71,12 +71,7 @@ public class ForEachSqlNode implements SqlNode {
     applyOpen(context);
     int i = 0;
     for (Object o : iterable) {
-      PrefixedContext scopedContext;
-      if (first || separator == null) {
-        scopedContext = new PrefixedContext(context, "");
-      } else {
-        scopedContext = new PrefixedContext(context, separator);
-      }
+      PrefixedContext scopedContext = new PrefixedContext(context, first || separator == null ? "" : separator);
       // Issue #709
       if (o instanceof Map.Entry) {
         @SuppressWarnings("unchecked")
