@@ -31,6 +31,7 @@ import org.apache.ibatis.scripting.ContextMap;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Clinton Begin
@@ -54,18 +55,15 @@ public class DynamicContext implements SqlBuildContext {
     this(configuration, null, parameterType, paramNameResolver, false, paramType);
   }
 
+  public DynamicContext(SqlBuildContext delegate) {
+    this(delegate.getConfiguration(), delegate.getParameterObject(), delegate.getParameterType(),
+        delegate.getParamNameResolver(), delegate.isParamExists(), delegate.getParamType());
+  }
+
   public DynamicContext(Configuration configuration, Object parameterObject, Class<?> parameterType,
       ParamNameResolver paramNameResolver, boolean paramExists, ParamType paramType) {
-    if (parameterObject == null || parameterObject instanceof Map) {
-      bindings = new ContextMap(null, false);
-    } else {
-      MetaObject metaObject = configuration.newMetaObject(parameterObject);
-      boolean existsTypeHandler = configuration.getTypeHandlerRegistry().hasTypeHandler(parameterObject.getClass());
-      bindings = new ContextMap(metaObject, existsTypeHandler);
-    }
-    bindings.put(PARAMETER_OBJECT_KEY, parameterObject);
-    bindings.put(DATABASE_ID_KEY, configuration.getDatabaseId());
     this.configuration = configuration;
+    this.bindings = createBindings(parameterObject);
     this.parameterObject = parameterObject;
     this.paramExists = paramExists;
     this.parameterType = parameterType;
@@ -73,9 +71,20 @@ public class DynamicContext implements SqlBuildContext {
     this.paramType = paramType;
   }
 
-  public DynamicContext(SqlBuildContext delegate) {
-    this(delegate.getConfiguration(), delegate.getParameterObject(), delegate.getParameterType(),
-        delegate.getParamNameResolver(), delegate.isParamExists(), delegate.getParamType());
+  @Override
+  @NotNull
+  public ContextMap createBindings(Object parameterObject) {
+    final ContextMap bindings;
+    if (parameterObject == null || parameterObject instanceof Map) {
+      bindings = new ContextMap();
+    } else {
+      MetaObject metaObject = configuration.newMetaObject(parameterObject);
+      boolean existsTypeHandler = configuration.getTypeHandlerRegistry().hasTypeHandler(parameterObject.getClass());
+      bindings = new ContextMap(metaObject, existsTypeHandler);
+    }
+    bindings.put(PARAMETER_OBJECT_KEY, parameterObject);
+    bindings.put(DATABASE_ID_KEY, configuration.getDatabaseId());
+    return bindings;
   }
 
   @Override

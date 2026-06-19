@@ -24,6 +24,10 @@ public class ContextMap extends HashMap<String, Object> {
   private final MetaObject parameterMetaObject;
   private final boolean fallbackParameterObject;
 
+  public ContextMap() {
+    this(null, false);
+  }
+
   public ContextMap(MetaObject parameterMetaObject, boolean fallbackParameterObject) {
     this.parameterMetaObject = parameterMetaObject;
     this.fallbackParameterObject = fallbackParameterObject;

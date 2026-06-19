@@ -25,12 +25,16 @@ import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface SqlBuildContext {
 
   String PARAMETER_OBJECT_KEY = "_parameter";
   String DATABASE_ID_KEY = "_databaseId";
+
+  @NotNull
+  ContextMap createBindings(Object parameterObject);
 
   ParamType getParamType();
 
