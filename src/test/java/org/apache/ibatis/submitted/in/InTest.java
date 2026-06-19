@@ -15,13 +15,11 @@
  */
 package org.apache.ibatis.submitted.in;
 
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.ibatis.BaseDataTest;
-import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -36,13 +34,10 @@ class InTest {
   @BeforeAll
   static void setUp() throws Exception {
     // create a SqlSessionFactory
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/in/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
-    }
+    sqlSessionFactory = SqlSessionFactoryBuilder.buildFromResource("org/apache/ibatis/submitted/in/mybatis-config.xml");
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/in/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/in/CreateDB.sql");
   }
 
   @Test
@@ -66,6 +61,31 @@ class InTest {
       // 2. Test shorthand <in> tag without body
       List<Integer> ids = Arrays.asList(2, 3, 4);
       int countShorthand = mapper.countByUserListWithInTagShorthand(ids);
+      Assertions.assertEquals(3, countShorthand);
+    }
+  }
+
+  @Test
+  void shouldExecuteWithColumnInTag() {
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+      Mapper mapper = sqlSession.getMapper(Mapper.class);
+
+      // 1. Test standard <in> tag with body
+      User user1 = new User();
+      user1.setId(2);
+      user1.setName("User2");
+      User user2 = new User();
+      user2.setId(3);
+      user2.setName("User3");
+      List<User> users = new ArrayList<>();
+      users.add(user1);
+      users.add(user2);
+      int countNormal = mapper.countByUserListWithInTag(users);
+      Assertions.assertEquals(2, countNormal);
+
+      // 2. Test shorthand <in> tag without body
+      List<Integer> ids = Arrays.asList(2, 3, 4);
+      int countShorthand = mapper.countByUserListWithColumnInTag(ids);
       Assertions.assertEquals(3, countShorthand);
     }
   }

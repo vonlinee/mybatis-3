@@ -638,6 +638,7 @@
       <xs:attribute name="collection" use="required"/>
       <xs:attribute name="nullable" type="xs:boolean"/>
       <xs:attribute name="item"/>
+      <xs:attribute name="column"/>
       <xs:attribute name="index"/>
     </xs:complexType>
   </xs:element>

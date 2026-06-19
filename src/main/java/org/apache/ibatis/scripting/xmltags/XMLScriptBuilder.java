@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.scripting.StaticTextSqlNode;
 import org.apache.ibatis.scripting.TextSqlNode;
@@ -228,7 +229,11 @@ public class XMLScriptBuilder {
       Boolean nullable = nodeToHandle.getBooleanAttribute("nullable");
       String item = nodeToHandle.getStringAttribute("item", "item");
       String index = nodeToHandle.getStringAttribute("index");
-      String open = "IN (";
+      String column = nodeToHandle.getStringAttribute("column");
+      String open = " IN (";
+      if (StringUtils.isNotBlank(column)) {
+        open = column + open;
+      }
       String close = ")";
       String separator = ",";
 

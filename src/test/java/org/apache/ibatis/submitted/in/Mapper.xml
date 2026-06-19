@@ -35,4 +35,11 @@
         id <in collection="ids" />
       </where>
   </select>
+
+    <select id="countByUserListWithColumnInTag" resultType="_int">
+        select count(*) from users u
+        <where>
+            <in column="u.id" collection="ids" />
+        </where>
+    </select>
 </mapper>

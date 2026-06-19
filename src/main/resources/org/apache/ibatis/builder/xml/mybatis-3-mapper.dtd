@@ -285,6 +285,7 @@ separator CDATA #IMPLIED
 <!ATTLIST in
 collection CDATA #REQUIRED
 nullable (true|false) #IMPLIED
+column CDATA #IMPLIED
 item CDATA #IMPLIED
 index CDATA #IMPLIED
 >

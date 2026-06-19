@@ -24,4 +24,6 @@ public interface Mapper {
   int countByUserListWithInTag(List<User> users);
 
   int countByUserListWithInTagShorthand(@Param("ids") List<Integer> userIds);
+
+  int countByUserListWithColumnInTag(@Param("ids") List<Integer> userIds);
 }
