@@ -15,18 +15,11 @@
  */
 package org.apache.ibatis.scripting.defaults;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.ibatis.builder.ParameterMappingTokenHandler;
 import org.apache.ibatis.builder.SqlSourceBuilder;
 import org.apache.ibatis.extension.ParamType;
 import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.reflection.ParamNameResolver;
-import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
 import org.apache.ibatis.scripting.xmltags.SqlNode;
 import org.apache.ibatis.session.Configuration;
@@ -48,11 +41,7 @@ public class RawSqlSource implements SqlSource {
 
   public RawSqlSource(Configuration configuration, SqlNode rootSqlNode, Class<?> parameterType,
       ParamNameResolver paramNameResolver) {
-    DynamicContext context = new DynamicContext(configuration, parameterType, paramNameResolver,
-        configuration.getDefaultParamType());
-    rootSqlNode.apply(context);
-    String sql = context.getSql();
-    sqlSource = SqlSourceBuilder.buildSqlSource(configuration, sql, context.getParameterMappings());
+    sqlSource = SqlSourceBuilder.buildStaticSqlSource(configuration, rootSqlNode, parameterType, paramNameResolver);
   }
 
   public RawSqlSource(Configuration configuration, String sql, Class<?> parameterType) {
@@ -61,10 +50,8 @@ public class RawSqlSource implements SqlSource {
 
   public RawSqlSource(Configuration configuration, String sql, Class<?> parameterType,
       ParamNameResolver paramNameResolver) {
-    List<ParameterMapping> parameterMappings = new ArrayList<>();
-    ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler(parameterMappings, configuration, null,
-        parameterType, new HashMap<>(), paramNameResolver, false, configuration.getDefaultParamType());
-    sqlSource = SqlSourceBuilder.buildSqlSource(configuration, tokenHandler.parse(sql), parameterMappings);
+
+    sqlSource = SqlSourceBuilder.buildStaticSqlSource(configuration, sql, parameterType, paramNameResolver);
   }
 
   @Override
