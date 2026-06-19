@@ -158,10 +158,9 @@ public class ParameterMappingTokenHandler extends ParameterMappingParser impleme
     if (paramNameResolver != null && ParamMap.class.equals(parameterType)) {
       Type actualParamType = paramNameResolver.getType(property);
       if (actualParamType != null) {
-        MetaClass metaClass = MetaClass.forClass(actualParamType, configuration.getReflectorFactory());
-        String multiParamsPropertyName;
         if (propertyTokenizer.hasNext()) {
-          multiParamsPropertyName = propertyTokenizer.getChildren();
+          String multiParamsPropertyName = propertyTokenizer.getChildren();
+          MetaClass metaClass = MetaClass.forClass(actualParamType, configuration.getReflectorFactory());
           if (metaClass.hasGetter(multiParamsPropertyName)) {
             Entry<Type, Class<?>> getterType = metaClass.getGenericGetterType(multiParamsPropertyName);
             genericType = getterType.getKey();
