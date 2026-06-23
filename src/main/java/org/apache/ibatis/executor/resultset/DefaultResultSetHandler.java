@@ -420,9 +420,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       final CacheKey rowKey = createRowKey(resultMap, rsw, columnPrefix);
       final CacheKey combinedKey = combineKeys(rowKey, parentRowKey);
 
-      if (combinedKey != CacheKey.NULL_CACHE_KEY) {
-        nestedResultObjects.put(combinedKey, rowValue);
-      }
+      putNestedResultObject(combinedKey, rowValue);
     }
 
     return rowValue;
@@ -458,11 +456,15 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         foundValues = !lazyLoader.isEmpty() || foundValues;
         rowValue = foundValues || configuration.isReturnInstanceForEmptyRow() ? rowValue : null;
       }
-      if (combinedKey != CacheKey.NULL_CACHE_KEY) {
-        nestedResultObjects.put(combinedKey, rowValue);
-      }
+      putNestedResultObject(combinedKey, rowValue);
     }
     return rowValue;
+  }
+
+  private void putNestedResultObject(CacheKey cacheKey, Object rowValue) {
+    if (cacheKey != CacheKey.NULL_CACHE_KEY) {
+      nestedResultObjects.put(cacheKey, rowValue);
+    }
   }
 
   private void putAncestor(Object resultObject, String resultMapId) {
@@ -1148,10 +1150,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     final CacheKey rowKey = createRowKey(resultMap, rsw, columnPrefix);
     final CacheKey combinedKey = combineKeys(rowKey, parentRowKey);
-
-    if (combinedKey != CacheKey.NULL_CACHE_KEY) {
-      nestedResultObjects.put(combinedKey, pendingCreation);
-    }
+    putNestedResultObject(combinedKey, pendingCreation);
 
     final List<ResultMapping> constructorMappings = resultMap.getConstructorResultMappings();
     for (int index = 0; index < constructorMappings.size(); index++) {
@@ -1174,11 +1173,11 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       final Object actualValue = constructorArgs.get(index);
       final boolean hasValue = actualValue != null;
       final boolean isInnerCreation = actualValue instanceof PendingConstructorCreation;
-      final boolean alreadyCreatedCollection = hasValue && objectFactory.isCollection(actualValue.getClass());
 
       if (!isInnerCreation) {
         final Collection<Object> value = pendingCreation.initializeCollectionForResultMapping(objectFactory,
             nestedResultMap, constructorMapping, index);
+        final boolean alreadyCreatedCollection = hasValue && objectFactory.isCollection(actualValue.getClass());
         if (!alreadyCreatedCollection) {
           // override values with empty collection
           constructorArgs.set(index, value);
@@ -1187,10 +1186,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         // since we are linking a new value, we need to let nested objects know we did that
         final CacheKey nestedRowKey = createRowKey(nestedResultMap, rsw, constructorColumnPrefix);
         final CacheKey nestedCombinedKey = combineKeys(nestedRowKey, combinedKey);
-
-        if (nestedCombinedKey != CacheKey.NULL_CACHE_KEY) {
-          nestedResultObjects.put(nestedCombinedKey, pendingCreation);
-        }
+        putNestedResultObject(nestedCombinedKey, pendingCreation);
 
         if (hasValue) {
           pendingCreation.linkCollectionValue(constructorMapping, actualValue);
@@ -1268,9 +1264,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
           pendingConstructorCreation.linkCollectionValue(constructorMapping, rowValue);
           foundValues = true;
 
-          if (combinedKey != CacheKey.NULL_CACHE_KEY) {
-            nestedResultObjects.put(combinedKey, pendingConstructorCreation);
-          }
+          putNestedResultObject(combinedKey, pendingConstructorCreation);
         }
       } catch (SQLException e) {
         throw new ExecutorException("Error getting constructor collection nested result map values for '"
