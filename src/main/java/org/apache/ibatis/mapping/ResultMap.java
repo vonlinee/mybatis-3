@@ -402,4 +402,13 @@ public class ResultMap {
     return autoMapping;
   }
 
+  public boolean hasLazyNestedResultMappings() {
+    for (ResultMapping propertyMapping : propertyResultMappings) {
+      // issue gcode #109 && issue #149
+      if (propertyMapping.getNestedQueryId() != null && propertyMapping.isLazy()) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

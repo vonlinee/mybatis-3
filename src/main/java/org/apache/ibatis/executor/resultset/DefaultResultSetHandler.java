@@ -689,14 +689,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     Object resultObject = createResultObject(rsw, resultMap, constructorArgTypes, constructorArgs, columnPrefix,
         parentRowKey);
     if (resultObject != null && !hasTypeHandlerForResultObject(rsw, resultMap.getType())) {
-      final List<ResultMapping> propertyMappings = resultMap.getPropertyResultMappings();
-      for (ResultMapping propertyMapping : propertyMappings) {
-        // issue gcode #109 && issue #149
-        if (propertyMapping.getNestedQueryId() != null && propertyMapping.isLazy()) {
-          resultObject = configuration.getProxyFactory().createProxy(resultObject, lazyLoader, configuration,
-              objectFactory, constructorArgTypes, constructorArgs);
-          break;
-        }
+      if (resultMap.hasLazyNestedResultMappings()) {
+        resultObject = configuration.getProxyFactory().createProxy(resultObject, lazyLoader, configuration,
+            objectFactory, constructorArgTypes, constructorArgs);
       }
 
       // (issue #101)
