@@ -414,15 +414,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       foundValues = !lazyLoader.isEmpty() || foundValues;
       rowValue = foundValues || configuration.isReturnInstanceForEmptyRow() ? rowValue : null;
     }
-
-    if (parentRowKey != null) {
-      // found a simple object/primitive in pending constructor creation that will need linking later
-      final CacheKey rowKey = createRowKey(resultMap, rsw, columnPrefix);
-      final CacheKey combinedKey = combineKeys(rowKey, parentRowKey);
-
-      putNestedResultObject(combinedKey, rowValue);
-    }
-
     return rowValue;
   }
 
@@ -764,6 +755,12 @@ public class DefaultResultSetHandler implements ResultSetHandler {
               configuration.getResultMap(constructorMapping.getNestedResultMapId()), constructorColumnPrefix);
           value = getSimpleRowValue(rsw, resultMap, constructorColumnPrefix,
               useCollectionConstructorInjection ? parentRowKey : null);
+
+          if (parentRowKey != null) {
+            // found a simple object/primitive in pending constructor creation that will need linking later
+            CacheKey combinedKey = getCombinedRowKey(resultMap, rsw, constructorColumnPrefix, parentRowKey);
+            putNestedResultObject(combinedKey, value);
+          }
         } else {
           final String column = constructorMapping.getColumn();
           TypeHandler<?> typeHandler = constructorMapping.getTypeHandler();
@@ -1147,8 +1144,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       return;
     }
 
-    final CacheKey rowKey = createRowKey(resultMap, rsw, columnPrefix);
-    final CacheKey combinedKey = combineKeys(rowKey, parentRowKey);
+    final CacheKey combinedKey = getCombinedRowKey(resultMap, rsw, columnPrefix, parentRowKey);
     putNestedResultObject(combinedKey, pendingCreation);
 
     final List<ResultMapping> constructorMappings = resultMap.getConstructorResultMappings();
@@ -1183,8 +1179,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         }
 
         // since we are linking a new value, we need to let nested objects know we did that
-        final CacheKey nestedRowKey = createRowKey(nestedResultMap, rsw, constructorColumnPrefix);
-        final CacheKey nestedCombinedKey = combineKeys(nestedRowKey, combinedKey);
+        final CacheKey nestedCombinedKey = getCombinedRowKey(nestedResultMap, rsw, constructorColumnPrefix,
+            combinedKey);
         putNestedResultObject(nestedCombinedKey, pendingCreation);
 
         if (hasValue) {
@@ -1221,8 +1217,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         final String columnPrefix = getColumnPrefix(parentPrefix, constructorMapping);
         final ResultMap nestedResultMap = getNestedResultMap(rsw, nestedResultMapId, columnPrefix);
 
-        final CacheKey rowKey = createRowKey(nestedResultMap, rsw, columnPrefix);
-        final CacheKey combinedKey = combineKeys(rowKey, parentRowKey);
+        final CacheKey combinedKey = getCombinedRowKey(nestedResultMap, rsw, columnPrefix, parentRowKey);
 
         // should have inserted already as a nested result object
         Object rowValue = nestedResultObjects.get(combinedKey);
@@ -1348,8 +1343,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
             }
           }
           final ResultMap nestedResultMap = getNestedResultMap(rsw, nestedResultMapId, columnPrefix);
-          final CacheKey rowKey = createRowKey(nestedResultMap, rsw, columnPrefix);
-          final CacheKey combinedKey = combineKeys(rowKey, parentRowKey);
+          final CacheKey combinedKey = getCombinedRowKey(nestedResultMap, rsw, columnPrefix, parentRowKey);
           Object rowValue = nestedResultObjects.get(combinedKey);
           boolean knownValue = rowValue != null;
           instantiateCollectionPropertyIfAppropriate(resultMapping, metaObject); // mandatory
@@ -1438,6 +1432,12 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       return CacheKey.NULL_CACHE_KEY;
     }
     return cacheKey;
+  }
+
+  private CacheKey getCombinedRowKey(ResultMap resultMap, ResultSetWrapper rsw, String columnPrefix,
+      CacheKey parentRowKey) throws SQLException {
+    final CacheKey rowKey = createRowKey(resultMap, rsw, columnPrefix);
+    return combineKeys(rowKey, parentRowKey);
   }
 
   private CacheKey combineKeys(CacheKey rowKey, CacheKey parentRowKey) {
