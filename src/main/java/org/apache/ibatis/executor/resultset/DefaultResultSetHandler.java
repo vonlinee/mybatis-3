@@ -1322,14 +1322,12 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       String parentPrefix, CacheKey parentRowKey, boolean newObject) {
     boolean foundValues = false;
     for (ResultMapping resultMapping : resultMap.getPropertyResultMappings()) {
-      final String nestedResultMapId = resultMapping.getNestedResultMapId();
-      if (nestedResultMapId != null && resultMapping.getResultSet() == null) {
+      if (resultMapping.isNestedResultMapping()) {
         try {
-          final String columnPrefix = getColumnPrefix(parentPrefix, resultMapping);
           if (resultMapping.getColumnPrefix() == null) {
             // try to fill circular reference only when columnPrefix
             // is not specified for the nested result map (issue #215)
-            Object ancestorObject = ancestorObjects.get(nestedResultMapId);
+            Object ancestorObject = ancestorObjects.get(resultMapping.getNestedResultMapId());
             if (ancestorObject != null) {
               if (newObject) {
                 linkObjects(metaObject, resultMapping, ancestorObject); // issue #385
@@ -1337,12 +1335,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
               continue;
             }
           }
-          final ResultMap nestedResultMap = getNestedResultMap(rsw, nestedResultMapId, columnPrefix);
+          final String columnPrefix = getColumnPrefix(parentPrefix, resultMapping);
+          final ResultMap nestedResultMap = getNestedResultMap(rsw, resultMapping.getNestedResultMapId(), columnPrefix);
           final CacheKey combinedKey = getCombinedRowKey(nestedResultMap, rsw, columnPrefix, parentRowKey);
           Object rowValue = nestedResultObjects.get(combinedKey);
-          boolean knownValue = rowValue != null;
           instantiateCollectionPropertyIfAppropriate(resultMapping, metaObject); // mandatory
           if (anyNotNullColumnHasValue(resultMapping, columnPrefix, rsw)) {
+            boolean knownValue = rowValue != null;
             rowValue = getNestedRowValue(rsw, nestedResultMap, combinedKey, columnPrefix, rowValue);
             if (rowValue != null && !knownValue) {
               linkObjects(metaObject, resultMapping, rowValue);

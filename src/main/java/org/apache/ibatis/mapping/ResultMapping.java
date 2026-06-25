@@ -268,6 +268,10 @@ public class ResultMapping {
     return this.resultSet;
   }
 
+  public boolean isNestedResultMapping() {
+    return nestedResultMapId != null && resultSet == null;
+  }
+
   public String getForeignColumn() {
     return foreignColumn;
   }
