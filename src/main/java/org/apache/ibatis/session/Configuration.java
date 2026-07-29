@@ -1010,7 +1010,7 @@ public class Configuration {
     tableInfoRegistry.register(entityType);
   }
 
-  public MapperMethod.Lookup getMethodLookup() {
+  public CompositeMethodLookup getMethodLookup() {
     return methodLookup;
   }
 

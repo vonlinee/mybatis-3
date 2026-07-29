@@ -16,18 +16,77 @@
 package org.apache.ibatis.binding;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.function.Predicate;
 
 import org.apache.ibatis.session.SqlSession;
 import org.jetbrains.annotations.Nullable;
 
 public class CompositeMethodLookup implements MapperMethod.Lookup {
 
-  private final List<MapperMethod.Lookup> lookups = new ArrayList<>();
+  private final Deque<MapperMethod.Lookup> lookups = new ConcurrentLinkedDeque<>();
 
+  /**
+   * Adds a lookup to the tail of the queue.
+   *
+   * @param lookup
+   *          the lookup to add
+   */
   public void addMethodLookup(MapperMethod.Lookup lookup) {
-    lookups.add(lookup);
+    addLast(lookup);
+  }
+
+  /**
+   * Adds a lookup to the head of the queue.
+   *
+   * @param lookup
+   *          the lookup to add
+   */
+  public void addFirst(MapperMethod.Lookup lookup) {
+    lookups.addFirst(Objects.requireNonNull(lookup, "lookup"));
+  }
+
+  /**
+   * Adds a lookup to the tail of the queue.
+   *
+   * @param lookup
+   *          the lookup to add
+   */
+  public void addLast(MapperMethod.Lookup lookup) {
+    lookups.addLast(Objects.requireNonNull(lookup, "lookup"));
+  }
+
+  /**
+   * Removes and returns the lookup at the head of the queue.
+   *
+   * @return the removed lookup, or {@code null} if the queue is empty
+   */
+  @Nullable
+  public MapperMethod.Lookup removeFirst() {
+    return lookups.pollFirst();
+  }
+
+  /**
+   * Removes and returns the lookup at the tail of the queue.
+   *
+   * @return the removed lookup, or {@code null} if the queue is empty
+   */
+  @Nullable
+  public MapperMethod.Lookup removeLast() {
+    return lookups.pollLast();
+  }
+
+  public List<MapperMethod.Lookup> getLookups() {
+    return new ArrayList<>(lookups);
+  }
+
+  public void removeLookup(MapperMethod.Lookup lookup) {
+    lookups.remove(lookup);
+  }
+
+  public void removeIf(Predicate<MapperMethod.Lookup> predicate) {
+    lookups.removeIf(predicate);
   }
 
   @Override
