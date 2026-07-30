@@ -205,6 +205,17 @@ public class MapperBuilderAssistant extends BaseBuilder {
       boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId,
       LanguageDriver lang, String resultSets, boolean dirtySelect, ParamNameResolver paramNameResolver,
       String countStatement) {
+    return addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
+        parameterType, resultMap, resultType, resultSetType, flushCache, useCache, resultOrdered, keyGenerator,
+        keyProperty, keyColumn, databaseId, lang, resultSets, dirtySelect, paramNameResolver, countStatement, null);
+  }
+
+  public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType,
+      SqlCommandType sqlCommandType, Integer fetchSize, Integer timeout, String parameterMap, Class<?> parameterType,
+      String resultMap, Class<?> resultType, ResultSetType resultSetType, boolean flushCache, boolean useCache,
+      boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId,
+      LanguageDriver lang, String resultSets, boolean dirtySelect, ParamNameResolver paramNameResolver,
+      String countStatement, NamingStrategy namingStrategy) {
     if (unresolvedCacheRef) {
       throw new IncompleteElementException("Cache-ref not yet resolved");
     }
@@ -217,7 +228,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         .resultOrdered(resultOrdered).resultSets(resultSets)
         .resultMaps(getStatementResultMaps(resultMap, resultType, id)).resultSetType(resultSetType)
         .flushCacheRequired(flushCache).useCache(useCache).cache(currentCache).dirtySelect(dirtySelect)
-        .paramNameResolver(paramNameResolver).countStatement(countStatement);
+        .paramNameResolver(paramNameResolver).countStatement(countStatement).namingStrategy(namingStrategy);
 
     ParameterMap statementParameterMap = getStatementParameterMap(parameterMap, parameterType, id);
     if (statementParameterMap != null) {

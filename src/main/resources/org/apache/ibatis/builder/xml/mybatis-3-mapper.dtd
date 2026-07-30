@@ -186,6 +186,7 @@ resultOrdered (true|false) #IMPLIED
 resultSets CDATA #IMPLIED 
 affectData (true|false) #IMPLIED
 countStatement CDATA #IMPLIED
+namingStrategy (LOWER_UNDERSCORE_TO_LOWER_CAMEL|UPPER_UNDERSCORE_TO_LOWER_CAMEL|LOWER_CAMEL_TO_LOWER_CAMEL) #IMPLIED
 >
 
 <!ELEMENT insert (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>

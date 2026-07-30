@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import org.apache.ibatis.mapping.NameMapping;
 
 /**
  * The annotation that specify an SQL for retrieving record(s).
@@ -82,6 +84,13 @@ public @interface Select {
    * @since 3.5.12
    */
   boolean affectData() default false;
+
+  /**
+   * Returns the naming style mapping used for automatic result mapping.
+   *
+   * @return the naming style mapping
+   */
+  NameMapping namingStrategy() default NameMapping.NONE;
 
   /**
    * The container annotation for {@link Select}.

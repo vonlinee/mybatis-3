@@ -56,6 +56,7 @@ import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.NamingStrategy;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.ResultMap;
@@ -581,6 +582,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
             continue;
           }
           propertyName = columnName.substring(columnPrefix.length());
+        }
+        final NamingStrategy namingStrategy = mappedStatement.getNamingStrategy();
+        if (namingStrategy != null) {
+          String mappedPropertyName = namingStrategy.columnToProperty(propertyName);
+          if (mappedPropertyName != null) {
+            propertyName = mappedPropertyName;
+          }
         }
         final String property = metaObject.findProperty(propertyName, configuration.isMapUnderscoreToCamelCase());
         if (property != null && metaObject.hasSetter(property)) {

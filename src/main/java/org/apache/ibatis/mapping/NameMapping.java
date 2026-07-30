@@ -20,6 +20,11 @@ import org.jetbrains.annotations.NotNull;
 public enum NameMapping implements NamingStrategy {
 
   /**
+   * Do not apply a naming style conversion.
+   */
+  NONE(NamingCase.UNKNOWN, NamingCase.UNKNOWN),
+
+  /**
    * lowerCamelCase in java and lower_underscore in database
    */
   LOWER_UNDERSCORE_TO_LOWER_CAMEL(NamingCase.LOWER_CAMEL, NamingCase.LOWER_UNDERSCORE),

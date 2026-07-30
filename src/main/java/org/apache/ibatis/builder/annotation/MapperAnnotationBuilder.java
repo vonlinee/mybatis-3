@@ -46,6 +46,7 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.FetchType;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.NameMapping;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.mapping.ResultSetType;
@@ -401,7 +402,7 @@ public class MapperAnnotationBuilder {
           isResultOrdered, keyGenerator, keyProperty, keyColumn, statementAnnotation.getDatabaseId(), languageDriver,
           // ResultSets
           options != null ? nullOrEmpty(options.resultSets()) : null, statementAnnotation.isDirtySelect(),
-          paramNameResolver, null);
+          paramNameResolver, null, statementAnnotation.getNameMapping());
     });
   }
 
@@ -709,6 +710,7 @@ public class MapperAnnotationBuilder {
     private final Annotation annotation;
     private final String databaseId;
     private final SqlCommandType sqlCommandType;
+    private NameMapping nameMapping;
     private boolean dirtySelect;
 
     AnnotationWrapper(Annotation annotation) {
@@ -717,6 +719,7 @@ public class MapperAnnotationBuilder {
         databaseId = ((Select) annotation).databaseId();
         sqlCommandType = SqlCommandType.SELECT;
         dirtySelect = ((Select) annotation).affectData();
+        nameMapping = ((Select) annotation).namingStrategy();
       } else if (annotation instanceof Update) {
         databaseId = ((Update) annotation).databaseId();
         sqlCommandType = SqlCommandType.UPDATE;
@@ -730,6 +733,7 @@ public class MapperAnnotationBuilder {
         databaseId = ((SelectProvider) annotation).databaseId();
         sqlCommandType = SqlCommandType.SELECT;
         dirtySelect = ((SelectProvider) annotation).affectData();
+        nameMapping = ((SelectProvider) annotation).namingStrategy();
       } else if (annotation instanceof UpdateProvider) {
         databaseId = ((UpdateProvider) annotation).databaseId();
         sqlCommandType = SqlCommandType.UPDATE;
@@ -765,6 +769,10 @@ public class MapperAnnotationBuilder {
 
     boolean isDirtySelect() {
       return dirtySelect;
+    }
+
+    NameMapping getNameMapping() {
+      return nameMapping == NameMapping.NONE ? null : nameMapping;
     }
   }
 

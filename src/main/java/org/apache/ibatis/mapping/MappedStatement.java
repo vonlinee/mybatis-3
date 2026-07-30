@@ -63,6 +63,7 @@ public final class MappedStatement {
   private ParamNameResolver paramNameResolver;
   private boolean dirtySelect;
   private String countStatement;
+  private NamingStrategy namingStrategy;
 
   MappedStatement() {
     // constructor disabled
@@ -201,6 +202,11 @@ public final class MappedStatement {
       return this;
     }
 
+    public Builder namingStrategy(NamingStrategy namingStrategy) {
+      mappedStatement.namingStrategy = namingStrategy;
+      return this;
+    }
+
     public MappedStatement build() {
       assert mappedStatement.configuration != null;
       assert mappedStatement.id != null;
@@ -322,6 +328,10 @@ public final class MappedStatement {
 
   public String getCountStatement() {
     return countStatement;
+  }
+
+  public NamingStrategy getNamingStrategy() {
+    return namingStrategy;
   }
 
   public ParamNameResolver getParamNameResolver() {

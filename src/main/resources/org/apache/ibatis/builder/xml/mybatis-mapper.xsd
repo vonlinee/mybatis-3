@@ -340,6 +340,15 @@
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="resultSets"/>
+      <xs:attribute name="namingStrategy">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="LOWER_UNDERSCORE_TO_LOWER_CAMEL"/>
+            <xs:enumeration value="UPPER_UNDERSCORE_TO_LOWER_CAMEL"/>
+            <xs:enumeration value="LOWER_CAMEL_TO_LOWER_CAMEL"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
   <xs:element name="insert">

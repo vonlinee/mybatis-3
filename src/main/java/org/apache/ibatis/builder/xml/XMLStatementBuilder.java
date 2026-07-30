@@ -31,6 +31,7 @@ import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.NameMapping;
 import org.apache.ibatis.mapping.ResultSetType;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.mapping.SqlSource;
@@ -151,11 +152,13 @@ public class XMLStatementBuilder extends BaseBuilder {
     boolean dirtySelect = context.getBooleanAttribute("affectData", Boolean.FALSE);
 
     final String countStatement = context.getStringAttribute("countStatement");
+    final String nameMapping = context.getStringAttribute("namingStrategy");
+    final NameMapping namingStrategy = nameMapping == null ? null : NameMapping.valueOf(nameMapping);
 
     builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
         parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, resultOrdered,
         keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect, paramNameResolver,
-        countStatement);
+        countStatement, namingStrategy);
   }
 
   private void processSelectKeyNodes(String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {
