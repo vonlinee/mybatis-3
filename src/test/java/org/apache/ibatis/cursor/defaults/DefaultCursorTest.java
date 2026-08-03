@@ -35,7 +35,6 @@ import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
-import org.apache.ibatis.executor.resultset.ResultSetWrapper;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
@@ -79,9 +78,7 @@ class DefaultCursorTest {
     doReturn(Types.VARCHAR).when(rsmd).getColumnType(2);
     doReturn(String.class.getCanonicalName()).when(rsmd).getColumnClassName(2);
 
-    final ResultSetWrapper rsw = new ResultSetWrapper(rs, ms.getConfiguration());
-
-    try (DefaultCursor<?> cursor = new DefaultCursor<>(resultSetHandler, rm, rsw, RowBounds.DEFAULT)) {
+    try (DefaultCursor<?> cursor = new DefaultCursor<>(resultSetHandler, rm, rs, RowBounds.DEFAULT)) {
       Iterator<?> iter = cursor.iterator();
       assertTrue(iter.hasNext());
       Map<String, Object> map = (Map<String, Object>) iter.next();

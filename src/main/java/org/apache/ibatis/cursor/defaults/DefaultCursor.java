@@ -15,13 +15,13 @@
  */
 package org.apache.ibatis.cursor.defaults;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
-import org.apache.ibatis.executor.resultset.ResultSetWrapper;
 import org.apache.ibatis.internal.util.JdbcUtils;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.session.ResultContext;
@@ -38,7 +38,7 @@ public class DefaultCursor<T> implements Cursor<T> {
   // ResultSetHandler stuff
   private final DefaultResultSetHandler resultSetHandler;
   private final ResultMap resultMap;
-  private final ResultSetWrapper rsw;
+  private final ResultSet rs;
   private final RowBounds rowBounds;
   protected final ObjectWrapperResultHandler<T> objectWrapperResultHandler = new ObjectWrapperResultHandler<>();
 
@@ -68,11 +68,11 @@ public class DefaultCursor<T> implements Cursor<T> {
     CONSUMED
   }
 
-  public DefaultCursor(DefaultResultSetHandler resultSetHandler, ResultMap resultMap, ResultSetWrapper rsw,
+  public DefaultCursor(DefaultResultSetHandler resultSetHandler, ResultMap resultMap, ResultSet rs,
       RowBounds rowBounds) {
     this.resultSetHandler = resultSetHandler;
     this.resultMap = resultMap;
-    this.rsw = rsw;
+    this.rs = rs;
     this.rowBounds = rowBounds;
   }
 
@@ -109,7 +109,7 @@ public class DefaultCursor<T> implements Cursor<T> {
       return;
     }
 
-    JdbcUtils.closeQuietly(rsw.getResultSet());
+    JdbcUtils.closeQuietly(rs);
     status = CursorStatus.CLOSED;
   }
 
@@ -129,8 +129,8 @@ public class DefaultCursor<T> implements Cursor<T> {
     try {
       objectWrapperResultHandler.fetched = false;
       status = CursorStatus.OPEN;
-      if (!rsw.getResultSet().isClosed()) {
-        resultSetHandler.handleRowValues(rsw, resultMap, objectWrapperResultHandler, RowBounds.DEFAULT, null);
+      if (!rs.isClosed()) {
+        resultSetHandler.handleRowValues(rs, resultMap, objectWrapperResultHandler, RowBounds.DEFAULT, null);
       }
     } catch (SQLException e) {
       throw new RuntimeException(e);

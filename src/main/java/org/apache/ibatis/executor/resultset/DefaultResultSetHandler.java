@@ -194,13 +194,12 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     try {
       final String resultMapId = parameterMapping.getResultMapId();
       final ResultMap resultMap = configuration.getResultMap(resultMapId);
-      final ResultSetWrapper rsw = new ResultSetWrapper(rs, configuration);
       if (this.resultHandler == null) {
         final DefaultResultHandler resultHandler = new DefaultResultHandler(objectFactory);
-        handleRowValues(rsw, resultMap, resultHandler, new RowBounds(), null);
+        handleRowValues(rs, resultMap, resultHandler, new RowBounds(), null);
         metaParam.setValue(parameterMapping.getProperty(), resultHandler.getResultList());
       } else {
-        handleRowValues(rsw, resultMap, resultHandler, new RowBounds(), null);
+        handleRowValues(rs, resultMap, resultHandler, new RowBounds(), null);
       }
     } finally {
       // issue #228 (close resultSets)
@@ -217,30 +216,31 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     final List<Object> multipleResults = new ArrayList<>();
 
-    int resultSetCount = 0;
-    ResultSetWrapper rsw = getFirstResultSet(stmt);
+    ResultSet rs = JdbcUtils.getFirstResultSet(stmt);
 
     List<ResultMap> resultMaps = mappedStatement.getResultMaps();
     int resultMapCount = resultMaps.size();
-    validateResultMapsCount(rsw, resultMapCount);
-    while (rsw != null && resultMapCount > resultSetCount) {
+    validateResultMapsCount(rs, resultMapCount);
+
+    int resultSetCount = 0;
+    while (rs != null && resultMapCount > resultSetCount) {
       ResultMap resultMap = resultMaps.get(resultSetCount);
-      handleResultSet(rsw, resultMap, multipleResults, null);
-      rsw = getNextResultSet(stmt);
+      handleResultSet(rs, resultMap, multipleResults, null);
+      rs = JdbcUtils.getNextResultSet(stmt);
       cleanUpAfterHandlingResultSet();
       resultSetCount++;
     }
 
     String[] resultSets = mappedStatement.getResultSets();
     if (resultSets != null) {
-      while (rsw != null && resultSetCount < resultSets.length) {
+      while (rs != null && resultSetCount < resultSets.length) {
         ResultMapping parentMapping = nextResultMaps.get(resultSets[resultSetCount]);
         if (parentMapping != null) {
           String nestedResultMapId = parentMapping.getNestedResultMapId();
           ResultMap resultMap = configuration.getResultMap(nestedResultMapId);
-          handleResultSet(rsw, resultMap, null, parentMapping);
+          handleResultSet(rs, resultMap, null, parentMapping);
         }
-        rsw = getNextResultSet(stmt);
+        rs = JdbcUtils.getNextResultSet(stmt);
         cleanUpAfterHandlingResultSet();
         resultSetCount++;
       }
@@ -255,57 +255,46 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   public <E> Cursor<E> handleCursorResultSets(Statement stmt) throws SQLException {
     ErrorContext.instance().activity("handling cursor results").object(mappedStatement.getId());
 
-    ResultSetWrapper rsw = getFirstResultSet(stmt);
-
+    ResultSet rs = JdbcUtils.getFirstResultSet(stmt);
     List<ResultMap> resultMaps = mappedStatement.getResultMaps();
 
     int resultMapCount = resultMaps.size();
-    validateResultMapsCount(rsw, resultMapCount);
+    validateResultMapsCount(rs, resultMapCount);
     if (resultMapCount != 1) {
       throw new ExecutorException("Cursor results cannot be mapped to multiple resultMaps");
     }
 
     ResultMap resultMap = resultMaps.get(0);
-    return new DefaultCursor<>(this, resultMap, rsw, rowBounds);
-  }
-
-  private ResultSetWrapper getFirstResultSet(Statement stmt) throws SQLException {
-    ResultSet rs = JdbcUtils.getFirstResultSet(stmt);
-    return rs != null ? new ResultSetWrapper(rs, configuration) : null;
-  }
-
-  private ResultSetWrapper getNextResultSet(Statement stmt) throws SQLException {
-    ResultSet rs = JdbcUtils.getNextResultSet(stmt);
-    return rs != null ? new ResultSetWrapper(rs, configuration) : null;
+    return new DefaultCursor<>(this, resultMap, rs, rowBounds);
   }
 
   private void cleanUpAfterHandlingResultSet() {
     nestedResultObjects.clear();
   }
 
-  private void validateResultMapsCount(ResultSetWrapper rsw, int resultMapCount) {
-    if (rsw != null && resultMapCount < 1) {
+  private void validateResultMapsCount(ResultSet rs, int resultMapCount) {
+    if (rs != null && resultMapCount < 1) {
       throw new ExecutorException(
           "A query was run and no Result Maps were found for the Mapped Statement '" + mappedStatement.getId()
               + "'. 'resultType' or 'resultMap' must be specified when there is no corresponding method.");
     }
   }
 
-  private void handleResultSet(ResultSetWrapper rsw, ResultMap resultMap, List<Object> multipleResults,
+  private void handleResultSet(ResultSet rs, ResultMap resultMap, List<Object> multipleResults,
       ResultMapping parentMapping) throws SQLException {
     try {
       if (parentMapping != null) {
-        handleRowValues(rsw, resultMap, null, RowBounds.DEFAULT, parentMapping);
+        handleRowValues(rs, resultMap, null, RowBounds.DEFAULT, parentMapping);
       } else if (resultHandler == null) {
         DefaultResultHandler defaultResultHandler = new DefaultResultHandler(objectFactory);
-        handleRowValues(rsw, resultMap, defaultResultHandler, rowBounds, null);
+        handleRowValues(rs, resultMap, defaultResultHandler, rowBounds, null);
         multipleResults.add(defaultResultHandler.getResultList());
       } else {
-        handleRowValues(rsw, resultMap, resultHandler, rowBounds, null);
+        handleRowValues(rs, resultMap, resultHandler, rowBounds, null);
       }
     } finally {
       // issue #228 (close resultSets)
-      JdbcUtils.closeQuietly(rsw.getResultSet());
+      JdbcUtils.closeQuietly(rs);
     }
   }
 
@@ -318,8 +307,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   // HANDLE ROWS FOR SIMPLE RESULTMAP
   //
 
-  public void handleRowValues(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler,
-      RowBounds rowBounds, ResultMapping parentMapping) throws SQLException {
+  public void handleRowValues(ResultSet rs, ResultMap resultMap, ResultHandler<?> resultHandler, RowBounds rowBounds,
+      ResultMapping parentMapping) throws SQLException {
+    ResultSetWrapper rsw = new ResultSetWrapper(rs, configuration);
     if (resultMap.hasNestedResultMaps()) {
       ensureNoRowBounds();
       checkResultHandler();
@@ -553,10 +543,10 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     ResultMap nestedResultMap = resolveDiscriminatedResultMap(rsw,
         configuration.getResultMap(propertyMapping.getNestedResultMapId()),
         getColumnPrefix(parentColumnPrefix, propertyMapping));
-    ResultSetWrapper nestedRsw = new ResultSetWrapper(rsw.getResultSet().getObject(column, ResultSet.class),
-        configuration);
+
+    ResultSet nestedRs = rsw.getResultSet().getObject(column, ResultSet.class);
     List<Object> results = new ArrayList<>();
-    handleResultSet(nestedRsw, nestedResultMap, results, null);
+    handleResultSet(nestedRs, nestedResultMap, results, null);
     return results;
   }
 
