@@ -250,9 +250,9 @@ class MappedSqlMethod implements MapperMethod {
     Object param = method.convertArgsToSqlCommandParam(args, configuration.isNullValueWhenKeyNotFoundInParamMap());
     if (method.hasRowBounds()) {
       RowBounds rowBounds = method.extractRowBounds(args);
-      result = sqlSession.selectMap(command.getName(), param, method.getMapKey(), rowBounds);
+      result = sqlSession.selectMap(command.getName(), param, method.getMapKey(), method.getMapValue(), rowBounds);
     } else {
-      result = sqlSession.selectMap(command.getName(), param, method.getMapKey());
+      result = sqlSession.selectMap(command.getName(), param, method.getMapKey(), method.getMapValue());
     }
     return result;
   }

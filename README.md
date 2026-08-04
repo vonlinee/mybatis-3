@@ -23,6 +23,30 @@ Essentials
 * [Download Latest](https://github.com/mybatis/mybatis-3/releases)
 * [Download Snapshot](https://oss.sonatype.org/content/repositories/snapshots/org/mybatis/mybatis/)
 
+# Added Features
+
+## Map Results
+
+Mapper methods that return a `Map` can use `@MapKey` to select the map key while keeping each row object as the map
+value.
+
+```java
+public interface UserMapper {
+  @MapKey("id")
+  @Select("select id, name from users")
+  Map<Integer, User> selectUsers();
+}
+```
+
+Use `@MapResult` when both the map key and map value should come from properties in each result object.
+
+```java
+public interface NoticeMapper {
+  @MapResult(key = "status", value = "count")
+  Map<Integer, Integer> groupStatus();
+}
+```
+
 Contributions
 -------------
 

@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.ibatis.annotations.MapKey;
+import org.apache.ibatis.annotations.MapResult;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.extension.pagination.Page;
 import org.apache.ibatis.reflection.ParamNameResolver;
@@ -44,6 +45,7 @@ public class MethodSignature {
   private final boolean returnsPage;
   private final Class<?> returnType;
   private final String mapKey;
+  private final String mapValue;
   private final Integer resultHandlerIndex;
   private final Integer rowBoundsIndex;
   private final ParamNameResolver paramNameResolver;
@@ -65,6 +67,7 @@ public class MethodSignature {
     this.returnsOptional = Optional.class.equals(this.returnType);
     this.returnsPage = Page.class.isAssignableFrom(this.returnType);
     this.mapKey = getMapKey(method);
+    this.mapValue = getMapValue(method);
     this.returnsMap = this.mapKey != null;
     this.rowBoundsIndex = getUniqueParamIndex(method, RowBounds.class);
     this.resultHandlerIndex = getUniqueParamIndex(method, ResultHandler.class);
@@ -153,6 +156,10 @@ public class MethodSignature {
     return mapKey;
   }
 
+  public String getMapValue() {
+    return mapValue;
+  }
+
   private String getMapKey(Method method) {
     String mapKey = null;
     if (Map.class.isAssignableFrom(method.getReturnType())) {
@@ -160,7 +167,34 @@ public class MethodSignature {
       if (mapKeyAnnotation != null) {
         mapKey = mapKeyAnnotation.value();
       }
+      final MapResult mapResultAnnotation = method.getAnnotation(MapResult.class);
+      if (mapResultAnnotation != null) {
+        mapKey = resolveMapProperty(method, "key", mapKey, mapResultAnnotation.key());
+      }
     }
     return mapKey;
+  }
+
+  private String getMapValue(Method method) {
+    String mapValue = null;
+    if (Map.class.isAssignableFrom(method.getReturnType())) {
+      final MapResult mapResultAnnotation = method.getAnnotation(MapResult.class);
+      if (mapResultAnnotation != null) {
+        mapValue = resolveMapProperty(method, "value", mapValue, mapResultAnnotation.value());
+      }
+    }
+    return mapValue;
+  }
+
+  private String resolveMapProperty(Method method, String name, String singleAnnotationValue,
+      String mapResultAnnotationValue) {
+    if (singleAnnotationValue == null) {
+      return mapResultAnnotationValue;
+    }
+    if (!singleAnnotationValue.equals(mapResultAnnotationValue)) {
+      throw new BindingException(
+          "Mapper method '" + method.toGenericString() + "' declares conflicting map " + name + " values.");
+    }
+    return singleAnnotationValue;
   }
 }

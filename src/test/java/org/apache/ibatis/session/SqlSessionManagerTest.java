@@ -171,6 +171,17 @@ class SqlSessionManagerTest extends BaseDataTest {
       }
 
       @Override
+      public <K, V> java.util.Map<K, V> selectMap(String statement, Object parameter, String mapKey, String mapValue) {
+        return baseSession.selectMap(statement, parameter, mapKey, mapValue);
+      }
+
+      @Override
+      public <K, V> java.util.Map<K, V> selectMap(String statement, Object parameter, String mapKey, String mapValue,
+          RowBounds rowBounds) {
+        return baseSession.selectMap(statement, parameter, mapKey, mapValue, rowBounds);
+      }
+
+      @Override
       public <T> org.apache.ibatis.cursor.Cursor<T> selectCursor(String statement) {
         return baseSession.selectCursor(statement);
       }
