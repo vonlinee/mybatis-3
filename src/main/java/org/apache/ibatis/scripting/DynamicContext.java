@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +27,6 @@ import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
-import org.apache.ibatis.scripting.ContextMap;
-import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.session.Configuration;
 import org.jetbrains.annotations.NotNull;

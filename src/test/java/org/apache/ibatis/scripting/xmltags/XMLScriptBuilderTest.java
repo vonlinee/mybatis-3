@@ -23,6 +23,7 @@ import org.apache.ibatis.builder.SqlSourceBuilder;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
+import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Test;
 

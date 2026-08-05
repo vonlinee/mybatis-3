@@ -28,8 +28,8 @@ import org.apache.ibatis.domain.blog.*;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.mapping.*;
+import org.apache.ibatis.scripting.DynamicSqlSource;
 import org.apache.ibatis.scripting.TextSqlNode;
-import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 

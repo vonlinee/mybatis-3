@@ -19,7 +19,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.scripting.DynamicContext;
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.jetbrains.annotations.NotNull;
 

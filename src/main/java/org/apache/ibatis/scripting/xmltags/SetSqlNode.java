@@ -18,6 +18,8 @@ package org.apache.ibatis.scripting.xmltags;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.ibatis.scripting.SqlNode;
+
 /**
  * @author Clinton Begin
  */

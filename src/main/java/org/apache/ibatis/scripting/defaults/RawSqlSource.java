@@ -20,8 +20,8 @@ import org.apache.ibatis.extension.ParamType;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.reflection.ParamNameResolver;
-import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
-import org.apache.ibatis.scripting.xmltags.SqlNode;
+import org.apache.ibatis.scripting.DynamicSqlSource;
+import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.session.Configuration;
 
 /**

@@ -18,6 +18,7 @@ package org.apache.ibatis.scripting.xmltags;
 import org.apache.ibatis.dialect.Dialect;
 import org.apache.ibatis.extension.pagination.Pageable;
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.SqlNode;
 import org.jetbrains.annotations.NotNull;
 
 public class PaginationSqlNode implements SqlNode {

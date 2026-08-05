@@ -22,7 +22,9 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.scripting.DynamicContext;
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.SqlNode;
 import org.jetbrains.annotations.NotNull;
 
 /**

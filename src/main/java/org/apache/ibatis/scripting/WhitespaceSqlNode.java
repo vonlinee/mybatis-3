@@ -15,7 +15,6 @@
  */
 package org.apache.ibatis.scripting;
 
-import org.apache.ibatis.scripting.xmltags.SqlNode;
 import org.jetbrains.annotations.NotNull;
 
 public class WhitespaceSqlNode implements SqlNode {

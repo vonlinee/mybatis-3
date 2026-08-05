@@ -18,6 +18,7 @@ package org.apache.ibatis.scripting.xmltags;
 import java.util.List;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
+import org.apache.ibatis.scripting.SqlNode;
 import org.jetbrains.annotations.NotNull;
 
 /**

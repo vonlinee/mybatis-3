@@ -18,7 +18,6 @@ package org.apache.ibatis.scripting;
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.parsing.TokenHandler;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
-import org.apache.ibatis.scripting.xmltags.SqlNode;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,9 +59,9 @@ public class TextSqlNode implements SqlNode {
     public String handleToken(String content) {
       Object parameter = context.getBindings().get(SqlBuildContext.PARAMETER_OBJECT_KEY);
       if (parameter == null) {
-        context.getBindings().put("value", null);
+        context.bind("value", null);
       } else if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
-        context.getBindings().put("value", parameter);
+        context.bind("value", parameter);
       }
       ExpressionEvaluator evaluator = context.getExpressionEvaluator();
       Object value = evaluator.getValue(content, context.getBindings());
