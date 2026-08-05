@@ -51,7 +51,6 @@ import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.reflection.TypeParameterResolver;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
@@ -73,18 +72,6 @@ public final class TypeHandlerRegistry {
    * The default constructor.
    */
   public TypeHandlerRegistry() {
-    this(new Configuration());
-  }
-
-  /**
-   * The constructor that pass the MyBatis configuration.
-   *
-   * @param configuration
-   *          a MyBatis configuration
-   *
-   * @since 3.5.4
-   */
-  public TypeHandlerRegistry(Configuration configuration) {
     // If a handler is registered against null JDBC type, it is the default handler for the Java type. Users can
     // override the default handler (e.g. `register(boolean.class, null, new YNBooleanTypeHandler())` or register a
     // custom handler for a specific Java-JDBC type combination (e.g. `register(boolean.class, JdbcType.CHAR, new
