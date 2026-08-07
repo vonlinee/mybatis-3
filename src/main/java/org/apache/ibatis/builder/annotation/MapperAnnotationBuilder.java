@@ -333,7 +333,7 @@ public class MapperAnnotationBuilder {
           .orElse(null);
       final ResultOrdered resultOrderedAnnotation = getAnnotationWrapper(method, false, ResultOrdered.class)
           .map(x -> (ResultOrdered) x.getAnnotation()).orElse(null);
-      final String mappedStatementId = getQualifiedStatementId(namespace, method.getName());
+      final String mappedStatementId = getQualifiedStatementId(namespace, getAndValidateLocalId(method));
 
       final KeyGenerator keyGenerator;
       String keyProperty = null;
@@ -404,6 +404,39 @@ public class MapperAnnotationBuilder {
           options != null ? nullOrEmpty(options.resultSets()) : null, statementAnnotation.isDirtySelect(),
           paramNameResolver, null, statementAnnotation.getNameMapping());
     });
+  }
+
+  private String getAndValidateLocalId(Method method) {
+    String localId = getLocalId(method);
+    if (localId.isEmpty()) {
+      throw new BuilderException(
+          String.format("Statement ID cannot be an empty string. Check @StatementId on %s#%s with parameter(s) %s",
+              type.getName(), method.getName(), Arrays.toString(method.getParameters())));
+    }
+    if (localId.indexOf('.') > -1) {
+      throw new BuilderException(
+          String.format("Dots are not allowed in statement ID. Check @StatementId on %s#%s with parameter(s) %s",
+              type.getName(), method.getName(), Arrays.toString(method.getParameters())));
+    }
+    return localId;
+  }
+
+  public static String getLocalId(Method method) {
+    StatementId statementIdAnnotation = method.getAnnotation(StatementId.class);
+    String methodName = method.getName();
+    if (statementIdAnnotation == null) {
+      return methodName;
+    }
+    String annotationValue = statementIdAnnotation.value();
+    if (StatementId.APPEND_PARAM_TYPES.equals(annotationValue)) {
+      StringBuilder buffer = new StringBuilder(methodName);
+      Parameter[] parameters = method.getParameters();
+      for (int i = 0; i < parameters.length; i++) {
+        buffer.append(i == 0 ? '#' : '_').append(parameters[i].getType().getSimpleName());
+      }
+      return buffer.toString();
+    }
+    return annotationValue;
   }
 
   private LanguageDriver getLanguageDriver(Method method) {
@@ -781,7 +814,7 @@ public class MapperAnnotationBuilder {
   }
 
   public static String getQualifiedStatementId(Class<?> mapperClass, Method method) {
-    return getQualifiedStatementId(getNamespace(mapperClass), method.getName());
+    return getQualifiedStatementId(getNamespace(mapperClass), getLocalId(method));
   }
 
   public static String getQualifiedStatementId(Class<?> mapperClass, String statementName) {
