@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.executor.result;
+package org.apache.ibatis.session.defaults;
 
 import java.util.Map;
 
@@ -21,13 +21,14 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
+import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 
 /**
  * @author Clinton Begin
  */
-public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
+class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
 
   private final Map<K, V> mappedResults;
   private final String mapKey;
@@ -37,11 +38,10 @@ public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
   private final ReflectorFactory reflectorFactory;
 
   @SuppressWarnings("unchecked")
-  public DefaultMapResultHandler(String mapKey, String mapValue, ObjectFactory objectFactory,
-      ObjectWrapperFactory objectWrapperFactory, ReflectorFactory reflectorFactory) {
-    this.objectFactory = objectFactory;
-    this.objectWrapperFactory = objectWrapperFactory;
-    this.reflectorFactory = reflectorFactory;
+  public DefaultMapResultHandler(String mapKey, String mapValue, Configuration configuration) {
+    this.objectFactory = configuration.getObjectFactory();
+    this.objectWrapperFactory = configuration.getObjectWrapperFactory();
+    this.reflectorFactory = configuration.getReflectorFactory();
     this.mappedResults = objectFactory.create(Map.class);
     this.mapKey = mapKey;
     this.mapValue = mapValue;
