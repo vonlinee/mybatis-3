@@ -183,31 +183,16 @@ public class XMLStatementBuilder extends BaseBuilder {
 
   private void parseSelectKeyNode(String id, XNode nodeToHandle, Class<?> parameterTypeClass, LanguageDriver langDriver,
       String databaseId) {
-    String resultType = nodeToHandle.getStringAttribute("resultType");
-    Class<?> resultTypeClass = resolveClass(resultType);
+    Class<?> resultTypeClass = resolveClass(nodeToHandle.getStringAttribute("resultType"));
     StatementType statementType = StatementType
         .valueOf(nodeToHandle.getStringAttribute("statementType", StatementType.PREPARED.toString()));
     String keyProperty = nodeToHandle.getStringAttribute("keyProperty");
     String keyColumn = nodeToHandle.getStringAttribute("keyColumn");
     boolean executeBefore = "BEFORE".equals(nodeToHandle.getStringAttribute("order", "AFTER"));
-
-    // defaults
-    boolean useCache = false;
-    boolean resultOrdered = false;
-    KeyGenerator keyGenerator = NoKeyGenerator.INSTANCE;
-    Integer fetchSize = null;
-    Integer timeout = null;
-    boolean flushCache = false;
-    String parameterMap = null;
-    String resultMap = null;
-    ResultSetType resultSetTypeEnum = null;
-
     SqlSource sqlSource = langDriver.createSqlSource(configuration, nodeToHandle, parameterTypeClass);
-    SqlCommandType sqlCommandType = SqlCommandType.SELECT;
 
-    builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
-        parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, resultOrdered,
-        keyGenerator, keyProperty, keyColumn, databaseId, langDriver, null, false, null, null);
+    builderAssistant.addSelectKeyStatement(id, sqlSource, statementType, parameterTypeClass, resultTypeClass,
+        keyProperty, keyColumn, databaseId, langDriver, null);
 
     id = builderAssistant.applyCurrentNamespace(id, false);
 

@@ -31,6 +31,7 @@ import org.apache.ibatis.datasource.pooled.PooledDataSourceFactory;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSourceFactory;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
+import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.loader.cglib.CglibProxyFactory;
 import org.apache.ibatis.executor.loader.javassist.JavassistProxyFactory;
 import org.apache.ibatis.logging.commons.JakartaCommonsLoggingImpl;
@@ -197,6 +198,14 @@ public class MapperBuilderAssistant extends BaseBuilder {
       namespaceDiscriminatorMap.put(e.getKey(), resultMap);
     }
     return new Discriminator.Builder(resultMapping, namespaceDiscriminatorMap).build();
+  }
+
+  public MappedStatement addSelectKeyStatement(String id, SqlSource sqlSource, StatementType statementType,
+      Class<?> parameterType, Class<?> resultType, String keyProperty, String keyColumn, String databaseId,
+      LanguageDriver lang, ParamNameResolver paramNameResolver) {
+    return addMappedStatement(id, sqlSource, statementType, SqlCommandType.SELECT, null, null, null, parameterType,
+        null, resultType, null, false, false, false, NoKeyGenerator.INSTANCE, keyProperty, keyColumn, databaseId, lang,
+        null, false, paramNameResolver, null, null);
   }
 
   public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType,
