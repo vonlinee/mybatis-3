@@ -723,7 +723,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     throw new ExecutorException("Do not know how to create an instance of " + resultType);
   }
 
-  Object createParameterizedResultObject(ResultSetWrapper rsw, Class<?> resultType,
+  private Object createParameterizedResultObject(ResultSetWrapper rsw, Class<?> resultType,
       List<ResultMapping> constructorMappings, List<Class<?>> constructorArgTypes, List<Object> constructorArgs,
       String columnPrefix, boolean useCollectionConstructorInjection, CacheKey parentRowKey) {
     boolean foundValues = false;
