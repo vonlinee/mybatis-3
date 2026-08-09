@@ -182,6 +182,10 @@ public class ResultMap {
       return this;
     }
 
+    public Builder addMapping(String property, String column, TypeHandler<?> typeHandler, ResultFlag... flags) {
+      return addMapping(property, column, typeHandler, ResultFlag.of(flags));
+    }
+
     /**
      * Appends a simple property-to-column mapping whose {@link TypeHandler} is resolved from the
      * {@link TypeHandlerRegistry} by the given Java {@link Type}, with no flags.
@@ -217,6 +221,10 @@ public class ResultMap {
       return this;
     }
 
+    public Builder addMapping(String property, String column, Type type, ResultFlag... flags) {
+      return addMapping(property, column, type, ResultFlag.of(flags));
+    }
+
     /**
      * Appends a simple property-to-column mapping resolved by Java type (stored as {@code javaType} on the mapping),
      * with no flags.
@@ -248,6 +256,10 @@ public class ResultMap {
       rm.flags(flags);
       resultMap.resultMappings.add(rm.build());
       return this;
+    }
+
+    public Builder addMapping(String property, String column, Class<?> javaType, ResultFlag... flags) {
+      return addMapping(property, column, javaType, ResultFlag.of(flags));
     }
 
     public Builder discriminator(Discriminator discriminator) {

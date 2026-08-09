@@ -296,7 +296,7 @@ final class ExecutorTestHelper {
         .addMapping("id", int.class)
         .build();
     final ResultMap resultMap = ResultMap.builder(config, "defaultResultMap", Blog.class)
-        .addMapping("id",              "id",        int.class,     ResultFlag.ID.mask())
+        .addMapping("id",              "id",        int.class,     ResultFlag.ID)
         .addMapping("title",           "title",     String.class)
         .addMapping("author.id",       "author_id", int.class)
         .addMapping("author.username", "username",  String.class)
@@ -330,7 +330,7 @@ final class ExecutorTestHelper {
         .addMapping("authorId", int.class)
         .build();
     final ResultMap resultMap = ResultMap.builder(config, "defaultResultMap", Blog.class)
-        .addMapping("id",              "id",        int.class,     ResultFlag.ID.mask())
+        .addMapping("id",              "id",        int.class,     ResultFlag.ID)
         .addMapping("title",           "title",     String.class)
         .addMapping("author.id",       "author_id", int.class)
         .addMapping("author.username", "username",  String.class)
@@ -369,11 +369,11 @@ final class ExecutorTestHelper {
         .addMapping("id", int.class)
         .build();
     final ResultMap tagResultMap =  ResultMap.builder(config, "tagResultMap", Tag.class)
-        .addMapping("id",   "tag_id",   int.class,    ResultFlag.ID.mask())
+        .addMapping("id",   "tag_id",   int.class,    ResultFlag.ID)
         .addMapping("name", "tag_name", String.class)
         .build();
     final ResultMap commentResultMap = ResultMap.builder(config, "commentResultMap", Comment.class)
-        .addMapping("id",      "comment_id",   int.class,    ResultFlag.ID.mask())
+        .addMapping("id",      "comment_id",   int.class,    ResultFlag.ID)
         .addMapping("name",    "comment_name", String.class)
         .addMapping("comment", "comment",      String.class)
         .build();
@@ -382,7 +382,7 @@ final class ExecutorTestHelper {
     config.addResultMap(commentResultMap);
     // @formatter:off
     final ResultMap postResultMap = ResultMap.builder(config, "defaultResultMap", Post.class)
-        .addMapping("id",        "id",         int.class,   ResultFlag.ID.mask())
+        .addMapping("id",        "id",         int.class,   ResultFlag.ID)
         .addNestedMapping("blog", "blog_id", int.class, Blog.class, "selectBlogById")
         .addMapping("createdOn", "created_on", Date.class)
         .addMapping("section",   "section",    Section.class)
@@ -420,11 +420,11 @@ final class ExecutorTestHelper {
         .addMapping("id", int.class)
         .build();
     final ResultMap tagResultMap = ResultMap.builder(config, "tagResultMap", Tag.class)
-        .addMapping("id",   "tag_id",   int.class,    ResultFlag.ID.mask())
+        .addMapping("id",   "tag_id",   int.class,    ResultFlag.ID)
         .addMapping("name", "tag_name", String.class)
         .build();
     final ResultMap commentResultMap = ResultMap.builder(config, "commentResultMap", Comment.class)
-        .addMapping("id",      "comment_id",   int.class,    ResultFlag.ID.mask())
+        .addMapping("id",      "comment_id",   int.class,    ResultFlag.ID)
         .addMapping("name",    "comment_name", String.class)
         .addMapping("comment", "comment",      String.class)
         .build();
@@ -433,7 +433,7 @@ final class ExecutorTestHelper {
     config.addResultMap(commentResultMap);
     // @formatter:off
     final ResultMap postResultMap = ResultMap.builder(config, "", Post.class)
-        .addMapping("id",        "id",         int.class,   ResultFlag.ID.mask())
+        .addMapping("id",        "id",         int.class,   ResultFlag.ID)
         .addNestedMapping("blog", "blog_id", int.class, Blog.class, "selectBlogById")
         .addMapping("createdOn", "created_on", Date.class)
         .addMapping("section",   "section",    Section.class)
@@ -473,11 +473,11 @@ final class ExecutorTestHelper {
         .addMapping("id", int.class)
         .build();
     final ResultMap tagResultMap = ResultMap.builder(config, "tagResultMap", Tag.class)
-        .addMapping("id",   "tag_id",   int.class,    ResultFlag.ID.mask())
+        .addMapping("id",   "tag_id",   int.class,    ResultFlag.ID)
         .addMapping("name", "tag_name", String.class)
         .build();
     final ResultMap commentResultMap = ResultMap.builder(config, "commentResultMap", Comment.class)
-        .addMapping("id",      "comment_id",   int.class,    ResultFlag.ID.mask())
+        .addMapping("id",      "comment_id",   int.class,    ResultFlag.ID)
         .addMapping("name",    "comment_name", String.class)
         .addMapping("comment", "comment",      String.class)
         .build();
@@ -486,7 +486,7 @@ final class ExecutorTestHelper {
     config.addResultMap(commentResultMap);
     // @formatter:off
     final ResultMap postResultMap = ResultMap.builder(config, "postResultMap", Post.class)
-        .addMapping("id", "id", int.class, ResultFlag.ID.mask())
+        .addMapping("id", "id", int.class, ResultFlag.ID)
         .addMapping(new ResultMapping.Builder("blog", config.isLazyLoadingEnabled()).nestedQueryId("selectBlogByIdAndAuthor")
           .composite("authorId", "author_id", int.class)
           .composite("blogId", "blog_id", int.class)

@@ -141,6 +141,11 @@ public class ResultMapping {
       return this;
     }
 
+    public Builder flags(ResultFlag... flags) {
+      resultMapping.flags = ResultFlag.of(flags);
+      return this;
+    }
+
     public Builder typeHandler(TypeHandler<?> typeHandler) {
       resultMapping.typeHandler = typeHandler;
       return this;

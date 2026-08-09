@@ -182,9 +182,9 @@ class ResultMappingTest {
     Configuration config = new Configuration();
     // @formatter:off
     ResultMap resultMap = ResultMap.builder(config, "rm", HashMap.class)
-        .addMapping("id",   "id",   int.class,    ResultFlag.ID.mask())
-        .addMapping("name", "name", String.class, ResultFlag.CONSTRUCTOR.mask())
-        .addMapping("pk",   "pk",   int.class,    ResultFlag.of(ResultFlag.ID, ResultFlag.CONSTRUCTOR))
+        .addMapping("id",   "id",   int.class,    ResultFlag.ID)
+        .addMapping("name", "name", String.class, ResultFlag.CONSTRUCTOR)
+        .addMapping("pk",   "pk",   int.class,    ResultFlag.ID, ResultFlag.CONSTRUCTOR)
         .addMapping("note", "note", String.class)
         .build();
     // @formatter:on
