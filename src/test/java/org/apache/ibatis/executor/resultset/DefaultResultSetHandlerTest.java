@@ -16,52 +16,29 @@
 package org.apache.ibatis.executor.resultset;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
-import org.apache.ibatis.builder.StaticSqlSource;
-import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.executor.ExecutorException;
-import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ResultMap;
-import org.apache.ibatis.mapping.ResultMapping;
-import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
-import org.apache.ibatis.type.TypeHandler;
-import org.junit.jupiter.api.Assertions;
+import org.apache.ibatis.BaseDataTest;
+import org.apache.ibatis.annotations.Arg;
+import org.apache.ibatis.annotations.ConstructorArgs;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.exceptions.PersistenceException;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.type.BaseTypeHandler;
+import org.apache.ibatis.type.JdbcType;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
-class DefaultResultSetHandlerTest {
-
-  @Mock
-  private Statement stmt;
-  @Mock
-  private ResultSet rs;
-  @Mock
-  private ResultSetMetaData rsmd;
-  @Mock
-  private Connection conn;
-  @Mock
-  private DatabaseMetaData dbmd;
+public class DefaultResultSetHandlerTest {
 
   /**
    * Contrary to the spec, some drivers require case-sensitive column names when getting result.
@@ -69,68 +46,82 @@ class DefaultResultSetHandlerTest {
    * @see <a href="https://github.com/mybatis/old-google-code-issues/issues/557">Issue 557</a>
    */
   @Test
-  void shouldRetainColumnNameCase() throws Exception {
+  void shouldRetainColumnNameCase() {
+    SqlSessionFactory sqlSessionFactory = createSqlSessionFactory();
 
-    final MappedStatement ms = getMappedStatement();
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+      Map<String, Object> result = sqlSession.getMapper(ResultSetHandlerMapper.class).selectRetainingColumnNameCase();
 
-    final Executor executor = null;
-    final ParameterHandler parameterHandler = null;
-    final ResultHandler resultHandler = null;
-    final BoundSql boundSql = null;
-    final RowBounds rowBounds = new RowBounds(0, 100);
-    final DefaultResultSetHandler fastResultSetHandler = new DefaultResultSetHandler(executor, ms, parameterHandler,
-        resultHandler, boundSql, rowBounds);
-
-    when(stmt.getResultSet()).thenReturn(rs);
-    when(rs.getMetaData()).thenReturn(rsmd);
-    when(rs.getType()).thenReturn(ResultSet.TYPE_FORWARD_ONLY);
-    when(rs.next()).thenReturn(true).thenReturn(false);
-    when(rs.getInt("CoLuMn1")).thenReturn(100);
-    when(rsmd.getColumnCount()).thenReturn(1);
-    when(rsmd.getColumnLabel(1)).thenReturn("CoLuMn1");
-    when(rsmd.getColumnType(1)).thenReturn(Types.INTEGER);
-    when(rsmd.getColumnClassName(1)).thenReturn(Integer.class.getCanonicalName());
-
-    final List<Object> results = fastResultSetHandler.handleResultSets(stmt);
-    assertEquals(1, results.size());
-    assertEquals(100, ((HashMap) results.get(0)).get("cOlUmN1"));
-  }
-
-  @Test
-  void shouldThrowExceptionWithColumnName() throws Exception {
-    final MappedStatement ms = getMappedStatement();
-    final RowBounds rowBounds = new RowBounds(0, 100);
-
-    final DefaultResultSetHandler defaultResultSetHandler = new DefaultResultSetHandler(null/* executor */, ms,
-        null/* parameterHandler */, null/* resultHandler */, null/* boundSql */, rowBounds);
-
-    final ResultSetWrapper rsw = mock(ResultSetWrapper.class);
-    when(rsw.getResultSet()).thenReturn(mock(ResultSet.class));
-
-    final ResultMapping resultMapping = mock(ResultMapping.class);
-    final TypeHandler typeHandler = mock(TypeHandler.class);
-    when(resultMapping.getColumn()).thenReturn("column");
-    when(resultMapping.getTypeHandler()).thenReturn(typeHandler);
-    when(typeHandler.getResult(any(ResultSet.class), any(String.class))).thenThrow(new SQLException("exception"));
-    List<ResultMapping> constructorMappings = List.of(resultMapping);
-
-    try {
-      defaultResultSetHandler.createParameterizedResultObject(rsw, null/* resultType */, constructorMappings,
-          null/* constructorArgTypes */, null/* constructorArgs */, null/* columnPrefix */, false,
-          /* useCollectionConstructorInjection */ null/* parentRowKey */);
-      Assertions.fail("Should have thrown ExecutorException");
-    } catch (Exception e) {
-      Assertions.assertTrue(e instanceof ExecutorException, "Expected ExecutorException");
-      Assertions.assertTrue(e.getMessage().contains("mapping: " + resultMapping.toString()));
+      assertEquals(100, result.get("cOlUmN1"));
     }
   }
 
-  MappedStatement getMappedStatement() {
-    final Configuration config = new Configuration();
-    return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource("some select statement"),
-        SqlCommandType.SELECT).resultMap(
-            ResultMap.builder(config, "testMap", HashMap.class).addMapping("cOlUmN1", "CoLuMn1", Integer.class).build())
-            .build();
+  @Test
+  void shouldThrowExceptionWithColumnName() {
+    SqlSessionFactory sqlSessionFactory = createSqlSessionFactory();
+
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+      ResultSetHandlerMapper mapper = sqlSession.getMapper(ResultSetHandlerMapper.class);
+
+      PersistenceException exception = assertThrows(PersistenceException.class,
+          mapper::selectFailingConstructorArgument);
+      assertTrue(exception.getMessage().contains("Could not process result for mapping: ResultMapping{"));
+      assertTrue(exception.getMessage().contains("column='PROBLEM_COLUMN'"));
+      assertTrue(
+          exception.getCause().getCause().getMessage().contains("Error attempting to get column 'PROBLEM_COLUMN'"));
+    }
   }
 
+  private static SqlSessionFactory createSqlSessionFactory() {
+    SqlSessionFactory sqlSessionFactory = BaseDataTest
+        .createDefaultHsqlDbSqlSessionFactory("DefaultResultSetHandlerTest" + System.nanoTime());
+    sqlSessionFactory.getConfiguration().addMapper(ResultSetHandlerMapper.class);
+    return sqlSessionFactory;
+  }
+
+  interface ResultSetHandlerMapper {
+    @Select("select * from (values(100)) as t(\"CoLuMn1\")")
+    @Results(@Result(property = "cOlUmN1", column = "CoLuMn1", javaType = Integer.class))
+    Map<String, Object> selectRetainingColumnNameCase();
+
+    @Select("select * from (values(100)) as t(\"PROBLEM_COLUMN\")")
+    @ConstructorArgs(@Arg(column = "PROBLEM_COLUMN", javaType = Integer.class, typeHandler = FailingIntegerTypeHandler.class))
+    FailingConstructorArgument selectFailingConstructorArgument();
+  }
+
+  public static class FailingConstructorArgument {
+
+    public FailingConstructorArgument() {
+    }
+
+    public FailingConstructorArgument(Integer value) {
+      // Constructor intentionally present so the query uses constructor mappings.
+    }
+  }
+
+  public static class FailingIntegerTypeHandler extends BaseTypeHandler<Integer> {
+    public FailingIntegerTypeHandler() {
+    }
+
+    @Override
+    public void setNonNullParameter(PreparedStatement ps, int i, Integer parameter, JdbcType jdbcType)
+        throws SQLException {
+      ps.setInt(i, parameter);
+    }
+
+    @Override
+    public Integer getNullableResult(ResultSet rs, String columnName) throws SQLException {
+      throw new SQLException("exception");
+    }
+
+    @Override
+    public Integer getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
+      throw new SQLException("exception");
+    }
+
+    @Override
+    public Integer getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
+      throw new SQLException("exception");
+    }
+  }
 }
