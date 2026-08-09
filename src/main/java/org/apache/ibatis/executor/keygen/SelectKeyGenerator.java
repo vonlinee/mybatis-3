@@ -58,9 +58,7 @@ public class SelectKeyGenerator implements KeyGenerator {
   private void processGeneratedKeys(Executor executor, MappedStatement ms, Object parameter) {
     try {
       if (parameter != null && keyStatement != null && keyStatement.getKeyProperties() != null) {
-        String[] keyProperties = keyStatement.getKeyProperties();
         final Configuration configuration = ms.getConfiguration();
-        final MetaObject metaParam = configuration.newMetaObject(parameter);
         // Do not close keyExecutor.
         // The transaction will be closed by parent executor.
         Executor keyExecutor = configuration.newExecutor(executor.getTransaction(), ExecutorType.SIMPLE);
@@ -70,19 +68,22 @@ public class SelectKeyGenerator implements KeyGenerator {
         }
         if (values.size() > 1) {
           throw new ExecutorException("SelectKey returned more than one value.");
-        } else {
-          MetaObject metaResult = configuration.newMetaObject(values.get(0));
-          if (keyProperties.length == 1) {
-            if (metaResult.hasGetter(keyProperties[0])) {
-              setValue(metaParam, keyProperties[0], metaResult.getValue(keyProperties[0]));
-            } else {
-              // no getter for the property - maybe just a single value object
-              // so try that
-              setValue(metaParam, keyProperties[0], values.get(0));
-            }
+        }
+        final MetaObject metaParam = configuration.newMetaObject(parameter);
+        MetaObject metaResult = configuration.newMetaObject(values.get(0));
+        String[] keyProperties = keyStatement.getKeyProperties();
+        if (keyProperties.length == 1) {
+          final String keyProperty = keyProperties[0];
+          Object value;
+          if (metaResult.hasGetter(keyProperty)) {
+            value = metaResult.getValue(keyProperty);
           } else {
-            handleMultipleProperties(keyProperties, metaParam, metaResult);
+            // no getter for the property - maybe just a single value object, so try that
+            value = values.get(0);
           }
+          setValue(metaParam, keyProperty, value);
+        } else {
+          handleMultipleProperties(keyProperties, metaParam, metaResult);
         }
       }
     } catch (ExecutorException e) {
