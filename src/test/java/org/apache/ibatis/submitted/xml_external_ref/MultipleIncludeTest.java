@@ -79,8 +79,7 @@ class MultipleIncludeTest {
   }
 
   private static void initDb(SqlSessionFactory sqlSessionFactory) throws IOException, SQLException {
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/xml_external_ref/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/xml_external_ref/CreateDB.sql");
   }
 
 }

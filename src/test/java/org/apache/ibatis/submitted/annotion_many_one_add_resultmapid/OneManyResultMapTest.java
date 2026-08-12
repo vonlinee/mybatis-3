@@ -42,7 +42,7 @@ class OneManyResultMapTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+    BaseDataTest.runScript(sqlSessionFactory,
         "org/apache/ibatis/submitted/annotion_many_one_add_resultmapid/CreateDB.sql");
   }
 

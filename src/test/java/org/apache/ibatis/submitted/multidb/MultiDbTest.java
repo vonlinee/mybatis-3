@@ -38,8 +38,7 @@ class MultiDbTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/multidb/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/multidb/CreateDB.sql");
   }
 
   @Test

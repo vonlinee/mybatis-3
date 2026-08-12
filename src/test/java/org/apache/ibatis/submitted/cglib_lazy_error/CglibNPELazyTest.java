@@ -39,8 +39,7 @@ class CglibNPELazyTest {
       sqlSessionFactory.getConfiguration().setAggressiveLazyLoading(false);
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/cglib_lazy_error/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/cglib_lazy_error/CreateDB.sql");
   }
 
   @Test

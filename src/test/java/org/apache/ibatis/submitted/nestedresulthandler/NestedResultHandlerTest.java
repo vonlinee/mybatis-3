@@ -40,8 +40,7 @@ class NestedResultHandlerTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/nestedresulthandler/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/nestedresulthandler/CreateDB.sql");
   }
 
   @Test

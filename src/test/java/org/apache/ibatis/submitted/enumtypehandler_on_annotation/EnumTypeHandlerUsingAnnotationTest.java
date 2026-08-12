@@ -55,8 +55,7 @@ class EnumTypeHandlerUsingAnnotationTest {
       sqlSessionFactory.getConfiguration().getMapperRegistry().addMapper(PersonMapper.class);
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/enumtypehandler_on_annotation/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/enumtypehandler_on_annotation/CreateDB.sql");
   }
 
   @BeforeEach

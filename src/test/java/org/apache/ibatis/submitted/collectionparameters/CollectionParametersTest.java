@@ -43,8 +43,7 @@ class CollectionParametersTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/collectionparameters/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/collectionparameters/CreateDB.sql");
   }
 
   @Test

@@ -37,7 +37,7 @@ class AutoTypeFromNonAmbiguousConstructorTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+    BaseDataTest.runScript(sqlSessionFactory,
         "org/apache/ibatis/submitted/auto_type_from_non_ambiguous_constructor/CreateDB.sql");
   }
 

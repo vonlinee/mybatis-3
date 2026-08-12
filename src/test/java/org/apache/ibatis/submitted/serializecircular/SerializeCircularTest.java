@@ -111,8 +111,7 @@ class SerializeCircularTest {
     try (Reader configReader = Resources.getResourceAsReader(resource)) {
       SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configReader);
 
-      BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-          "org/apache/ibatis/submitted/serializecircular/CreateDB.sql");
+      BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/serializecircular/CreateDB.sql");
 
       return sqlSessionFactory;
     }

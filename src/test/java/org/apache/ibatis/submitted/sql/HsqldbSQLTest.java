@@ -48,8 +48,7 @@ class HsqldbSQLTest {
     configuration.setVariables(properties);
     sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/sql/CreateDB-hsqldb.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/sql/CreateDB-hsqldb.sql");
   }
 
   @Test

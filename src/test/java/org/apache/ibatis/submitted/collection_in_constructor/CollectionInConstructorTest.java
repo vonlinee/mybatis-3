@@ -46,8 +46,7 @@ class CollectionInConstructorTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/collection_in_constructor/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/collection_in_constructor/CreateDB.sql");
   }
 
   @Test

@@ -40,8 +40,7 @@ class AuthorDAOTest {
       factory = new SqlSessionFactoryBuilder().build(reader);
     }
 
-    BaseDataTest.runScript(factory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/initialized_collection_property/create.sql");
+    BaseDataTest.runScript(factory, "org/apache/ibatis/submitted/initialized_collection_property/create.sql");
   }
 
   @Test

@@ -38,8 +38,7 @@ class InlineCollectionWithDotTest {
 
       SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(batisConfigReader);
 
-      BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-          "org/apache/ibatis/submitted/inline_association_with_dot/create.sql");
+      BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/inline_association_with_dot/create.sql");
 
       sqlSession = sqlSessionFactory.openSession();
     }

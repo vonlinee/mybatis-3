@@ -43,7 +43,7 @@ class ArgNameBasedConstructorAutoMappingTest {
     }
     sqlSessionFactory.getConfiguration().setArgNameBasedConstructorAutoMapping(true);
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+    BaseDataTest.runScript(sqlSessionFactory,
         "org/apache/ibatis/submitted/arg_name_based_constructor_automapping/CreateDB.sql");
   }
 

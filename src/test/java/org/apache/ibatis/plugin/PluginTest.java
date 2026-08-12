@@ -41,8 +41,7 @@ class PluginTest {
     try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/plugin/mybatis-config.xml")) {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/plugin/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/plugin/CreateDB.sql");
   }
 
   @Test

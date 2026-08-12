@@ -36,8 +36,7 @@ class CommonPropertyLazyLoadTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/lazyload_common_property/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/lazyload_common_property/CreateDB.sql");
   }
 
   @Test

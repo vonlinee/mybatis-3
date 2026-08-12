@@ -40,8 +40,7 @@ final class ImmutablePOJOTest {
       factory = new SqlSessionFactoryBuilder().build(reader);
     }
 
-    BaseDataTest.runScript(factory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/lazy_immutable/CreateDB.sql");
+    BaseDataTest.runScript(factory, "org/apache/ibatis/submitted/lazy_immutable/CreateDB.sql");
   }
 
   @Test

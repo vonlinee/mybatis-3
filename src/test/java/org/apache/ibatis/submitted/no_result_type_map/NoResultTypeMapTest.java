@@ -46,8 +46,7 @@ class NoResultTypeMapTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/no_result_type_map/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/no_result_type_map/CreateDB.sql");
   }
 
   @Test

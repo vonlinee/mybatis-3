@@ -38,8 +38,7 @@ class AncestorRefTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/ancestor_ref/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/ancestor_ref/CreateDB.sql");
   }
 
   @Test

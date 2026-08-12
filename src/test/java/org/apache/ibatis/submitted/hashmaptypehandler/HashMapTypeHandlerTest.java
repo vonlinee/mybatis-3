@@ -40,8 +40,7 @@ class HashMapTypeHandlerTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/hashmaptypehandler/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/hashmaptypehandler/CreateDB.sql");
   }
 
   @Test

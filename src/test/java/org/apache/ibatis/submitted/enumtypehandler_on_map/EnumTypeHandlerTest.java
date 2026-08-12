@@ -40,8 +40,7 @@ class EnumTypeHandlerTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/enumtypehandler_on_map/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/enumtypehandler_on_map/CreateDB.sql");
   }
 
   @Test

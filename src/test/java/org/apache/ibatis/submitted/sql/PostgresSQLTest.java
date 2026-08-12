@@ -50,8 +50,7 @@ class PostgresSQLTest {
     configuration.setVariables(properties);
     sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/sql/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/sql/CreateDB.sql");
   }
 
   @Test

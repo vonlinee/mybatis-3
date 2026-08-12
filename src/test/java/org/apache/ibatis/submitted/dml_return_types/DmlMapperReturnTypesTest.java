@@ -48,7 +48,7 @@ class DmlMapperReturnTypesTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(), SQL);
+    BaseDataTest.runScript(sqlSessionFactory, SQL);
 
   }
 

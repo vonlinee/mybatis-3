@@ -48,7 +48,7 @@ class ColumnOrderBasedConstructorAutomappingTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+    BaseDataTest.runScript(sqlSessionFactory,
         "org/apache/ibatis/submitted/column_order_based_constructor_automapping/CreateDB.sql");
   }
 

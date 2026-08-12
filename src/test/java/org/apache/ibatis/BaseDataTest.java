@@ -145,8 +145,7 @@ public abstract class BaseDataTest {
    * }
    *
    * // populate in-memory database
-   * BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-   *     "org/apache/ibatis/submitted/missing_id_property/CreateDB.sql");
+   * BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/missing_id_property/CreateDB.sql");
    * </pre>
    *
    * </blockquote>

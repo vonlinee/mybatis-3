@@ -43,8 +43,7 @@ class AssociationTypeTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/associationtype/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/associationtype/CreateDB.sql");
   }
 
   @ParameterizedTest

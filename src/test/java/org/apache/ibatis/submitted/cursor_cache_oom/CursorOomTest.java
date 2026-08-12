@@ -49,8 +49,7 @@ class CursorOomTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/cursor_cache_oom/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/cursor_cache_oom/CreateDB.sql");
   }
 
   private static Map<CacheKey, Object> getNestedResultObjects(Cursor<User> users)

@@ -37,8 +37,7 @@ class ComponentTest {
     Reader reader = Resources.getResourceAsReader(resource);
     sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/complex_property/db.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/complex_property/db.sql");
   }
 
   @Test

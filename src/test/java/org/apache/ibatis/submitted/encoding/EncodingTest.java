@@ -42,8 +42,7 @@ class EncodingTest {
     try {
       // make sure that the SQL file has been saved in UTF-8!
       Resources.setCharset(Charset.forName("utf-8"));
-      BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-          "org/apache/ibatis/submitted/encoding/CreateDB.sql");
+      BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/encoding/CreateDB.sql");
     } finally {
       Resources.setCharset(charset);
     }

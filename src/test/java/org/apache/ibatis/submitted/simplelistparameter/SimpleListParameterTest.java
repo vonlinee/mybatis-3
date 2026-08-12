@@ -41,8 +41,7 @@ class SimpleListParameterTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/simplelistparameter/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/simplelistparameter/CreateDB.sql");
   }
 
   @Test

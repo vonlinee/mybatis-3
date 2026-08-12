@@ -42,8 +42,7 @@ class MapperTypeParameterTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/mapper_type_parameter/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/mapper_type_parameter/CreateDB.sql");
   }
 
   @Test

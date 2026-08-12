@@ -44,8 +44,7 @@ class FooMapperTest {
     session = factory.openSession();
     conn = session.getConnection();
 
-    BaseDataTest.runScript(factory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/overwritingproperties/create-schema-mysql.sql");
+    BaseDataTest.runScript(factory, "org/apache/ibatis/submitted/overwritingproperties/create-schema-mysql.sql");
   }
 
   @BeforeEach

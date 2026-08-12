@@ -36,8 +36,7 @@ class RepeatableSelectTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-hsql");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     User user;
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
@@ -60,8 +59,7 @@ class RepeatableSelectTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-hsql");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     User user;
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
@@ -83,8 +81,7 @@ class RepeatableSelectTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-derby");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     User user;
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
@@ -107,8 +104,7 @@ class RepeatableSelectTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-derby");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     User user;
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
@@ -130,8 +126,7 @@ class RepeatableSelectTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-h2");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     User user;
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
@@ -154,8 +149,7 @@ class RepeatableSelectTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-h2");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     User user;
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
@@ -177,8 +171,7 @@ class RepeatableSelectTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-derby");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     User user;
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
@@ -201,8 +194,7 @@ class RepeatableSelectTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-hsql");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     User user;
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {

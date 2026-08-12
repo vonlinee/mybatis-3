@@ -41,8 +41,7 @@ class SubstitutionInAnnotsTest {
     configuration.addMapper(SubstitutionInAnnotsMapper.class);
     sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/substitution_in_annots/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/substitution_in_annots/CreateDB.sql");
   }
 
   @Test

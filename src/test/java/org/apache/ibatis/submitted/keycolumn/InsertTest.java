@@ -51,8 +51,7 @@ class InsertTest {
     configuration.addMapper(InsertMapper.class);
     sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/keycolumn/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/keycolumn/CreateDB.sql");
   }
 
   @Test

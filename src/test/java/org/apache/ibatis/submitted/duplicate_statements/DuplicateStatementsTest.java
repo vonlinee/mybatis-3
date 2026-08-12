@@ -42,8 +42,7 @@ class DuplicateStatementsTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/duplicate_statements/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/duplicate_statements/CreateDB.sql");
   }
 
   @Test

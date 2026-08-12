@@ -54,8 +54,7 @@ class OptionalOnMapperMethodTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/optional_on_mapper_method/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/optional_on_mapper_method/CreateDB.sql");
   }
 
   @Test

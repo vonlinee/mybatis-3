@@ -39,8 +39,7 @@ class OgnlStaticTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/ognlstatic/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/ognlstatic/CreateDB.sql");
   }
 
   /**

@@ -44,7 +44,7 @@ abstract class AbstractLazyTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+    BaseDataTest.runScript(sqlSessionFactory,
         "org/apache/ibatis/submitted/lazyload_proxyfactory_comparison/CreateDB.sql");
 
     sqlSession = sqlSessionFactory.openSession();

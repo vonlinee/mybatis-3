@@ -52,10 +52,8 @@ class CollectionInjectionTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/collection_injection/create_db.sql");
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/collection_injection/data_load_small.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/collection_injection/create_db.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/collection_injection/data_load_small.sql");
   }
 
   @Test

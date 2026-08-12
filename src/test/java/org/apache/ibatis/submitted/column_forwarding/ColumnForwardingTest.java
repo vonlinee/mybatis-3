@@ -39,8 +39,7 @@ class ColumnForwardingTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/column_forwarding/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/column_forwarding/CreateDB.sql");
   }
 
   @Test

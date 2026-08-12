@@ -41,8 +41,7 @@ class ConstructorAutomappingTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/constructor_automapping/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/constructor_automapping/CreateDB.sql");
   }
 
   @Test

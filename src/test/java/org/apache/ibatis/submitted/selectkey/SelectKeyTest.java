@@ -44,8 +44,7 @@ class SelectKeyTest {
       sqlSessionFactory.getConfiguration().addMapper(AnnotatedMapper.class);
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/selectkey/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/selectkey/CreateDB.sql");
   }
 
   @Test

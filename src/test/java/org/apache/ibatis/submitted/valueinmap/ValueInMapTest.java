@@ -43,8 +43,7 @@ class ValueInMapTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/valueinmap/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/valueinmap/CreateDB.sql");
   }
 
   @Test // issue #165

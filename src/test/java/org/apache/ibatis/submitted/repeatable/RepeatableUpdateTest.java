@@ -36,8 +36,7 @@ class RepeatableUpdateTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-hsql");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Mapper mapper = sqlSession.getMapper(Mapper.class);
@@ -55,8 +54,7 @@ class RepeatableUpdateTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-hsql");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Mapper mapper = sqlSession.getMapper(Mapper.class);
@@ -74,8 +72,7 @@ class RepeatableUpdateTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-derby");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Mapper mapper = sqlSession.getMapper(Mapper.class);
@@ -94,8 +91,7 @@ class RepeatableUpdateTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-derby");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Mapper mapper = sqlSession.getMapper(Mapper.class);
@@ -114,8 +110,7 @@ class RepeatableUpdateTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-h2");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Mapper mapper = sqlSession.getMapper(Mapper.class);
@@ -134,8 +129,7 @@ class RepeatableUpdateTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader, "development-h2");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/repeatable/CreateDB.sql");
 
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Mapper mapper = sqlSession.getMapper(Mapper.class);

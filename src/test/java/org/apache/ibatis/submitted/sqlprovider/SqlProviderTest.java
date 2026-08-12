@@ -51,8 +51,7 @@ class SqlProviderTest {
       sqlSessionFactory.getConfiguration().addMapper(DatabaseIdMapper.class);
     }
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/sqlprovider/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/sqlprovider/CreateDB.sql");
 
     // create a SqlSessionFactory
     try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/sqlprovider/mybatis-config.xml")) {

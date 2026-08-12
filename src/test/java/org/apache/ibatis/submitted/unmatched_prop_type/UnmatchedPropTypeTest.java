@@ -36,8 +36,7 @@ class UnmatchedPropTypeTest {
         .getResourceAsReader("org/apache/ibatis/submitted/unmatched_prop_type/mybatis-config.xml")) {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/unmatched_prop_type/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/unmatched_prop_type/CreateDB.sql");
   }
 
   @Test

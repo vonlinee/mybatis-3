@@ -41,8 +41,7 @@ class TimestampWithTimezoneTypeHandlerTest {
         .getResourceAsReader("org/apache/ibatis/submitted/timestamp_with_timezone/mybatis-config.xml")) {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/timestamp_with_timezone/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/timestamp_with_timezone/CreateDB.sql");
   }
 
   @Test

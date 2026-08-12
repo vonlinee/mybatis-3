@@ -50,8 +50,7 @@ class DynSqlTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(configReader);
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/dynsql/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/dynsql/CreateDB.sql");
   }
 
   @Test

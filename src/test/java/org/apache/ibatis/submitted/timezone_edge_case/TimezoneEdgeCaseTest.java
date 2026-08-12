@@ -47,8 +47,7 @@ class TimezoneEdgeCaseTest {
         .getResourceAsReader("org/apache/ibatis/submitted/timezone_edge_case/mybatis-config.xml")) {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/timezone_edge_case/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/timezone_edge_case/CreateDB.sql");
   }
 
   @BeforeEach

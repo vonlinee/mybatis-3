@@ -39,8 +39,7 @@ class QuotedColumnNamesTest {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/quotedcolumnnames/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/quotedcolumnnames/CreateDB.sql");
   }
 
   @Test

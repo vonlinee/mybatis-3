@@ -38,8 +38,7 @@ class BindInForeachTest {
         .getResourceAsReader("org/apache/ibatis/submitted/bind_in_foreach/mybatis-config.xml")) {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/bind_in_foreach/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/bind_in_foreach/CreateDB.sql");
   }
 
   @Test

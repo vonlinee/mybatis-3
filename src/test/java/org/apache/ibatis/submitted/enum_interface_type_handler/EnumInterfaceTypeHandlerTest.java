@@ -40,8 +40,7 @@ class EnumInterfaceTypeHandlerTest {
     }
 
     // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/enum_interface_type_handler/CreateDB.sql");
+    BaseDataTest.runScript(sqlSessionFactory, "org/apache/ibatis/submitted/enum_interface_type_handler/CreateDB.sql");
   }
 
   @Test
