@@ -18,11 +18,14 @@ package org.apache.ibatis.submitted.mapper_return_types;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.junit.jupiter.api.Assertions;
@@ -43,6 +46,9 @@ class MapperReturnTypesTest extends BaseDataTest {
 
     @Select("select * from users")
     Stream<User> getAllUsersStream();
+
+    @Select("select * from users")
+    Stream<User> getUsers(RowBounds rowBounds);
   }
 
   @BeforeAll
@@ -84,12 +90,24 @@ class MapperReturnTypesTest extends BaseDataTest {
   void shouldSupportReturnStreamInMapperMethod() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Mapper mapper = sqlSession.getMapper(Mapper.class);
-      Stream<User> stream = mapper.getAllUsersStream();
       final int[] ids = { 1, 2, 3, 4, 5 };
-      stream.forEach(user -> {
-        Assertions.assertEquals(user.getId(), ids[user.getId() - 1]);
-        Assertions.assertEquals(user.getName(), "User" + (ids[user.getId() - 1]));
-      });
+      try (Stream<User> stream = mapper.getAllUsersStream()) {
+        stream.forEach(user -> {
+          Assertions.assertEquals(user.getId(), ids[user.getId() - 1]);
+          Assertions.assertEquals(user.getName(), "User" + (ids[user.getId() - 1]));
+        });
+      }
+    }
+  }
+
+  @Test
+  void shouldApplyRowBoundsToStreamInMapperMethod() {
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+      Mapper mapper = sqlSession.getMapper(Mapper.class);
+      try (Stream<User> stream = mapper.getUsers(new RowBounds(1, 2))) {
+        List<Integer> ids = stream.map(User::getId).collect(Collectors.toList());
+        assertEquals(List.of(2, 3), ids);
+      }
     }
   }
 }
