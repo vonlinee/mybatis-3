@@ -196,10 +196,10 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       final ResultMap resultMap = configuration.getResultMap(resultMapId);
       if (this.resultHandler == null) {
         final DefaultResultHandler resultHandler = new DefaultResultHandler(objectFactory);
-        handleRowValues(rs, resultMap, resultHandler, new RowBounds(), null);
+        handleRowValues(rs, resultMap, resultHandler, RowBounds.DEFAULT, null);
         metaParam.setValue(parameterMapping.getProperty(), resultHandler.getResultList());
       } else {
-        handleRowValues(rs, resultMap, resultHandler, new RowBounds(), null);
+        handleRowValues(rs, resultMap, resultHandler, RowBounds.DEFAULT, null);
       }
     } finally {
       // issue #228 (close resultSets)
