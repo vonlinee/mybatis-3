@@ -59,7 +59,7 @@ public class XMLScriptBuilder {
     return parseDynamicTags(context);
   }
 
-  protected MixedSqlNode parseDynamicTags(XNode node) {
+  protected SqlNode parseDynamicTags(XNode node) {
     final List<SqlNode> contents = new ArrayList<>();
     List<XNode> childNodes = node.getChildNodes();
     for (XNode child : childNodes) {
@@ -81,89 +81,70 @@ public class XMLScriptBuilder {
         if (handler == null) {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
         }
-        handler.handleNode(child, contents);
+        contents.add(handler.handleNode(child));
       }
     }
     return new MixedSqlNode(contents);
   }
 
   private interface NodeHandler {
-    void handleNode(XNode nodeToHandle, List<SqlNode> targetContents);
+    SqlNode handleNode(XNode nodeToHandle);
   }
 
   private static class BindHandler implements NodeHandler {
-    public BindHandler() {
-      // Prevent Synthetic Access
-    }
 
     @Override
-    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+    public SqlNode handleNode(XNode nodeToHandle) {
       final String name = nodeToHandle.getStringAttribute("name");
       final String expression = nodeToHandle.getStringAttribute("value");
-      final VarDeclSqlNode node = new VarDeclSqlNode(name, expression);
-      targetContents.add(node);
+      return new VarDeclSqlNode(name, expression);
     }
   }
 
   private static class PaginationHandler implements NodeHandler {
 
     @Override
-    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      targetContents.add(new PaginationSqlNode());
+    public SqlNode handleNode(XNode nodeToHandle) {
+      return new PaginationSqlNode();
     }
   }
 
   private class TrimHandler implements NodeHandler {
-    public TrimHandler() {
-      // Prevent Synthetic Access
-    }
 
     @Override
-    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+    public SqlNode handleNode(XNode nodeToHandle) {
+      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
       String prefix = nodeToHandle.getStringAttribute("prefix");
       String prefixOverrides = nodeToHandle.getStringAttribute("prefixOverrides");
       String suffix = nodeToHandle.getStringAttribute("suffix");
       String suffixOverrides = nodeToHandle.getStringAttribute("suffixOverrides");
-      TrimSqlNode trim = new TrimSqlNode(mixedSqlNode, prefix, prefixOverrides, suffix, suffixOverrides);
-      targetContents.add(trim);
+      return new TrimSqlNode(sqlNode, prefix, prefixOverrides, suffix, suffixOverrides);
     }
   }
 
   private class WhereHandler implements NodeHandler {
-    public WhereHandler() {
-      // Prevent Synthetic Access
-    }
 
     @Override
-    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
-      WhereSqlNode where = new WhereSqlNode(mixedSqlNode);
-      targetContents.add(where);
+    public SqlNode handleNode(XNode nodeToHandle) {
+      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+      return new WhereSqlNode(sqlNode);
     }
   }
 
   private class SetHandler implements NodeHandler {
-    public SetHandler() {
-      // Prevent Synthetic Access
-    }
 
     @Override
-    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
-      SetSqlNode set = new SetSqlNode(mixedSqlNode);
-      targetContents.add(set);
+    public SqlNode handleNode(XNode nodeToHandle) {
+      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+      return new SetSqlNode(sqlNode);
     }
   }
 
   private class ForEachHandler implements NodeHandler {
-    public ForEachHandler() {
-      // Prevent Synthetic Access
-    }
 
     @Override
-    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+    public SqlNode handleNode(XNode nodeToHandle) {
+      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
       String collection = nodeToHandle.getStringAttribute("collection");
       Boolean nullable = nodeToHandle.getBooleanAttribute("nullable");
       String item = nodeToHandle.getStringAttribute("item");
@@ -171,23 +152,17 @@ public class XMLScriptBuilder {
       String open = nodeToHandle.getStringAttribute("open");
       String close = nodeToHandle.getStringAttribute("close");
       String separator = nodeToHandle.getStringAttribute("separator");
-      ForEachSqlNode forEachSqlNode = new ForEachSqlNode(mixedSqlNode, collection, nullable, index, item, open, close,
-          separator);
-      targetContents.add(forEachSqlNode);
+      return new ForEachSqlNode(sqlNode, collection, nullable, index, item, open, close, separator);
     }
   }
 
   private class IfHandler implements NodeHandler {
-    public IfHandler() {
-      // Prevent Synthetic Access
-    }
 
     @Override
-    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+    public SqlNode handleNode(XNode nodeToHandle) {
+      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
       String test = nodeToHandle.getStringAttribute("test");
-      IfSqlNode ifSqlNode = new IfSqlNode(mixedSqlNode, test);
-      targetContents.add(ifSqlNode);
+      return new IfSqlNode(sqlNode, test);
     }
   }
 
@@ -219,13 +194,10 @@ public class XMLScriptBuilder {
    * The above evaluates precisely to `IN (#{item_0}, #{item_1}, ...)` at runtime.
    */
   private class InHandler implements NodeHandler {
-    public InHandler() {
-      // Prevent Synthetic Access
-    }
 
     @Override
-    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+    public SqlNode handleNode(XNode nodeToHandle) {
+      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
       String collection = nodeToHandle.getStringAttribute("collection");
       Boolean nullable = nodeToHandle.getBooleanAttribute("nullable");
       String item = nodeToHandle.getStringAttribute("item", "item");
@@ -238,43 +210,33 @@ public class XMLScriptBuilder {
       String close = ")";
       String separator = ",";
 
-      SqlNode contents = mixedSqlNode;
+      SqlNode contents = sqlNode;
       if (!nodeToHandle.hasElementChildNodes() && nodeToHandle.isBodyBlank()) {
         contents = new TextSqlNode("#{" + item + "}");
       }
 
       // Syntactic sugar for IN (?). We delegate to ForEachSqlNode which handles collection iteration.
-      ForEachSqlNode forEachSqlNode = new ForEachSqlNode(contents, collection, nullable, index, item, open, close,
-          separator);
-      targetContents.add(forEachSqlNode);
+      return new ForEachSqlNode(contents, collection, nullable, index, item, open, close, separator);
     }
   }
 
   private class OtherwiseHandler implements NodeHandler {
-    public OtherwiseHandler() {
-      // Prevent Synthetic Access
-    }
 
     @Override
-    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
-      targetContents.add(mixedSqlNode);
+    public SqlNode handleNode(XNode nodeToHandle) {
+      return parseDynamicTags(nodeToHandle);
     }
   }
 
   private class ChooseHandler implements NodeHandler {
-    public ChooseHandler() {
-      // Prevent Synthetic Access
-    }
 
     @Override
-    public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+    public SqlNode handleNode(XNode nodeToHandle) {
       List<SqlNode> whenSqlNodes = new ArrayList<>();
       List<SqlNode> otherwiseSqlNodes = new ArrayList<>();
       handleWhenOtherwiseNodes(nodeToHandle, whenSqlNodes, otherwiseSqlNodes);
       SqlNode defaultSqlNode = getDefaultSqlNode(otherwiseSqlNodes);
-      ChooseSqlNode chooseSqlNode = new ChooseSqlNode(whenSqlNodes, defaultSqlNode);
-      targetContents.add(chooseSqlNode);
+      return new ChooseSqlNode(whenSqlNodes, defaultSqlNode);
     }
 
     private void handleWhenOtherwiseNodes(XNode chooseSqlNode, List<SqlNode> ifSqlNodes,
@@ -284,9 +246,9 @@ public class XMLScriptBuilder {
         String nodeName = child.getNode().getNodeName();
         NodeHandler handler = nodeHandlerMap.get(nodeName);
         if (handler instanceof IfHandler) {
-          handler.handleNode(child, ifSqlNodes);
+          ifSqlNodes.add(handler.handleNode(child));
         } else if (handler instanceof OtherwiseHandler) {
-          handler.handleNode(child, defaultSqlNodes);
+          defaultSqlNodes.add(handler.handleNode(child));
         } else {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
         }
