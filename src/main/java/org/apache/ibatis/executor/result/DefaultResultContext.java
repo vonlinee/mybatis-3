@@ -16,6 +16,7 @@
 package org.apache.ibatis.executor.result;
 
 import org.apache.ibatis.session.ResultContext;
+import org.apache.ibatis.session.ResultHandler;
 
 /**
  * @author Clinton Begin
@@ -26,10 +27,17 @@ public class DefaultResultContext<T> implements ResultContext<T> {
   private int resultCount;
   private boolean stopped;
 
+  private final ResultHandler<?> resultHandler;
+
   public DefaultResultContext() {
+    this(null);
+  }
+
+  public DefaultResultContext(ResultHandler<?> resultHandler) {
     resultObject = null;
     resultCount = 0;
     stopped = false;
+    this.resultHandler = resultHandler;
   }
 
   @Override
@@ -47,9 +55,14 @@ public class DefaultResultContext<T> implements ResultContext<T> {
     return stopped;
   }
 
+  @SuppressWarnings("unchecked")
   public void nextResultObject(T resultObject) {
     resultCount++;
     this.resultObject = resultObject;
+
+    if (resultHandler != null) {
+      ((ResultHandler<Object>) resultHandler).handleResult(this);
+    }
   }
 
   @Override
