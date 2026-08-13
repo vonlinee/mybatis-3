@@ -22,9 +22,9 @@ import org.apache.ibatis.session.RowBounds;
 /**
  * @author Clinton Begin
  */
-class DefaultResultContext<T> implements ResultContext<T> {
+class DefaultResultContext implements ResultContext<Object> {
 
-  private T resultObject;
+  private Object resultObject;
   private int resultCount;
   private boolean stopped;
 
@@ -40,7 +40,7 @@ class DefaultResultContext<T> implements ResultContext<T> {
   }
 
   @Override
-  public T getResultObject() {
+  public Object getResultObject() {
     return resultObject;
   }
 
@@ -55,7 +55,7 @@ class DefaultResultContext<T> implements ResultContext<T> {
   }
 
   @SuppressWarnings("unchecked")
-  public void nextResultObject(T resultObject) {
+  public void nextResultObject(Object resultObject) {
     resultCount++;
     this.resultObject = resultObject;
 

@@ -311,7 +311,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     JdbcUtils.absolute(rs, rowBounds.getOffset());
 
     ResultSetWrapper rsw = new ResultSetWrapper(rs, configuration);
-    final DefaultResultContext<Object> resultContext = new DefaultResultContext<>(resultHandler, rowBounds);
+    final DefaultResultContext resultContext = new DefaultResultContext(resultHandler, rowBounds);
 
     if (resultMap.hasNestedResultMaps()) {
       ensureNoRowBounds();
@@ -340,7 +340,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private void handleRowValuesForSimpleResultMap(ResultSetWrapper rsw, ResultMap resultMap,
-      DefaultResultContext<Object> resultContext, ResultMapping parentMapping) throws SQLException {
+      DefaultResultContext resultContext, ResultMapping parentMapping) throws SQLException {
     final boolean useCollectionConstructorInjection = resultMap.hasResultMapsUsingConstructorCollection();
 
     ResultSet resultSet = rsw.getResultSet();
@@ -359,7 +359,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
   }
 
-  private void storeObject(DefaultResultContext<Object> resultContext, Object rowValue, ResultMapping parentMapping,
+  private void storeObject(DefaultResultContext resultContext, Object rowValue, ResultMapping parentMapping,
       ResultSet rs) throws SQLException {
     if (parentMapping != null) {
       linkToParents(rs, parentMapping, rowValue);
@@ -1056,7 +1056,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   //
 
   private void handleRowValuesForNestedResultMap(ResultSetWrapper rsw, ResultMap resultMap,
-      DefaultResultContext<Object> resultContext, ResultMapping parentMapping) throws SQLException {
+      DefaultResultContext resultContext, ResultMapping parentMapping) throws SQLException {
     final boolean useCollectionConstructorInjection = resultMap.hasResultMapsUsingConstructorCollection();
     if (useCollectionConstructorInjection) {
       verifyPendingCreationPreconditions(parentMapping);
@@ -1288,7 +1288,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
   }
 
-  private void createAndStorePendingCreation(ResultSet resultSet, DefaultResultContext<Object> resultContext,
+  private void createAndStorePendingCreation(ResultSet resultSet, DefaultResultContext resultContext,
       PendingConstructorCreation pendingCreation) throws SQLException {
     final Object result = pendingCreation.create(objectFactory);
     storeObject(resultContext, result, null, resultSet);
