@@ -309,6 +309,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   public void handleRowValues(ResultSet rs, ResultMap resultMap, ResultHandler<?> resultHandler, RowBounds rowBounds,
       ResultMapping parentMapping) throws SQLException {
+
+    JdbcUtils.absolute(rs, rowBounds.getOffset());
+
     ResultSetWrapper rsw = new ResultSetWrapper(rs, configuration);
     final DefaultResultContext<Object> resultContext = new DefaultResultContext<>(resultHandler);
 
@@ -344,7 +347,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     final boolean useCollectionConstructorInjection = resultMap.hasResultMapsUsingConstructorCollection();
 
     ResultSet resultSet = rsw.getResultSet();
-    skipRows(resultSet, rowBounds);
     while (shouldProcessMoreRows(resultContext, rowBounds) && !resultSet.isClosed() && resultSet.next()) {
       ResultMap discriminatedResultMap = resolveDiscriminatedResultMap(rsw, resultMap, null);
       Object rowValue = getSimpleRowValue(rsw, discriminatedResultMap, null, null);
@@ -376,10 +378,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   private boolean shouldProcessMoreRows(ResultContext<?> context, RowBounds rowBounds) {
     return !context.isStopped() && context.getResultCount() < rowBounds.getLimit();
-  }
-
-  private void skipRows(ResultSet rs, RowBounds rowBounds) throws SQLException {
-    JdbcUtils.absolute(rs, rowBounds.getOffset());
   }
 
   //
@@ -1073,7 +1071,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
 
     ResultSet resultSet = rsw.getResultSet();
-    skipRows(resultSet, rowBounds);
     Object rowValue = previousRowValue;
 
     PendingConstructorCreation lastHandledCreation = null;
