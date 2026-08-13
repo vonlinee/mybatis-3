@@ -27,8 +27,8 @@ import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.executor.result.DefaultResultContext;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
@@ -101,17 +101,18 @@ public class DefaultSqlSession implements SqlSession {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey, String mapValue,
       RowBounds rowBounds) {
     final List<? extends V> list = selectList(statement, parameter, rowBounds);
-    final DefaultMapResultHandler<K, V> mapResultHandler = new DefaultMapResultHandler<>(mapKey, mapValue,
-        configuration);
-    final DefaultResultContext<V> context = new DefaultResultContext<>();
-    for (V o : list) {
-      context.nextResultObject(o);
-      mapResultHandler.handleResult(context);
+    Map<K, V> mappedResults = configuration.getObjectFactory().create(Map.class);
+    for (V value : list) {
+      final MetaObject mo = configuration.newMetaObject(value);
+      // TODO is that assignment always true?
+      final K key = (K) mo.getValue(mapKey);
+      mappedResults.put(key, (V) (mapValue == null ? value : mo.getValue(mapValue)));
     }
-    return mapResultHandler.getMappedResults();
+    return mappedResults;
   }
 
   @Override
