@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.builder.xml;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -398,4 +399,17 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
   }
 
+  public static void parseResource(Configuration configuration, String resource) throws IOException {
+    try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
+      XMLMapperBuilder builder = new XMLMapperBuilder(inputStream, configuration, resource,
+          configuration.getSqlFragments());
+      builder.parse();
+    }
+  }
+
+  public static void parse(Configuration configuration, String resource, InputStream inputStream) throws IOException {
+    XMLMapperBuilder builder = new XMLMapperBuilder(inputStream, configuration, resource,
+        configuration.getSqlFragments());
+    builder.parse();
+  }
 }
