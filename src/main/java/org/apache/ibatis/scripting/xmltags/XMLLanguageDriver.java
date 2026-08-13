@@ -38,6 +38,8 @@ import org.apache.ibatis.session.Configuration;
  */
 public class XMLLanguageDriver implements LanguageDriver {
 
+  protected final XMLScriptBuilder builder = new XMLScriptBuilder();
+
   @Override
   public ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject,
       BoundSql boundSql) {
@@ -52,7 +54,6 @@ public class XMLLanguageDriver implements LanguageDriver {
   @Override
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType,
       ParamNameResolver paramNameResolver) {
-    XMLScriptBuilder builder = new XMLScriptBuilder();
     SqlNode root = builder.parseSqlNode(script);
     return SqlSourceBuilder.buildSqlSource(configuration, root, parameterType, paramNameResolver);
   }
