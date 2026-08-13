@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.executor.result;
+package org.apache.ibatis.executor.resultset;
 
 import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
@@ -22,7 +22,7 @@ import org.apache.ibatis.session.RowBounds;
 /**
  * @author Clinton Begin
  */
-public class DefaultResultContext<T> implements ResultContext<T> {
+class DefaultResultContext<T> implements ResultContext<T> {
 
   private T resultObject;
   private int resultCount;
@@ -30,10 +30,6 @@ public class DefaultResultContext<T> implements ResultContext<T> {
 
   private final ResultHandler<?> resultHandler;
   private final RowBounds rowBounds;
-
-  public DefaultResultContext() {
-    this(null, null);
-  }
 
   public DefaultResultContext(ResultHandler<?> resultHandler, RowBounds rowBounds) {
     resultObject = null;
