@@ -67,7 +67,6 @@ import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.AutoMappingBehavior;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.JdbcType;
@@ -313,14 +312,14 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     JdbcUtils.absolute(rs, rowBounds.getOffset());
 
     ResultSetWrapper rsw = new ResultSetWrapper(rs, configuration);
-    final DefaultResultContext<Object> resultContext = new DefaultResultContext<>(resultHandler);
+    final DefaultResultContext<Object> resultContext = new DefaultResultContext<>(resultHandler, rowBounds);
 
     if (resultMap.hasNestedResultMaps()) {
       ensureNoRowBounds();
       checkResultHandler();
-      handleRowValuesForNestedResultMap(rsw, resultMap, resultContext, rowBounds, parentMapping);
+      handleRowValuesForNestedResultMap(rsw, resultMap, resultContext, parentMapping);
     } else {
-      handleRowValuesForSimpleResultMap(rsw, resultMap, resultContext, rowBounds, parentMapping);
+      handleRowValuesForSimpleResultMap(rsw, resultMap, resultContext, parentMapping);
     }
   }
 
@@ -342,12 +341,11 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private void handleRowValuesForSimpleResultMap(ResultSetWrapper rsw, ResultMap resultMap,
-      DefaultResultContext<Object> resultContext, RowBounds rowBounds, ResultMapping parentMapping)
-      throws SQLException {
+      DefaultResultContext<Object> resultContext, ResultMapping parentMapping) throws SQLException {
     final boolean useCollectionConstructorInjection = resultMap.hasResultMapsUsingConstructorCollection();
 
     ResultSet resultSet = rsw.getResultSet();
-    while (shouldProcessMoreRows(resultContext, rowBounds) && !resultSet.isClosed() && resultSet.next()) {
+    while (resultContext.shouldProcessMoreRows() && !resultSet.isClosed() && resultSet.next()) {
       ResultMap discriminatedResultMap = resolveDiscriminatedResultMap(rsw, resultMap, null);
       Object rowValue = getSimpleRowValue(rsw, discriminatedResultMap, null, null);
       if (!useCollectionConstructorInjection) {
@@ -374,10 +372,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
 
     resultContext.nextResultObject(rowValue);
-  }
-
-  private boolean shouldProcessMoreRows(ResultContext<?> context, RowBounds rowBounds) {
-    return !context.isStopped() && context.getResultCount() < rowBounds.getLimit();
   }
 
   //
@@ -1063,8 +1057,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   //
 
   private void handleRowValuesForNestedResultMap(ResultSetWrapper rsw, ResultMap resultMap,
-      DefaultResultContext<Object> resultContext, RowBounds rowBounds, ResultMapping parentMapping)
-      throws SQLException {
+      DefaultResultContext<Object> resultContext, ResultMapping parentMapping) throws SQLException {
     final boolean useCollectionConstructorInjection = resultMap.hasResultMapsUsingConstructorCollection();
     if (useCollectionConstructorInjection) {
       verifyPendingCreationPreconditions(parentMapping);
@@ -1075,7 +1068,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     PendingConstructorCreation lastHandledCreation = null;
 
-    while (shouldProcessMoreRows(resultContext, rowBounds) && !resultSet.isClosed() && resultSet.next()) {
+    while (resultContext.shouldProcessMoreRows() && !resultSet.isClosed() && resultSet.next()) {
       final ResultMap discriminatedResultMap = resolveDiscriminatedResultMap(rsw, resultMap, null);
       final CacheKey rowKey = createRowKey(discriminatedResultMap, rsw, null);
 
@@ -1109,8 +1102,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     if (useCollectionConstructorInjection && lastHandledCreation != null) {
       createAndStorePendingCreation(resultSet, resultContext, lastHandledCreation);
-    } else if (rowValue != null && mappedStatement.isResultOrdered()
-        && shouldProcessMoreRows(resultContext, rowBounds)) {
+    } else if (rowValue != null && mappedStatement.isResultOrdered() && resultContext.shouldProcessMoreRows()) {
       storeObject(resultContext, rowValue, parentMapping, resultSet);
       previousRowValue = null;
     } else if (rowValue != null) {

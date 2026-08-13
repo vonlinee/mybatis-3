@@ -17,6 +17,7 @@ package org.apache.ibatis.executor.result;
 
 import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
 
 /**
  * @author Clinton Begin
@@ -28,16 +29,18 @@ public class DefaultResultContext<T> implements ResultContext<T> {
   private boolean stopped;
 
   private final ResultHandler<?> resultHandler;
+  private final RowBounds rowBounds;
 
   public DefaultResultContext() {
-    this(null);
+    this(null, null);
   }
 
-  public DefaultResultContext(ResultHandler<?> resultHandler) {
+  public DefaultResultContext(ResultHandler<?> resultHandler, RowBounds rowBounds) {
     resultObject = null;
     resultCount = 0;
     stopped = false;
     this.resultHandler = resultHandler;
+    this.rowBounds = rowBounds;
   }
 
   @Override
@@ -70,4 +73,7 @@ public class DefaultResultContext<T> implements ResultContext<T> {
     this.stopped = true;
   }
 
+  public boolean shouldProcessMoreRows() {
+    return !stopped && (rowBounds == null || resultCount < rowBounds.getLimit());
+  }
 }
