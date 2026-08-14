@@ -22,7 +22,7 @@ import ognl.Ognl;
 import ognl.OgnlContext;
 import ognl.OgnlException;
 
-import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.scripting.expression.ExpressionException;
 
 /**
  * Caches OGNL parsed expressions.
@@ -46,7 +46,7 @@ final class OgnlCache {
       OgnlContext context = Ognl.createDefaultContext(root, MEMBER_ACCESS, CLASS_RESOLVER, null);
       return Ognl.getValue(parseExpression(expression), context, root);
     } catch (OgnlException e) {
-      throw new BuilderException("Error evaluating expression '" + expression + "'. Cause: " + e, e);
+      throw new ExpressionException("Error evaluating expression '" + expression + "'. Cause: " + e, e);
     }
   }
 
