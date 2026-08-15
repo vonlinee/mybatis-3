@@ -167,7 +167,7 @@ alias CDATA #REQUIRED
 type CDATA #REQUIRED
 >
 
-<!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>
+<!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination | columns)*>
 <!ATTLIST select
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -252,6 +252,11 @@ refid CDATA #REQUIRED
 <!ATTLIST bind
  name CDATA #REQUIRED
  value CDATA #REQUIRED
+>
+
+<!ELEMENT columns (#PCDATA)>
+<!ATTLIST columns
+table CDATA #IMPLIED
 >
 
 <!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>

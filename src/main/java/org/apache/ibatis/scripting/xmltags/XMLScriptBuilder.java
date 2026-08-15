@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.extension.SqlUtils;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.scripting.SqlNode;
@@ -53,6 +54,7 @@ public class XMLScriptBuilder {
     nodeHandlerMap.put("bind", new BindHandler());
     nodeHandlerMap.put("in", new InHandler());
     nodeHandlerMap.put("pagination", new PaginationHandler());
+    nodeHandlerMap.put("columns", new ColumnsHandler());
   }
 
   public SqlNode parseSqlNode(XNode context) {
@@ -220,6 +222,25 @@ public class XMLScriptBuilder {
     }
   }
 
+  private static class ColumnsHandler implements NodeHandler {
+
+    @Override
+    public SqlNode handleNode(XNode nodeToHandle) {
+      if (!isWithinStatement(nodeToHandle, "select")) {
+        throw new BuilderException("<columns> element is only supported in <select> statements.");
+      }
+      StringBuilder columns = new StringBuilder();
+      for (XNode child : nodeToHandle.getChildNodes()) {
+        if (!child.isTextualNode()) {
+          throw new BuilderException("<columns> element can only contain text nodes.");
+        }
+        columns.append(child.getStringBody(""));
+      }
+      return new StaticTextSqlNode(
+          SqlUtils.qualifyColumns(nodeToHandle.getStringAttribute("table"), columns.toString()));
+    }
+  }
+
   private class OtherwiseHandler implements NodeHandler {
 
     @Override
@@ -264,6 +285,27 @@ public class XMLScriptBuilder {
       }
       return defaultSqlNode;
     }
+  }
+
+  /**
+   * Determines whether the node is contained in a {@code <select> | <update> | <insert> | <delete>} statement.
+   *
+   * @param node
+   *          the node to inspect
+   * @param sqlStatementType
+   *          <select> | <update> | <insert> | <delete>
+   *
+   * @return {@code true} if the node is contained in specified statement type
+   */
+  private static boolean isWithinStatement(XNode node, String sqlStatementType) {
+    XNode current = node;
+    while (current != null) {
+      if (sqlStatementType.equals(current.getName())) {
+        return true;
+      }
+      current = current.getParent();
+    }
+    return false;
   }
 
 }

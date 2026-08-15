@@ -15,6 +15,7 @@ The Dynamic SQL elements should be familiar to anyone who has used JSTL or any s
 - choose (when, otherwise)
 - trim (where, set)
 - foreach
+- columns
 
 ### if
 
@@ -191,6 +192,40 @@ The *foreach* element is very powerful, and allows you to specify a collection, 
 <span class="label important">NOTE</span> You can pass any Iterable object (for example List, Set, etc.), as well as any Map or Array object to foreach as collection parameter. When using an Iterable or Array, index will be the number of current iteration and value item will be the element retrieved in this iteration. When using a Map (or Collection of Map.Entry objects), index will be the key object and item will be the value object.
 
 This wraps up the discussion regarding the XML configuration file and XML mapping files. The next section will discuss the Java API in detail, so that you can get the most out of the mappings that you’ve created.
+
+### columns
+
+The `columns` element is useful when a `select` statement reads from multiple tables and column names may be ambiguous. It avoids repeating the same table prefix for every column while keeping the selected column list easy to read and maintain. It is supported only inside `select` statements.
+
+It generates a comma-separated list of columns for a `select` statement. Its body must contain text only, and the columns are separated with commas. The optional `table` attribute qualifies every column:
+
+```xml
+<select id="selectUsers" resultType="User">
+  SELECT <columns table="t1">id, name, age</columns>
+  FROM t1
+</select>
+```
+
+For example, when joining `users` and `orders`, qualifying the selected columns prevents ambiguity between columns with the same name:
+
+```xml
+<select id="selectUserOrders" resultType="UserOrder">
+  SELECT
+    <columns table="u">id, name</columns>,
+    <columns table="o">id, total</columns>
+  FROM users u
+  JOIN orders o ON o.user_id = u.id
+</select>
+```
+
+The examples above generate `t1.id, t1.name, t1.age` and `u.id, u.name, o.id, o.total`. The table name is added immediately before each column name, and whitespace in the body is preserved. If `table` is omitted, the body is emitted unchanged:
+
+```xml
+<select id="selectUsers" resultType="User">
+  SELECT <columns>id,  name,age</columns>
+  FROM t1
+</select>
+```
 
 ### script
 

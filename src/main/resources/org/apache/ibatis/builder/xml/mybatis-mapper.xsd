@@ -286,6 +286,7 @@
         <xs:element ref="choose"/>
         <xs:element ref="if"/>
         <xs:element ref="bind"/>
+        <xs:element ref="columns"/>
       </xs:choice>
       <xs:attribute name="id" use="required"/>
       <xs:attribute name="parameterMap"/>
@@ -540,6 +541,11 @@
     <xs:complexType>
       <xs:attribute name="name" use="required"/>
       <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="columns">
+    <xs:complexType mixed="true">
+      <xs:attribute name="table"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="sql">

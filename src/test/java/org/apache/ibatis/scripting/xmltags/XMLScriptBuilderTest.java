@@ -101,4 +101,69 @@ class XMLScriptBuilderTest {
     assertThat(sqlSource.getBoundSql(configuration, params).getSql()).containsPattern(
         "(?m)^\\s*SELECT \\* FROM users\\s+WHERE id\\s+IN\\s*\\(\\s*\\?\\s*,\\s*\\?\\s*,\\s*\\?\\s*\\)\\s*$");
   }
+
+  @Test
+  void shouldFormatColumnsTagWithTable() {
+    String xml = """
+        <select><columns table="t1">id, name, age</columns></select>
+        """;
+
+    Configuration configuration = new Configuration();
+    SqlSource sqlSource = parseStatementSqlSource(configuration, xml);
+    assertThat(sqlSource.getBoundSql(configuration, null).getSql()).isEqualTo("t1.id, t1.name, t1.age");
+  }
+
+  @Test
+  void shouldKeepColumnsTagTextWhenTableIsMissing() {
+    String xml = """
+        <select><columns>id,  name,age</columns></select>
+        """;
+
+    Configuration configuration = new Configuration();
+    SqlSource sqlSource = parseStatementSqlSource(configuration, xml);
+    assertThat(sqlSource.getBoundSql(configuration, null).getSql()).isEqualTo("id,  name,age");
+  }
+
+  @Test
+  void shouldCombineTextNodesInColumnsTag() {
+    String xml = """
+        <select><columns table="t1">id<![CDATA[, name]]></columns></select>
+        """;
+
+    Configuration configuration = new Configuration();
+    SqlSource sqlSource = parseStatementSqlSource(configuration, xml);
+    assertThat(sqlSource.getBoundSql(configuration, null).getSql()).isEqualTo("t1.id, t1.name");
+  }
+
+  @Test
+  void shouldRejectElementChildrenInColumnsTag() {
+    String xml = """
+        <select>
+        SELECT <columns><if test="true">id</if></columns>
+        </select>
+        """;
+
+    assertThatThrownBy(() -> parseStatementSqlSource(new Configuration(), xml)).isInstanceOf(BuilderException.class)
+        .hasMessage("<columns> element can only contain text nodes.");
+  }
+
+  @Test
+  void shouldRejectColumnsTagInNonSelectStatement() {
+    String xml = """
+        <update>
+        UPDATE users SET name = #{name} WHERE id = #{id}
+        <columns table="t1">id</columns>
+        </update>
+        """;
+
+    assertThatThrownBy(() -> parseStatementSqlSource(new Configuration(), xml)).isInstanceOf(BuilderException.class)
+        .hasMessage("<columns> element is only supported in <select> statements.");
+  }
+
+  private SqlSource parseStatementSqlSource(Configuration configuration, String xml) {
+    XNode root = new XPathParser(xml).evalNode("/*");
+    XMLScriptBuilder builder = new XMLScriptBuilder();
+    SqlNode sqlNode = builder.parseSqlNode(root);
+    return SqlSourceBuilder.buildSqlSource(configuration, sqlNode);
+  }
 }

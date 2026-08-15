@@ -15,6 +15,8 @@
  */
 package org.apache.ibatis.extension;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -541,4 +543,46 @@ public final class SqlUtils {
     });
     return tokenParser.parse(sql);
   }
+
+  /**
+   * Qualifies each column in a comma-separated column list with a table name.
+   * <p>
+   * Whitespace in the column list is preserved. Empty or {@code null} table names leave the column list unchanged.
+   *
+   * @param table
+   *          the table name to prepend to each non-empty column
+   * @param columns
+   *          a comma-separated list of column names
+   *
+   * @return the column list with the table name prepended to each non-empty column
+   */
+  public static String qualifyColumns(String table, String columns) {
+    return qualifyColumns(table, Arrays.asList(columns.split(",")));
+  }
+
+  private static String qualifyColumns(String table, Collection<String> columns) {
+    StringBuilder sql = new StringBuilder();
+    int colIdx = 0;
+    for (String column : columns) {
+      boolean tableAppended = false;
+      for (int i = 0; i < column.length(); i++) {
+        char c = column.charAt(i);
+        if (c == ' ') {
+          sql.append(c);
+        } else {
+          if (!tableAppended && table != null) {
+            sql.append(table).append(".");
+            tableAppended = true;
+          }
+          sql.append(c);
+        }
+      }
+      if (colIdx <= columns.size() - 2) {
+        sql.append(",");
+      }
+      colIdx++;
+    }
+    return sql.toString();
+  }
+
 }
