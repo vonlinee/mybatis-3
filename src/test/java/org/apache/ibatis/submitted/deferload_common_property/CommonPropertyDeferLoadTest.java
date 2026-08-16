@@ -53,12 +53,12 @@ class CommonPropertyDeferLoadTest {
   @Test
   void deferLoadAfterResultHandler() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      class MyResultHandler implements ResultHandler {
+      class MyResultHandler implements ResultHandler<Child> {
         private final List<Child> children = new ArrayList<>();
 
         @Override
-        public void handleResult(ResultContext context) {
-          Child child = (Child) context.getResultObject();
+        public void handleResult(ResultContext<? extends Child> context) {
+          Child child = context.getResultObject();
           children.add(child);
         }
       }
@@ -73,10 +73,10 @@ class CommonPropertyDeferLoadTest {
   @Test
   void deferLoadDuringResultHandler() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      class MyResultHandler implements ResultHandler {
+      class MyResultHandler implements ResultHandler<Child> {
         @Override
-        public void handleResult(ResultContext context) {
-          Child child = (Child) context.getResultObject();
+        public void handleResult(ResultContext<? extends Child> context) {
+          Child child = context.getResultObject();
           assertNotNull(child.getFather());
         }
       }
@@ -88,12 +88,12 @@ class CommonPropertyDeferLoadTest {
   @Test
   void deferLoadAfterResultHandlerWithLazyLoad() {
     try (SqlSession sqlSession = lazyLoadSqlSessionFactory.openSession()) {
-      class MyResultHandler implements ResultHandler {
+      class MyResultHandler implements ResultHandler<Child> {
         private final List<Child> children = new ArrayList<>();
 
         @Override
-        public void handleResult(ResultContext context) {
-          Child child = (Child) context.getResultObject();
+        public void handleResult(ResultContext<? extends Child> context) {
+          Child child = context.getResultObject();
           children.add(child);
         }
       }
@@ -108,10 +108,10 @@ class CommonPropertyDeferLoadTest {
   @Test
   void deferLoadDuringResultHandlerWithLazyLoad() {
     try (SqlSession sqlSession = lazyLoadSqlSessionFactory.openSession()) {
-      class MyResultHandler implements ResultHandler {
+      class MyResultHandler implements ResultHandler<Child> {
         @Override
-        public void handleResult(ResultContext context) {
-          Child child = (Child) context.getResultObject();
+        public void handleResult(ResultContext<? extends Child> context) {
+          Child child = context.getResultObject();
           assertNotNull(child.getFather());
         }
       }

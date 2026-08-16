@@ -95,7 +95,7 @@ class RefCursorTest {
   @Test
   void shouldUseResultHandlerOnOutputParam() {
     class OrderResultHandler implements ResultHandler<Order> {
-      private List<Order> orders = new ArrayList<>();
+      private final List<Order> orders = new ArrayList<>();
 
       @Override
       public void handleResult(ResultContext<? extends Order> resultContext) {
