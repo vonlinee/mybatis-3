@@ -28,14 +28,12 @@ public interface ExpressionEvaluator {
     return evaluateIterable(expression, parameterObject, false);
   }
 
-  void setSupportExtensionMethods(boolean enabled);
-
-  boolean isExtensionMethodSupportEnabled();
+  default String postProcessExpression(String expression) {
+    return expression;
+  }
 
   /**
    * @since 3.5.9
    */
   Iterable<?> evaluateIterable(String expression, Object parameterObject, boolean nullable);
-
-  void registerMethod(ExtensionMethod method);
 }

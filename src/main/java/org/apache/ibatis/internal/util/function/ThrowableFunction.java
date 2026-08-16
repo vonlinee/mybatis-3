@@ -13,19 +13,11 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.expression;
+package org.apache.ibatis.internal.util.function;
 
-public interface ExtensionMethod {
+import java.io.Serializable;
 
-  String getName();
-
-  default boolean supports(Object target) {
-    return true;
-  }
-
-  int getParameterCount();
-
-  Class<?>[] getParameterTypes();
-
-  Object invoke(Object target, Object[] args);
+@FunctionalInterface
+public interface ThrowableFunction<T, R> extends Serializable {
+  R apply(T t) throws Throwable;
 }

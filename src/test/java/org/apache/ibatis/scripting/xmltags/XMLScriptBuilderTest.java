@@ -48,7 +48,7 @@ class XMLScriptBuilderTest {
   private SqlSource parseSqlSource(Configuration configuration, String xml) {
     XNode root = new XPathParser(xml).evalNode("/script");
     XMLScriptBuilder builder = new XMLScriptBuilder();
-    SqlNode sqlNode = builder.parseSqlNode(root);
+    SqlNode sqlNode = builder.parseSqlNode(configuration, root);
     return SqlSourceBuilder.buildSqlSource(configuration, sqlNode);
   }
 
@@ -163,7 +163,7 @@ class XMLScriptBuilderTest {
   private SqlSource parseStatementSqlSource(Configuration configuration, String xml) {
     XNode root = new XPathParser(xml).evalNode("/*");
     XMLScriptBuilder builder = new XMLScriptBuilder();
-    SqlNode sqlNode = builder.parseSqlNode(root);
+    SqlNode sqlNode = builder.parseSqlNode(configuration, root);
     return SqlSourceBuilder.buildSqlSource(configuration, sqlNode);
   }
 }

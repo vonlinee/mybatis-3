@@ -275,7 +275,6 @@ class LinkedMultiValueMapTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   void shouldPreserveInsertionOrderAfterDeserialization() throws Exception {
     LinkedMultiValueMap<String, String> original = new LinkedMultiValueMap<>();
     original.add("first", "1");

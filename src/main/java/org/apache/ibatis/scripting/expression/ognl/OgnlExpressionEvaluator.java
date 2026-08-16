@@ -15,41 +15,31 @@
  */
 package org.apache.ibatis.scripting.expression.ognl;
 
+import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
-import ognl.*;
+import ognl.OgnlContext;
+import ognl.OgnlRuntime;
+import ognl.PropertyAccessor;
 
 import org.apache.ibatis.builder.BuilderException;
-import org.apache.ibatis.internal.util.CollectionUtils;
-import org.apache.ibatis.logging.Log;
-import org.apache.ibatis.logging.LogFactory;
+import org.apache.ibatis.internal.util.LambdaUtils;
+import org.apache.ibatis.internal.util.ObjectUtils;
+import org.apache.ibatis.internal.util.function.ThrowableFunction;
 import org.apache.ibatis.scripting.ContextMap;
 import org.apache.ibatis.scripting.SqlBuildContext;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.apache.ibatis.scripting.expression.ExpressionException;
-import org.apache.ibatis.scripting.expression.ExtensionMethod;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Clinton Begin
  */
 public class OgnlExpressionEvaluator implements ExpressionEvaluator {
-
-  private final Log log = LogFactory.getLog(OgnlExpressionEvaluator.class);
-
-  private final Map<String, ExtensionMethod> extensionMethodMap = new HashMap<>();
-
-  /**
-   * the original object method accessor without modified by this class.
-   */
-  @Nullable
-  private MethodAccessor originalObjectMethodAccessor;
 
   @Override
   public Object getValue(String expression, Object root) {
@@ -66,37 +56,6 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
       return new BigDecimal(String.valueOf(value)).compareTo(BigDecimal.ZERO) != 0;
     }
     return value != null;
-  }
-
-  @Override
-  public void setSupportExtensionMethods(boolean enabled) {
-    if (enabled) {
-      if (isExtensionMethodSupportEnabled()) {
-        return;
-      }
-      this.originalObjectMethodAccessor = getOgnlObjectMethodAccessor();
-      log.warn(
-          "extension method support is enabled, Note that it will override the default global method accessor existed for "
-              + Object.class + " in OGNL.");
-      OgnlRuntime.setMethodAccessor(Object.class, new MethodAccessorInterceptor(extensionMethodMap));
-    } else {
-      if (this.originalObjectMethodAccessor != null) {
-        OgnlRuntime.setMethodAccessor(Object.class, this.originalObjectMethodAccessor);
-      }
-    }
-  }
-
-  @Override
-  public boolean isExtensionMethodSupportEnabled() {
-    return getOgnlObjectMethodAccessor() instanceof MethodAccessorInterceptor;
-  }
-
-  private static MethodAccessor getOgnlObjectMethodAccessor() {
-    try {
-      return OgnlRuntime.getMethodAccessor(Object.class);
-    } catch (OgnlException e) {
-      throw new ExpressionException("error get the existed method accessor for type " + Object.class);
-    }
   }
 
   /**
@@ -134,8 +93,8 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
   }
 
   @Override
-  public void registerMethod(ExtensionMethod method) {
-    extensionMethodMap.put(method.getName(), method);
+  public String postProcessExpression(String expression) {
+    return qualifyFunctionCalls(expression, ObjectUtils.class);
   }
 
   static {
@@ -179,75 +138,174 @@ public class OgnlExpressionEvaluator implements ExpressionEvaluator {
     }
   }
 
-  /**
-   * to support extension method
-   *
-   * @see ognl.ObjectMethodAccessor
-   */
-  private static class MethodAccessorInterceptor implements MethodAccessor {
+  public static String toStaticCallExpression(Class<?> type, String method) {
+    return toStaticCallExpression(type.getName(), method);
+  }
 
-    private final Map<String, ExtensionMethod> methodMap;
+  public static String toStaticCallExpression(String typeName, String method) {
+    return "@" + typeName + "@" + method;
+  }
 
-    MethodAccessorInterceptor(Map<String, ExtensionMethod> methodMap) {
-      this.methodMap = methodMap;
-    }
-
-    @Override
-    public Object callStaticMethod(OgnlContext context, Class<?> targetClass, String methodName, Object[] args)
-        throws MethodFailedException {
-      List<Method> methods = OgnlRuntime.getMethods(targetClass, methodName, true);
-      return OgnlRuntime.callAppropriateMethod(context, targetClass, null, methodName, null, methods, args);
-    }
-
-    @Override
-    public Object callMethod(OgnlContext context, Object target, String methodName, Object[] args)
-        throws MethodFailedException {
-      Class<?> targetClass = (target == null) ? null : target.getClass();
-      List<Method> methods = OgnlRuntime.getMethods(targetClass, methodName, false);
-      if (CollectionUtils.isEmpty(methods)) {
-        // static methods
-        methods = OgnlRuntime.getMethods(targetClass, methodName, true);
+  public static <T, R> String toStaticCallExpression(ThrowableFunction<T, R> methodRef) {
+    try {
+      SerializedLambda lambda = LambdaUtils.getSerializedLambda(methodRef);
+      String className = lambda.getImplClass().replace('/', '.');
+      String methodName = lambda.getImplMethodName();
+      int methodKind = lambda.getImplMethodKind();
+      // methodKind: 6 = static method (REF_invokeStatic)
+      if (methodKind != 6) {
+        throw new IllegalArgumentException("not static method: " + methodKind);
       }
-      final ExtensionMethod extensionMethod = methodMap.get(methodName);
-      if (extensionMethod != null && extensionMethod.supports(target)) {
-        boolean callMethodOnTarget = false;
-        if (CollectionUtils.isNotEmpty(methods)) {
-          final Class<?>[] methodParameterTypes = extensionMethod.getParameterTypes();
-          for (Method method : methods) {
-            if (method.getParameterCount() == extensionMethod.getParameterCount()) {
-              if (isCompatible(methodParameterTypes, method.getParameterTypes())) {
-                callMethodOnTarget = true;
-                break;
+      return toStaticCallExpression(className, methodName);
+    } catch (Exception e) {
+      throw new ExpressionException("cannot parse Lambda method reference", e);
+    }
+  }
+
+  public static String toStaticCallExpression(Class<?> type, String method, String... argExpressions) {
+    return "@" + type.getName() + "@" + method + "(" + String.join(",", argExpressions) + ")";
+  }
+
+  public static <T, R> String toStaticCallExpression(ThrowableFunction<T, R> function, String... argNames) {
+    StringJoiner args = new StringJoiner(",", "(", ")");
+    for (String argName : argNames) {
+      args.add(argName);
+    }
+    return toStaticCallExpression(function) + args;
+  }
+
+  public static String qualifyFunctionCalls(String expression, Class<?> type) {
+    return qualifyFunctionCalls(expression, type.getName(), null);
+  }
+
+  /**
+   * Qualifies function calls in an OGNL expression with the default function class.
+   *
+   * @param expression
+   *          the original OGNL expression
+   * @param defaultFunctionClass
+   *          the fully qualified name of the class containing the default functions
+   *
+   * @return the OGNL expression with unqualified function calls converted to static calls
+   */
+  public static String qualifyFunctionCalls(String expression, String defaultFunctionClass) {
+    return qualifyFunctionCalls(expression, defaultFunctionClass, null);
+  }
+
+  /**
+   * Qualifies function calls in an OGNL expression with their target function classes.
+   * <p>
+   * An unqualified call such as {@code @isEmpty(value)} is converted to {@code @com.example.Functions@isEmpty(value)}.
+   * Existing OGNL static calls and function-like text inside string literals are left unchanged.
+   *
+   * @param expression
+   *          the original OGNL expression
+   * @param defaultFunctionClass
+   *          the fully qualified name of the fallback function class
+   * @param functionClassMap
+   *          a map from function names to fully qualified class names, or {@code null}
+   *
+   * @return the OGNL expression with unqualified function calls converted to static calls
+   *
+   * @throws IllegalArgumentException
+   *           if a function call has neither a mapped class nor a valid default class
+   */
+  public static String qualifyFunctionCalls(String expression, String defaultFunctionClass,
+      Map<String, String> functionClassMap) {
+    if (expression == null || expression.isEmpty()) {
+      return expression;
+    }
+    final int length = expression.length();
+
+    StringBuilder out = new StringBuilder(length + 32);
+    int i = 0;
+    while (i < length) {
+      char c = expression.charAt(i);
+      // Copy string literals as-is so that text such as "@isEmpty(value)" is not treated as a function call.
+      if (c == '\'' || c == '"') {
+        out.append(c);
+        i++;
+        while (i < length) {
+          char ch = expression.charAt(i);
+          out.append(ch);
+
+          // Preserve escaped characters so an escaped quote cannot terminate the literal early.
+          if (ch == '\\' && i + 1 < length) {
+            out.append(expression.charAt(i + 1));
+            i += 2;
+            continue;
+          }
+          i++;
+          if (ch == c) {
+            break;
+          }
+        }
+        continue;
+      }
+
+      // Look for the shorthand OGNL function-call form: @functionName(...).
+      if (c == '@' && i + 1 < length) {
+        int start = i + 1;
+        if (Character.isJavaIdentifierStart(expression.charAt(start))) {
+          int j = start + 1;
+          // Consume the complete Java identifier so names containing digits or underscores are supported.
+          while (j < length && Character.isJavaIdentifierPart(expression.charAt(j))) {
+            j++;
+          }
+          // A function call is recognized only when the identifier is immediately followed by '('.
+          if (j < length && expression.charAt(j) == '(') {
+            // Skip the method part of an existing @class@method(...) static call, including calls with whitespace.
+            if (!isExistingStaticCall(expression, i)) {
+              String functionName = expression.substring(start, j);
+
+              // A function-specific mapping takes precedence over the default class.
+              String targetClass = functionClassMap != null
+                  ? functionClassMap.getOrDefault(functionName, defaultFunctionClass) : defaultFunctionClass;
+
+              if (targetClass == null || targetClass.trim().isEmpty()) {
+                throw new IllegalArgumentException("cannot find class of function " + functionName);
               }
+
+              out.append('@').append(targetClass.trim()).append('@').append(functionName);
+              // Leave '(' for the next iteration so the original argument list is copied unchanged.
+              i = j;
+              continue;
             }
           }
         }
-        if (!callMethodOnTarget) {
-          return extensionMethod.invoke(target, args);
-        }
       }
-      // fallback to method already defined in the class
-      return OgnlRuntime.callAppropriateMethod(context, target, target, methodName, null, methods, args);
+      out.append(c);
+      i++;
     }
+    return out.toString();
+  }
 
-    private static boolean isCompatible(Class<?>[] parameterTypes, Class<?>[] targetParameterTypes) {
-      if (parameterTypes.length != targetParameterTypes.length) {
-        return false;
-      }
-      for (int i = 0; i < parameterTypes.length; i++) {
-        if (!isAssignableFrom(parameterTypes[i], targetParameterTypes[i])) {
-          return false;
-        }
-      }
-      return true;
+  private static boolean isExistingStaticCall(String expression, int methodAt) {
+    int index = methodAt - 1;
+    while (index >= 0 && Character.isWhitespace(expression.charAt(index))) {
+      index--;
     }
-
-    private static boolean isAssignableFrom(Class<?> type1, Class<?> type2) {
-      if (type1 == type2) {
-        return true;
-      }
-      // TODO consider primitive types ?
-      return type1.isAssignableFrom(type2);
+    if (index < 0 || !Character.isJavaIdentifierPart(expression.charAt(index))) {
+      return false;
     }
+    // Walk backward through the class name, allowing whitespace around package separators.
+    while (index >= 0) {
+      while (index >= 0 && Character.isJavaIdentifierPart(expression.charAt(index))) {
+        index--;
+      }
+      while (index >= 0 && Character.isWhitespace(expression.charAt(index))) {
+        index--;
+      }
+      if (index < 0 || expression.charAt(index) != '.') {
+        break;
+      }
+      do {
+        index--;
+      } while (index >= 0 && Character.isWhitespace(expression.charAt(index)));
+    }
+    while (index >= 0 && Character.isWhitespace(expression.charAt(index))) {
+      index--;
+    }
+    return index >= 0 && expression.charAt(index) == '@';
   }
 }

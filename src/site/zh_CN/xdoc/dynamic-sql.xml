@@ -61,6 +61,26 @@
   </if>
 </select>]]></source>
       </subsection>
+      <subsection name="动态条件中的静态函数简写" id="staticFunctionCalls">
+        <p>在 <code>if</code> 和 <code>when</code> 条件中，可以使用更简洁的 OGNL 静态函数调用形式。比如，<code>@isNotEmpty(param.name)</code> 会自动补全为 MyBatis 内置的 <code>ObjectUtils</code> 类调用：</p>
+        <source><![CDATA[<select id="findUsers" resultType="User">
+  SELECT * FROM USERS
+  <where>
+    <if test="@isNotEmpty(param.name)">
+      name = #{param.name}
+    </if>
+  </where>
+</select>]]></source>
+        <p>上述简写等价于：</p>
+        <source><![CDATA[<if test="@org.apache.ibatis.internal.util.ObjectUtils@isNotEmpty(param.name)">
+  name = #{param.name}
+</if>]]></source>
+        <p>该功能适用于 <code>ObjectUtils</code> 中的内置方法，例如 <code>isEmpty</code> 和 <code>isNotEmpty</code>。已有的完整 OGNL 静态调用会保持不变，包括类名和方法分隔符周围带空格的调用：</p>
+        <source><![CDATA[<if test="@java.util.Objects @toString(param.name) == 'Alice'">
+  ...
+</if>]]></source>
+        <p>只有函数名后紧跟左括号的简写形式才会被补全。字符串字面量中的文本不会被修改。</p>
+      </subsection>
       <subsection name="choose、when、otherwise" id="chooseWhenOtherwise">
         <p>有时候，我们不想使用所有的条件，而只是想从多个条件中选择一个使用。针对这种情况，MyBatis 提供了 choose 元素，它有点像 Java 中的 switch 语句。</p>
         <p>还是上面的例子，但是策略变为：传入了 “title” 就按 “title” 查找，传入了 “author” 就按 “author” 查找的情形。若两者都没有传入，就返回标记为 featured 的 BLOG（这可能是管理员认为，与其返回大量的无意义随机 Blog，还不如返回一些由管理员精选的 Blog）。</p>

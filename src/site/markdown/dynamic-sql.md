@@ -49,6 +49,42 @@ What if we wanted to optionally search by title and author? First, I’d change 
 </select>
 ```
 
+### Static function calls in dynamic conditions
+
+OGNL function calls in `if` and `when` conditions can use a shorter form. A call such as
+`@isNotEmpty(param.name)` is automatically qualified with MyBatis' built-in `ObjectUtils` class:
+
+```xml
+<select id="findUsers" resultType="User">
+  SELECT * FROM USERS
+  <where>
+    <if test="@isNotEmpty(param.name)">
+      name = #{param.name}
+    </if>
+  </where>
+</select>
+```
+
+The shorthand above is equivalent to:
+
+```xml
+<if test="@org.apache.ibatis.internal.util.ObjectUtils@isNotEmpty(param.name)">
+  name = #{param.name}
+</if>
+```
+
+The feature is useful with built-in `ObjectUtils` methods such as `isEmpty` and `isNotEmpty`. Existing fully qualified
+OGNL static calls are preserved, including calls with whitespace around the class and method separators:
+
+```xml
+<if test="@java.util.Objects @toString(param.name) == 'Alice'">
+  ...
+</if>
+```
+
+Only the shorthand form with the function name immediately followed by `(` is qualified. Text inside string literals
+is left unchanged.
+
 ### choose, when, otherwise
 
 Sometimes we don’t want all of the conditionals to apply, instead we want to choose only one case among many options. Similar to a switch statement in Java, MyBatis offers a choose element.

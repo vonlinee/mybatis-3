@@ -52,6 +52,10 @@ public final class ObjectUtils {
     return false;
   }
 
+  public static boolean isNotEmpty(Object obj) {
+    return !isEmpty(obj);
+  }
+
   /**
    * Determine whether the given array is empty: i.e. {@code null} or of zero length.
    *
@@ -62,6 +66,10 @@ public final class ObjectUtils {
    */
   public static <T> boolean isEmpty(@Nullable T[] array) {
     return (array == null || array.length == 0);
+  }
+
+  public static <T> boolean isNotEmpty(@Nullable T[] array) {
+    return array != null && array.length != 0;
   }
 
   /**

@@ -104,13 +104,6 @@ public class Configuration {
   protected boolean argNameBasedConstructorAutoMapping;
 
   /**
-   * whether extension method is supported in expression.
-   *
-   * @see org.apache.ibatis.scripting.expression.ExtensionMethod
-   */
-  protected boolean supportExtensionMethods;
-
-  /**
    * whether view the value of parameter as null when the parameter name is not found in the parameter map.
    *
    * @see org.apache.ibatis.binding.ParamMap
@@ -282,15 +275,6 @@ public class Configuration {
 
   public void setShrinkWhitespacesInSql(boolean shrinkWhitespacesInSql) {
     this.shrinkWhitespacesInSql = shrinkWhitespacesInSql;
-  }
-
-  public boolean isExtensionMethodsSupported() {
-    return supportExtensionMethods;
-  }
-
-  public void setSupportExtensionMethods(boolean supportExtensionMethods) {
-    this.supportExtensionMethods = supportExtensionMethods;
-    expressionEvaluator.setSupportExtensionMethods(supportExtensionMethods);
   }
 
   /**

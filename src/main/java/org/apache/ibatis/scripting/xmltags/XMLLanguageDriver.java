@@ -54,7 +54,7 @@ public class XMLLanguageDriver implements LanguageDriver {
   @Override
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType,
       ParamNameResolver paramNameResolver) {
-    SqlNode root = builder.parseSqlNode(script);
+    SqlNode root = builder.parseSqlNode(configuration, script);
     return SqlSourceBuilder.buildSqlSource(configuration, root, parameterType, paramNameResolver);
   }
 

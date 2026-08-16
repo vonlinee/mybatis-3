@@ -29,6 +29,7 @@ import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.scripting.StaticTextSqlNode;
 import org.apache.ibatis.scripting.TextSqlNode;
 import org.apache.ibatis.scripting.WhitespaceSqlNode;
+import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
@@ -57,11 +58,11 @@ public class XMLScriptBuilder {
     nodeHandlerMap.put("columns", new ColumnsHandler());
   }
 
-  public SqlNode parseSqlNode(XNode context) {
-    return parseDynamicTags(context);
+  public SqlNode parseSqlNode(Configuration configuration, XNode context) {
+    return parseDynamicTags(configuration, context);
   }
 
-  protected SqlNode parseDynamicTags(XNode node) {
+  protected SqlNode parseDynamicTags(Configuration configuration, XNode node) {
     final List<SqlNode> contents = new ArrayList<>();
     List<XNode> childNodes = node.getChildNodes();
     for (XNode child : childNodes) {
@@ -83,20 +84,20 @@ public class XMLScriptBuilder {
         if (handler == null) {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
         }
-        contents.add(handler.handleNode(child));
+        contents.add(handler.handleNode(configuration, child));
       }
     }
     return new MixedSqlNode(contents);
   }
 
   private interface NodeHandler {
-    SqlNode handleNode(XNode nodeToHandle);
+    SqlNode handleNode(Configuration configuration, XNode nodeToHandle);
   }
 
   private static class BindHandler implements NodeHandler {
 
     @Override
-    public SqlNode handleNode(XNode nodeToHandle) {
+    public SqlNode handleNode(Configuration configuration, XNode nodeToHandle) {
       final String name = nodeToHandle.getStringAttribute("name");
       final String expression = nodeToHandle.getStringAttribute("value");
       return new VarDeclSqlNode(name, expression);
@@ -106,7 +107,7 @@ public class XMLScriptBuilder {
   private static class PaginationHandler implements NodeHandler {
 
     @Override
-    public SqlNode handleNode(XNode nodeToHandle) {
+    public SqlNode handleNode(Configuration configuration, XNode nodeToHandle) {
       return new PaginationSqlNode();
     }
   }
@@ -114,8 +115,8 @@ public class XMLScriptBuilder {
   private class TrimHandler implements NodeHandler {
 
     @Override
-    public SqlNode handleNode(XNode nodeToHandle) {
-      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+    public SqlNode handleNode(Configuration configuration, XNode nodeToHandle) {
+      SqlNode sqlNode = parseDynamicTags(configuration, nodeToHandle);
       String prefix = nodeToHandle.getStringAttribute("prefix");
       String prefixOverrides = nodeToHandle.getStringAttribute("prefixOverrides");
       String suffix = nodeToHandle.getStringAttribute("suffix");
@@ -127,8 +128,8 @@ public class XMLScriptBuilder {
   private class WhereHandler implements NodeHandler {
 
     @Override
-    public SqlNode handleNode(XNode nodeToHandle) {
-      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+    public SqlNode handleNode(Configuration configuration, XNode nodeToHandle) {
+      SqlNode sqlNode = parseDynamicTags(configuration, nodeToHandle);
       return new WhereSqlNode(sqlNode);
     }
   }
@@ -136,8 +137,8 @@ public class XMLScriptBuilder {
   private class SetHandler implements NodeHandler {
 
     @Override
-    public SqlNode handleNode(XNode nodeToHandle) {
-      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+    public SqlNode handleNode(Configuration configuration, XNode nodeToHandle) {
+      SqlNode sqlNode = parseDynamicTags(configuration, nodeToHandle);
       return new SetSqlNode(sqlNode);
     }
   }
@@ -145,8 +146,8 @@ public class XMLScriptBuilder {
   private class ForEachHandler implements NodeHandler {
 
     @Override
-    public SqlNode handleNode(XNode nodeToHandle) {
-      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+    public SqlNode handleNode(Configuration configuration, XNode nodeToHandle) {
+      SqlNode sqlNode = parseDynamicTags(configuration, nodeToHandle);
       String collection = nodeToHandle.getStringAttribute("collection");
       Boolean nullable = nodeToHandle.getBooleanAttribute("nullable");
       String item = nodeToHandle.getStringAttribute("item");
@@ -161,10 +162,11 @@ public class XMLScriptBuilder {
   private class IfHandler implements NodeHandler {
 
     @Override
-    public SqlNode handleNode(XNode nodeToHandle) {
-      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
-      String test = nodeToHandle.getStringAttribute("test");
-      return new IfSqlNode(sqlNode, test);
+    public SqlNode handleNode(Configuration configuration, XNode nodeToHandle) {
+      SqlNode sqlNode = parseDynamicTags(configuration, nodeToHandle);
+      String testExpression = nodeToHandle.getStringAttribute("test");
+      testExpression = configuration.getExpressionEvaluator().postProcessExpression(testExpression);
+      return new IfSqlNode(sqlNode, testExpression);
     }
   }
 
@@ -198,8 +200,8 @@ public class XMLScriptBuilder {
   private class InHandler implements NodeHandler {
 
     @Override
-    public SqlNode handleNode(XNode nodeToHandle) {
-      SqlNode sqlNode = parseDynamicTags(nodeToHandle);
+    public SqlNode handleNode(Configuration configuration, XNode nodeToHandle) {
+      SqlNode sqlNode = parseDynamicTags(configuration, nodeToHandle);
       String collection = nodeToHandle.getStringAttribute("collection");
       Boolean nullable = nodeToHandle.getBooleanAttribute("nullable");
       String item = nodeToHandle.getStringAttribute("item", "item");
@@ -225,7 +227,7 @@ public class XMLScriptBuilder {
   private static class ColumnsHandler implements NodeHandler {
 
     @Override
-    public SqlNode handleNode(XNode nodeToHandle) {
+    public SqlNode handleNode(Configuration configuration, XNode nodeToHandle) {
       if (!isWithinStatement(nodeToHandle, "select")) {
         throw new BuilderException("<columns> element is only supported in <select> statements.");
       }
@@ -244,32 +246,32 @@ public class XMLScriptBuilder {
   private class OtherwiseHandler implements NodeHandler {
 
     @Override
-    public SqlNode handleNode(XNode nodeToHandle) {
-      return parseDynamicTags(nodeToHandle);
+    public SqlNode handleNode(Configuration configuration, XNode nodeToHandle) {
+      return parseDynamicTags(configuration, nodeToHandle);
     }
   }
 
   private class ChooseHandler implements NodeHandler {
 
     @Override
-    public SqlNode handleNode(XNode nodeToHandle) {
+    public SqlNode handleNode(Configuration configuration, XNode nodeToHandle) {
       List<SqlNode> whenSqlNodes = new ArrayList<>();
       List<SqlNode> otherwiseSqlNodes = new ArrayList<>();
-      handleWhenOtherwiseNodes(nodeToHandle, whenSqlNodes, otherwiseSqlNodes);
+      handleWhenOtherwiseNodes(configuration, nodeToHandle, whenSqlNodes, otherwiseSqlNodes);
       SqlNode defaultSqlNode = getDefaultSqlNode(otherwiseSqlNodes);
       return new ChooseSqlNode(whenSqlNodes, defaultSqlNode);
     }
 
-    private void handleWhenOtherwiseNodes(XNode chooseSqlNode, List<SqlNode> ifSqlNodes,
+    private void handleWhenOtherwiseNodes(Configuration configuration, XNode chooseSqlNode, List<SqlNode> ifSqlNodes,
         List<SqlNode> defaultSqlNodes) {
       List<XNode> children = chooseSqlNode.getChildElements();
       for (XNode child : children) {
         String nodeName = child.getNode().getNodeName();
         NodeHandler handler = nodeHandlerMap.get(nodeName);
         if (handler instanceof IfHandler) {
-          ifSqlNodes.add(handler.handleNode(child));
+          ifSqlNodes.add(handler.handleNode(configuration, child));
         } else if (handler instanceof OtherwiseHandler) {
-          defaultSqlNodes.add(handler.handleNode(child));
+          defaultSqlNodes.add(handler.handleNode(configuration, child));
         } else {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
         }
