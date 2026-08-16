@@ -23,8 +23,6 @@ public interface LimitClause {
   /**
    * Modifies the given SQL string to append or wrap a limit and offset clause.
    *
-   * @param originalSql
-   *          the original query string
    * @param offset
    *          the number of rows to skip
    * @param limit

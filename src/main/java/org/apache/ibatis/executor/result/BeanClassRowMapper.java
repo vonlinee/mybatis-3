@@ -37,11 +37,12 @@ import org.jetbrains.annotations.Nullable;
  * Column values are mapped based on matching the column name (as obtained from result set meta-data) to public setters
  * in the target class for the corresponding properties. The names are matched either directly or by transforming a name
  * separating the parts with underscores to the same name using "camel" case.
+ * </p>
  * <p>
  * Mapping is provided for properties in the target class for many common types &mdash; for example: String, boolean,
  * Boolean, byte, Byte, short, Short, int, Integer, long, Long, float, Float, double, Double, BigDecimal,
  * {@code java.util.Date}, etc.
- * <p>
+ * </p>
  *
  * @param <T>
  *          the result type

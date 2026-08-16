@@ -450,14 +450,14 @@ public final class JdbcUtils {
   }
 
   /**
-   * map rows Map<String, Object>
+   * map rows
    *
    * @param connection
    *          connection
    * @param sql
    *          sql
    *
-   * @return List<Map < String, Object>>
+   * @return row list
    *
    * @throws SQLException
    *           data access error
@@ -481,7 +481,7 @@ public final class JdbcUtils {
   }
 
   /**
-   * map rows Map<String, Object>
+   * map rows
    *
    * @param connection
    *          connection
@@ -490,7 +490,7 @@ public final class JdbcUtils {
    * @param columNameMapping
    *          mapping from column name to key of map
    *
-   * @return List<Map < String, Object>>
+   * @return row list
    *
    * @throws SQLException
    *           data access error

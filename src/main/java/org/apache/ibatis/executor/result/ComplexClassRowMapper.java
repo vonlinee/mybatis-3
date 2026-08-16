@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * @param <T>
+ *          the type of the target object
  *
  * @see org.apache.ibatis.type.SimpleTypeRegistry#isSimpleType(Class)
  */

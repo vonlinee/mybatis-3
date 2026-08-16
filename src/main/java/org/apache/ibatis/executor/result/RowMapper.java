@@ -24,8 +24,6 @@ import java.sql.SQLException;
  * This provides a low level mapping option with direct use of JDBC ResultSet with the option of having logic in the
  * mapping. For example, only map some columns depending on the values read from other columns.
  * </p>
- * <p>
- * </p>
  *
  * <pre>{@code
  *

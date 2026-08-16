@@ -101,9 +101,11 @@ public class ColumnMetadata implements Comparable<ColumnMetadata>, Serializable 
 
   /**
    * NULLABLE int => is NULL allowed.
+   * <ul>
    * <li>0 - Indicates that the column might not allow NULL values.</li>
    * <li>1 - Indicates that the column definitely allows NULL values.</li>
    * <li>2 - Indicates that the nullability of columns is unknown.</li>
+   * </ul>
    *
    * @see java.sql.DatabaseMetaData#columnNoNulls
    * @see java.sql.DatabaseMetaData#columnNullable
@@ -146,9 +148,11 @@ public class ColumnMetadata implements Comparable<ColumnMetadata>, Serializable 
 
   /**
    * IS_NULLABLE String => ISO rules are used to determine the nullability for a column.
+   * <ul>
    * <li>YES --- if the column can include NULLs</li>
    * <li>NO --- if the column cannot include NULLs</li>
    * <li>empty string --- if the nullability for the column is unknown</li>
+   * </ul>
    *
    * @see <a href=
    *      "https://stackoverflow.com/questions/26490427/jdbc-getcolumns-differences-between-is-nullable-and-nullable">JDBC

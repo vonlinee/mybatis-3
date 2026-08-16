@@ -282,7 +282,7 @@ public class XPathParser {
   }
 
   /**
-   * Selects the root element (the topmost named tag, such as <html> in a web page), regardless of its name.
+   * Selects the root element (the topmost named tag, such as `html` in a web page), regardless of its name.
    *
    * @return the root element
    */

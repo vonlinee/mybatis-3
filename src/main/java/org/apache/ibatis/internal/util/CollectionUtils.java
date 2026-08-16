@@ -184,10 +184,13 @@ public final class CollectionUtils {
   }
 
   /**
+   * lock down a list to immutable
+   * <ul>
    * <li>Collections that do not support modification operations (such as add, remove and clear) are referred to as
    * unmodifiable. Collections that are not unmodifiable are modifiable.</li>
    * <li>Collections that additionally guarantee that no change in the Collection object will be visible are referred to
-   * as immutable. Collections that are not immutable are mutable.</li> lock down a list to immutable
+   * as immutable. Collections that are not immutable are mutable.</li>
+   * </ul>
    *
    * @param list
    *          list

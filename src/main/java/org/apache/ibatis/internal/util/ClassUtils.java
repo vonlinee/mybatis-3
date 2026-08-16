@@ -1874,12 +1874,14 @@ public final class ClassUtils {
 
   /**
    * the legality of a package name usually follows the following rules:
+   * <ul>
    * <li>Can only contain letters, numbers, underscores (_), and dots (.): Package names cannot contain other special
    * characters.</li>
    * <li>Must start with a letter: The first character of the package name must be a letter.</li>
    * <li>Cannot use reserved words: Avoid using Java reserved words (such as class, interface, etc.).</li>
    * <li>Generally use lowercase letters: To avoid conflicts, package names usually use lowercase letters.</li>
    * <li>Cannot exceed 255 characters: The length of the entire package name should be within a reasonable range.</li>
+   * </ul>
    *
    * @param packageName
    *          package name to check
