@@ -381,6 +381,10 @@ public class ResultMap {
     return constructorResultMappings;
   }
 
+  public boolean hasConstructorResultMappings() {
+    return !constructorResultMappings.isEmpty();
+  }
+
   public List<ResultMapping> getPropertyResultMappings() {
     return propertyResultMappings;
   }
@@ -400,6 +404,10 @@ public class ResultMap {
 
   public Set<String> getMappedProperties() {
     return mappedProperties;
+  }
+
+  public boolean containsMappedProperty(String property) {
+    return mappedProperties.contains(property);
   }
 
   public Discriminator getDiscriminator() {

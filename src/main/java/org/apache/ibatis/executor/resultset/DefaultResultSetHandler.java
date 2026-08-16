@@ -117,6 +117,19 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   private static class PendingRelation {
     public MetaObject metaObject;
     public ResultMapping propertyMapping;
+
+    public PendingRelation(MetaObject metaObject, ResultMapping propertyMapping) {
+      this.metaObject = metaObject;
+      this.propertyMapping = propertyMapping;
+    }
+
+    Object instantiateCollectionPropertyIfAppropriate() {
+      return metaObject.getOrCreateCollection(propertyMapping.getProperty(), propertyMapping.getJavaType());
+    }
+
+    public void removeLinkToOldCollection() {
+      metaObject.setValue(propertyMapping.getProperty(), null);
+    }
   }
 
   private static class UnMappedColumnAutoMapping {
@@ -125,11 +138,11 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     private final TypeHandler<?> typeHandler;
     private final boolean primitive;
 
-    public UnMappedColumnAutoMapping(String column, String property, TypeHandler<?> typeHandler, boolean primitive) {
+    public UnMappedColumnAutoMapping(String column, String property, TypeHandler<?> typeHandler, Type propertyType) {
       this.column = column;
       this.property = property;
       this.typeHandler = typeHandler;
-      this.primitive = primitive;
+      this.primitive = propertyType instanceof Class && ((Class<?>) propertyType).isPrimitive();
     }
   }
 
@@ -578,14 +591,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         }
         final String property = metaObject.findProperty(propertyName, configuration.isMapUnderscoreToCamelCase());
         if (property != null && metaObject.hasSetter(property)) {
-          if (resultMap.getMappedProperties().contains(property)) {
+          if (resultMap.containsMappedProperty(property)) {
             continue;
           }
           final Type propertyType = metaObject.getGenericSetterType(property).getKey();
           TypeHandler<?> typeHandler = rsw.getTypeHandler(propertyType, columnName);
           if (typeHandler != null) {
-            autoMapping.add(new UnMappedColumnAutoMapping(columnName, property, typeHandler,
-                propertyType instanceof Class && ((Class<?>) propertyType).isPrimitive()));
+            autoMapping.add(new UnMappedColumnAutoMapping(columnName, property, typeHandler, propertyType));
           } else {
             configuration.getAutoMappingUnknownColumnBehavior().doAction(mappedStatement, columnName, property,
                 propertyType);
@@ -638,12 +650,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       throws SQLException {
     CacheKey cacheKey = createKeyForMultipleResults(rs, parentMapping, parentMapping.getColumn(),
         parentMapping.getColumn());
-    PendingRelation deferLoad = new PendingRelation();
-    deferLoad.metaObject = metaResultObject;
-    deferLoad.propertyMapping = parentMapping;
     List<PendingRelation> relations = pendingRelations.computeIfAbsent(cacheKey, k -> new ArrayList<>());
     // issue #255
-    relations.add(deferLoad);
+    relations.add(new PendingRelation(metaResultObject, parentMapping));
     ResultMapping previous = nextResultMaps.get(parentMapping.getResultSet());
     if (previous == null) {
       nextResultMaps.put(parentMapping.getResultSet(), parentMapping);
@@ -706,10 +715,10 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     if (hasTypeHandlerForResultObject(rsw, resultType)) {
       return createPrimitiveResultObject(rsw, resultMap, columnPrefix);
     }
-    final List<ResultMapping> constructorMappings = resultMap.getConstructorResultMappings();
-    if (!constructorMappings.isEmpty()) {
-      return createParameterizedResultObject(rsw, resultType, constructorMappings, constructorArgTypes, constructorArgs,
-          columnPrefix, resultMap.hasResultMapsUsingConstructorCollection(), parentRowKey);
+    if (resultMap.hasConstructorResultMappings()) {
+      return createParameterizedResultObject(rsw, resultType, resultMap.getConstructorResultMappings(),
+          constructorArgTypes, constructorArgs, columnPrefix, resultMap.hasResultMapsUsingConstructorCollection(),
+          parentRowKey);
     } else if (resultType.isInterface() || MetaClass.forClass(resultType, reflectorFactory).hasDefaultConstructor()) {
       return objectFactory.create(resultType);
     } else if (shouldApplyAutomaticMappings(resultMap, false)) {
@@ -826,20 +835,19 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   private Object applyConstructorAutomapping(ResultSetWrapper rsw, ResultMap resultMap, String columnPrefix,
       Class<?> resultType, List<Class<?>> constructorArgTypes, List<Object> constructorArgs, Constructor<?> constructor)
       throws SQLException {
-    boolean foundValues = false;
+    boolean foundValues;
     if (configuration.isArgNameBasedConstructorAutoMapping()) {
       foundValues = applyArgNameBasedConstructorAutoMapping(rsw, resultMap, columnPrefix, constructorArgTypes,
-          constructorArgs, constructor, foundValues);
+          constructorArgs, constructor);
     } else {
-      foundValues = applyColumnOrderBasedConstructorAutomapping(rsw, constructorArgTypes, constructorArgs, constructor,
-          foundValues);
+      foundValues = applyColumnOrderBasedConstructorAutomapping(rsw, constructorArgTypes, constructorArgs, constructor);
     }
     return foundValues || configuration.isReturnInstanceForEmptyRow()
         ? objectFactory.create(resultType, constructorArgTypes, constructorArgs) : null;
   }
 
   private boolean applyColumnOrderBasedConstructorAutomapping(ResultSetWrapper rsw, List<Class<?>> constructorArgTypes,
-      List<Object> constructorArgs, Constructor<?> constructor, boolean foundValues) throws SQLException {
+      List<Object> constructorArgs, Constructor<?> constructor) throws SQLException {
     Class<?>[] parameterTypes = constructor.getParameterTypes();
 
     if (parameterTypes.length > rsw.getColumnCount()) {
@@ -848,6 +856,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
           constructor, parameterTypes.length, rsw.getColumnCount()));
     }
 
+    boolean foundValues = false;
     for (int i = 0; i < parameterTypes.length; i++) {
       Class<?> parameterType = parameterTypes[i];
       String columnName = rsw.getColumnName(i);
@@ -861,10 +870,12 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private boolean applyArgNameBasedConstructorAutoMapping(ResultSetWrapper rsw, ResultMap resultMap,
-      String columnPrefix, List<Class<?>> constructorArgTypes, List<Object> constructorArgs, Constructor<?> constructor,
-      boolean foundValues) throws SQLException {
+      String columnPrefix, List<Class<?>> constructorArgTypes, List<Object> constructorArgs, Constructor<?> constructor)
+      throws SQLException {
     List<String> missingArgs = null;
     Parameter[] params = constructor.getParameters();
+
+    boolean foundValues = false;
     for (Parameter param : params) {
       boolean columnNotFound = true;
       Param paramAnno = param.getAnnotation(Param.class);
@@ -981,11 +992,11 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     if (resultMapping.isCompositeResult()) {
       return prepareCompositeKeyParameter(rsw, resultMapping, parameterType, columnPrefix);
     }
-    return prepareSimpleKeyParameter(rsw, resultMapping, parameterType, columnPrefix);
+    return prepareSimpleKeyParameter(rsw, resultMapping, columnPrefix);
   }
 
-  private Object prepareSimpleKeyParameter(ResultSetWrapper rsw, ResultMapping resultMapping, Class<?> parameterType,
-      String columnPrefix) throws SQLException {
+  private Object prepareSimpleKeyParameter(ResultSetWrapper rsw, ResultMapping resultMapping, String columnPrefix)
+      throws SQLException {
     // parameterType is ignored in this case
     final String columnName = prependPrefix(resultMapping.getColumn(), columnPrefix);
     final TypeHandler<?> typeHandler = rsw.getTypeHandler(null, columnName);
@@ -1185,11 +1196,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private boolean applyNestedPendingConstructorCreations(ResultSetWrapper rsw, ResultMap resultMap,
-      MetaObject metaObject, String parentPrefix, CacheKey parentRowKey, boolean newObject, boolean foundValues) {
-    if (newObject) {
-      // new objects are linked by createResultObject
-      return false;
-    }
+      MetaObject metaObject, String parentPrefix, CacheKey parentRowKey, boolean foundValues) {
 
     for (ResultMapping constructorMapping : resultMap.getConstructorResultMappings()) {
       final String nestedResultMapId = constructorMapping.getNestedResultMapId();
@@ -1259,21 +1266,18 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     // handle possible pending creations within this object
     // by now, the property mapping has been completely built, we can reconstruct it
     final PendingRelation pendingRelation = pendingPccRelations.remove(rowValue);
-    final MetaObject metaObject = pendingRelation.metaObject;
-    final ResultMapping resultMapping = pendingRelation.propertyMapping;
-
     // get the list to be built
-    Object collectionProperty = instantiateCollectionPropertyIfAppropriate(resultMapping, metaObject);
+    Object collectionProperty = pendingRelation.instantiateCollectionPropertyIfAppropriate();
     if (collectionProperty != null) {
       // we expect pending creations now
       @SuppressWarnings("unchecked")
       final Collection<Object> pendingCreations = (Collection<Object>) collectionProperty;
 
       // remove the link to the old collection
-      metaObject.setValue(resultMapping.getProperty(), null);
+      pendingRelation.removeLinkToOldCollection();
 
       // create new collection property
-      collectionProperty = instantiateCollectionPropertyIfAppropriate(resultMapping, metaObject);
+      collectionProperty = pendingRelation.instantiateCollectionPropertyIfAppropriate();
       final MetaObject targetMetaObject = configuration.newMetaObject(collectionProperty);
 
       // create the pending objects
@@ -1348,8 +1352,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     // (issue #101)
     if (resultMap.hasResultMapsUsingConstructorCollection()) {
-      foundValues = applyNestedPendingConstructorCreations(rsw, resultMap, metaObject, parentPrefix, parentRowKey,
-          newObject, foundValues);
+      if (newObject) {
+        // new objects are linked by createResultObject
+        foundValues = false;
+      } else {
+        foundValues = applyNestedPendingConstructorCreations(rsw, resultMap, metaObject, parentPrefix, parentRowKey,
+            foundValues);
+      }
     }
 
     return foundValues;
@@ -1519,11 +1528,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       // keep track of these, so we can rebuild them.
       final Object originalObject = metaObject.getOriginalObject();
       if (rowValue instanceof PendingConstructorCreation && !pendingPccRelations.containsKey(originalObject)) {
-        PendingRelation pendingRelation = new PendingRelation();
-        pendingRelation.propertyMapping = resultMapping;
-        pendingRelation.metaObject = metaObject;
-
-        pendingPccRelations.put(originalObject, pendingRelation);
+        pendingPccRelations.put(originalObject, new PendingRelation(metaObject, resultMapping));
       }
     } else {
       metaObject.setValue(resultMapping.getProperty(), rowValue);
