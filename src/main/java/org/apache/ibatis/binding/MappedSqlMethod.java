@@ -15,7 +15,6 @@
  */
 package org.apache.ibatis.binding;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +31,7 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.ReflectionUtils;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
@@ -168,7 +168,7 @@ class MappedSqlMethod implements MapperMethod {
     // issue #510 Collections & arrays support
     if (!method.getReturnType().isAssignableFrom(result.getClass())) {
       if (method.getReturnType().isArray()) {
-        return convertToArray(result);
+        return ReflectionUtils.convertToArray(result, method.getReturnType().getComponentType());
       }
       return convertToDeclaredCollection(sqlSession.getConfiguration(), result);
     }
@@ -229,19 +229,6 @@ class MappedSqlMethod implements MapperMethod {
     MetaObject metaObject = config.newMetaObject(collection);
     metaObject.addAll(list);
     return collection;
-  }
-
-  @SuppressWarnings("unchecked")
-  private <E> Object convertToArray(List<E> list) {
-    Class<?> arrayComponentType = method.getReturnType().getComponentType();
-    Object array = Array.newInstance(arrayComponentType, list.size());
-    if (!arrayComponentType.isPrimitive()) {
-      return list.toArray((E[]) array);
-    }
-    for (int i = 0; i < list.size(); i++) {
-      Array.set(array, i, list.get(i));
-    }
-    return array;
   }
 
   private <K, V> Map<K, V> executeForMap(SqlSession sqlSession, Object[] args) {

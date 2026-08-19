@@ -16,12 +16,12 @@
 package org.apache.ibatis.builder.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.reflection.ParamNameResolver;
+import org.apache.ibatis.reflection.ReflectionUtils;
 import org.apache.ibatis.session.Configuration;
 
 /**
@@ -34,7 +34,7 @@ public class AnnotationSqlProvider implements SqlProvider {
   public AnnotationSqlProvider(Configuration configuration, Annotation provider, Class<?> mapperType,
       Method mapperMethod) {
     try {
-      Class<?> providerType = getProviderType(configuration, provider, mapperMethod);
+      Class<?> providerType = getProviderType(provider, mapperMethod, configuration.getDefaultSqlProviderType());
       if (SqlProviderFactory.class.isAssignableFrom(providerType)) {
         SqlProviderFactory sqlProviderFactory = configuration.getSqlProviderFactory(providerType);
         if (sqlProviderFactory == null) {
@@ -48,7 +48,9 @@ public class AnnotationSqlProvider implements SqlProvider {
         this.delegate = new MethodDelegationSqlProvider(configuration, provider, mapperType, mapperMethod,
             providerType);
       }
-    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+    } catch (BuilderException e) {
+      throw e;
+    } catch (Throwable e) {
       throw new BuilderException("Error creating SqlSource for SqlProvider.  Cause: " + e);
     }
   }
@@ -63,13 +65,13 @@ public class AnnotationSqlProvider implements SqlProvider {
     return delegate.provideSql(providerContext);
   }
 
-  private Class<?> getProviderType(Configuration configuration, Annotation providerAnnotation, Method mapperMethod)
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    Class<?> type = (Class<?>) providerAnnotation.annotationType().getMethod("type").invoke(providerAnnotation);
-    Class<?> value = (Class<?>) providerAnnotation.annotationType().getMethod("value").invoke(providerAnnotation);
+  private Class<?> getProviderType(Annotation providerAnnotation, Method mapperMethod,
+      Class<?> defaultSqlProviderType) {
+    Class<?> type = ReflectionUtils.getAnnotationAttributeValue(providerAnnotation, "type");
+    Class<?> value = ReflectionUtils.getAnnotationAttributeValue(providerAnnotation, "value");
     if (value == void.class && type == void.class) {
-      if (configuration.getDefaultSqlProviderType() != null) {
-        return configuration.getDefaultSqlProviderType();
+      if (defaultSqlProviderType != null) {
+        return defaultSqlProviderType;
       }
       throw new BuilderException("Please specify either 'value' or 'type' attribute of @"
           + providerAnnotation.annotationType().getSimpleName() + " at the '" + mapperMethod.toString() + "'.");

@@ -30,6 +30,7 @@ import org.apache.ibatis.executor.result.BeanClassRowMapper;
 import org.apache.ibatis.executor.result.MapRowMapper;
 import org.apache.ibatis.executor.result.RowMapper;
 import org.apache.ibatis.executor.result.SingleColumnRowMapper;
+import org.apache.ibatis.jdbc.RuntimeSqlException;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.mapping.NamingStrategy;
@@ -874,5 +875,35 @@ public final class JdbcUtils {
       list.add(rowMapper.mapRow(rs, rowNum++));
     }
     return list;
+  }
+
+  public static void setAutoCommit(Connection connection, boolean autoCommit) {
+    try {
+      if (autoCommit != connection.getAutoCommit()) {
+        connection.setAutoCommit(autoCommit);
+      }
+    } catch (Throwable t) {
+      throw new RuntimeSqlException("Could not set AutoCommit to " + autoCommit + ". Cause: " + t, t);
+    }
+  }
+
+  public static void commitConnection(Connection connection) {
+    try {
+      if (!connection.getAutoCommit()) {
+        connection.commit();
+      }
+    } catch (Throwable t) {
+      throw new RuntimeSqlException("Could not commit transaction. Cause: " + t, t);
+    }
+  }
+
+  public static void rollbackConnectionQuietly(Connection connection) {
+    try {
+      if (!connection.getAutoCommit()) {
+        connection.rollback();
+      }
+    } catch (Throwable t) {
+      // ignore
+    }
   }
 }

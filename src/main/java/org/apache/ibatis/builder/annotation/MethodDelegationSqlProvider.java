@@ -18,12 +18,15 @@ package org.apache.ibatis.builder.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.internal.util.CollectionUtils;
 import org.apache.ibatis.reflection.ExceptionUtils;
 import org.apache.ibatis.reflection.ParamNameResolver;
+import org.apache.ibatis.reflection.ReflectionUtils;
 import org.apache.ibatis.session.Configuration;
 
 public class MethodDelegationSqlProvider implements SqlProvider {
@@ -80,29 +83,20 @@ public class MethodDelegationSqlProvider implements SqlProvider {
     this.paramNameResolver = new ParamNameResolver(mapperType, this.providerMethod,
         configuration.isUseActualParamName());
     this.providerMethodParameterTypes = this.providerMethod.getParameterTypes();
-    this.providerContextIndex = getCandidateProviderContextIndex();
+
+    List<Integer> indexes = ReflectionUtils.findParameterIndexesByType(this.providerMethod, ProviderContext.class);
+    if (indexes.size() > 1) {
+      throw new BuilderException(
+          "Error creating SqlSource for SqlProvider. ProviderContext found multiple in SqlProvider method ("
+              + this.providerType.getName() + "." + providerMethod.getName()
+              + "). ProviderContext can not define multiple in SqlProvider method argument.");
+    }
+    this.providerContextIndex = CollectionUtils.getFirst(indexes);
   }
 
   @Override
   public ParamNameResolver resolveParameterNames(Class<?> mapperClass, Method mapperMethod) {
     return new ParamNameResolver(mapperClass, mapperMethod, configuration.isUseActualParamName());
-  }
-
-  private Integer getCandidateProviderContextIndex() {
-    Integer candidateProviderContextIndex = null;
-    for (int i = 0; i < this.providerMethodParameterTypes.length; i++) {
-      Class<?> parameterType = this.providerMethodParameterTypes[i];
-      if (parameterType == ProviderContext.class) {
-        if (candidateProviderContextIndex != null) {
-          throw new BuilderException(
-              "Error creating SqlSource for SqlProvider. ProviderContext found multiple in SqlProvider method ("
-                  + this.providerType.getName() + "." + providerMethod.getName()
-                  + "). ProviderContext can not define multiple in SqlProvider method argument.");
-        }
-        candidateProviderContextIndex = i;
-      }
-    }
-    return candidateProviderContextIndex;
   }
 
   @Override

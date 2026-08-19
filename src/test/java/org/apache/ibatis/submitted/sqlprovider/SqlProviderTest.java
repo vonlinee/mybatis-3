@@ -307,8 +307,8 @@ class SqlProviderTest {
       new ProviderSqlSource(null, null, null, sqlProvider);
       fail();
     } catch (BuilderException e) {
-      assertTrue(e.getMessage().contains(
-          "Error creating SqlSource for SqlProvider.  Cause: java.lang.NoSuchMethodException: org.junit.jupiter.api.Test.type()"));
+      assertTrue(e.getMessage().contains("Error creating SqlSource for SqlProvider.")
+          && e.getMessage().contains("java.lang.NoSuchMethodException: org.junit.jupiter.api.Test.type()"));
     }
   }
 

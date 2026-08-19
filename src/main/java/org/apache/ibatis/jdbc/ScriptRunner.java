@@ -27,6 +27,8 @@ import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.ibatis.internal.util.JdbcUtils;
+
 /**
  * This is an internal testing utility.<br>
  * You are welcome to use this class for your own purposes,<br>
@@ -167,11 +169,7 @@ public class ScriptRunner {
    */
   @Deprecated
   public void closeConnection() {
-    try {
-      connection.close();
-    } catch (Exception e) {
-      // ignore
-    }
+    JdbcUtils.closeQuietly(connection);
   }
 
   private void setAutoCommit() {
@@ -185,23 +183,11 @@ public class ScriptRunner {
   }
 
   private void commitConnection() {
-    try {
-      if (!connection.getAutoCommit()) {
-        connection.commit();
-      }
-    } catch (Throwable t) {
-      throw new RuntimeSqlException("Could not commit transaction. Cause: " + t, t);
-    }
+    JdbcUtils.commitConnection(connection);
   }
 
   private void rollbackConnection() {
-    try {
-      if (!connection.getAutoCommit()) {
-        connection.rollback();
-      }
-    } catch (Throwable t) {
-      // ignore
-    }
+    JdbcUtils.rollbackConnectionQuietly(connection);
   }
 
   private void checkForMissingLineTerminator(StringBuilder command) {
