@@ -30,6 +30,7 @@ import org.apache.ibatis.scripting.StaticTextSqlNode;
 import org.apache.ibatis.scripting.TextSqlNode;
 import org.apache.ibatis.scripting.WhitespaceSqlNode;
 import org.apache.ibatis.session.Configuration;
+import org.w3c.dom.Node;
 
 /**
  * @author Clinton Begin
@@ -306,8 +307,19 @@ public class XMLScriptBuilder {
         return true;
       }
       current = current.getParent();
+      // skip XML script in annotation like @Select
+      if (isScriptNode(current)) {
+        return true;
+      }
     }
     return false;
+  }
+
+  private static boolean isScriptNode(XNode node) {
+    if (node == null) {
+      return false;
+    }
+    return node.getNode().getNodeType() == Node.ELEMENT_NODE && "script".equals(node.getNode().getNodeName());
   }
 
 }
