@@ -15,6 +15,8 @@
  */
 package org.apache.ibatis.submitted.refid_resolution;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import java.io.Reader;
 
 import org.apache.ibatis.exceptions.PersistenceException;
@@ -33,5 +35,17 @@ class RefidResolutionTest {
     SqlSessionFactory sqlSessionFactory = builder.build(reader);
     Assertions.assertThrows(PersistenceException.class,
         () -> sqlSessionFactory.getConfiguration().getMappedStatementNames());
+  }
+
+  @Test
+  void externalRefAfterSelectKey() {
+    assertDoesNotThrow(() -> {
+      String resource = "org/apache/ibatis/submitted/refid_resolution/ExternalMapperConfig.xml";
+      try (Reader reader = Resources.getResourceAsReader(resource)) {
+        SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
+        SqlSessionFactory sqlSessionFactory = builder.build(reader);
+        sqlSessionFactory.getConfiguration().getMappedStatementNames();
+      }
+    });
   }
 }
