@@ -54,7 +54,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private final XPathParser parser;
   private final MapperBuilderAssistant builderAssistant;
-  private final Map<String, XNode> sqlFragments;
+  private final ScopedSqlFragmentsMap sqlFragments;
   private final String resource;
   private Class<?> mapperClass;
 
@@ -81,7 +81,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     super(configuration);
     this.builderAssistant = new MapperBuilderAssistant(configuration, resource);
     this.parser = parser;
-    this.sqlFragments = sqlFragments;
+    this.sqlFragments = new ScopedSqlFragmentsMap(sqlFragments);
     this.resource = resource;
   }
 
@@ -128,7 +128,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
     for (XNode context : list) {
       final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context,
-          requiredDatabaseId, mapperClass);
+          requiredDatabaseId, mapperClass, sqlFragments);
       try {
         statementParser.parseStatementNode();
       } catch (IncompleteElementException e) {
@@ -308,9 +308,15 @@ public class XMLMapperBuilder extends BaseBuilder {
     for (XNode context : list) {
       String databaseId = context.getStringAttribute("databaseId");
       String id = context.getStringAttribute("id");
+      String scope = context.getStringAttribute("scope");
       id = builderAssistant.applyCurrentNamespace(id, false);
-      if (databaseIdMatchesCurrent(id, databaseId, requiredDatabaseId)) {
-        sqlFragments.put(id, context);
+      if ("private".equals(scope)) {
+        // no namespace, only can be referenced in single XML mapper file.
+        sqlFragments.putLocal(id, context);
+      } else {
+        if (databaseIdMatchesCurrent(id, databaseId, requiredDatabaseId)) {
+          sqlFragments.putGlobal(id, context);
+        }
       }
     }
   }
@@ -397,9 +403,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   public static void parseResource(Configuration configuration, String resource) throws IOException {
     try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
-      XMLMapperBuilder builder = new XMLMapperBuilder(inputStream, configuration, resource,
-          configuration.getSqlFragments());
-      builder.parse();
+      parse(configuration, resource, inputStream);
     }
   }
 
@@ -407,5 +411,39 @@ public class XMLMapperBuilder extends BaseBuilder {
     XMLMapperBuilder builder = new XMLMapperBuilder(inputStream, configuration, resource,
         configuration.getSqlFragments());
     builder.parse();
+  }
+
+  private static class ScopedSqlFragmentsMap extends HashMap<String, XNode> {
+
+    private final Map<String, XNode> sqlFragments;
+
+    private ScopedSqlFragmentsMap(Map<String, XNode> sqlFragments) {
+      this.sqlFragments = sqlFragments;
+    }
+
+    public void putGlobal(String key, XNode value) {
+      sqlFragments.put(key, value);
+    }
+
+    public void putLocal(String key, XNode value) {
+      super.put(key, value);
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+      if (super.containsKey(key)) {
+        return true;
+      }
+      return sqlFragments.containsKey(key);
+    }
+
+    @Override
+    public XNode get(Object key) {
+      XNode node = super.get(key);
+      if (node != null) {
+        return node;
+      }
+      return sqlFragments.get(key);
+    }
   }
 }

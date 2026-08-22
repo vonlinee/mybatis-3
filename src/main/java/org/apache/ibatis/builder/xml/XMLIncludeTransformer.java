@@ -87,7 +87,8 @@ public class XMLIncludeTransformer {
       XNode nodeToInclude = sqlFragments.get(refid);
       return nodeToInclude.getNode().cloneNode(true);
     } catch (IllegalArgumentException e) {
-      throw new IncompleteElementException("Could not find SQL statement to include with refid '" + refid + "'", e);
+      throw new IncompleteElementException(
+          "Could not find SQL statement to include with refid '" + refid + "', maybe it's declared private.", e);
     }
   }
 

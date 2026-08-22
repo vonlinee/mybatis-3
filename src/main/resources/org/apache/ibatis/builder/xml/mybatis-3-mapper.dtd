@@ -264,6 +264,7 @@ table CDATA #IMPLIED
 id CDATA #REQUIRED
 lang CDATA #IMPLIED
 databaseId CDATA #IMPLIED
+scope (private|public) #IMPLIED
 >
 
 <!ELEMENT trim (#PCDATA | include | trim | where | set | foreach | choose | if | bind | in | pagination)*>

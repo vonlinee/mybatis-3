@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-       Copyright 2009-2023 the original author or authors.
+       Copyright 2009-2026 the original author or authors.
 
        Licensed under the Apache License, Version 2.0 (the "License");
        you may not use this file except in compliance with the License.
@@ -20,25 +20,15 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.apache.ibatis.submitted.refid_resolution.ExternalMapper2">
-    <sql id="externalColumnList">
-        field1, field2
-    </sql>
-
-    <sql id="externalPrivateColumnList" scope="private">
-        field1, field2, field3
-    </sql>
-
-    <sql id="externalColumnList1">
-        <include refid="externalPrivateColumnList"/>
-    </sql>
+<mapper namespace="org.apache.ibatis.submitted.refid_resolution.ExternalMapper3">
 
     <insert id="insert" parameterType="map">
         <selectKey resultType="java.lang.Integer" keyProperty="id">
             CALL IDENTITY()
         </selectKey>
         insert into table1 (
-        <include refid="externalPrivateColumnList" />
+        <include
+                refid="org.apache.ibatis.submitted.refid_resolution.ExternalMapper2.externalPrivateColumnList" />
         ) values (#{field1},#{field2},#{field3})
     </insert>
 </mapper>

@@ -52,19 +52,26 @@ class XMLStatementBuilder extends PendingResolver {
   private final Class<?> mapperClass;
   private final XMLIncludeTransformer includeParser;
   private final Configuration configuration;
+  private final Map<String, XNode> sqlFragments;
 
   public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context) {
-    this(configuration, builderAssistant, context, null);
+    this(configuration, builderAssistant, context, null, Collections.emptyMap());
   }
 
   public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context,
-      String databaseId) {
-    this(configuration, builderAssistant, context, databaseId, null);
+      Map<String, XNode> sqlFragments) {
+    this(configuration, builderAssistant, context, null, sqlFragments);
   }
 
   public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context,
-      String databaseId, Class<?> mapperClass) {
+      String databaseId, Map<String, XNode> sqlFragments) {
+    this(configuration, builderAssistant, context, databaseId, null, sqlFragments);
+  }
+
+  public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context,
+      String databaseId, Class<?> mapperClass, Map<String, XNode> sqlFragments) {
     this.configuration = configuration;
+    this.sqlFragments = sqlFragments;
     this.builderAssistant = builderAssistant;
     this.includeParser = new XMLIncludeTransformer() {
       @Override
@@ -80,7 +87,7 @@ class XMLStatementBuilder extends PendingResolver {
   }
 
   public void parseStatementNode() {
-    this.parseStatementNode(this.context, configuration.getVariables(), configuration.getSqlFragments());
+    this.parseStatementNode(this.context, configuration.getVariables(), sqlFragments);
   }
 
   public void parseStatementNode(XNode context, Properties variables, Map<String, XNode> sqlFragments) {
