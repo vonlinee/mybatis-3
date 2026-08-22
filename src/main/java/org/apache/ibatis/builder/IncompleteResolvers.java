@@ -20,22 +20,19 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.ibatis.builder.annotation.MethodResolver;
-import org.apache.ibatis.builder.xml.XMLStatementBuilder;
-
 public class IncompleteResolvers {
 
-  protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>();
-  protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<>();
-  protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>();
-  protected final Collection<MethodResolver> incompleteMethods = new LinkedList<>();
+  protected final Collection<PendingResolver> incompleteStatements = new LinkedList<>();
+  protected final Collection<PendingResolver> incompleteCacheRefs = new LinkedList<>();
+  protected final Collection<PendingResolver> incompleteResultMaps = new LinkedList<>();
+  protected final Collection<PendingResolver> incompleteMethods = new LinkedList<>();
 
   private final ReentrantLock incompleteResultMapsLock = new ReentrantLock();
   private final ReentrantLock incompleteCacheRefsLock = new ReentrantLock();
   private final ReentrantLock incompleteStatementsLock = new ReentrantLock();
   private final ReentrantLock incompleteMethodsLock = new ReentrantLock();
 
-  public void addIncompleteStatement(XMLStatementBuilder incompleteStatement) {
+  public void addIncompleteStatement(PendingResolver incompleteStatement) {
     incompleteStatementsLock.lock();
     try {
       incompleteStatements.add(incompleteStatement);
@@ -44,7 +41,7 @@ public class IncompleteResolvers {
     }
   }
 
-  public void addIncompleteCacheRef(CacheRefResolver incompleteCacheRef) {
+  public void addIncompleteCacheRef(PendingResolver incompleteCacheRef) {
     incompleteCacheRefsLock.lock();
     try {
       incompleteCacheRefs.add(incompleteCacheRef);
@@ -53,7 +50,7 @@ public class IncompleteResolvers {
     }
   }
 
-  public void addIncompleteResultMap(ResultMapResolver resultMapResolver) {
+  public void addIncompleteResultMap(PendingResolver resultMapResolver) {
     incompleteResultMapsLock.lock();
     try {
       incompleteResultMaps.add(resultMapResolver);
@@ -62,7 +59,7 @@ public class IncompleteResolvers {
     }
   }
 
-  public void addIncompleteMethod(MethodResolver builder) {
+  public void addIncompleteMethod(PendingResolver builder) {
     incompleteMethodsLock.lock();
     try {
       incompleteMethods.add(builder);
@@ -96,10 +93,7 @@ public class IncompleteResolvers {
     }
     incompleteStatementsLock.lock();
     try {
-      incompleteStatements.removeIf(x -> {
-        x.parseStatementNode();
-        return true;
-      });
+      incompleteStatements.removeIf(PendingResolver::resolve);
     } catch (IncompleteElementException e) {
       if (reportUnresolved) {
         throw e;
@@ -115,7 +109,7 @@ public class IncompleteResolvers {
     }
     incompleteCacheRefsLock.lock();
     try {
-      incompleteCacheRefs.removeIf(x -> x.resolveCacheRef() != null);
+      incompleteCacheRefs.removeIf(PendingResolver::resolve);
     } catch (IncompleteElementException e) {
       if (reportUnresolved) {
         throw e;
@@ -135,7 +129,7 @@ public class IncompleteResolvers {
       IncompleteElementException ex = null;
       do {
         resolved = false;
-        Iterator<ResultMapResolver> iterator = incompleteResultMaps.iterator();
+        Iterator<PendingResolver> iterator = incompleteResultMaps.iterator();
         while (iterator.hasNext()) {
           try {
             iterator.next().resolve();

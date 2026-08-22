@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
+import org.apache.ibatis.builder.PendingResolver;
 import org.apache.ibatis.builder.annotation.MapperAnnotationBuilder;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -43,7 +44,7 @@ import org.w3c.dom.Node;
 /**
  * @author Clinton Begin
  */
-public class XMLStatementBuilder {
+class XMLStatementBuilder extends PendingResolver {
 
   private final MapperBuilderAssistant builderAssistant;
   private final XNode context;
@@ -218,4 +219,8 @@ public class XMLStatementBuilder {
     }
   }
 
+  @Override
+  public void doResolve() {
+    this.parseStatementNode();
+  }
 }

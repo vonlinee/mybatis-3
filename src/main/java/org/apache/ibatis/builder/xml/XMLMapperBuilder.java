@@ -27,10 +27,8 @@ import java.util.Properties;
 
 import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
-import org.apache.ibatis.builder.CacheRefResolver;
 import org.apache.ibatis.builder.IncompleteElementException;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
-import org.apache.ibatis.builder.ResultMapResolver;
 import org.apache.ibatis.builder.ResultMappingConstructorResolver;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.ErrorContext;
@@ -141,13 +139,12 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private void cacheRefElement(XNode context) {
     if (context != null) {
-      configuration.addCacheRef(builderAssistant.getCurrentNamespace(), context.getStringAttribute("namespace"));
-      CacheRefResolver cacheRefResolver = new CacheRefResolver(builderAssistant,
-          context.getStringAttribute("namespace"));
+      final String cacheRefNamespace = context.getStringAttribute("namespace");
+      configuration.addCacheRef(builderAssistant.getCurrentNamespace(), cacheRefNamespace);
       try {
-        cacheRefResolver.resolveCacheRef();
+        builderAssistant.useCacheRef(cacheRefNamespace);
       } catch (IncompleteElementException e) {
-        configuration.addIncompleteCacheRef(cacheRefResolver);
+        builderAssistant.addIncompleteCacheRef(cacheRefNamespace);
       }
     }
   }
@@ -238,12 +235,11 @@ public class XMLMapperBuilder extends BaseBuilder {
         resultMappings.add(buildResultMappingFromContext(resultChild, typeClass, flags));
       }
     }
-
-    ResultMapResolver resultMapResolver = new ResultMapResolver(builderAssistant, id, typeClass, extend, discriminator,
-        resultMappings, autoMapping);
     try {
-      return resultMapResolver.resolve();
+      return builderAssistant.addResultMap(id, typeClass, extend, discriminator, resultMappings, autoMapping);
     } catch (IncompleteElementException e) {
+      ResultMapResolver resultMapResolver = new ResultMapResolver(builderAssistant, id, typeClass, extend,
+          discriminator, resultMappings, autoMapping);
       configuration.addIncompleteResultMap(resultMapResolver);
       throw e;
     }

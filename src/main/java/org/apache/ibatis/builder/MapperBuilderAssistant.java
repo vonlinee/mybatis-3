@@ -441,4 +441,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
   public ResultSetType resolveResultSetType(String alias) {
     return super.resolveResultSetType(alias);
   }
+
+  public void addIncompleteCacheRef(String cacheRefNamespace) {
+    configuration.addIncompleteCacheRef(new CacheRefResolver(this, cacheRefNamespace));
+  }
 }

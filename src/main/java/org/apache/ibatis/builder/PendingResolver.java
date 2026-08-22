@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,27 +13,30 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.builder.annotation;
+package org.apache.ibatis.builder;
 
-import java.lang.reflect.Method;
+public abstract class PendingResolver {
 
-import org.apache.ibatis.builder.PendingResolver;
+  private boolean resolved;
 
-/**
- * @author Eduardo Macarron
- */
-class MethodResolver extends PendingResolver {
-  private final MapperAnnotationBuilder annotationBuilder;
-  private final Method method;
-
-  public MethodResolver(MapperAnnotationBuilder annotationBuilder, Method method) {
-    this.annotationBuilder = annotationBuilder;
-    this.method = method;
+  public final boolean isResolved() {
+    return resolved;
   }
 
-  @Override
-  public void doResolve() {
-    annotationBuilder.parseStatement(method);
+  public void markResolved(boolean resolved) {
+    this.resolved = resolved;
   }
 
+  public final boolean resolve() {
+    try {
+      doResolve();
+      markResolved(true);
+    } catch (IncompleteElementException e) {
+      markResolved(false);
+      throw e;
+    }
+    return isResolved();
+  }
+
+  protected abstract void doResolve();
 }

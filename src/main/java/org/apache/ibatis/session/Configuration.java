@@ -25,11 +25,12 @@ import org.apache.ibatis.binding.CompositeMethodLookup;
 import org.apache.ibatis.binding.MappedStatementMethodLookup;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.binding.MapperRegistry;
-import org.apache.ibatis.builder.*;
-import org.apache.ibatis.builder.annotation.MethodResolver;
+import org.apache.ibatis.builder.BuilderException;
+import org.apache.ibatis.builder.IncompleteResolvers;
+import org.apache.ibatis.builder.MapperBuilderAssistant;
+import org.apache.ibatis.builder.PendingResolver;
 import org.apache.ibatis.builder.annotation.SqlProviderFactory;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
-import org.apache.ibatis.builder.xml.XMLStatementBuilder;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.BatchExecutor;
 import org.apache.ibatis.executor.CachingExecutor;
@@ -802,19 +803,19 @@ public class Configuration {
     return mappedStatements.values();
   }
 
-  public void addIncompleteStatement(XMLStatementBuilder incompleteStatement) {
+  public void addIncompleteStatement(PendingResolver incompleteStatement) {
     incompleteResolvers.addIncompleteStatement(incompleteStatement);
   }
 
-  public void addIncompleteCacheRef(CacheRefResolver incompleteCacheRef) {
+  public void addIncompleteCacheRef(PendingResolver incompleteCacheRef) {
     incompleteResolvers.addIncompleteCacheRef(incompleteCacheRef);
   }
 
-  public void addIncompleteResultMap(ResultMapResolver resultMapResolver) {
+  public void addIncompleteResultMap(PendingResolver resultMapResolver) {
     incompleteResolvers.addIncompleteResultMap(resultMapResolver);
   }
 
-  public void addIncompleteMethod(MethodResolver builder) {
+  public void addIncompleteMethod(PendingResolver builder) {
     incompleteResolvers.addIncompleteMethod(builder);
   }
 

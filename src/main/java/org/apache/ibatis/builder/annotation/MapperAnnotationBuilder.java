@@ -31,7 +31,6 @@ import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.annotations.Options.FlushCachePolicy;
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.builder.BuilderException;
-import org.apache.ibatis.builder.CacheRefResolver;
 import org.apache.ibatis.builder.IncompleteElementException;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.builder.ResultMappingConstructorResolver;
@@ -210,7 +209,7 @@ public class MapperAnnotationBuilder {
       try {
         assistant.useCacheRef(namespace);
       } catch (IncompleteElementException e) {
-        configuration.addIncompleteCacheRef(new CacheRefResolver(assistant, namespace));
+        assistant.addIncompleteCacheRef(namespace);
       }
     }
   }

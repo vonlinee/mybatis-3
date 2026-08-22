@@ -13,18 +13,19 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.builder;
+package org.apache.ibatis.builder.xml;
 
 import java.util.List;
 
+import org.apache.ibatis.builder.MapperBuilderAssistant;
+import org.apache.ibatis.builder.PendingResolver;
 import org.apache.ibatis.mapping.Discriminator;
-import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 
 /**
  * @author Eduardo Macarron
  */
-public class ResultMapResolver {
+class ResultMapResolver extends PendingResolver {
   private final MapperBuilderAssistant assistant;
   private final String id;
   private final Class<?> type;
@@ -44,9 +45,9 @@ public class ResultMapResolver {
     this.autoMapping = autoMapping;
   }
 
-  public ResultMap resolve() {
-    return assistant.addResultMap(this.id, this.type, this.extend, this.discriminator, this.resultMappings,
-        this.autoMapping);
+  @Override
+  public void doResolve() {
+    assistant.addResultMap(this.id, this.type, this.extend, this.discriminator, this.resultMappings, this.autoMapping);
   }
 
 }

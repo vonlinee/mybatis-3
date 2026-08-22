@@ -20,7 +20,7 @@ import org.apache.ibatis.cache.Cache;
 /**
  * @author Clinton Begin
  */
-public class CacheRefResolver {
+class CacheRefResolver extends PendingResolver {
   private final MapperBuilderAssistant assistant;
   private final String cacheRefNamespace;
 
@@ -31,5 +31,10 @@ public class CacheRefResolver {
 
   public Cache resolveCacheRef() {
     return assistant.useCacheRef(cacheRefNamespace);
+  }
+
+  @Override
+  public void doResolve() {
+    resolveCacheRef();
   }
 }
