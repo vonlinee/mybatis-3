@@ -32,7 +32,7 @@ class MethodResolver extends PendingResolver {
   }
 
   @Override
-  public void doResolve() {
+  protected void doResolve() {
     annotationBuilder.parseStatement(method);
   }
 

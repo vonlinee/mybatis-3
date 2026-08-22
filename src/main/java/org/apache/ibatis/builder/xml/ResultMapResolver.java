@@ -46,7 +46,7 @@ class ResultMapResolver extends PendingResolver {
   }
 
   @Override
-  public void doResolve() {
+  protected void doResolve() {
     assistant.addResultMap(this.id, this.type, this.extend, this.discriminator, this.resultMappings, this.autoMapping);
   }
 

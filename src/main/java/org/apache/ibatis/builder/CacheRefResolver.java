@@ -34,7 +34,7 @@ class CacheRefResolver extends PendingResolver {
   }
 
   @Override
-  public void doResolve() {
+  protected void doResolve() {
     resolveCacheRef();
   }
 }

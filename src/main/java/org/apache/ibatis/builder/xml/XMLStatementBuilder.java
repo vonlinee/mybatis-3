@@ -220,7 +220,7 @@ class XMLStatementBuilder extends PendingResolver {
   }
 
   @Override
-  public void doResolve() {
+  protected void doResolve() {
     this.parseStatementNode();
   }
 }
