@@ -45,8 +45,7 @@ public class ReuseExecutor extends BaseExecutor {
 
   @Override
   public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
-    Configuration configuration = ms.getConfiguration();
-    StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
+    StatementHandler handler = super.newStatementHandlerForUpdate(this, ms, parameter);
     Statement stmt = prepareStatement(handler, ms);
     return handler.update(stmt);
   }
@@ -54,8 +53,7 @@ public class ReuseExecutor extends BaseExecutor {
   @Override
   public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler,
       BoundSql boundSql) throws SQLException {
-    Configuration configuration = ms.getConfiguration();
-    StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler,
+    StatementHandler handler = super.newStatementHandlerForQuery(wrapper, ms, parameter, rowBounds, resultHandler,
         boundSql);
     Statement stmt = prepareStatement(handler, ms);
     return handler.query(stmt, resultHandler);
@@ -64,8 +62,7 @@ public class ReuseExecutor extends BaseExecutor {
   @Override
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
       throws SQLException {
-    Configuration configuration = ms.getConfiguration();
-    StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
+    StatementHandler handler = super.newStatementHandlerForQuery(wrapper, ms, parameter, rowBounds, null, boundSql);
     Statement stmt = prepareStatement(handler, ms);
     return handler.queryCursor(stmt);
   }

@@ -42,8 +42,7 @@ public class SimpleExecutor extends BaseExecutor {
   public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
     Statement stmt = null;
     try {
-      Configuration configuration = ms.getConfiguration();
-      StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
+      StatementHandler handler = super.newStatementHandlerForUpdate(this, ms, parameter);
       stmt = prepareStatement(handler, ms);
       return handler.update(stmt);
     } finally {
@@ -56,8 +55,7 @@ public class SimpleExecutor extends BaseExecutor {
       BoundSql boundSql) throws SQLException {
     Statement stmt = null;
     try {
-      Configuration configuration = ms.getConfiguration();
-      StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler,
+      StatementHandler handler = super.newStatementHandlerForQuery(wrapper, ms, parameter, rowBounds, resultHandler,
           boundSql);
       stmt = prepareStatement(handler, ms);
       return handler.query(stmt, resultHandler);
@@ -69,8 +67,7 @@ public class SimpleExecutor extends BaseExecutor {
   @Override
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
       throws SQLException {
-    Configuration configuration = ms.getConfiguration();
-    StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
+    StatementHandler handler = super.newStatementHandlerForQuery(wrapper, ms, parameter, rowBounds, null, boundSql);
     Statement stmt = prepareStatement(handler, ms);
     Cursor<E> cursor = handler.queryCursor(stmt);
     stmt.closeOnCompletion();

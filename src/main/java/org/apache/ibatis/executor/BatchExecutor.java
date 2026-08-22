@@ -53,9 +53,7 @@ public class BatchExecutor extends BaseExecutor {
 
   @Override
   public int doUpdate(MappedStatement ms, Object parameterObject) throws SQLException {
-    final Configuration configuration = ms.getConfiguration();
-    final StatementHandler handler = configuration.newStatementHandler(this, ms, parameterObject, RowBounds.DEFAULT,
-        null, null);
+    final StatementHandler handler = super.newStatementHandlerForUpdate(this, ms, parameterObject);
     final BoundSql boundSql = handler.getBoundSql();
     final String sql = boundSql.getSql();
     final Statement stmt;
@@ -85,8 +83,7 @@ public class BatchExecutor extends BaseExecutor {
     Statement stmt = null;
     try {
       flushStatements();
-      Configuration configuration = ms.getConfiguration();
-      StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameterObject, rowBounds,
+      StatementHandler handler = super.newStatementHandlerForQuery(wrapper, ms, parameterObject, rowBounds,
           resultHandler, boundSql);
       stmt = prepareStatement(handler, ms);
       return handler.query(stmt, resultHandler);
@@ -99,8 +96,7 @@ public class BatchExecutor extends BaseExecutor {
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
       throws SQLException {
     flushStatements();
-    Configuration configuration = ms.getConfiguration();
-    StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
+    StatementHandler handler = super.newStatementHandlerForQuery(wrapper, ms, parameter, rowBounds, null, boundSql);
     Statement stmt = prepareStatement(handler, ms);
     Cursor<E> cursor = handler.queryCursor(stmt);
     stmt.closeOnCompletion();

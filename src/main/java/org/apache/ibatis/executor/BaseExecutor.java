@@ -397,4 +397,14 @@ public abstract class BaseExecutor implements Executor {
 
   }
 
+  protected StatementHandler newStatementHandlerForUpdate(Executor executor, MappedStatement ms, Object parameter) {
+    Configuration configuration = ms.getConfiguration();
+    return configuration.newStatementHandler(executor, ms, parameter, RowBounds.DEFAULT, null, null);
+  }
+
+  protected StatementHandler newStatementHandlerForQuery(Executor executor, MappedStatement ms, Object parameter,
+      RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+    Configuration configuration = ms.getConfiguration();
+    return configuration.newStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);
+  }
 }
