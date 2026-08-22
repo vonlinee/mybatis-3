@@ -669,15 +669,15 @@ public class Configuration {
     return (ParameterHandler) interceptorChain.pluginAll(parameterHandler);
   }
 
-  public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds,
-      ParameterHandler parameterHandler, ResultHandler resultHandler, BoundSql boundSql) {
+  public <T> ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement,
+      RowBounds rowBounds, ParameterHandler parameterHandler, ResultHandler<T> resultHandler, BoundSql boundSql) {
     ResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, mappedStatement, parameterHandler,
         resultHandler, boundSql, rowBounds);
     return (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
   }
 
-  public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement,
-      Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+  public <T> StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement,
+      Object parameterObject, RowBounds rowBounds, ResultHandler<T> resultHandler, BoundSql boundSql) {
     StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject,
         rowBounds, resultHandler, boundSql);
     return (StatementHandler) interceptorChain.pluginAll(statementHandler);

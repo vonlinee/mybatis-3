@@ -152,10 +152,10 @@ public class DefaultSqlSession implements SqlSession {
 
   @Override
   public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
-    return selectList(statement, parameter, rowBounds, Executor.NO_RESULT_HANDLER);
+    return selectList(statement, parameter, rowBounds, null);
   }
 
-  private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler<?> handler) {
+  private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler<E> handler) {
     try {
       MappedStatement ms = configuration.getMappedStatement(statement);
       dirty |= ms.isDirtySelect();

@@ -38,7 +38,7 @@ import org.apache.ibatis.session.RowBounds;
 public class SimpleStatementHandler extends BaseStatementHandler {
 
   public SimpleStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameter,
-      RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+      RowBounds rowBounds, ResultHandler<?> resultHandler, BoundSql boundSql) {
     super(executor, mappedStatement, parameter, rowBounds, resultHandler, boundSql);
   }
 
@@ -70,7 +70,7 @@ public class SimpleStatementHandler extends BaseStatementHandler {
   }
 
   @Override
-  public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
+  public <E> List<E> query(Statement statement, ResultHandler<E> resultHandler) throws SQLException {
     String sql = boundSql.getSql();
     statement.execute(sql);
     return resultSetHandler.handleResultSets(statement);
