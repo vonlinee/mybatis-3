@@ -17,15 +17,12 @@ package org.apache.ibatis.builder.xml;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.IncompleteElementException;
-import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.PropertyParser;
 import org.apache.ibatis.parsing.XNode;
-import org.apache.ibatis.session.Configuration;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -35,19 +32,12 @@ import org.w3c.dom.NodeList;
  */
 public class XMLIncludeTransformer {
 
-  private final Configuration configuration;
-  private final MapperBuilderAssistant builderAssistant;
-
-  public XMLIncludeTransformer(Configuration configuration, MapperBuilderAssistant builderAssistant) {
-    this.configuration = configuration;
-    this.builderAssistant = builderAssistant;
-  }
-
-  public void applyIncludes(Node source) {
+  public void applyIncludes(Node source, Properties variables, Map<String, XNode> sqlFragments) {
     Properties variablesContext = new Properties();
-    Properties configurationVariables = configuration.getVariables();
-    Optional.ofNullable(configurationVariables).ifPresent(variablesContext::putAll);
-    applyIncludes(source, variablesContext, false);
+    if (variables != null) {
+      variablesContext.putAll(variables);
+    }
+    applyIncludes(source, variablesContext, sqlFragments, false);
   }
 
   /**
@@ -58,11 +48,12 @@ public class XMLIncludeTransformer {
    * @param variablesContext
    *          Current context for static variables with values
    */
-  private void applyIncludes(Node source, final Properties variablesContext, boolean included) {
+  private void applyIncludes(Node source, final Properties variablesContext, Map<String, XNode> sqlFragments,
+      boolean included) {
     if ("include".equals(source.getNodeName())) {
-      Node toInclude = findSqlFragment(getStringAttribute(source, "refid"), variablesContext);
+      Node toInclude = findSqlFragment(getStringAttribute(source, "refid"), variablesContext, sqlFragments);
       Properties toIncludeContext = getVariablesContext(source, variablesContext);
-      applyIncludes(toInclude, toIncludeContext, true);
+      applyIncludes(toInclude, toIncludeContext, sqlFragments, true);
       if (toInclude.getOwnerDocument() != source.getOwnerDocument()) {
         toInclude = source.getOwnerDocument().importNode(toInclude, true);
       }
@@ -82,7 +73,7 @@ public class XMLIncludeTransformer {
       }
       NodeList children = source.getChildNodes();
       for (int i = 0; i < children.getLength(); i++) {
-        applyIncludes(children.item(i), variablesContext, included);
+        applyIncludes(children.item(i), variablesContext, sqlFragments, included);
       }
     } else if (included && (source.getNodeType() == Node.TEXT_NODE || source.getNodeType() == Node.CDATA_SECTION_NODE)
         && !variablesContext.isEmpty()) {
@@ -91,11 +82,9 @@ public class XMLIncludeTransformer {
     }
   }
 
-  private Node findSqlFragment(String refid, Properties variables) {
-    refid = PropertyParser.parse(refid, variables);
-    refid = builderAssistant.applyCurrentNamespace(refid, true);
+  protected Node findSqlFragment(String refid, Properties variables, Map<String, XNode> sqlFragments) {
     try {
-      XNode nodeToInclude = configuration.getSqlFragments().get(refid);
+      XNode nodeToInclude = sqlFragments.get(refid);
       return nodeToInclude.getNode().cloneNode(true);
     } catch (IllegalArgumentException e) {
       throw new IncompleteElementException("Could not find SQL statement to include with refid '" + refid + "'", e);

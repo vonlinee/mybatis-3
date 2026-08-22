@@ -403,4 +403,42 @@ public class MapperBuilderAssistant extends BaseBuilder {
     typeAliasRegistry.registerAlias("CGLIB", CglibProxyFactory.class);
     typeAliasRegistry.registerAlias("JAVASSIST", JavassistProxyFactory.class);
   }
+
+  public LanguageDriver getLanguageDriver(String lang) {
+    Class<? extends LanguageDriver> langClass = null;
+    if (lang != null) {
+      langClass = resolveClass(lang);
+    }
+    return configuration.getLanguageDriver(langClass);
+  }
+
+  public boolean databaseIdMatchesCurrent(String id, String databaseId, String requiredDatabaseId) {
+    if (requiredDatabaseId != null) {
+      return requiredDatabaseId.equals(databaseId);
+    }
+    if (databaseId != null) {
+      return false;
+    }
+    id = this.applyCurrentNamespace(id, false);
+    if (!this.configuration.hasStatement(id, false)) {
+      return true;
+    }
+    // skip this statement if there is a previous one with a not null databaseId
+    MappedStatement previous = this.configuration.getMappedStatement(id, false); // issue #2
+    return previous.getDatabaseId() == null;
+  }
+
+  public MappedStatement getMappedStatement(String id, boolean validateIncompleteStatements) {
+    return configuration.getMappedStatement(id, validateIncompleteStatements);
+  }
+
+  @Override
+  public <T> Class<? extends T> resolveClass(String alias) {
+    return super.resolveClass(alias);
+  }
+
+  @Override
+  public ResultSetType resolveResultSetType(String alias) {
+    return super.resolveResultSetType(alias);
+  }
 }
