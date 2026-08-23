@@ -69,10 +69,20 @@ import org.apache.ibatis.type.UnknownTypeHandler;
  */
 public class MapperAnnotationBuilder {
 
-  private static final Set<Class<? extends Annotation>> statementAnnotationTypes = Stream
-      .of(Select.class, Update.class, Insert.class, Delete.class, SelectProvider.class, UpdateProvider.class,
-          InsertProvider.class, DeleteProvider.class)
-      .collect(Collectors.toSet());
+  // @formatter:off
+  @SuppressWarnings("unchecked")
+  private static final Class<? extends Annotation>[] statementAnnotationTypes =
+    new Class[] {
+      Select.class,
+      Update.class,
+      Insert.class,
+      Delete.class,
+      SelectProvider.class,
+      UpdateProvider.class,
+      InsertProvider.class,
+      DeleteProvider.class
+    };
+  // @formatter:on
 
   private final Configuration configuration;
   private final MapperBuilderAssistant assistant;
@@ -81,10 +91,13 @@ public class MapperAnnotationBuilder {
 
   public MapperAnnotationBuilder(Configuration configuration, Class<?> type) {
     this.namespace = getNamespace(type);
-    String resource = type.getName().replace('.', '/') + ".java (best guess)";
-    this.assistant = new MapperBuilderAssistant(configuration, resource);
+    this.assistant = new MapperBuilderAssistant(configuration, getMapperResource(type));
     this.configuration = configuration;
     this.type = type;
+  }
+
+  private static String getMapperResource(Class<?> type) {
+    return type.getName().replace('.', '/') + ".java (best guess)";
   }
 
   public static String getNamespace(Class<?> mapperClass) {
@@ -118,12 +131,12 @@ public class MapperAnnotationBuilder {
       if (type.isAnnotationPresent(NamedResultMaps.class)) {
         parseNamedResultMaps();
       }
-
+      final String databaseId = configuration.getDatabaseId();
       for (Method method : type.getMethods()) {
         if (!canHaveStatement(method)) {
           continue;
         }
-        if (getAnnotationWrapper(method, false, Select.class, SelectProvider.class).isPresent()
+        if (getAnnotationWrapper(databaseId, method, false, Select.class, SelectProvider.class).isPresent()
             && method.getAnnotation(ResultMap.class) == null) {
           parseResultMap(method);
         }
@@ -287,12 +300,12 @@ public class MapperAnnotationBuilder {
   private void createDiscriminatorResultMaps(String resultMapId, Class<?> resultType, TypeDiscriminator discriminator) {
     if (discriminator != null) {
       for (Case c : discriminator.cases()) {
-        String caseResultMapId = resultMapId + "-" + c.value();
         List<ResultMapping> resultMappings = new ArrayList<>();
         // issue #136
         applyConstructorArgs(c.constructArgs(), resultType, resultMappings, resultMapId);
         applyResults(c.results(), resultType, resultMappings);
         // TODO add AutoMappingBehaviour
+        String caseResultMapId = resultMapId + "-" + c.value();
         assistant.addResultMap(caseResultMapId, c.type(), resultMapId, null, resultMappings, null);
       }
     }
@@ -324,13 +337,15 @@ public class MapperAnnotationBuilder {
         configuration.isUseActualParamName());
     final LanguageDriver languageDriver = getLanguageDriver(method);
 
-    getAnnotationWrapper(method, true, statementAnnotationTypes).ifPresent(statementAnnotation -> {
+    final String databaseId = configuration.getDatabaseId();
+
+    getAnnotationWrapper(databaseId, method, true, statementAnnotationTypes).ifPresent(statementAnnotation -> {
       final SqlSource sqlSource = buildSqlSource(statementAnnotation.getAnnotation(), parameterTypeClass,
           paramNameResolver, languageDriver, method);
       final SqlCommandType sqlCommandType = statementAnnotation.getSqlCommandType();
-      final Options options = getAnnotationWrapper(method, false, Options.class).map(x -> (Options) x.getAnnotation())
-          .orElse(null);
-      final ResultOrdered resultOrderedAnnotation = getAnnotationWrapper(method, false, ResultOrdered.class)
+      final Options options = getAnnotationWrapper(databaseId, method, false, Options.class)
+          .map(x -> (Options) x.getAnnotation()).orElse(null);
+      final ResultOrdered resultOrderedAnnotation = getAnnotationWrapper(databaseId, method, false, ResultOrdered.class)
           .map(x -> (ResultOrdered) x.getAnnotation()).orElse(null);
       final String mappedStatementId = getQualifiedStatementId(namespace, getAndValidateLocalId(method));
 
@@ -339,7 +354,7 @@ public class MapperAnnotationBuilder {
       String keyColumn = null;
       if (SqlCommandType.INSERT.equals(sqlCommandType) || SqlCommandType.UPDATE.equals(sqlCommandType)) {
         // first check for SelectKey annotation - that overrides everything else
-        SelectKey selectKey = getAnnotationWrapper(method, false, SelectKey.class)
+        SelectKey selectKey = getAnnotationWrapper(databaseId, method, false, SelectKey.class)
             .map(x -> (SelectKey) x.getAnnotation()).orElse(null);
         if (selectKey != null) {
           keyGenerator = handleSelectKeyAnnotation(selectKey, mappedStatementId, getParameterType(method),
@@ -680,14 +695,13 @@ public class MapperAnnotationBuilder {
   }
 
   @SafeVarargs
-  private final Optional<AnnotationWrapper> getAnnotationWrapper(Method method, boolean errorIfNoMatch,
+  private Optional<AnnotationWrapper> getAnnotationWrapper(String databaseId, Method method, boolean errorIfNoMatch,
       Class<? extends Annotation>... targetTypes) {
-    return getAnnotationWrapper(method, errorIfNoMatch, Arrays.asList(targetTypes));
+    return getAnnotationWrapper(databaseId, method, errorIfNoMatch, Arrays.asList(targetTypes));
   }
 
-  private Optional<AnnotationWrapper> getAnnotationWrapper(Method method, boolean errorIfNoMatch,
+  private Optional<AnnotationWrapper> getAnnotationWrapper(String databaseId, Method method, boolean errorIfNoMatch,
       Collection<Class<? extends Annotation>> targetTypes) {
-    String databaseId = configuration.getDatabaseId();
     Map<String, AnnotationWrapper> statementAnnotations = targetTypes.stream()
         .flatMap(x -> Arrays.stream(method.getAnnotationsByType(x))).map(AnnotationWrapper::new)
         .collect(Collectors.toMap(AnnotationWrapper::getDatabaseId, x -> x, (existing, duplicate) -> {
