@@ -38,8 +38,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ResultExtractorTest {
 
-  private ResultExtractor resultExtractor;
-
   @Mock
   private Configuration configuration;
   @Mock
@@ -47,19 +45,19 @@ class ResultExtractorTest {
 
   @BeforeEach
   void setUp() {
-    resultExtractor = new ResultExtractor(configuration, objectFactory);
+    when(configuration.getObjectFactory()).thenReturn(objectFactory);
   }
 
   @Test
   void shouldExtractNullForNullTargetType() {
-    final Object result = resultExtractor.extractObjectFromList(null, null);
+    final Object result = ResultExtractor.extractObjectFromList(configuration, null, null);
     assertThat(result).isNull();
   }
 
   @Test
   void shouldExtractList() {
     final List<Object> list = Arrays.asList(1, 2, 3);
-    final Object result = resultExtractor.extractObjectFromList(list, List.class);
+    final Object result = ResultExtractor.extractObjectFromList(configuration, list, List.class);
     assertThat(result).isInstanceOf(List.class);
     final List<?> resultList = (List<?>) result;
     assertThat(resultList).isEqualTo(list);
@@ -68,7 +66,7 @@ class ResultExtractorTest {
   @Test
   void shouldExtractArray() {
     final List<Object> list = Arrays.asList(1, 2, 3);
-    final Object result = resultExtractor.extractObjectFromList(list, Integer[].class);
+    final Object result = ResultExtractor.extractObjectFromList(configuration, list, Integer[].class);
     assertThat(result).isInstanceOf(Integer[].class);
     final Integer[] resultArray = (Integer[]) result;
     assertThat(resultArray).isEqualTo(new Integer[] { 1, 2, 3 });
@@ -85,7 +83,7 @@ class ResultExtractorTest {
     when(objectFactory.create(targetType)).thenReturn(set);
     when(configuration.newMetaObject(set)).thenReturn(metaObject);
 
-    final Set<?> result = (Set<?>) resultExtractor.extractObjectFromList(list, targetType);
+    final Set<?> result = (Set<?>) ResultExtractor.extractObjectFromList(configuration, list, targetType);
     assertThat(result).isSameAs(set);
 
     verify(metaObject).addAll(list);
@@ -94,14 +92,17 @@ class ResultExtractorTest {
   @Test
   void shouldExtractSingleObject() {
     final List<Object> list = List.of("single object");
-    assertThat((String) resultExtractor.extractObjectFromList(list, String.class)).isEqualTo("single object");
-    assertThat((String) resultExtractor.extractObjectFromList(list, null)).isEqualTo("single object");
-    assertThat((String) resultExtractor.extractObjectFromList(list, Integer.class)).isEqualTo("single object");
+    assertThat((String) ResultExtractor.extractObjectFromList(configuration, list, String.class))
+        .isEqualTo("single object");
+    assertThat((String) ResultExtractor.extractObjectFromList(configuration, list, null)).isEqualTo("single object");
+    assertThat((String) ResultExtractor.extractObjectFromList(configuration, list, Integer.class))
+        .isEqualTo("single object");
   }
 
   @Test
   void shouldFailWhenMultipleItemsInList() {
     final List<Object> list = Arrays.asList("first object", "second object");
-    Assertions.assertThrows(ExecutorException.class, () -> resultExtractor.extractObjectFromList(list, String.class));
+    Assertions.assertThrows(ExecutorException.class,
+        () -> ResultExtractor.extractObjectFromList(configuration, list, String.class));
   }
 }

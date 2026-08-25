@@ -25,16 +25,17 @@ import org.apache.ibatis.session.Configuration;
 /**
  * @author Andrew Gustafson
  */
-public class ResultExtractor {
-  private final Configuration configuration;
-  private final ObjectFactory objectFactory;
+public final class ResultExtractor {
 
-  public ResultExtractor(Configuration configuration, ObjectFactory objectFactory) {
-    this.configuration = configuration;
-    this.objectFactory = objectFactory;
+  private ResultExtractor() {
   }
 
-  public Object extractObjectFromList(List<Object> list, Class<?> targetType) {
+  public static Object extractObjectFromList(Configuration configuration, List<Object> list, Class<?> targetType) {
+    return extractObjectFromList(configuration, configuration.getObjectFactory(), list, targetType);
+  }
+
+  public static Object extractObjectFromList(Configuration configuration, ObjectFactory objectFactory,
+      List<Object> list, Class<?> targetType) {
     Object value = null;
     if (targetType != null && targetType.isAssignableFrom(list.getClass())) {
       value = list;

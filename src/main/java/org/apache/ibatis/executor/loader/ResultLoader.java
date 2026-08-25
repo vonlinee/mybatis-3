@@ -47,7 +47,6 @@ public class ResultLoader {
   protected final ObjectFactory objectFactory;
   protected final CacheKey cacheKey;
   protected final BoundSql boundSql;
-  protected final ResultExtractor resultExtractor;
   protected final long creatorThreadId;
 
   protected boolean loaded;
@@ -63,13 +62,12 @@ public class ResultLoader {
     this.objectFactory = configuration.getObjectFactory();
     this.cacheKey = cacheKey;
     this.boundSql = boundSql;
-    this.resultExtractor = new ResultExtractor(configuration, objectFactory);
     this.creatorThreadId = Thread.currentThread().getId();
   }
 
   public Object loadResult() throws SQLException {
     List<Object> list = selectList();
-    resultObject = resultExtractor.extractObjectFromList(list, targetType);
+    resultObject = ResultExtractor.extractObjectFromList(configuration, list, targetType);
     return resultObject;
   }
 

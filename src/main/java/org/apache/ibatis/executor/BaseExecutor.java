@@ -184,9 +184,12 @@ public abstract class BaseExecutor implements Executor {
   public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key,
       Class<?> targetType) {
     assertNotClosed();
-    DeferredLoad deferredLoad = new DeferredLoad(resultObject, property, key, localCache, configuration, targetType);
-    if (deferredLoad.canLoad()) {
-      deferredLoad.load();
+    Object cached = localCache.getObject(key);
+    if (cached != null && cached != EXECUTION_PLACEHOLDER) {
+      // we suppose we get back a List
+      @SuppressWarnings("unchecked")
+      List<Object> list = (List<Object>) cached;
+      resultObject.setValue(property, ResultExtractor.extractObjectFromList(configuration, list, targetType));
     } else {
       deferredLoads.add(new DeferredLoad(resultObject, property, key, localCache, configuration, targetType));
     }
@@ -369,7 +372,7 @@ public abstract class BaseExecutor implements Executor {
     private final Class<?> targetType;
     private final CacheKey key;
     private final PerpetualCache localCache;
-    private final ResultExtractor resultExtractor;
+    private final Configuration configuration;
 
     // issue #781
     public DeferredLoad(MetaObject resultObject, String property, CacheKey key, PerpetualCache localCache,
@@ -378,20 +381,15 @@ public abstract class BaseExecutor implements Executor {
       this.property = property;
       this.key = key;
       this.localCache = localCache;
-      this.resultExtractor = new ResultExtractor(configuration, configuration.getObjectFactory());
+      this.configuration = configuration;
       this.targetType = targetType;
-    }
-
-    public boolean canLoad() {
-      Object cached = localCache.getObject(key);
-      return cached != null && cached != EXECUTION_PLACEHOLDER;
     }
 
     public void load() {
       @SuppressWarnings("unchecked")
       // we suppose we get back a List
       List<Object> list = (List<Object>) localCache.getObject(key);
-      Object value = resultExtractor.extractObjectFromList(list, targetType);
+      Object value = ResultExtractor.extractObjectFromList(configuration, list, targetType);
       resultObject.setValue(property, value);
     }
 
