@@ -362,7 +362,7 @@ public abstract class BaseExecutor implements Executor {
     this.wrapper = wrapper;
   }
 
-  private static class DeferredLoad {
+  protected static class DeferredLoad {
 
     private final MetaObject resultObject;
     private final String property;
