@@ -20,15 +20,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.ibatis.binding.ParamMap;
 import org.apache.ibatis.executor.Executor;
@@ -224,7 +217,7 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
     if (param instanceof Object[]) {
       return Arrays.asList((Object[]) param);
     } else {
-      return Arrays.asList(param);
+      return Collections.singletonList(param);
     }
   }
 
