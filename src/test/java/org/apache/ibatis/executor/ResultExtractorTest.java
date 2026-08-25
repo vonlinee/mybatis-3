@@ -61,7 +61,7 @@ class ResultExtractorTest {
     final List<Object> list = Arrays.asList(1, 2, 3);
     final Object result = resultExtractor.extractObjectFromList(list, List.class);
     assertThat(result).isInstanceOf(List.class);
-    final List resultList = (List) result;
+    final List<?> resultList = (List<?>) result;
     assertThat(resultList).isEqualTo(list);
   }
 
@@ -77,14 +77,15 @@ class ResultExtractorTest {
   @Test
   void shouldExtractSet() {
     final List<Object> list = Arrays.asList(1, 2, 3);
+    @SuppressWarnings("rawtypes")
     final Class<Set> targetType = Set.class;
-    final Set set = new HashSet();
+    final Set<?> set = new HashSet<>();
     final MetaObject metaObject = mock(MetaObject.class);
     when(objectFactory.isCollection(targetType)).thenReturn(true);
     when(objectFactory.create(targetType)).thenReturn(set);
     when(configuration.newMetaObject(set)).thenReturn(metaObject);
 
-    final Set result = (Set) resultExtractor.extractObjectFromList(list, targetType);
+    final Set<?> result = (Set<?>) resultExtractor.extractObjectFromList(list, targetType);
     assertThat(result).isSameAs(set);
 
     verify(metaObject).addAll(list);
@@ -99,7 +100,7 @@ class ResultExtractorTest {
   }
 
   @Test
-  void shouldFailWhenMutipleItemsInList() {
+  void shouldFailWhenMultipleItemsInList() {
     final List<Object> list = Arrays.asList("first object", "second object");
     Assertions.assertThrows(ExecutorException.class, () -> resultExtractor.extractObjectFromList(list, String.class));
   }
