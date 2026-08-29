@@ -28,16 +28,73 @@ public final class LambdaUtils {
   private LambdaUtils() {
   }
 
-  public static <T, R> SerializedLambda getSerializedLambda(ThrowableFunction<T, R> methodRef)
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+  /**
+   * Extracts the serialized representation of a single-argument function or method reference.
+   * <p>
+   * For example:
+   *
+   * <pre>{@code
+   * ThrowableFunction<String, Integer> length = String::length;
+   * SerializedLambda lambda = LambdaUtils.getSerializedLambda(length);
+   *
+   * assert "length".equals(lambda.getImplMethodName());
+   * }</pre>
+   *
+   * @param methodRef
+   *          the serializable function or method reference to inspect
+   * @param <T>
+   *          the input type
+   * @param <R>
+   *          the result type
+   *
+   * @return the serialized representation of the function or method reference
+   *
+   * @throws IllegalArgumentException
+   *           if {@code methodRef} is {@code null}
+   * @throws ReflectionException
+   *           if the serialized representation cannot be extracted
+   */
+  public static <T, R> SerializedLambda getSerializedLambda(ThrowableFunction<T, R> methodRef) {
     if (methodRef == null) {
       throw new IllegalArgumentException("method reference is null");
     }
-    Method writeReplace = methodRef.getClass().getDeclaredMethod("writeReplace");
-    writeReplace.setAccessible(true);
-    return (SerializedLambda) writeReplace.invoke(methodRef);
+    try {
+      Method writeReplace = methodRef.getClass().getDeclaredMethod("writeReplace");
+      writeReplace.setAccessible(true);
+      return (SerializedLambda) writeReplace.invoke(methodRef);
+    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+      throw new ReflectionException(e);
+    }
   }
 
+  /**
+   * Extracts the serialized representation of a two-argument function or method reference.
+   * <p>
+   * For example:
+   *
+   * <pre>{@code
+   * ThrowableBiFunction<String, Integer, String> substring = String::substring;
+   * SerializedLambda lambda = LambdaUtils.getSerializedLambda(substring);
+   *
+   * assert "substring".equals(lambda.getImplMethodName());
+   * }</pre>
+   *
+   * @param methodRef
+   *          the serializable function or method reference to inspect
+   * @param <T>
+   *          the type of the first input
+   * @param <U>
+   *          the type of the second input
+   * @param <R>
+   *          the result type
+   *
+   * @return the serialized representation of the function or method reference
+   *
+   * @throws IllegalArgumentException
+   *           if {@code methodRef} is {@code null}
+   * @throws ReflectionException
+   *           if the serialized representation cannot be extracted
+   */
   public static <T, U, R> SerializedLambda getSerializedLambda(ThrowableBiFunction<T, U, R> methodRef) {
     if (methodRef == null) {
       throw new IllegalArgumentException("method reference is null");
