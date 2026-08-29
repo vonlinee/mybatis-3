@@ -19,7 +19,9 @@ import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.apache.ibatis.internal.util.function.ThrowableBiFunction;
 import org.apache.ibatis.internal.util.function.ThrowableFunction;
+import org.apache.ibatis.reflection.ReflectionException;
 
 public final class LambdaUtils {
 
@@ -34,5 +36,18 @@ public final class LambdaUtils {
     Method writeReplace = methodRef.getClass().getDeclaredMethod("writeReplace");
     writeReplace.setAccessible(true);
     return (SerializedLambda) writeReplace.invoke(methodRef);
+  }
+
+  public static <T, U, R> SerializedLambda getSerializedLambda(ThrowableBiFunction<T, U, R> methodRef) {
+    if (methodRef == null) {
+      throw new IllegalArgumentException("method reference is null");
+    }
+    try {
+      Method writeReplace = methodRef.getClass().getDeclaredMethod("writeReplace");
+      writeReplace.setAccessible(true);
+      return (SerializedLambda) writeReplace.invoke(methodRef);
+    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+      throw new ReflectionException(e);
+    }
   }
 }

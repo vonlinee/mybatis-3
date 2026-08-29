@@ -17,6 +17,7 @@ package org.apache.ibatis.builder.annotation;
 
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
@@ -41,6 +42,9 @@ import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.extension.CrudMapper;
+import org.apache.ibatis.internal.util.ClassUtils;
+import org.apache.ibatis.internal.util.LambdaUtils;
+import org.apache.ibatis.internal.util.function.ThrowableBiFunction;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.FetchType;
@@ -826,5 +830,13 @@ public class MapperAnnotationBuilder {
 
   public static String getQualifiedStatementId(String namespace, String statementName) {
     return namespace + "." + statementName;
+  }
+
+  public static <T, U, R> String getQualifiedStatementId(ThrowableBiFunction<T, U, R> methodRef) {
+    Objects.requireNonNull(methodRef, "method ref is null");
+    SerializedLambda lambda = LambdaUtils.getSerializedLambda(methodRef);
+    String className = ClassUtils.convertResourcePathToClassName(lambda.getImplClass());
+    String methodName = lambda.getImplMethodName();
+    return getQualifiedStatementId(className, methodName);
   }
 }

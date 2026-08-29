@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.submitted.xml_external_ref;
 
+import static org.apache.ibatis.builder.annotation.MapperAnnotationBuilder.getQualifiedStatementId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -49,21 +50,20 @@ class MultipleCrossIncludeTest {
 
   @Test
   void mappedStatementCache() throws Exception {
-    try (Reader configReader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/xml_external_ref/MultipleCrossIncludeMapperConfig.xml")) {
-      SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configReader);
+    SqlSessionFactory sqlSessionFactory = SqlSessionFactoryBuilder
+        .buildFromResource("org/apache/ibatis/submitted/xml_external_ref/MultipleCrossIncludeMapperConfig.xml");
 
-      Configuration configuration = sqlSessionFactory.getConfiguration();
-      configuration.getMappedStatementNames();
+    Configuration configuration = sqlSessionFactory.getConfiguration();
+    configuration.getMappedStatementNames();
 
-      MappedStatement selectPetStatement = configuration
-          .getMappedStatement("org.apache.ibatis.submitted.xml_external_ref.MultipleCrossIncludePetMapper.select");
-      MappedStatement selectPersonStatement = configuration
-          .getMappedStatement("org.apache.ibatis.submitted.xml_external_ref.MultipleCrossIncludePersonMapper.select");
-      Cache cache = selectPetStatement.getCache();
-      assertEquals("org.apache.ibatis.submitted.xml_external_ref.MultipleCrossIncludePetMapper", cache.getId());
-      assertSame(cache, selectPersonStatement.getCache());
-    }
+    MappedStatement selectPetStatement = configuration
+        .getMappedStatement(getQualifiedStatementId(MultipleCrossIncludePetMapper::select));
+    MappedStatement selectPersonStatement = configuration
+        .getMappedStatement(getQualifiedStatementId(MultipleCrossIncludePersonMapper::select));
+    Cache cache = selectPetStatement.getCache();
+
+    assertEquals(MultipleCrossIncludePetMapper.class.getName(), cache.getId());
+    assertSame(cache, selectPersonStatement.getCache());
   }
 
   private void testCrossReference(SqlSessionFactory sqlSessionFactory) {
