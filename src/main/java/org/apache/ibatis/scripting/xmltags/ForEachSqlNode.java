@@ -155,4 +155,36 @@ public class ForEachSqlNode implements SqlNode {
     }
   }
 
+  public String getCollectionExpression() {
+    return collectionExpression;
+  }
+
+  public Boolean getNullable() {
+    return nullable;
+  }
+
+  public SqlNode getContents() {
+    return contents;
+  }
+
+  public String getOpen() {
+    return open;
+  }
+
+  public String getClose() {
+    return close;
+  }
+
+  public String getSeparator() {
+    return separator;
+  }
+
+  public String getItem() {
+    return item;
+  }
+
+  public String getIndex() {
+    return index;
+  }
+
 }

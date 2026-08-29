@@ -31,6 +31,10 @@ public class TextSqlNode implements SqlNode {
     this.text = text;
   }
 
+  public String getText() {
+    return text;
+  }
+
   @Override
   public boolean isDynamic() {
     return GenericTokenParser.containsToken(text, "${", "}");

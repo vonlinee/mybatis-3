@@ -27,6 +27,10 @@ public class StaticTextSqlNode implements SqlNode {
     this.text = text;
   }
 
+  public String getText() {
+    return text;
+  }
+
   @Override
   public boolean isDynamic() {
     return false;

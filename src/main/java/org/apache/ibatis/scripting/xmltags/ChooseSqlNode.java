@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
@@ -31,6 +32,14 @@ public class ChooseSqlNode implements SqlNode {
   public ChooseSqlNode(List<SqlNode> ifSqlNodes, SqlNode defaultSqlNode) {
     this.ifSqlNodes = ifSqlNodes;
     this.defaultSqlNode = defaultSqlNode;
+  }
+
+  public SqlNode getDefaultSqlNode() {
+    return defaultSqlNode;
+  }
+
+  public List<SqlNode> getIfSqlNodes() {
+    return Collections.unmodifiableList(ifSqlNodes);
   }
 
   @Override

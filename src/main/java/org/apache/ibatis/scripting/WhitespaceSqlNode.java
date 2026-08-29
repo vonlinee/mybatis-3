@@ -35,4 +35,8 @@ public class WhitespaceSqlNode implements SqlNode {
     context.appendSql(whitespaces);
     return true;
   }
+
+  public String getText() {
+    return whitespaces;
+  }
 }

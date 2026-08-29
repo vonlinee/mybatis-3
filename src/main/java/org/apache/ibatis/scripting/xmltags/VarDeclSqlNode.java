@@ -33,6 +33,14 @@ public class VarDeclSqlNode implements SqlNode {
     this.expression = exp;
   }
 
+  public String getName() {
+    return name;
+  }
+
+  public String getExpression() {
+    return expression;
+  }
+
   @Override
   public boolean apply(@NotNull SqlBuildContext context) {
     ExpressionEvaluator evaluator = context.getExpressionEvaluator();

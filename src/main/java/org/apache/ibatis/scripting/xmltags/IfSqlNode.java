@@ -47,4 +47,12 @@ public class IfSqlNode implements SqlNode {
     return false;
   }
 
+  public String getTest() {
+    return test;
+  }
+
+  public SqlNode getContents() {
+    return contents;
+  }
+
 }

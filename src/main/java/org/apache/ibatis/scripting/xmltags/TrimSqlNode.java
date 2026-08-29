@@ -159,4 +159,24 @@ public class TrimSqlNode implements SqlNode {
 
   }
 
+  public SqlNode getContents() {
+    return contents;
+  }
+
+  public String getPrefix() {
+    return prefix;
+  }
+
+  public String getSuffix() {
+    return suffix;
+  }
+
+  public List<String> getPrefixesToOverride() {
+    return Collections.unmodifiableList(prefixesToOverride);
+  }
+
+  public List<String> getSuffixesToOverride() {
+    return Collections.unmodifiableList(suffixesToOverride);
+  }
+
 }

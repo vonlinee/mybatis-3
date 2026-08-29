@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.scripting;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
@@ -44,4 +45,9 @@ public class MixedSqlNode implements SqlNode {
     contents.forEach(node -> node.apply(context));
     return true;
   }
+
+  public List<SqlNode> getContents() {
+    return Collections.unmodifiableList(contents);
+  }
+
 }
