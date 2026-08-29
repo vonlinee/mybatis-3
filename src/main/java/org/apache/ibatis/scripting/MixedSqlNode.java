@@ -13,12 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.apache.ibatis.scripting.xmltags;
+package org.apache.ibatis.scripting;
 
 import java.util.List;
 
-import org.apache.ibatis.scripting.SqlBuildContext;
-import org.apache.ibatis.scripting.SqlNode;
 import org.jetbrains.annotations.NotNull;
 
 /**

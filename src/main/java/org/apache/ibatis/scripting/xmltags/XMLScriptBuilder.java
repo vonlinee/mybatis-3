@@ -25,10 +25,7 @@ import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.extension.SqlUtils;
 import org.apache.ibatis.internal.util.StringUtils;
 import org.apache.ibatis.parsing.XNode;
-import org.apache.ibatis.scripting.SqlNode;
-import org.apache.ibatis.scripting.StaticTextSqlNode;
-import org.apache.ibatis.scripting.TextSqlNode;
-import org.apache.ibatis.scripting.WhitespaceSqlNode;
+import org.apache.ibatis.scripting.*;
 import org.apache.ibatis.session.Configuration;
 import org.w3c.dom.Node;
 
