@@ -16,14 +16,13 @@
 package org.apache.ibatis.scripting.xmltags;
 
 import org.apache.ibatis.scripting.SqlBuildContext;
-import org.apache.ibatis.scripting.SqlNode;
 import org.apache.ibatis.scripting.expression.ExpressionEvaluator;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Frank D. Martinez [mnesarco]
  */
-public class VarDeclSqlNode implements SqlNode {
+public class VarDeclSqlNode extends XmlSqlNode {
 
   private final String name;
   private final String expression;
@@ -46,11 +45,6 @@ public class VarDeclSqlNode implements SqlNode {
     ExpressionEvaluator evaluator = context.getExpressionEvaluator();
     final Object value = evaluator.getValue(expression, context.getBindings());
     context.bind(name, value);
-    return true;
-  }
-
-  @Override
-  public boolean isDynamic() {
     return true;
   }
 }

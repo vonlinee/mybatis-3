@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Clinton Begin
  */
-public class ChooseSqlNode implements SqlNode {
+public class ChooseSqlNode extends XmlSqlNode {
   private final SqlNode defaultSqlNode;
   private final List<SqlNode> ifSqlNodes;
 
@@ -40,11 +40,6 @@ public class ChooseSqlNode implements SqlNode {
 
   public List<SqlNode> getIfSqlNodes() {
     return Collections.unmodifiableList(ifSqlNodes);
-  }
-
-  @Override
-  public boolean isDynamic() {
-    return true;
   }
 
   @Override

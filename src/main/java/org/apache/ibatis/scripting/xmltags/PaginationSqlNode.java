@@ -18,15 +18,9 @@ package org.apache.ibatis.scripting.xmltags;
 import org.apache.ibatis.dialect.Dialect;
 import org.apache.ibatis.extension.pagination.Pageable;
 import org.apache.ibatis.scripting.SqlBuildContext;
-import org.apache.ibatis.scripting.SqlNode;
 import org.jetbrains.annotations.NotNull;
 
-public class PaginationSqlNode implements SqlNode {
-
-  @Override
-  public boolean isDynamic() {
-    return true;
-  }
+public class PaginationSqlNode extends XmlSqlNode {
 
   @Override
   public boolean apply(@NotNull SqlBuildContext context) {

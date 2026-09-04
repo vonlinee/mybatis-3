@@ -23,18 +23,13 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Clinton Begin
  */
-public class IfSqlNode implements SqlNode {
+public class IfSqlNode extends XmlSqlNode {
   private final String test;
   private final SqlNode contents;
 
   public IfSqlNode(SqlNode contents, String test) {
     this.test = test;
     this.contents = contents;
-  }
-
-  @Override
-  public boolean isDynamic() {
-    return true;
   }
 
   @Override

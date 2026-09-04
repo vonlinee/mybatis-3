@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Clinton Begin
  */
-public class TrimSqlNode implements SqlNode {
+public class TrimSqlNode extends XmlSqlNode {
 
   private final SqlNode contents;
   private final String prefix;
@@ -58,11 +58,6 @@ public class TrimSqlNode implements SqlNode {
     boolean result = contents.apply(filteredDynamicContext);
     filteredDynamicContext.applyAll();
     return result;
-  }
-
-  @Override
-  public boolean isDynamic() {
-    return true;
   }
 
   private static List<String> parseOverrides(String overrides) {

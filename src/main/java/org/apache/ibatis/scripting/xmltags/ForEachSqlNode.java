@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Clinton Begin
  */
-public class ForEachSqlNode implements SqlNode {
+public class ForEachSqlNode extends XmlSqlNode {
 
   private final String collectionExpression;
   private final Boolean nullable;
@@ -52,11 +52,6 @@ public class ForEachSqlNode implements SqlNode {
     this.separator = separator;
     this.index = index;
     this.item = item;
-  }
-
-  @Override
-  public boolean isDynamic() {
-    return true;
   }
 
   @Override
