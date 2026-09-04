@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package org.apache.ibatis.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -31,7 +31,7 @@ class TypeReferenceTest {
   void testRawType() {
     Type rawType = new TypeReference<List<Integer>>() {
     }.getRawType();
-    assertTrue(rawType instanceof ParameterizedType);
+    assertInstanceOf(ParameterizedType.class, rawType);
     ParameterizedType parameterizedType = (ParameterizedType) rawType;
     assertEquals(List.class, parameterizedType.getRawType());
     assertEquals(1, parameterizedType.getActualTypeArguments().length);
@@ -42,12 +42,12 @@ class TypeReferenceTest {
   void testWildcard() {
     Type rawType = new TypeReference<List<?>>() {
     }.getRawType();
-    assertTrue(rawType instanceof ParameterizedType);
+    assertInstanceOf(ParameterizedType.class, rawType);
     ParameterizedType parameterizedType = (ParameterizedType) rawType;
     assertEquals(List.class, parameterizedType.getRawType());
     assertEquals(1, parameterizedType.getActualTypeArguments().length);
     Type arg = parameterizedType.getActualTypeArguments()[0];
-    assertTrue(arg instanceof WildcardType);
+    assertInstanceOf(WildcardType.class, arg);
     WildcardType wildcardType = (WildcardType) arg;
     assertEquals(1, wildcardType.getUpperBounds().length);
     assertEquals(Object.class, wildcardType.getUpperBounds()[0]);

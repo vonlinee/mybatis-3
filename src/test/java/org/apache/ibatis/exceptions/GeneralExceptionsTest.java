@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package org.apache.ibatis.exceptions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -43,7 +43,7 @@ class GeneralExceptionsTest {
   @Test
   void should() {
     RuntimeException thrown = ExceptionFactory.wrapException(EXPECTED_MESSAGE, EXPECTED_CAUSE);
-    assertTrue(thrown instanceof PersistenceException, "Exception should be wrapped in RuntimeSqlException.");
+    assertInstanceOf(PersistenceException.class, thrown, "Exception should be wrapped in RuntimeSqlException.");
     testThrowException(thrown);
   }
 

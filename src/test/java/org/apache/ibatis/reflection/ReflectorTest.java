@@ -281,7 +281,7 @@ class ReflectorTest {
 
     assertEquals(Integer.class, reflector.getGetterType("prop1"));
     Invoker getInvoker = reflector.getGetInvoker("prop1");
-    assertEquals(Integer.valueOf(1), getInvoker.invoke(new BeanClass(), null));
+    assertEquals(1, getInvoker.invoke(new BeanClass(), null));
 
     Class<?> paramType = reflector.getGetterType("prop2");
     assertEquals(int.class, paramType);
@@ -321,7 +321,7 @@ class ReflectorTest {
 
     assertEquals(Integer.class, reflector.getGetterType("prop1"));
     Invoker getInvoker = reflector.getGetInvoker("prop1");
-    assertEquals(Integer.valueOf(1), getInvoker.invoke(new BeanClass(), null));
+    assertEquals(1, getInvoker.invoke(new BeanClass(), null));
 
     Class<?> returnType = reflector.getGetterType("prop2");
     assertTrue(Integer.class.equals(returnType) || boolean.class.equals(returnType));
@@ -356,15 +356,15 @@ class ReflectorTest {
   }
 
   @Test
-  void shouldIgnoreBestMatchSetterIfGetterIsAmbiguous() throws Exception {
+  void shouldIgnoreBestMatchSetterIfGetterIsAmbiguous() {
     @SuppressWarnings("unused")
     class Bean {
       public Integer isBool() {
-        return Integer.valueOf(1);
+        return 1;
       }
 
       public Integer getBool() {
-        return Integer.valueOf(2);
+        return 2;
       }
 
       public void setBool(boolean bool) {

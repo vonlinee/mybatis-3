@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ class UnknownTypeHandlerTest extends BaseTypeHandlerTest {
       TYPE_HANDLER.setParameter(ps, 1, null, JdbcType.INTEGER);
       Assertions.fail("Should have thrown a TypeException");
     } catch (Exception e) {
-      Assertions.assertTrue(e instanceof TypeException, "Expected TypedException");
+      Assertions.assertInstanceOf(TypeException.class, e, "Expected TypedException");
       Assertions.assertTrue(e.getMessage().contains("parameter #1"), "Parameter index is in exception");
     }
   }
@@ -112,7 +112,7 @@ class UnknownTypeHandlerTest extends BaseTypeHandlerTest {
       TYPE_HANDLER.setParameter(ps, 1, 99, JdbcType.INTEGER);
       Assertions.fail("Should have thrown a TypeException");
     } catch (Exception e) {
-      Assertions.assertTrue(e instanceof TypeException, "Expected TypedException");
+      Assertions.assertInstanceOf(TypeException.class, e, "Expected TypedException");
       Assertions.assertTrue(e.getMessage().contains("parameter #1"), "Parameter index is in exception");
     }
   }
@@ -124,7 +124,7 @@ class UnknownTypeHandlerTest extends BaseTypeHandlerTest {
       TYPE_HANDLER.getResult(rs, "foo");
       Assertions.fail("Should have thrown a ResultMapException");
     } catch (Exception e) {
-      Assertions.assertTrue(e instanceof ResultMapException, "Expected ResultMapException");
+      Assertions.assertInstanceOf(ResultMapException.class, e, "Expected ResultMapException");
       Assertions.assertTrue(e.getMessage().contains("column 'foo'"), "column name is not in exception");
     }
   }
@@ -136,7 +136,7 @@ class UnknownTypeHandlerTest extends BaseTypeHandlerTest {
       TYPE_HANDLER.getResult(rs, 1);
       Assertions.fail("Should have thrown a ResultMapException");
     } catch (Exception e) {
-      Assertions.assertTrue(e instanceof ResultMapException, "Expected ResultMapException");
+      Assertions.assertInstanceOf(ResultMapException.class, e, "Expected ResultMapException");
       Assertions.assertTrue(e.getMessage().contains("column #1"), "column index is not in exception");
     }
   }
@@ -148,7 +148,7 @@ class UnknownTypeHandlerTest extends BaseTypeHandlerTest {
       TYPE_HANDLER.getResult(cs, 1);
       Assertions.fail("Should have thrown a ResultMapException");
     } catch (Exception e) {
-      Assertions.assertTrue(e instanceof ResultMapException, "Expected ResultMapException");
+      Assertions.assertInstanceOf(ResultMapException.class, e, "Expected ResultMapException");
       Assertions.assertTrue(e.getMessage().contains("column #1"), "column index is not in exception");
     }
   }

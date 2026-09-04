@@ -44,7 +44,7 @@ class MapWrapperTest {
     Map<String, Object> map = new LinkedHashMap<>();
     map.put("a", "100");
     map.put("b", null);
-    map.put("my_name", Integer.valueOf(200));
+    map.put("my_name", 200);
     MetaObject metaObj = MetaObject.forObject(map, new DefaultObjectFactory(), new DefaultObjectWrapperFactory(),
         new DefaultReflectorFactory());
     assertFalse(metaObj.isCollection());
@@ -65,7 +65,7 @@ class MapWrapperTest {
     assertEquals(Integer.class, metaObj.getSetterType("my_name"));
     assertEquals("100", metaObj.getValue("a"));
     assertNull(metaObj.getValue("b"));
-    assertEquals(Integer.valueOf(200), metaObj.getValue("my_name"));
+    assertEquals(200, metaObj.getValue("my_name"));
     try {
       metaObj.add("x");
       fail();
@@ -78,8 +78,8 @@ class MapWrapperTest {
     } catch (UnsupportedOperationException e) {
       // pass
     }
-    metaObj.setValue("a", Long.valueOf(900L));
-    assertEquals(Long.valueOf(900L), map.get("a"));
+    metaObj.setValue("a", 900L);
+    assertEquals(900L, map.get("a"));
   }
 
   @Test
@@ -99,13 +99,13 @@ class MapWrapperTest {
     assertEquals(Object.class, metaObj.getSetterType("child.anykey"));
     assertNull(metaObj.getValue("anykey"));
 
-    metaObj.setValue("anykey", Integer.valueOf(200));
-    metaObj.setValue("child.anykey", Integer.valueOf(300));
+    metaObj.setValue("anykey", 200);
+    metaObj.setValue("child.anykey", 300);
     assertEquals(3, map.size());
-    assertEquals(Integer.valueOf(200), map.get("anykey"));
+    assertEquals(200, map.get("anykey"));
     @SuppressWarnings("unchecked")
     Map<String, Object> childMap = (Map<String, Object>) map.get("child");
-    assertEquals(Integer.valueOf(300), childMap.get("anykey"));
+    assertEquals(300, childMap.get("anykey"));
   }
 
   @Test

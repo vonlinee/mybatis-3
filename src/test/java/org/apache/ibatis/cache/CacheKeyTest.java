@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2024 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,13 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.NotSerializableException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Date;
 
+import org.apache.ibatis.internal.util.SerializationUtils;
 import org.junit.jupiter.api.Test;
 
 class CacheKeyTest {
@@ -123,11 +120,8 @@ class CacheKeyTest {
   }
 
   private static <T> T serialize(T object) throws Exception {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    new ObjectOutputStream(baos).writeObject(object);
-
-    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-    return (T) new ObjectInputStream(bais).readObject();
+    byte[] bytes = SerializationUtils.writeObject(object);
+    return SerializationUtils.readObject(bytes);
   }
 
 }

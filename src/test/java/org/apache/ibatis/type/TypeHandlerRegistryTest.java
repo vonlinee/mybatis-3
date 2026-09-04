@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2025 the original author or authors.
+ *    Copyright 2009-2026 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,10 +15,7 @@
  */
 package org.apache.ibatis.type;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -144,7 +141,6 @@ class TypeHandlerRegistryTest {
   @Test
   void shouldReturnHandlerForSuperclassIfRegistered() {
     class MyDate extends Date {
-      private static final long serialVersionUID = 1L;
     }
     assertEquals(DateTypeHandler.class, typeHandlerRegistry.getTypeHandler(MyDate.class).getClass());
   }
@@ -152,10 +148,8 @@ class TypeHandlerRegistryTest {
   @Test
   void shouldReturnHandlerForSuperSuperclassIfRegistered() {
     class MyDate1 extends Date {
-      private static final long serialVersionUID = 1L;
     }
     class MyDate2 extends MyDate1 {
-      private static final long serialVersionUID = 1L;
     }
     assertEquals(DateTypeHandler.class, typeHandlerRegistry.getTypeHandler(MyDate2.class).getClass());
   }
@@ -181,7 +175,7 @@ class TypeHandlerRegistryTest {
   enum NoTypeHandlerInterfaceEnum implements NoTypeHandlerInterface {
   }
 
-  class SomeClass implements SomeInterface {
+  static class SomeClass implements SomeInterface {
   }
 
   @MappedTypes(SomeInterface.class)
@@ -280,26 +274,26 @@ class TypeHandlerRegistryTest {
     }.getRawType(), TypeTestTypeHandler.class);
     TypeHandler<?> result = registry.getTypeHandler(new TypeReference<List<Integer>>() {
     }.getRawType(), JdbcType.INTEGER);
-    assertTrue(result instanceof TypeTestTypeHandler);
+    assertInstanceOf(TypeTestTypeHandler.class, result);
     TypeTestTypeHandler handler = (TypeTestTypeHandler) result;
     Type type = handler.getType();
-    assertTrue(type instanceof ParameterizedType);
+    assertInstanceOf(ParameterizedType.class, type);
     ParameterizedType parameterizedType = (ParameterizedType) type;
     assertEquals(List.class, parameterizedType.getRawType());
     assertEquals(Integer.class, parameterizedType.getActualTypeArguments()[0]);
   }
 
   @Test
-  void shouldSmartHandlerMatchSameRawType() throws Exception {
+  void shouldSmartHandlerMatchSameRawType() {
     TypeHandlerRegistry registry = new TypeHandlerRegistry();
     registry.register(new TypeReference<List<String>>() {
     }.getRawType(), TypeTestTypeHandler.class);
     TypeHandler<?> result = registry.getTypeHandler(new TypeReference<List<Integer>>() {
     }.getRawType(), JdbcType.INTEGER);
-    assertTrue(result instanceof TypeTestTypeHandler);
+    assertInstanceOf(TypeTestTypeHandler.class, result);
     TypeTestTypeHandler handler = (TypeTestTypeHandler) result;
     Type type = handler.getType();
-    assertTrue(type instanceof ParameterizedType);
+    assertInstanceOf(ParameterizedType.class, type);
     ParameterizedType parameterizedType = (ParameterizedType) type;
     assertEquals(List.class, parameterizedType.getRawType());
     assertEquals(Integer.class, parameterizedType.getActualTypeArguments()[0]);

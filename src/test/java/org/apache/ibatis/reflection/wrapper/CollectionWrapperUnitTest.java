@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.PropertyTokenizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,9 +42,6 @@ class CollectionWrapperUnitTest extends ObjectWrapperBase {
 
   @Mock
   private Collection<Object> collection;
-
-  @Mock
-  private PropertyTokenizer tokenizer;
 
   private ObjectWrapper wrapper;
 
@@ -132,15 +129,7 @@ class CollectionWrapperUnitTest extends ObjectWrapperBase {
   @Test
   @Override
   void shouldAddAll() {
-    List<Object> list = new ArrayList<>() {
-      private static final long serialVersionUID = 1L;
-
-      {
-        add("1");
-        add("2");
-        add("3");
-      }
-    };
+    List<Object> list = new ArrayList<>(Arrays.asList("1", "2", "3"));
     wrapper.addAll(list);
 
     verify(collection).addAll(list);

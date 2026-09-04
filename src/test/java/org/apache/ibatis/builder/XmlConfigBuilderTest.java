@@ -19,11 +19,7 @@ import static com.googlecode.catchexception.apis.BDDCatchException.caughtExcepti
 import static com.googlecode.catchexception.apis.BDDCatchException.when;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -172,7 +168,7 @@ class XmlConfigBuilderTest {
     TypeHandlerRegistry typeHandlerRegistry = builder.getConfiguration().getTypeHandlerRegistry();
     TypeHandler<?> typeHandler = typeHandlerRegistry.getTypeHandler(MyEnum.class);
 
-    assertTrue(typeHandler instanceof EnumOrderTypeHandler);
+    assertInstanceOf(EnumOrderTypeHandler.class, typeHandler);
     assertArrayEquals(MyEnum.values(), ((EnumOrderTypeHandler<MyEnum>) typeHandler).constants);
   }
 

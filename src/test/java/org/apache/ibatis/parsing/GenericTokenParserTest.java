@@ -33,7 +33,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 class GenericTokenParserTest {
 
   public static class VariableTokenHandler implements TokenHandler {
-    private Map<String, String> variables = new HashMap<>();
+    private final Map<String, String> variables;
 
     VariableTokenHandler(Map<String, String> variables) {
       this.variables = variables;
@@ -48,18 +48,15 @@ class GenericTokenParserTest {
   @ParameterizedTest
   @MethodSource("shouldDemonstrateGenericTokenReplacementProvider")
   void shouldDemonstrateGenericTokenReplacement(String expected, String text) {
-    GenericTokenParser parser = new GenericTokenParser("${", "}",
-        new VariableTokenHandler(new HashMap<String, String>() {
-          private static final long serialVersionUID = 1L;
-
-          {
-            put("first_name", "James");
-            put("initial", "T");
-            put("last_name", "Kirk");
-            put("var{with}brace", "Hiya");
-            put("", "");
-          }
-        }));
+    GenericTokenParser parser = new GenericTokenParser("${", "}", new VariableTokenHandler(new HashMap<>() {
+      {
+        put("first_name", "James");
+        put("initial", "T");
+        put("last_name", "Kirk");
+        put("var{with}brace", "Hiya");
+        put("", "");
+      }
+    }));
     assertEquals(expected, parser.parse(text));
   }
 
@@ -103,17 +100,14 @@ class GenericTokenParserTest {
   void shouldParseFastOnJdk7u6() {
     Assertions.assertTimeout(Duration.ofMillis(1000), () -> {
       // issue #760
-      GenericTokenParser parser = new GenericTokenParser("${", "}",
-          new VariableTokenHandler(new HashMap<String, String>() {
-            private static final long serialVersionUID = 1L;
-
-            {
-              put("first_name", "James");
-              put("initial", "T");
-              put("last_name", "Kirk");
-              put("", "");
-            }
-          }));
+      GenericTokenParser parser = new GenericTokenParser("${", "}", new VariableTokenHandler(new HashMap<>() {
+        {
+          put("first_name", "James");
+          put("initial", "T");
+          put("last_name", "Kirk");
+          put("", "");
+        }
+      }));
 
       StringBuilder input = new StringBuilder();
       for (int i = 0; i < 10000; i++) {

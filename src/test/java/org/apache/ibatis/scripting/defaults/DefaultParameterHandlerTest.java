@@ -82,7 +82,7 @@ class DefaultParameterHandlerTest {
       defaultParameterHandler.setParameters(ps);
       Assertions.fail("Should have thrown TypeException");
     } catch (Exception e) {
-      Assertions.assertTrue(e instanceof TypeException, "expected TypeException");
+      Assertions.assertInstanceOf(TypeException.class, e, "expected TypeException");
       Assertions.assertTrue(e.getMessage().contains("mapping: ParameterMapping"));
     }
 
