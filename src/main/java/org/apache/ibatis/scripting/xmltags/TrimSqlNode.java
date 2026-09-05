@@ -167,11 +167,11 @@ public class TrimSqlNode extends XmlSqlNode {
   }
 
   public List<String> getPrefixesToOverride() {
-    return Collections.unmodifiableList(prefixesToOverride);
+    return prefixesToOverride == null ? Collections.emptyList() : Collections.unmodifiableList(prefixesToOverride);
   }
 
   public List<String> getSuffixesToOverride() {
-    return Collections.unmodifiableList(suffixesToOverride);
+    return suffixesToOverride == null ? Collections.emptyList() : Collections.unmodifiableList(suffixesToOverride);
   }
 
 }
