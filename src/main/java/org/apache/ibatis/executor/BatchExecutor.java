@@ -106,10 +106,10 @@ public class BatchExecutor extends BaseExecutor {
   @Override
   public List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException {
     try {
-      List<BatchResult> results = new ArrayList<>();
       if (isRollback) {
         return Collections.emptyList();
       }
+      List<BatchResult> results = new ArrayList<>();
       for (int i = 0, n = statementList.size(); i < n; i++) {
         Statement stmt = statementList.get(i);
         applyTransactionTimeout(stmt);
@@ -117,13 +117,12 @@ public class BatchExecutor extends BaseExecutor {
         try {
           batchResult.setUpdateCounts(stmt.executeBatch());
           MappedStatement ms = batchResult.getMappedStatement();
-          List<Object> parameterObjects = batchResult.getParameterObjects();
           KeyGenerator keyGenerator = ms.getKeyGenerator();
           if (Jdbc3KeyGenerator.class.equals(keyGenerator.getClass())) {
             Jdbc3KeyGenerator jdbc3KeyGenerator = (Jdbc3KeyGenerator) keyGenerator;
-            jdbc3KeyGenerator.processBatch(ms, stmt, parameterObjects);
+            jdbc3KeyGenerator.processBatch(ms, stmt, batchResult.getParameterObjects());
           } else if (!NoKeyGenerator.class.equals(keyGenerator.getClass())) { // issue #141
-            for (Object parameter : parameterObjects) {
+            for (Object parameter : batchResult.getParameterObjects()) {
               keyGenerator.processAfter(this, ms, stmt, parameter);
             }
           }
